@@ -33,6 +33,7 @@ check-in.html           Short daily Flame Check-In
 story-armor.html        Full long-form reflection
 story-boundaries.html   Full long-form reflection
 story-one-stone.html    Full long-form reflection
+story-shame.html        Full shame/accountability reflection
 BRAND.md                Visual identity, terminology, voice, publishing rules
 assets/
   sigil.svg             Primary Eye + Flame vector mark
@@ -76,6 +77,8 @@ Guardian is reserved as a future service and leadership identity grounded in emo
 6. Circle of the Flame
 
 The Path is a map, not a hierarchy. It includes a starting-point selector and one practical reflection/action at each stage.
+
+Sacred Mirror Work explicitly includes **shame versus accountability**: learning what can be owned, repaired, or changed without converting mistakes, trauma responses, loyalty, love, or missed warnings into a verdict about personal worth.
 
 ## Free reflection tools
 
@@ -139,11 +142,14 @@ Helps separate an overwhelming problem into:
 
 ## Content system
 
-V0.5 begins converting short Stories From the Fire into full public reflections. The first long-form pieces are:
+V0.5 begins converting short Stories From the Fire into full public reflections. The current long-form pieces are:
 
 - The Armor We Don't Need Forever
 - Boundaries Can Hurt
 - One Stone at a Time
+- The Shame That Wasn't Mine
+
+The shame reflection is adapted from Rickey Partin Jr.'s private journal while removing third-party identities and private legal/clinical claims. Its public lesson is the distinction between shame and accountability: loyalty is not stupidity, love is not blindness, and a trauma response is not a complete character reference.
 
 Each long-form reflection follows a reusable pattern:
 

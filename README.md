@@ -8,7 +8,7 @@ Build a public platform rooted in lived experience, emotional healing, spiritual
 
 ## Current version
 
-**Version 0.5 — Deeper Tools & Content System**
+**Version 0.6 — Engagement Foundation**
 
 The project remains a lightweight static site using:
 
@@ -30,20 +30,24 @@ movement.html           Values, symbolism, founder, movement philosophy
 resources.html          Free tools and resources hub
 pattern-map.html        Pattern/evidence/inference mapping tool
 check-in.html           Short daily Flame Check-In
+join.html               Participation / Join the Movement page
+support.html            Crisis, domestic-violence, and safety routing
+privacy.html            Plain-language privacy and data-use notice
 story-armor.html        Full long-form reflection
 story-boundaries.html   Full long-form reflection
 story-one-stone.html    Full long-form reflection
 story-shame.html        Full shame/accountability reflection
 BRAND.md                Visual identity, terminology, voice, publishing rules
+ENGAGEMENT.md           Join, email, contact, safety, and privacy rules
 assets/
   sigil.svg             Primary Eye + Flame vector mark
   favicon.svg           Browser icon
 css/
   style.css             Shared responsive design system
   brand.css             Brand identity layer
-  experience.css        Tools, long-form reading, accessibility, Path styles
+  experience.css        Tools, long-form reading, engagement, accessibility styles
 js/
-  main.js               Navigation and interactive tool behavior
+  main.js               Navigation, engagement wiring, and interactive tool behavior
 ```
 
 ## Brand system
@@ -61,7 +65,7 @@ Primary movement phrase:
 
 ### Flamewalker
 
-A Flamewalker is the movement identity for a person doing the work of reclamation. It is not a rank, diagnosis, religion, or membership requirement.
+A Flamewalker is the movement identity for a person doing the work of reclamation. It is not a rank, diagnosis, religion, certification, or membership requirement.
 
 ### Guardian
 
@@ -84,65 +88,29 @@ Sacred Mirror Work explicitly includes **shame versus accountability**: learning
 
 ### Flame Check-In
 
-A short repeatable snapshot built around:
-
-- body
-- emotion
-- thought
-- boundary
-- need
-- next action
-
-It is intentionally lighter than The Forge and intended for quick state awareness rather than deep analysis.
+A short repeatable snapshot built around body, emotion, thought, boundary, need, and next action.
 
 ### The Forge
 
-Examines difficult thoughts through:
-
-- fact versus assumption
-- evidence for and against
-- pattern recognition
-- compassionate perspective
-- the Six Sacred Questions: Who, What, When, Where, Why, How
-- a final rewritten or "forged" thought
+Examines difficult thoughts through fact versus assumption, evidence for and against, pattern recognition, compassionate perspective, the Six Sacred Questions, and a final rewritten thought.
 
 ### Pattern Map
 
-Organizes:
-
-- an anchor event
-- what happened before
-- what happened after
-- what repeated
-- what changed
-- verifiable evidence
-- inference/assumption
-- a careful summary
-
-The tool explicitly warns that repetition does not by itself prove motive, intent, or cause.
+Organizes an anchor event, before/after context, repetition, differences, verifiable evidence, inference, and a careful summary. It explicitly warns that repetition does not by itself prove motive, intent, or cause.
 
 ### Boundary Builder
 
-Helps convert a vague sense that something is wrong into:
-
-- the behavior
-- the impact
-- the boundary
-- the action the user controls if the behavior continues
+Helps convert a vague sense that something is wrong into the behavior, impact, boundary, and action the user controls.
 
 ### One Stone Planner
 
-Helps separate an overwhelming problem into:
-
-- the larger mountain
-- one realistic action to take now
-- what can intentionally wait
+Helps separate an overwhelming problem into the larger mountain, one realistic action to take now, and what can intentionally wait.
 
 **Privacy design:** Current interactive entries are not submitted to a server or stored by the website. The tools run entirely in the visitor's browser and provide copy-to-clipboard functionality where appropriate.
 
 ## Content system
 
-V0.5 begins converting short Stories From the Fire into full public reflections. The current long-form pieces are:
+Current long-form Stories From the Fire include:
 
 - The Armor We Don't Need Forever
 - Boundaries Can Hurt
@@ -151,7 +119,7 @@ V0.5 begins converting short Stories From the Fire into full public reflections.
 
 The shame reflection is adapted from Rickey Partin Jr.'s private journal while removing third-party identities and private legal/clinical claims. Its public lesson is the distinction between shame and accountability: loyalty is not stupidity, love is not blindness, and a trauma response is not a complete character reference.
 
-Each long-form reflection follows a reusable pattern:
+Each long-form reflection follows a reusable **read → reflect → act** structure:
 
 1. human experience / story theme
 2. grounded interpretation
@@ -160,7 +128,46 @@ Each long-form reflection follows a reusable pattern:
 5. related NBJB tool or next action
 6. navigation back into the broader story library
 
-This creates the first repeatable **read → reflect → act** content loop.
+## V0.6 engagement foundation
+
+V0.6 adds the first honest participation layer.
+
+### Join the Movement
+
+The Join page explains that participation currently means:
+
+- walking the Path
+- using the Resources
+- reading and applying Stories From the Fire
+- carrying the Guardian Code into ordinary life
+- optionally generating a browser-only personal Flamewalker commitment
+
+It does **not** pretend that the visitor created an account, joined a certification program, entered therapy, or enrolled in an email database.
+
+### Email updates
+
+Email/newsletter signup is intentionally **not active yet**. A real provider must be selected and documented before a form is enabled. See `ENGAGEMENT.md` for the provider and privacy requirements.
+
+### Support & Safety
+
+The site now has a dedicated Support & Safety page that clearly distinguishes reflective tools from crisis care. U.S. resources currently included and verified September 14, 2026:
+
+- 911 for immediate life-threatening danger
+- 988 Suicide & Crisis Lifeline: call or text 988 / official chat
+- National Domestic Violence Hotline: 800-799-SAFE (7233), text START to 88788, official live chat
+
+These resources should be rechecked before major public launches or periodically as the site is maintained.
+
+### Privacy & Data Use
+
+The site now documents:
+
+- browser-only reflection-tool behavior
+- clipboard behavior
+- absence of an account/newsletter/contact backend
+- Google Fonts third-party requests
+- future hosting-provider technical logs
+- the principle **Collect less. Explain more.**
 
 ## Accessibility direction
 
@@ -172,6 +179,7 @@ Current accessibility work includes:
 - visible focus-compatible interactive elements
 - reduced-motion support
 - semantic labels and live status text for interactive tools
+- permanent Support & Safety and Privacy routes
 
 Accessibility should continue to be checked as new features are added.
 
@@ -190,18 +198,21 @@ Public content should follow these rules:
 - Present survivor-originated psychological or neurocognitive models as survivor-originated concepts unless independent research supports stronger claims.
 - Keep clear educational/personal-development disclaimers on reflective or mental-health-adjacent tools.
 
-## Future architecture reserved, not yet public
+## Next milestone: V0.7 — Launch Engineering
 
-Potential later additions include:
+Before public launch, the project should add or verify:
 
-- Library / books / paid guides
-- Courses and structured curriculum
-- Community / Circle features
-- Guardian training and facilitator pathways
-- Newsletter
-- Events and retreats
-- Video / podcast library
-- Commerce and merchandise
-- Additional interactive tools
+- real email/newsletter provider and consent flow
+- non-crisis contact channel
+- custom domain decision
+- GitHub Pages deployment
+- sitemap and robots.txt
+- Open Graph/social-sharing metadata
+- SEO cleanup and structured metadata
+- broken-link and mobile QA
+- accessibility pass
+- privacy notice update for final hosting/email providers
+- analytics decision, preferably privacy-minimal
+- final review for private names, legal allegations, and unpublished paid IP
 
-These are future hooks, not launch promises.
+Future commercial architecture such as books, paid guides, courses, events, merchandise, and Guardian training remains reserved until deliberately prepared for release.

@@ -6,7 +6,7 @@ The member system exists to give people a place to **return**, not merely a page
 
 The intended journey is:
 
-**discover → join → enter the Flamewalker Hub → choose a current focus → use a practice/tool → return → deepen connection**
+**discover → join → onboard → dashboard → choose a current focus → use a practice/tool → return → deepen connection**
 
 Membership should create useful access, continuity, and community without turning NBJB into a rank hierarchy or pretending reflective tools are clinical treatment.
 
@@ -22,127 +22,131 @@ Guardian remains a future service / leadership role with responsibilities and de
 
 ## Front-end first, backend second
 
-The member experience can be designed and built before the final authentication/database provider is connected. That is the preferred approach for the current development phase.
+The member experience is being designed and built before the final authentication/database provider is connected. That is the preferred approach for the current development phase.
 
-The front end should be treated as a real product shell rather than a fake login system. We can design:
+The current member platform shell includes:
 
-- the Flamewalker dashboard
-- profile/snapshot editing
-- current Path focus and progress views
-- Guardian Code practice views
-- member resource/library navigation
-- future event, course, circle, and member-content shells
-- account/settings/privacy screens
-- signed-out, loading, empty, error, and access-denied states
-- sign-in, create-account, recovery, and verification screen layouts
+- `member-onboarding.html` — first-run member journey and device-local snapshot setup
+- `members.html` — Flamewalker dashboard
+- `member-path.html` — current Path focus and stage progress UI
+- `member-tools.html` — member-facing tool hub and last-tool routing
+- `member-library.html` — public material plus clearly marked future locked-content placeholders
+- `member-profile.html` — minimal member profile and future visibility choices
+- `member-settings.html` — prototype privacy/data preferences, export, and clear-device controls
+- `member-auth.html` — disabled sign-in/create/recovery workflow mockups for the future authentication bridge
+- `css/members.css` — shared member platform layout and responsive styles
+- `js/member-service.js` — storage/service boundary between UI and data source
+- `js/member-platform.js` — shared member interactions and rendering
 
-During this phase, low-sensitivity prototype state can continue to use browser `localStorage`.
-
-The code should keep a clean service boundary so the UI does not care whether its data comes from local storage today or a secure backend tomorrow. Conceptually:
+The UI is intentionally separated from its storage mechanism:
 
 `member UI → member service/adapter → localStorage now / authenticated backend later`
 
-When the backend is connected, the service layer can be replaced or extended without rebuilding the member experience from scratch.
+This lets the account bridge replace or extend the service layer later without rebuilding the member experience from scratch.
 
-### Important security boundary
+## Current device-local data model
 
-A static page in a public GitHub Pages repository is **not protected member content** merely because it is linked only after a login screen. Until real authentication and server-side authorization exist, member pages are prototypes/workspaces, not secure access-controlled areas.
+The current prototype stores low-sensitivity continuity data under:
 
-When paid, private, or member-only content is introduced, the protected data/content must come from an authenticated backend or private storage after access is checked. Do not commit proprietary paid material to the public repository and then rely on hidden links.
+`nbjb.member.v2`
 
-## Phase 1 — Device-local Member Hub
+The service can migrate the earlier `nbjb.member.v1` snapshot.
 
-Implemented in the `development` branch:
+Current local member data includes:
 
-- `members.html`
-- `css/members.css`
-- `js/members.js`
-
-The current Member Hub provides:
-
-- optional name / nickname
+- optional display name / nickname
+- optional short profile description
+- prototype profile visibility choice
 - current Flamewalker Path focus
+- per-stage progress state: `not-started`, `in-progress`, or `practicing`
 - one next honest action
 - Guardian Code values being actively practiced
-- quick routes to all reflection tools
-- quick routes to each Path stage
-- a clear explanation of current versus future member capabilities
+- last tool name opened from the member tools hub
+- onboarding completion state
+- prototype preferences for future cloud sync / member updates / motion behavior
 
-The member snapshot is stored with browser `localStorage` under:
+This data stays on the current browser/device. It is not currently sent to GitHub, NBJB email, an analytics service, an NBJB database, or an AI model.
 
-`nbjb.member.v1`
+The member settings screen provides a device-local JSON copy action and a clear-device action.
 
-It stays on that browser/device. It is not sent to GitHub, NBJB email, an analytics service, or an NBJB database.
+## Privacy boundary
 
-The hub includes a clear **Clear This Device** action.
+A member account does **not** automatically mean private reflections should be uploaded.
+
+The member profile/service intentionally does not ingest the contents of:
+
+- Forge notes
+- Pattern Maps
+- Six Sacred Questions answers
+- shame reflections
+- therapy/medical material
+- legal evidence or active-case material
+- sensitive journals or private source documents
+
+Those should remain device-local by default unless a future feature deliberately offers secure storage with explicit purpose, consent, deletion controls, and appropriate protection.
+
+A useful product principle is:
+
+> **Your account can remember your journey without needing to read your journal.**
+
+## Important security boundary
+
+A static page in a public GitHub Pages repository is **not protected member content** merely because it is linked only after a login screen.
+
+The current `member-library.html` therefore contains only public routes and architecture placeholders for future protected material. Private manuscripts, paid curricula, personal records, and proprietary member content must not be committed as public static assets and “protected” only by hidden links.
+
+When real protected content exists, authorization must occur before the data/content is returned from a backend or private storage layer.
 
 ## Phase 2 — Real member accounts
 
 A real member system requires authentication and persistent server-side storage. GitHub Pages is a static host and cannot securely provide this by itself.
 
-The preferred current backend candidate is **Supabase** because it can provide authentication, a Postgres database, Row Level Security, and server/Edge Function capabilities while allowing the existing static front end to remain largely intact. Firebase remains a viable alternative if requirements change.
+The preferred current backend candidate is **Supabase** because it can provide authentication, Postgres, Row Level Security, and server/Edge Function capabilities while allowing the current static front end to remain largely intact. Firebase remains a viable alternative if requirements change.
 
-Required capabilities before launch of accounts:
+Required capabilities before live accounts:
 
 - secure account creation and login
-- email verification or passwordless login
-- password / credential handling delegated to a reputable auth provider
-- member profile
+- email verification or passwordless login decision
+- credential handling delegated to the auth provider
+- authenticated session management
+- member profile persistence across devices
+- Row Level Security or equivalent isolation between members
+- member-only content/access-control checks
 - account deletion
-- data export where appropriate
-- cross-device synchronization of low-sensitivity member preferences / progress
-- privacy notice updated for the chosen providers
-- security rules preventing members from reading one another's private data
-- moderation/admin roles separated from ordinary membership
-- rate limiting / abuse protection where necessary
+- appropriate data export
+- privacy notice updated for provider behavior
+- admin/moderator roles separated from ordinary membership
+- rate limiting / abuse protection where appropriate
+- unauthorized-access and account-edge-case testing
 
 ### Supabase bridge concept
 
 The eventual connection should behave like a bridge between the existing public/member UI and secure account services:
 
-1. public Join/sign-in screen starts authentication
+1. the public Join/sign-in screen starts authentication
 2. Supabase Auth establishes the signed-in user
-3. the member service reads/writes only that user's permitted profile data under Row Level Security
-4. the existing Flamewalker Hub renders the returned profile/progress
+3. the member service reads/writes only that user's permitted profile/progress data under Row Level Security
+4. the existing Flamewalker dashboard renders the returned profile/progress
 5. protected entitlements/content are requested only after authorization succeeds
 6. logout returns the person to a public/signed-out state
 
-The browser may use the Supabase project URL and public/anon publishable key only with correctly configured Row Level Security. A service-role/private secret must never be placed in public JavaScript or committed to the repository.
+The browser may use the Supabase project URL and public/anon publishable key only with correctly configured Row Level Security. A service-role/private secret must never be placed in browser JavaScript or committed to the repository.
 
-Account deletion or other privileged operations that require elevated permissions should run through a trusted server/Edge Function, not through a service-role secret in the browser.
+Privileged operations such as account deletion should run through trusted server/Edge Function code, not through a service-role secret exposed to the browser.
 
-### Data-minimization rule
+## Future member library
 
-A member account does **not** automatically mean private reflections should be uploaded.
-
-Default server-stored data should be limited to what is necessary for membership, such as:
-
-- account/member identifier
-- email/account identifier used by authentication
-- display name if chosen
-- current Path focus
-- selected Guardian Code values / low-sensitivity preferences
-- next honest action if the member intentionally chooses to sync it
-- access entitlements / role
-- timestamps
-- optional event/course progress
-
-Sensitive Forge notes, Pattern Maps, shame reflections, medical details, legal evidence, therapy material, and similar content should remain device-local by default unless a future feature deliberately offers secure storage with explicit consent and a clear reason.
-
-## Phase 3 — Member-only content
-
-Possible member areas:
+The current member library reserves UX space for future deliberately released content such as:
 
 - deeper guided practices
-- downloadable worksheets that are intentionally released
-- member-only Stories From the Fire
-- live/event information
+- intentionally released member-only Stories From the Fire
 - recorded talks or workshops
+- courses/programs with access entitlements
+- live event/circle information
 - founder updates
-- community prompts
-- book/course access after purchase
+- purchased book/course access
 
-Do not publish private manuscripts or paid curricula merely because the member architecture exists.
+These are placeholders only. They do not represent currently protected content.
 
 ## Phase 4 — Community
 
@@ -193,4 +197,4 @@ The member experience should avoid:
 
 `main` remains the public/live branch.
 
-Member-system development should occur on `development` until the hub and account architecture are ready for deliberate release.
+Member-system development occurs on `development` until the front-end member experience, authentication bridge, authorization model, privacy/security rules, and release QA are ready for deliberate launch.

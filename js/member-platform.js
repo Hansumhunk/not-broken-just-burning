@@ -5,6 +5,20 @@
   const page = document.body.dataset.memberPage || '';
   const state = service.load();
 
+  const memberRoutes = [
+    ['dashboard', 'members.html', 'Dashboard'],
+    ['path', 'member-path.html', 'My Path'],
+    ['tools', 'member-tools.html', 'Toolbox'],
+    ['work', 'member-work.html', 'My Work'],
+    ['progress', 'member-progress.html', 'Progress'],
+    ['library', 'member-library.html', 'Library'],
+    ['watch', 'member-media.html', 'Watch'],
+    ['store', 'member-store.html', 'Store'],
+    ['community', 'member-community.html', 'Circle'],
+    ['profile', 'member-profile.html', 'Profile'],
+    ['settings', 'member-settings.html', 'Settings']
+  ];
+
   function status(message, target = document.querySelector('[data-member-status]')) {
     if (!target) return;
     target.textContent = message;
@@ -20,22 +34,20 @@
   }
 
   function ensureMemberNav() {
-    const nav = document.querySelector('.member-subnav');
-    if (!nav) return;
-    const additions = [
-      ['progress', 'member-progress.html', 'Progress'],
-      ['watch', 'member-media.html', 'Watch'],
-      ['store', 'member-store.html', 'Store'],
-      ['community', 'member-community.html', 'Circle']
-    ];
-    const profileLink = nav.querySelector('[data-member-nav="profile"]');
-    additions.forEach(([key, href, label]) => {
-      if (nav.querySelector(`[data-member-nav="${key}"]`)) return;
-      const link = document.createElement('a');
-      link.dataset.memberNav = key;
-      link.href = href;
-      link.textContent = label;
-      nav.insertBefore(link, profileLink || nav.querySelector('.member-exit') || null);
+    document.querySelectorAll('.member-subnav').forEach((nav) => {
+      nav.replaceChildren();
+      memberRoutes.forEach(([key, href, label]) => {
+        const link = document.createElement('a');
+        link.dataset.memberNav = key;
+        link.href = href;
+        link.textContent = label;
+        nav.appendChild(link);
+      });
+      const exit = document.createElement('a');
+      exit.className = 'member-exit';
+      exit.href = 'index.html';
+      exit.textContent = 'Exit to site';
+      nav.appendChild(exit);
     });
   }
 
@@ -162,6 +174,120 @@
     }
   }
 
+  function entryText(entry) {
+    const sections = [
+      `NOT BROKEN JUST BURNING — ${entry.tool || 'SAVED WORK'}`,
+      formatDate(entry.createdAt),
+      '',
+      entry.title || 'Saved reflection',
+      '',
+      entry.summary || '(no summary saved)'
+    ];
+    if (entry.tags?.length) sections.push('', `TAGS: ${entry.tags.join(', ')}`);
+    const details = Object.entries(entry.data || {}).filter(([, value]) => value !== '' && value !== null && value !== undefined);
+    if (details.length) {
+      sections.push('', 'SAVED DETAILS');
+      details.forEach(([key, value]) => sections.push(`${key.replace(/[-_]/g, ' ').toUpperCase()}: ${Array.isArray(value) ? value.join(', ') : String(value)}`));
+    }
+    return sections.join('\n');
+  }
+
+  function renderMyWork() {
+    const allEntries = service.listEntries();
+    fillText('[data-work-total]', String(allEntries.length), '0');
+    document.querySelectorAll('[data-work-tool]').forEach((node) => {
+      node.textContent = String(service.listEntries(node.dataset.workTool || '').length);
+    });
+
+    const search = document.querySelector('#member-work-search');
+    const filter = document.querySelector('#member-work-filter');
+    const needle = (search?.value || '').trim().toLowerCase();
+    const tool = filter?.value || '';
+    const entries = allEntries.filter((entry) => {
+      if (tool && entry.tool !== tool) return false;
+      if (!needle) return true;
+      const haystack = [entry.tool, entry.title, entry.summary, ...(entry.tags || []), ...Object.values(entry.data || {}).map((value) => String(value))].join(' ').toLowerCase();
+      return haystack.includes(needle);
+    });
+
+    const list = document.querySelector('#member-work-list');
+    if (!list) return;
+    list.replaceChildren();
+    if (!entries.length) {
+      const empty = document.createElement('div');
+      empty.className = 'member-empty-state';
+      empty.textContent = allEntries.length ? 'No saved work matches this search or filter.' : 'My Work is empty on this device. Reflections appear here only after you explicitly save them from a supported tool.';
+      list.appendChild(empty);
+      return;
+    }
+
+    entries.forEach((entry) => {
+      const card = document.createElement('article');
+      card.className = 'member-work-card';
+
+      const top = document.createElement('div');
+      top.className = 'member-history-top';
+      const toolName = document.createElement('strong');
+      toolName.textContent = entry.tool;
+      const date = document.createElement('span');
+      date.textContent = formatDate(entry.createdAt);
+      top.append(toolName, date);
+
+      const title = document.createElement('h3');
+      title.textContent = entry.title || 'Saved reflection';
+      const summary = document.createElement('p');
+      summary.textContent = entry.summary || 'No summary saved.';
+      card.append(top, title, summary);
+
+      if (entry.tags?.length) {
+        const tags = document.createElement('div');
+        tags.className = 'member-work-tags';
+        entry.tags.forEach((tag) => {
+          const chip = document.createElement('span');
+          chip.textContent = tag;
+          tags.appendChild(chip);
+        });
+        card.appendChild(tags);
+      }
+
+      const detailEntries = Object.entries(entry.data || {}).filter(([, value]) => value !== '' && value !== null && value !== undefined);
+      if (detailEntries.length) {
+        const details = document.createElement('details');
+        details.className = 'member-work-details';
+        const detailsSummary = document.createElement('summary');
+        detailsSummary.textContent = 'View saved details';
+        const detailList = document.createElement('dl');
+        detailEntries.forEach(([key, value]) => {
+          const row = document.createElement('div');
+          const dt = document.createElement('dt');
+          dt.textContent = key.replace(/[-_]/g, ' ');
+          const dd = document.createElement('dd');
+          dd.textContent = Array.isArray(value) ? value.join(', ') : String(value);
+          row.append(dt, dd);
+          detailList.appendChild(row);
+        });
+        details.append(detailsSummary, detailList);
+        card.appendChild(details);
+      }
+
+      const actions = document.createElement('div');
+      actions.className = 'member-actions';
+      const copy = document.createElement('button');
+      copy.type = 'button';
+      copy.className = 'button button-ghost';
+      copy.dataset.copyEntry = entry.id;
+      copy.textContent = 'Copy Entry';
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'member-history-remove';
+      remove.dataset.deleteEntry = entry.id;
+      remove.textContent = 'Remove from this device';
+      actions.append(copy, remove);
+      card.appendChild(actions);
+      list.appendChild(card);
+    });
+  }
+
   // Dashboard quick action.
   const quickAction = document.querySelector('#member-quick-action');
   if (quickAction) quickAction.value = state.journey.nextAction || '';
@@ -171,7 +297,6 @@
     status(result.ok ? 'Next honest action saved on this device.' : 'Your browser blocked local saving.');
   });
 
-  // Focus controls shared across dashboard and Path page.
   document.querySelectorAll('[data-set-focus]').forEach((button) => {
     button.addEventListener('click', () => {
       const focus = button.dataset.setFocus || '';
@@ -191,7 +316,6 @@
     });
   }
 
-  // Path progress controls.
   document.querySelectorAll('[data-stage-progress]').forEach((select) => {
     const stage = select.dataset.stageProgress;
     if (stage) select.value = state.journey.progress[stage] || 'not-started';
@@ -202,12 +326,10 @@
     });
   });
 
-  // Tool tracking stays low-sensitivity unless a tool offers an explicit Save to History action.
   document.querySelectorAll('[data-member-tool]').forEach((link) => {
     link.addEventListener('click', () => service.noteTool(link.dataset.memberTool || ''));
   });
 
-  // Profile page.
   const profileName = document.querySelector('#profile-name');
   const profileAbout = document.querySelector('#profile-about');
   const profileVisibility = document.querySelector('#profile-visibility');
@@ -227,7 +349,6 @@
     status(result.ok ? 'Profile saved on this device.' : 'Your browser blocked local saving.');
   });
 
-  // Onboarding page.
   const onboardingName = document.querySelector('#onboarding-name');
   const onboardingFocus = document.querySelector('#onboarding-focus');
   const onboardingAction = document.querySelector('#onboarding-action');
@@ -254,7 +375,6 @@
     window.location.href = 'members.html';
   });
 
-  // Settings page.
   const syncNext = document.querySelector('#setting-sync-next');
   const memberUpdates = document.querySelector('#setting-member-updates');
   const motion = document.querySelector('#setting-motion');
@@ -278,19 +398,39 @@
     status(copied ? 'Device-local member data copied as JSON.' : 'Copy failed.');
   });
 
+  document.querySelector('#copy-member-work')?.addEventListener('click', async () => {
+    const entries = service.listEntries();
+    if (!entries.length) return status('There is no saved work on this device yet.');
+    const copied = await copyText(JSON.stringify(entries, null, 2));
+    status(copied ? 'Saved work data copied.' : 'Copy failed.');
+  });
+
+  document.querySelector('#member-work-search')?.addEventListener('input', renderMyWork);
+  document.querySelector('#member-work-filter')?.addEventListener('change', renderMyWork);
+
   document.querySelector('#clear-member-activity')?.addEventListener('click', () => {
     if (!window.confirm('Clear saved member tool history from this device? Your profile and Path progress will remain.')) return;
     const result = service.clearActivity();
     status(result.ok ? 'Saved tool history cleared from this device.' : 'Your browser blocked clearing local history.');
     renderProgressHistory();
+    renderMyWork();
   });
 
-  document.addEventListener('click', (event) => {
-    const button = event.target.closest('[data-delete-entry]');
-    if (!button) return;
+  document.addEventListener('click', async (event) => {
+    const copyButton = event.target.closest('[data-copy-entry]');
+    if (copyButton) {
+      const entry = service.listEntries().find((item) => item.id === copyButton.dataset.copyEntry);
+      if (!entry) return status('That saved entry could not be found.');
+      const copied = await copyText(entryText(entry));
+      return status(copied ? 'Saved entry copied.' : 'Copy failed.');
+    }
+
+    const deleteButton = event.target.closest('[data-delete-entry]');
+    if (!deleteButton) return;
     if (!window.confirm('Remove this saved reflection from member history on this device?')) return;
-    service.removeEntry(button.dataset.deleteEntry || '');
+    service.removeEntry(deleteButton.dataset.deleteEntry || '');
     renderProgressHistory();
+    renderMyWork();
   });
 
   document.querySelector('#clear-member-device')?.addEventListener('click', () => {
@@ -304,4 +444,5 @@
   renderCommon(state);
   paintFocus(state);
   if (page === 'progress') renderProgressHistory();
+  if (page === 'work') renderMyWork();
 })();

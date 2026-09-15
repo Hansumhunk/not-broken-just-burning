@@ -15,7 +15,7 @@
   <header class="site-header"><a class="brand" href="index.html" aria-label="Not Broken Just Burning home"><span class="brand-mark" aria-hidden="true"></span><span class="brand-name">Not Broken <span>Just Burning</span></span></a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation"><span></span><span></span><span></span></button><nav class="site-nav" id="site-nav" aria-label="Primary navigation"><a href="path.html">The Path</a><a href="forge.html">The Forge</a><a href="fire.html">The Fire</a><a href="movement.html">The Movement</a><a class="active" href="resources.html">Resources</a></nav></header>
 
   <main id="main-content">
-    <section class="page-hero section-shell reveal"><p class="eyebrow">Pattern Map</p><h1>Notice repetition.<br><span>Do not manufacture certainty.</span></h1><p class="hero-lead">Patterns can be useful signals, but repetition alone does not prove motive, intent, or cause. This tool helps you organize what happened, what repeated, what changed, what evidence exists, and what you may still be assuming.</p><span class="privacy-chip">Private by design: entries remain in this browser session unless you explicitly save a Pattern Map to member history on this device.</span></section>
+    <section class="page-hero section-shell reveal"><p class="eyebrow">Pattern Map</p><h1>Notice repetition.<br><span>Do not manufacture certainty.</span></h1><p class="hero-lead">Patterns can be useful signals, but repetition alone does not prove motive, intent, or cause. This tool helps you organize what happened, what repeated, what changed, what evidence exists, and what you may still be assuming.</p><span class="privacy-chip">Private by design: entries stay in this browser unless you explicitly choose Save to My Work on this device.</span></section>
 
     <section class="forge-shell section-shell reveal" id="pattern-tool">
       <div class="forge-intro"><p class="eyebrow">Anchor event</p><h2>Start with one event you can describe plainly.</h2><label for="pattern-event">What happened?</label><textarea id="pattern-event" rows="4" placeholder="Describe the event without interpreting motive yet."></textarea></div>
@@ -29,18 +29,12 @@
       </div>
       <div class="forge-questions"><p class="eyebrow">The Six Sacred Questions</p><p>Who? What? When? Where? Why do I think it matters? How do I know?</p></div>
       <div class="forge-final"><label for="pattern-summary">Most careful summary</label><textarea id="pattern-summary" rows="5" placeholder="Example: I see a repeated sequence around X. I can verify A and B. I suspect C, but I do not yet have enough evidence to treat C as fact."></textarea><div class="forge-actions"><button class="button button-primary" id="build-pattern" type="button">Build My Pattern Notes</button><button class="button button-ghost" id="copy-pattern" type="button">Copy Notes</button><button class="button button-ghost" id="clear-pattern" type="button">Clear</button><span class="forge-status" id="pattern-status" role="status" aria-live="polite"></span></div></div>
-
-      <section class="member-history-optin" aria-labelledby="pattern-history-title">
-        <p class="eyebrow">Member progress prototype</p><h2 id="pattern-history-title">Save this Pattern Map to my history?</h2><p>This is optional. Saving creates a device-local member-history record so your Progress page can compare separate Pattern Maps over time. It does not upload the reflection to NBJB, GitHub, an AI model, or a server.</p>
-        <label><input id="pattern-history-consent" type="checkbox"> <span>I understand this saves the Pattern Map in member history on this device until I remove it or clear member data.</span></label>
-        <div class="forge-actions"><button class="button button-primary" id="save-pattern-member-history" type="button">Save Pattern to My History</button><a class="button button-ghost" href="member-progress.html">Open My Progress</a><span class="forge-status" id="pattern-history-status" role="status" aria-live="polite"></span></div>
-      </section>
     </section>
 
     <section class="callout section-shell reveal"><p class="eyebrow">Pattern is not proof</p><h2>Use the map to ask better questions.</h2><p>A useful pattern map separates direct observations from interpretation. It can help you decide what to document, what to verify, what to discuss, or what to stop assuming.</p><a class="button button-primary" href="resources.html">Back to Resources</a></section>
   </main>
 
   <footer class="site-footer section-shell"><div><strong>NOT BROKEN JUST BURNING</strong><p>See the pattern. Test the story. Keep the distinction.</p></div><div class="footer-meta"><p>© <span id="year"></span> Not Broken Just Burning.</p><p class="disclaimer">Educational and personal-development content only. This tool does not prove intent, diagnose people, or replace professional medical, mental-health, legal, investigative, or emergency services.</p></div></footer>
-  <script src="js/main.js"></script><script src="js/member-service.js"></script><script src="js/pattern-member-history.js"></script>
+  <script src="js/main.js"></script><script src="js/member-service.js"></script><script src="js/tool-member-history.js"></script>
 </body>
 </html>

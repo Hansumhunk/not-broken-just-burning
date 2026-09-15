@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/brand.css">
   <link rel="stylesheet" href="css/experience.css">
+  <link rel="stylesheet" href="css/member-expansion.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -35,7 +36,7 @@
       <p class="eyebrow">Free Resource · 06</p>
       <h1>The Six Sacred<br><span>Questions.</span></h1>
       <p class="hero-lead">Use the six questions as a working reflection. Type what you currently understand about the people, event, timing, context, explanation, and process. The goal is not to prove a case. It is to slow confusion down enough to see what belongs where.</p>
-      <span class="privacy-chip">🔒 What you type stays on this page in your browser. This tool does not submit your answers to NBJB.</span>
+      <span class="privacy-chip">🔒 What you type stays in this browser unless you explicitly choose Save to My Work on this device.</span>
     </section>
 
     <section class="section-shell connection-panel reveal">
@@ -54,68 +55,27 @@
       </div>
 
       <div class="tool-grid">
-        <div class="forge-field">
-          <label for="sacred-who"><span>01 · Who?</span></label>
-          <textarea id="sacred-who" data-sacred="who" rows="6" placeholder="Who is directly involved? Who witnessed it? Who is a direct source, secondhand source, decision-maker, or support person? Who actually knows what firsthand?"></textarea>
-          <a class="text-link" href="question-who.html">Learn how to use Who? →</a>
-        </div>
-        <div class="forge-field">
-          <label for="sacred-what"><span>02 · What?</span></label>
-          <textarea id="sacred-what" data-sacred="what" rows="6" placeholder="What actually happened? What was said, done, changed, decided, or observed? Try to describe the event before adding motive or character judgments."></textarea>
-          <a class="text-link" href="question-what.html">Learn how to use What? →</a>
-        </div>
-        <div class="forge-field">
-          <label for="sacred-when"><span>03 · When?</span></label>
-          <textarea id="sacred-when" data-sacred="when" rows="6" placeholder="When did it happen? What came before and after? How often has it happened? What changed over time? Are there important exceptions?"></textarea>
-          <a class="text-link" href="question-when.html">Learn how to use When? →</a>
-        </div>
-        <div class="forge-field">
-          <label for="sacred-where"><span>04 · Where?</span></label>
-          <textarea id="sacred-where" data-sacred="where" rows="6" placeholder="Where did this happen? In person, by text, online, at home, at work, in public, in private? What environmental or relational context matters?"></textarea>
-          <a class="text-link" href="question-where.html">Learn how to use Where? →</a>
-        </div>
-        <div class="forge-field">
-          <label for="sacred-why"><span>05 · Why?</span></label>
-          <textarea id="sacred-why" data-sacred="why" rows="6" placeholder="Why do I think this happened or matters? What explanation am I considering? What supports that explanation, and what part is still uncertain or inferred?"></textarea>
-          <a class="text-link" href="question-why.html">Learn how to use Why? →</a>
-        </div>
-        <div class="forge-field">
-          <label for="sacred-how"><span>06 · How?</span></label>
-          <textarea id="sacred-how" data-sacred="how" rows="6" placeholder="How did the situation develop? How did each step affect the next? How did I respond? How might I interrupt the pattern or choose the next action within my control?"></textarea>
-          <a class="text-link" href="question-how.html">Learn how to use How? →</a>
-        </div>
+        <div class="forge-field"><label for="sacred-who"><span>01 · Who?</span></label><textarea id="sacred-who" data-sacred="who" rows="6" placeholder="Who is directly involved? Who witnessed it? Who is a direct source, secondhand source, decision-maker, or support person? Who actually knows what firsthand?"></textarea><a class="text-link" href="question-who.html">Learn how to use Who? →</a></div>
+        <div class="forge-field"><label for="sacred-what"><span>02 · What?</span></label><textarea id="sacred-what" data-sacred="what" rows="6" placeholder="What actually happened? What was said, done, changed, decided, or observed? Try to describe the event before adding motive or character judgments."></textarea><a class="text-link" href="question-what.html">Learn how to use What? →</a></div>
+        <div class="forge-field"><label for="sacred-when"><span>03 · When?</span></label><textarea id="sacred-when" data-sacred="when" rows="6" placeholder="When did it happen? What came before and after? How often has it happened? What changed over time? Are there important exceptions?"></textarea><a class="text-link" href="question-when.html">Learn how to use When? →</a></div>
+        <div class="forge-field"><label for="sacred-where"><span>04 · Where?</span></label><textarea id="sacred-where" data-sacred="where" rows="6" placeholder="Where did this happen? In person, by text, online, at home, at work, in public, in private? What environmental or relational context matters?"></textarea><a class="text-link" href="question-where.html">Learn how to use Where? →</a></div>
+        <div class="forge-field"><label for="sacred-why"><span>05 · Why?</span></label><textarea id="sacred-why" data-sacred="why" rows="6" placeholder="Why do I think this happened or matters? What explanation am I considering? What supports that explanation, and what part is still uncertain or inferred?"></textarea><a class="text-link" href="question-why.html">Learn how to use Why? →</a></div>
+        <div class="forge-field"><label for="sacred-how"><span>06 · How?</span></label><textarea id="sacred-how" data-sacred="how" rows="6" placeholder="How did the situation develop? How did each step affect the next? How did I respond? How might I interrupt the pattern or choose the next action within my control?"></textarea><a class="text-link" href="question-how.html">Learn how to use How? →</a></div>
       </div>
 
-      <div class="tool-output" aria-live="polite">
-        <p class="eyebrow">My Six-Question Notes</p>
-        <pre id="sacred-preview" style="white-space: pre-wrap; font: inherit; color: inherit; margin: 0;">Fill in any of the six questions, then build your notes.</pre>
-      </div>
-
-      <div class="forge-actions">
-        <button class="button button-primary" id="build-sacred" type="button">Build My Six-Question Notes</button>
-        <button class="button button-ghost" id="copy-sacred" type="button">Copy My Notes</button>
-        <button class="button button-ghost" id="clear-sacred" type="button">Clear</button>
-        <span class="forge-status" id="sacred-status" role="status" aria-live="polite"></span>
-      </div>
+      <div class="tool-output" aria-live="polite"><p class="eyebrow">My Six-Question Notes</p><pre id="sacred-preview" style="white-space: pre-wrap; font: inherit; color: inherit; margin: 0;">Fill in any of the six questions, then build your notes.</pre></div>
+      <div class="forge-actions"><button class="button button-primary" id="build-sacred" type="button">Build My Six-Question Notes</button><button class="button button-ghost" id="copy-sacred" type="button">Copy My Notes</button><button class="button button-ghost" id="clear-sacred" type="button">Clear</button><span class="forge-status" id="sacred-status" role="status" aria-live="polite"></span></div>
     </section>
 
-    <section class="section-shell reflection-box reveal">
-      <p class="eyebrow">A useful order</p>
-      <h2>Do not let Why swallow the other five.</h2>
-      <p>When a situation hurts, the mind often jumps straight to <em>Why did they do this?</em> Sometimes that question matters. But Who, What, When, and Where usually give Why better ground to stand on. How then turns the reflection toward process and the next controllable step.</p>
-      <div class="hero-actions"><a class="button button-primary" href="forge.html">Take It to The Forge</a><a class="button button-ghost" href="pattern-map.html">Use the Pattern Map</a></div>
-    </section>
+    <section class="section-shell reflection-box reveal"><p class="eyebrow">A useful order</p><h2>Do not let Why swallow the other five.</h2><p>When a situation hurts, the mind often jumps straight to <em>Why did they do this?</em> Sometimes that question matters. But Who, What, When, and Where usually give Why better ground to stand on. How then turns the reflection toward process and the next controllable step.</p><div class="hero-actions"><a class="button button-primary" href="forge.html">Take It to The Forge</a><a class="button button-ghost" href="pattern-map.html">Use the Pattern Map</a></div></section>
 
-    <section class="callout section-shell reveal">
-      <p class="eyebrow">A question is not a verdict</p>
-      <h2>Use the six to organize your viewpoint, not manufacture certainty.</h2>
-      <p>The Six Sacred Questions can help a client organize a personal reflection. They do not verify allegations, prove motive, diagnose another person, establish legal facts, or replace professional investigation, medical care, mental-health care, legal advice, or emergency support.</p>
-      <a class="button button-primary" href="resources.html">Return to Resources</a>
-    </section>
+    <section class="callout section-shell reveal"><p class="eyebrow">A question is not a verdict</p><h2>Use the six to organize your viewpoint, not manufacture certainty.</h2><p>The Six Sacred Questions can help a client organize a personal reflection. They do not verify allegations, prove motive, diagnose another person, establish legal facts, or replace professional investigation, medical care, mental-health care, legal advice, or emergency support.</p><a class="button button-primary" href="resources.html">Return to Resources</a></section>
   </main>
 
   <footer class="site-footer section-shell"><div><strong>NOT BROKEN JUST BURNING</strong><p>Ask better questions before demanding final answers.</p></div><div class="footer-meta"><p>© <span id="year"></span> Not Broken Just Burning.</p><p class="footer-links"><a href="contact.html">Contact</a> · <a href="support.html">Support & Safety</a> · <a href="privacy.html">Privacy & Data Use</a></p><p class="disclaimer">Educational and personal-development content only. Not a substitute for professional medical, mental-health, legal, investigative, or emergency services.</p></div></footer>
   <script src="js/main.js"></script>
   <script src="js/six-sacred.js"></script>
+  <script src="js/member-service.js"></script>
+  <script src="js/tool-member-history.js"></script>
 </body>
 </html>

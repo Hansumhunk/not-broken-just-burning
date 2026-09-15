@@ -6,9 +6,9 @@ The member system exists to give people a place to **return**, not merely a page
 
 The intended journey is:
 
-**discover → join → onboard → dashboard → choose a current focus → use a practice/tool → return → review progress → deepen connection**
+**discover → join → onboard → dashboard → choose a current focus → use a practice/tool → save only what matters → return → review progress → deepen connection**
 
-Membership should create useful access, continuity, and community without turning NBJB into a rank hierarchy or pretending reflective tools are clinical treatment.
+Membership should create useful continuity, access, and community without turning NBJB into a rank hierarchy or pretending reflective tools are clinical treatment.
 
 ## Identity model
 
@@ -30,7 +30,8 @@ Current development-only member routes:
 - `members.html` — dashboard
 - `member-path.html` — current Path focus and stage progress
 - `member-tools.html` — Toolbox
-- `member-progress.html` — saved member-tool history and longitudinal review
+- `member-work.html` — searchable archive for deliberately saved work
+- `member-progress.html` — longitudinal history and review layer
 - `member-library.html` — member library shell
 - `member-media.html` — video/learning hub shell
 - `member-store.html` — storefront and entitlement shell
@@ -42,10 +43,10 @@ Current development-only member routes:
 Shared layers:
 
 - `css/members.css` — core member platform layout
-- `css/member-expansion.css` — progress/media/store/community extensions
+- `css/member-expansion.css` — saved-work/progress/media/store/community extensions
 - `js/member-service.js` — storage/service adapter
-- `js/member-platform.js` — shared member interactions and rendering
-- `js/pattern-member-history.js` — explicit Pattern Map → member history bridge prototype
+- `js/member-platform.js` — shared member navigation, My Work, Progress, profile, Path, and settings behavior
+- `js/tool-member-history.js` — shared explicit Save to My Work bridge for all six Toolbox tools
 
 The UI is separated from its storage mechanism:
 
@@ -53,11 +54,7 @@ The UI is separated from its storage mechanism:
 
 ## Current device-local data model
 
-The current prototype stores low-sensitivity continuity data under:
-
-`nbjb.member.v2`
-
-It can migrate the earlier `nbjb.member.v1` snapshot.
+The current prototype stores low-sensitivity continuity data under `nbjb.member.v2` and can migrate the earlier `nbjb.member.v1` snapshot.
 
 Current local member data can include:
 
@@ -71,21 +68,40 @@ Current local member data can include:
 - last tool opened
 - onboarding completion state
 - prototype preferences
-- explicitly saved member-tool history
+- explicitly saved My Work entries
 
-The service currently caps saved activity history to a bounded local list so the prototype does not grow browser storage without limit.
+Saved activity is capped to a bounded local list so the prototype does not grow browser storage without limit.
 
-## Tool history and longitudinal progress
+## My Work and Progress are different layers
 
-Tool content is **not automatically copied** into member history merely because a member opens a tool.
+**My Work** answers: *What did I deliberately save, and where is it?*
 
-The preferred pattern is explicit save:
+**Progress** answers: *What appears to be changing, repeating, or worth reviewing over time?*
 
-`use tool → review result → choose Save to My History → local member record → Progress page`
+Keeping archive and interpretation separate makes both easier to understand.
 
-The first implemented example is Pattern Map.
+The explicit-save flow is:
 
-A saved Pattern Map record can contain:
+`use tool → review result → choose Save to My Work → confirm device-local save → My Work → optional longitudinal Progress review`
+
+All six Toolbox tools now use the same shared save bridge:
+
+- The Forge
+- Flame Check-In
+- Pattern Map
+- Boundary Builder
+- One Stone
+- Six Sacred Questions
+
+Normal tool use does **not** add anything to My Work. Saving requires a separate member-controlled action and confirmation.
+
+Current saved records can include tool-specific fields, a title, summary, timestamp, and future tags. My Work can search, filter, copy, inspect, and remove saved entries.
+
+## Current longitudinal review
+
+Pattern Map remains the first tool with a dedicated longitudinal comparison because its structure naturally supports repeated-event review.
+
+A saved Pattern Map can include:
 
 - anchor event
 - before / after context
@@ -96,58 +112,52 @@ A saved Pattern Map record can contain:
 - careful summary
 - timestamp
 
-The Progress page can compare multiple saved Pattern Maps over time. The first rule-based longitudinal review is intentionally transparent: after multiple entries, it surfaces repeated language across separate saved maps. It does **not** claim that word repetition proves motive, diagnosis, causation, or objective truth.
+After multiple saved Pattern Maps, Progress can surface repeated language across separate entries using a transparent frequency rule. It does **not** claim that repetition proves motive, diagnosis, causation, or objective truth.
 
 Five saved Pattern Maps is the current UX threshold for calling the view a longitudinal review. This is a product threshold, not a scientific or clinical threshold.
 
-Future versions may add better structured comparison or AI-assisted summaries only after privacy, consent, and backend design are explicit.
+## Next history layer
+
+The next useful development phase is structured, member-selected metadata rather than increasingly clever guesswork.
+
+Potential optional tags / themes include:
+
+- work
+- relationship
+- parenting
+- money
+- boundary
+- conflict
+- identity
+- fear
+- anger
+- grief
+- health
+- decision
+
+Future saved-work metadata may also distinguish trigger/context, response, outcome, what helped, and what changed. The member should remain able to correct or ignore any suggested pattern.
+
+After structured history exists, the platform can build transparent 7-day, 30-day, and 90-day Flame Reviews.
 
 ## Privacy boundary
 
 A member account does **not** automatically mean private reflections should be uploaded.
 
-A useful product principle is:
-
 > **Your account can remember your journey without needing to read your journal.**
 
-Highly sensitive material should remain device-local by default, including:
+Highly sensitive material should remain device-local by default, including therapy/medical material, legal evidence or active-case material, private journals/source documents, and highly sensitive reflections unless a future secure-storage feature is deliberately chosen.
 
-- therapy or medical material
-- legal evidence / active-case material
-- private journals or source documents
-- highly sensitive Forge or pattern notes unless the member deliberately chooses a future secure-storage feature
-
-The current Pattern Map history prototype is device-local and explicitly opt-in. Future cloud history should require a deliberate sync choice, deletion controls, and clear explanation of what is stored.
+Future cloud history should require a deliberate sync choice, deletion controls, and clear explanation of what leaves the device.
 
 ## Video / learning strategy
-
-The preferred content model is:
 
 **website = organized learning home**
 
 **Discord = conversation / announcements / live community companion**
 
-Members should not have to search Discord history to find the official lesson, replay, worksheet, or course module.
-
-Large video files should not be stored directly in the GitHub repository. A dedicated video host should provide playback. Future protected member video should use a provider / delivery model that supports real access control or signed/private playback where appropriate.
-
-Possible member media collections:
-
-- Start Here / foundation videos
-- Path-stage lessons
-- recorded workshops and talks
-- replay library
-- founder updates
-- member-only releases
+Members should not have to search Discord history to find an official lesson, replay, worksheet, or course module. Large video files should not be stored directly in the GitHub repository. Future protected video should use a delivery model that supports real access control where appropriate.
 
 ## Storefront strategy
-
-`member-store.html` reserves the product experience for:
-
-- books / e-books
-- released workbooks and downloads
-- workshops and courses
-- special member releases
 
 The eventual commerce flow should be:
 
@@ -157,31 +167,12 @@ A storefront card is not security. Private manuscripts, paid courses, unreleased
 
 ## Community / discussion strategy
 
-The member platform reserves a Circle area for future discussion.
-
 A useful split is:
 
 - website: identity, structured prompts, official resources, program pages, event pages, account progress
 - Discord: fast conversation, live rooms, announcements, informal community interaction
 
-Potential spaces:
-
-- general member lounge
-- Path-stage circles
-- book/video/workshop discussion
-- live event circles and Q&A
-
-Before any real community launch, define:
-
-- community guidelines
-- moderation workflow
-- reporting and blocking
-- privacy defaults
-- age policy
-- crisis/safety boundaries
-- harassment and doxxing rules
-- limits on legal/medical advice
-- moderator visibility and permissions
+Before real community launch, define community guidelines, moderation workflow, reporting/blocking, privacy defaults, age policy, crisis/safety boundaries, harassment/doxxing rules, limits on legal/medical advice, and moderator visibility/permissions.
 
 ## Important security boundary
 
@@ -200,48 +191,22 @@ Required capabilities before live accounts:
 - authenticated session management
 - member profile persistence across devices
 - Row Level Security or equivalent member isolation
-- opt-in sync rules for appropriate progress/history data
+- opt-in sync rules for appropriate saved-work/progress data
 - member-only content/access checks
 - purchase entitlement storage
-- account deletion
-- appropriate account data export
+- account deletion and appropriate export
 - provider-specific privacy notice
 - admin/moderator roles separated from ordinary membership
 - abuse/rate limiting where appropriate
 - unauthorized-access and account-edge-case testing
 
-### Supabase bridge concept
-
-1. public Join/sign-in starts authentication
-2. Supabase Auth establishes the signed-in member
-3. the member service reads/writes only that member's permitted profile/progress under RLS
-4. the existing Flamewalker dashboard renders the returned state
-5. optional history sync is handled according to explicit privacy preferences
-6. protected media/store/library entitlements are checked before content is returned
-7. logout returns the person to a public/signed-out state
-
 A Supabase service-role/private secret must never be placed in browser JavaScript or committed to the repository.
 
 ## Member culture
 
-The Guardian Code applies to member spaces:
+The Guardian Code applies to member spaces: Trust, Honor, Respect, Honesty, Loyalty. These are conduct filters, not demands for obedience.
 
-- Trust
-- Honor
-- Respect
-- Honesty
-- Loyalty
-
-These are conduct filters, not demands for obedience.
-
-Avoid:
-
-- artificial rank/status pressure
-- shame-based engagement
-- manipulative streak mechanics
-- implying site participation is treatment
-- presenting unverified beliefs as fact
-- turning private conflict into community entertainment
+Avoid artificial rank/status pressure, shame-based engagement, manipulative streak mechanics, implying site participation is treatment, presenting unverified beliefs as fact, or turning private conflict into community entertainment.
 
 ## Current development rule
 

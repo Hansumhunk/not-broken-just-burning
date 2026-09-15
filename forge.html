@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Use the Not Broken Just Burning Forge to examine a difficult thought with evidence, patterns, and the Six Sacred Questions.">
+  <meta name="theme-color" content="#09090b">
+  <title>The Forge | Not Broken Just Burning</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="ember-field" aria-hidden="true"></div>
+  <header class="site-header">
+    <a class="brand" href="index.html"><span class="brand-mark">NBJB</span><span class="brand-name">Not Broken <span>Just Burning</span></span></a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation"><span></span><span></span><span></span></button>
+    <nav class="site-nav" id="site-nav" aria-label="Primary navigation">
+      <a href="path.html">The Path</a><a class="active" href="forge.html">The Forge</a><a href="fire.html">The Fire</a><a href="movement.html">The Movement</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-hero section-shell reveal">
+      <p class="eyebrow">The Forge</p>
+      <h1>Put the thought<br><span>under heat.</span></h1>
+      <p class="hero-lead">Strong emotions deserve respect, but they are not automatically evidence. Use the Forge to slow the thought down, test it, and rewrite it into something more accurate and useful.</p>
+      <div class="privacy-chip">🔒 Your answers stay in this browser. Nothing is submitted or saved by this site.</div>
+    </section>
+
+    <section class="forge-shell section-shell reveal" id="forge-tool">
+      <div class="forge-intro">
+        <p class="eyebrow">Step 1</p>
+        <h2>Name what is burning.</h2>
+        <label for="forge-thought">The thought I want to examine</label>
+        <textarea id="forge-thought" rows="4" placeholder="Example: I ruined everything. I will never trust anyone again. I am failing."></textarea>
+      </div>
+
+      <div class="forge-grid">
+        <label class="forge-field"><span>What do I actually know?</span><textarea data-forge="know" rows="5" placeholder="Facts I can verify..."></textarea></label>
+        <label class="forge-field"><span>What am I assuming?</span><textarea data-forge="assume" rows="5" placeholder="Interpretations, fears, predictions..."></textarea></label>
+        <label class="forge-field"><span>What evidence supports the thought?</span><textarea data-forge="support" rows="5" placeholder="Evidence for it..."></textarea></label>
+        <label class="forge-field"><span>What evidence challenges the thought?</span><textarea data-forge="challenge" rows="5" placeholder="Evidence against it or missing context..."></textarea></label>
+        <label class="forge-field"><span>What pattern am I seeing?</span><textarea data-forge="pattern" rows="5" placeholder="What repeats? What changed? What is actually connected?"></textarea></label>
+        <label class="forge-field"><span>What would I tell someone I love?</span><textarea data-forge="compassion" rows="5" placeholder="Use the same standards you would use for someone you care about..."></textarea></label>
+      </div>
+
+      <div class="six-questions forge-questions">
+        <p class="eyebrow">The Six Sacred Questions</p>
+        <p>Who is involved? What happened? When did it happen? Where did it happen? Why do I think it matters? How do I know?</p>
+      </div>
+
+      <div class="forge-final">
+        <label for="forge-rewrite">Forge the thought into its most accurate version</label>
+        <textarea id="forge-rewrite" rows="5" placeholder="Example: I made mistakes and I am still learning. Some things were outside my control. I can decide what I do next."></textarea>
+        <div class="forge-actions">
+          <button class="button button-primary" id="copy-forge" type="button">Copy My Forge Notes</button>
+          <button class="button button-ghost" id="clear-forge" type="button">Clear the Forge</button>
+          <span class="forge-status" id="forge-status" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="callout section-shell reveal">
+      <p class="eyebrow">A boundary worth keeping</p>
+      <h2>This is reflection, not crisis care.</h2>
+      <p>If a thought involves immediate danger, self-harm, harming someone else, or a medical emergency, use real-world emergency or professional support rather than trying to reason your way through it alone.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer section-shell"><div><strong>NOT BROKEN JUST BURNING</strong><p>Truth survives examination.</p></div><div class="footer-meta"><p>© <span id="year"></span> Not Broken Just Burning.</p><p class="disclaimer">Educational and personal-development content only. Not a substitute for professional medical, mental-health, legal, or emergency services.</p></div></footer>
+  <script src="js/main.js"></script>
+</body>
+</html>

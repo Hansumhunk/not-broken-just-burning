@@ -8,7 +8,7 @@ Build a public platform rooted in lived experience, emotional healing, spiritual
 
 ## Current version
 
-**Version 0.4 — Resources Foundation**
+**Version 0.5 — Deeper Tools & Content System**
 
 The project remains a lightweight static site using:
 
@@ -22,22 +22,27 @@ This keeps the site fast, understandable, inexpensive to host, and easy to evolv
 ## Public architecture
 
 ```text
-index.html        Home / platform gateway
-path.html         Six-stage actionable Flamewalker Path
-forge.html        Interactive private-in-browser reflection tool
-fire.html         Expandable Stories From the Fire reflections
-movement.html     Values, symbolism, founder, movement philosophy
-resources.html    Free reflection tools and resources hub
-BRAND.md          Visual identity, terminology, voice, and publishing rules
+index.html              Home / platform gateway
+path.html               Six-stage actionable Flamewalker Path
+forge.html              Evidence-based thought reflection tool
+fire.html               Stories From the Fire library
+movement.html           Values, symbolism, founder, movement philosophy
+resources.html          Free tools and resources hub
+pattern-map.html        Pattern/evidence/inference mapping tool
+check-in.html           Short daily Flame Check-In
+story-armor.html        Full long-form reflection
+story-boundaries.html   Full long-form reflection
+story-one-stone.html    Full long-form reflection
+BRAND.md                Visual identity, terminology, voice, publishing rules
 assets/
-  sigil.svg       Primary Eye + Flame vector mark
-  favicon.svg     Browser icon
+  sigil.svg             Primary Eye + Flame vector mark
+  favicon.svg           Browser icon
 css/
-  style.css       Shared responsive design system
-  brand.css       Brand identity layer
-  experience.css  Resource, accessibility, Path, and reflection styles
+  style.css             Shared responsive design system
+  brand.css             Brand identity layer
+  experience.css        Tools, long-form reading, accessibility, Path styles
 js/
-  main.js         Navigation, reveal effects, Forge, Boundary Builder, One Stone tools
+  main.js               Navigation and interactive tool behavior
 ```
 
 ## Brand system
@@ -70,9 +75,22 @@ Guardian is reserved as a future service and leadership identity grounded in emo
 5. Voice of Fire
 6. Circle of the Flame
 
-The Path is a map, not a hierarchy. V0.4 adds a starting-point selector and one practical reflection/action to each stage.
+The Path is a map, not a hierarchy. It includes a starting-point selector and one practical reflection/action at each stage.
 
 ## Free reflection tools
+
+### Flame Check-In
+
+A short repeatable snapshot built around:
+
+- body
+- emotion
+- thought
+- boundary
+- need
+- next action
+
+It is intentionally lighter than The Forge and intended for quick state awareness rather than deep analysis.
 
 ### The Forge
 
@@ -85,9 +103,24 @@ Examines difficult thoughts through:
 - the Six Sacred Questions: Who, What, When, Where, Why, How
 - a final rewritten or "forged" thought
 
+### Pattern Map
+
+Organizes:
+
+- an anchor event
+- what happened before
+- what happened after
+- what repeated
+- what changed
+- verifiable evidence
+- inference/assumption
+- a careful summary
+
+The tool explicitly warns that repetition does not by itself prove motive, intent, or cause.
+
 ### Boundary Builder
 
-Helps convert a vague sense that something is wrong into four clearer elements:
+Helps convert a vague sense that something is wrong into:
 
 - the behavior
 - the impact
@@ -104,9 +137,24 @@ Helps separate an overwhelming problem into:
 
 **Privacy design:** Current interactive entries are not submitted to a server or stored by the website. The tools run entirely in the visitor's browser and provide copy-to-clipboard functionality where appropriate.
 
-## Stories From the Fire
+## Content system
 
-V0.4 turns the story library into expandable reflections. Each short story now includes a deeper interpretation and a question the visitor can use for their own reflection.
+V0.5 begins converting short Stories From the Fire into full public reflections. The first long-form pieces are:
+
+- The Armor We Don't Need Forever
+- Boundaries Can Hurt
+- One Stone at a Time
+
+Each long-form reflection follows a reusable pattern:
+
+1. human experience / story theme
+2. grounded interpretation
+3. memorable anchor idea
+4. reflection question
+5. related NBJB tool or next action
+6. navigation back into the broader story library
+
+This creates the first repeatable **read → reflect → act** content loop.
 
 ## Accessibility direction
 

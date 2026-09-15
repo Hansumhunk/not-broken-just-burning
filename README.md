@@ -8,13 +8,14 @@ Build a public platform rooted in lived experience, emotional healing, spiritual
 
 ## Current version
 
-**Version 0.2 — Platform Foundation**
+**Version 0.3 — Visual Identity & Content Refinement**
 
 The project remains a lightweight static site using:
 
 - HTML
 - CSS
 - Vanilla JavaScript
+- SVG brand assets
 
 This keeps the site fast, understandable, inexpensive to host, and easy to evolve.
 
@@ -26,13 +27,39 @@ path.html         Six-stage Flamewalker Path
 forge.html        Interactive private-in-browser reflection tool
 fire.html         Stories From the Fire
 movement.html     Values, symbolism, founder, movement philosophy
+BRAND.md          Visual identity, terminology, voice, and publishing rules
+assets/
+  sigil.svg       Primary Eye + Flame vector mark
+  favicon.svg     Browser icon
 css/
   style.css       Shared responsive design system
+  brand.css       V0.3 brand identity layer
 js/
-  main.js         Navigation, reveal effects, Forge interactions
+  main.js         Navigation, reveal effects, brand loading, Forge interactions
 ```
 
-### The Path
+## Brand system
+
+The V0.3 identity is built around the **Eye + Flame** sigil:
+
+- Eye = witness, memory, accountability, discernment
+- Flame = transformation, heat, purification, surviving energy
+- Triangle = structure, discipline, direction
+- Radiance = clarity carried outward
+
+Primary movement phrase:
+
+**See clearly. Burn clean. Build deliberately.**
+
+### Flamewalker
+
+A Flamewalker is the movement identity for a person doing the work of reclamation. It is not a rank, diagnosis, religion, or membership requirement.
+
+### Guardian
+
+Guardian is reserved as a future service and leadership identity grounded in emotional discipline, dignity, boundaries, and the Guardian Code. The public site should not imply that formal Guardian training or certification currently exists until such programs are actually launched.
+
+## The Path
 
 1. Fire Reclamation
 2. The Guardian's Path
@@ -41,7 +68,9 @@ js/
 5. Voice of Fire
 6. Circle of the Flame
 
-### The Forge
+The path is a map, not a hierarchy.
+
+## The Forge
 
 The Forge is a reflection tool for examining difficult thoughts through:
 

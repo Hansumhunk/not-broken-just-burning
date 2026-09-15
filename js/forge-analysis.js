@@ -57,6 +57,10 @@
     };
   }
 
+  function hasMeaningfulContent(data = collect()) {
+    return Object.values(data).some((value) => String(value || '').trim());
+  }
+
   function saveDraft() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...collect(), savedAt: Date.now() }));
@@ -112,22 +116,22 @@
 
   function buildDraft(data) {
     const parts = [];
-    if (data.know) parts.push(`What I can verify right now is ${compact(data.know, 240)}`);
-    else parts.push('I do not yet have enough clearly stated facts to treat my first thought as a settled conclusion');
+    if (data.know) parts.push(`What I currently have in my facts box is ${compact(data.know, 240)}`);
+    else parts.push('I have not yet written enough concrete information to treat my first thought as a settled conclusion');
 
     if (data.support && data.challenge) {
-      parts.push('There is evidence that supports my concern, and there is also evidence or missing context that complicates it');
+      parts.push('There is information I entered that supports my concern, and there is also information or missing context that complicates it');
     } else if (data.support) {
-      parts.push('I have listed evidence that supports my concern, but I have not yet tested it against much counter-evidence or missing context');
+      parts.push('I have listed information that supports my concern, but I have not yet tested it against much counter-evidence or missing context');
     } else if (data.challenge) {
-      parts.push('I have identified evidence or context that challenges the harshest version of the thought');
+      parts.push('I have identified information or context that challenges the harshest version of the thought');
     }
 
     if (data.assume) parts.push(`I may also be assuming or predicting ${compact(data.assume, 220)}`);
     if (data.pattern) parts.push('I notice a possible pattern, but repetition alone does not prove motive, intent, or cause');
     if (data.compassion) parts.push(`Using the standard I would use for someone I care about, I would say: ${compact(data.compassion, 220)}`);
 
-    parts.push('I can keep what is verified, label what is still uncertain, and choose my next action from what is actually within my control');
+    parts.push('I can keep what I can support, label what is still uncertain, and choose my next action from what is actually within my control');
     return `${parts.join('. ')}.`.replace(/\.\./g, '.');
   }
 
@@ -146,18 +150,18 @@
     };
 
     const grounding = [];
-    if (!data.know) grounding.push('The verified-facts box is still empty. Before reaching a conclusion, name what a neutral observer could actually confirm.');
-    else grounding.push('You separated at least some verifiable information from the original thought. Keep that layer distinct from interpretation.');
+    if (!data.know) grounding.push('The facts box is still empty. Before reaching a conclusion, name what you currently understand to be directly observable or supportable.');
+    else grounding.push('You separated some information you currently regard as factual from the original thought. The Forge has not independently verified it, so keep that layer distinct from interpretation and revise it if better information appears.');
 
     if (counts.assumptions > Math.max(18, counts.facts * 1.5)) grounding.push('Your assumptions/predictions currently outweigh the facts you wrote down. That does not make them wrong; it means uncertainty is doing a lot of the work.');
     if (absolutes.length) grounding.push(`The original thought uses absolute language (${absolutes.slice(0, 4).join(', ')}). Test whether there are exceptions before treating the statement as total.`);
     if (predictions.length) grounding.push('Some language points toward the future. A prediction can guide preparation, but it is not the same thing as present evidence.');
 
     const evidence = [];
-    if (data.support && data.challenge) evidence.push('You gave the thought both supporting and challenging evidence. That is a healthier evidence test than building only one side.');
+    if (data.support && data.challenge) evidence.push('You gave the thought both supporting and challenging information. That is a healthier evidence test than building only one side.');
     if (data.support && !data.challenge) evidence.push('You listed support but no meaningful challenge yet. Ask what evidence, exception, or missing context could weaken your first conclusion.');
-    if (!data.support && data.challenge) evidence.push('The evidence you entered leans more toward challenging the original thought than supporting it. The first wording may be harsher than the current record supports.');
-    if (!data.support && !data.challenge) evidence.push('The evidence test is still thin. Add what supports the thought and what challenges it before asking the Forge for certainty.');
+    if (!data.support && data.challenge) evidence.push('What you entered leans more toward challenging the original thought than supporting it. The first wording may be harsher than the information you currently have supports.');
+    if (!data.support && !data.challenge) evidence.push('The evidence test is still thin. Add what supports the thought and what challenges it before asking the Forge for a more grounded draft.');
 
     const pattern = [];
     if (data.pattern) pattern.push('You identified a possible pattern. Treat it as a reason to ask better questions, not as automatic proof of cause or motive.');
@@ -174,7 +178,7 @@
       '<strong>When:</strong> What is the order, frequency, and relevant exception?',
       '<strong>Where:</strong> What context or environment could change the meaning?',
       '<strong>Why:</strong> Which explanation is supported, and which explanation is still a hypothesis?',
-      '<strong>How:</strong> What mechanism can you verify, and what can you actually do next?'
+      '<strong>How:</strong> What mechanism can you currently support, and what can you actually do next?'
     ];
 
     return {
@@ -203,7 +207,7 @@
           <h3>Evidence balance</h3>
           <p>This is a completeness check, not a truth score. More words do not make a claim more true.</p>
           <div class="forge-balance-meter">
-            <div class="forge-meter-cell"><strong>${result.counts.facts}</strong><span>fact words</span></div>
+            <div class="forge-meter-cell"><strong>${result.counts.facts}</strong><span>fact-box words</span></div>
             <div class="forge-meter-cell"><strong>${result.counts.assumptions}</strong><span>assumption words</span></div>
             <div class="forge-meter-cell"><strong>${result.counts.support}</strong><span>support words</span></div>
             <div class="forge-meter-cell"><strong>${result.counts.challenge}</strong><span>challenge words</span></div>
@@ -225,7 +229,8 @@
       </div>`;
 
     output.hidden = false;
-    output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    output.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
 
     document.querySelector('#use-forge-draft-inline')?.addEventListener('click', () => {
       rewrite.value = result.draft;
@@ -235,8 +240,7 @@
     });
   }
 
-  function buildNotes() {
-    const data = collect();
+  function buildNotes(data = collect()) {
     const result = analyze(data);
     const sections = [
       'NOT BROKEN JUST BURNING — THE FORGE', '',
@@ -260,7 +264,7 @@
 
   analyzeButton.addEventListener('click', () => {
     const data = collect();
-    if (!data.thought && !data.know && !data.assume && !data.support && !data.challenge && !data.pattern && !data.compassion) {
+    if (!hasMeaningfulContent({ ...data, rewrite: '' })) {
       flash('Add something to the Forge before analyzing it.');
       thought.focus();
       return;
@@ -270,11 +274,27 @@
   });
 
   copyButton?.addEventListener('click', async () => {
-    const copied = await copyText(buildNotes());
+    const data = collect();
+    if (!hasMeaningfulContent(data)) {
+      flash('Add something to the Forge before copying notes.');
+      thought.focus();
+      return;
+    }
+    const copied = await copyText(buildNotes(data));
     flash(copied ? 'Forge notes and analysis copied.' : 'Copy failed.');
   });
 
   clearButton?.addEventListener('click', () => {
+    let hasSavedDraft = false;
+    try { hasSavedDraft = Boolean(localStorage.getItem(STORAGE_KEY)); } catch (error) { /* ignore */ }
+
+    if ((hasMeaningfulContent() || hasSavedDraft || !output.hidden)
+      && !window.confirm('Clear this Forge from this device? This removes the current fields, analysis, and locally saved draft.')) {
+      flash('Clear cancelled. Your Forge is still here.');
+      return;
+    }
+
+    clearTimeout(saveTimer);
     thought.value = '';
     rewrite.value = '';
     fields.forEach((field) => { field.value = ''; });
@@ -288,6 +308,11 @@
 
   useDraftButton?.addEventListener('click', () => {
     const data = collect();
+    if (!hasMeaningfulContent({ ...data, rewrite: '' })) {
+      flash('Add something to the Forge before building a forged version.');
+      thought.focus();
+      return;
+    }
     const result = analyze(data);
     rewrite.value = result.draft;
     saveDraft();

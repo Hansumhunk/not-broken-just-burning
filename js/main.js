@@ -1,3 +1,15 @@
+// V0.3 brand layer: load shared visual identity assets across every page.
+const brandStylesheet = document.createElement('link');
+brandStylesheet.rel = 'stylesheet';
+brandStylesheet.href = 'css/brand.css';
+document.head.appendChild(brandStylesheet);
+
+const favicon = document.createElement('link');
+favicon.rel = 'icon';
+favicon.type = 'image/svg+xml';
+favicon.href = 'assets/favicon.svg';
+document.head.appendChild(favicon);
+
 const navToggle = document.querySelector('.nav-toggle');
 const siteNav = document.querySelector('.site-nav');
 const navLinks = document.querySelectorAll('.site-nav a');

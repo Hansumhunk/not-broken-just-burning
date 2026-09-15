@@ -2,7 +2,10 @@ name: Validate static site
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - development
+      - 'staging/**'
     paths:
       - '**.html'
       - 'css/**'
@@ -38,5 +41,5 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Validate site structure, links, and launch wiring
+      - name: Validate structure, navigation, links, SEO, accessibility basics, and launch wiring
         run: python scripts/validate_site.py

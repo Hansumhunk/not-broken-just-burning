@@ -8,7 +8,7 @@ Build a public platform rooted in lived experience, emotional healing, spiritual
 
 ## Current version
 
-**Version 0.3 — Visual Identity & Content Refinement**
+**Version 0.4 — Resources Foundation**
 
 The project remains a lightweight static site using:
 
@@ -23,24 +23,26 @@ This keeps the site fast, understandable, inexpensive to host, and easy to evolv
 
 ```text
 index.html        Home / platform gateway
-path.html         Six-stage Flamewalker Path
+path.html         Six-stage actionable Flamewalker Path
 forge.html        Interactive private-in-browser reflection tool
-fire.html         Stories From the Fire
+fire.html         Expandable Stories From the Fire reflections
 movement.html     Values, symbolism, founder, movement philosophy
+resources.html    Free reflection tools and resources hub
 BRAND.md          Visual identity, terminology, voice, and publishing rules
 assets/
   sigil.svg       Primary Eye + Flame vector mark
   favicon.svg     Browser icon
 css/
   style.css       Shared responsive design system
-  brand.css       V0.3 brand identity layer
+  brand.css       Brand identity layer
+  experience.css  Resource, accessibility, Path, and reflection styles
 js/
-  main.js         Navigation, reveal effects, brand loading, Forge interactions
+  main.js         Navigation, reveal effects, Forge, Boundary Builder, One Stone tools
 ```
 
 ## Brand system
 
-The V0.3 identity is built around the **Eye + Flame** sigil:
+The identity is built around the **Eye + Flame** sigil:
 
 - Eye = witness, memory, accountability, discernment
 - Flame = transformation, heat, purification, surviving energy
@@ -68,11 +70,13 @@ Guardian is reserved as a future service and leadership identity grounded in emo
 5. Voice of Fire
 6. Circle of the Flame
 
-The path is a map, not a hierarchy.
+The Path is a map, not a hierarchy. V0.4 adds a starting-point selector and one practical reflection/action to each stage.
 
-## The Forge
+## Free reflection tools
 
-The Forge is a reflection tool for examining difficult thoughts through:
+### The Forge
+
+Examines difficult thoughts through:
 
 - fact versus assumption
 - evidence for and against
@@ -81,7 +85,41 @@ The Forge is a reflection tool for examining difficult thoughts through:
 - the Six Sacred Questions: Who, What, When, Where, Why, How
 - a final rewritten or "forged" thought
 
-**Privacy design:** Forge entries are not submitted to a server or stored by the website. The current implementation runs entirely in the visitor's browser and provides a copy-to-clipboard function.
+### Boundary Builder
+
+Helps convert a vague sense that something is wrong into four clearer elements:
+
+- the behavior
+- the impact
+- the boundary
+- the action the user controls if the behavior continues
+
+### One Stone Planner
+
+Helps separate an overwhelming problem into:
+
+- the larger mountain
+- one realistic action to take now
+- what can intentionally wait
+
+**Privacy design:** Current interactive entries are not submitted to a server or stored by the website. The tools run entirely in the visitor's browser and provide copy-to-clipboard functionality where appropriate.
+
+## Stories From the Fire
+
+V0.4 turns the story library into expandable reflections. Each short story now includes a deeper interpretation and a question the visitor can use for their own reflection.
+
+## Accessibility direction
+
+Current accessibility work includes:
+
+- skip-to-content links
+- keyboard-friendly navigation
+- Escape-key mobile-menu closing
+- visible focus-compatible interactive elements
+- reduced-motion support
+- semantic labels and live status text for interactive tools
+
+Accessibility should continue to be checked as new features are added.
 
 ## Publishing guardrails
 

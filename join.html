@@ -20,6 +20,24 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/brand.css">
   <link rel="stylesheet" href="css/experience.css">
+  <style>
+    .mobile-member-entry { display: none; }
+    @media (max-width: 700px) {
+      .member-entry-actions { display: grid; grid-template-columns: 1fr; width: 100%; }
+      .member-entry-actions .button { width: 100%; min-height: 56px; padding: 0 20px; text-align: center; }
+      .mobile-member-entry {
+        display: block;
+        width: min(calc(100% - 28px), var(--max));
+        margin: 0 auto 28px;
+        padding: 22px;
+        border: 1px solid var(--line-hot);
+        border-radius: 18px;
+        background: linear-gradient(145deg, rgba(255,122,45,.09), rgba(255,255,255,.018));
+      }
+      .mobile-member-entry p { margin: 0 0 14px; color: var(--muted); }
+      .mobile-member-entry .button { width: 100%; min-height: 58px; }
+    }
+  </style>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -37,7 +55,13 @@
       <p class="eyebrow">Join the Movement</p>
       <h1>You do not need permission<br><span>to start rebuilding.</span></h1>
       <p class="hero-lead">Joining Not Broken Just Burning is not a membership fee, a diagnosis, a loyalty test, or an oath to another human being. It means choosing to practice clarity, accountability, boundaries, voice, and deliberate rebuilding in your own life.</p>
-      <div class="hero-actions"><a class="button button-primary" href="members.html">Enter the Flamewalker Hub</a><a class="button button-ghost" href="path.html">Walk the Path</a></div>
+      <div class="hero-actions member-entry-actions"><a class="button button-primary" href="members.html">Start My Flamewalker Profile</a><a class="button button-ghost" href="path.html">Walk the Path</a></div>
+    </section>
+
+    <section class="mobile-member-entry" aria-label="Start Flamewalker profile">
+      <p class="eyebrow">Ready to begin?</p>
+      <p>Open the Flamewalker Hub to enter your basic information, choose your current Path focus, and set one next honest action.</p>
+      <a class="button button-primary" href="members.html">Start My Flamewalker Profile</a>
     </section>
 
     <section class="section-shell join-grid" aria-label="Ways to participate">
@@ -70,7 +94,7 @@
       <div>
         <p>The first Flamewalker Hub works without requiring an account. It keeps a lightweight member snapshot on the visitor's own device so the movement has somewhere to return to besides a marketing page.</p>
         <p>Secure login, cross-device profiles, member-only content, account deletion/export, and community features require a real backend and will be added only with clear privacy rules and moderation boundaries. Private reflection content will not automatically become server data simply because accounts exist.</p>
-        <div class="hero-actions"><a class="button button-primary" href="members.html">Enter Member Hub</a><a class="button button-ghost" href="privacy.html">Read Privacy & Data Use</a></div>
+        <div class="hero-actions member-entry-actions"><a class="button button-primary" href="members.html">Start My Flamewalker Profile</a><a class="button button-ghost" href="privacy.html">Read Privacy & Data Use</a></div>
       </div>
     </section>
 

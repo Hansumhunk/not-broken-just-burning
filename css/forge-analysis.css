@@ -1,0 +1,120 @@
+.forge-analysis-intro {
+  margin-top: 34px;
+  padding: 28px;
+  border: 1px solid rgba(255,122,45,0.34);
+  border-radius: 20px;
+  background: linear-gradient(145deg, rgba(255,122,45,0.08), rgba(255,255,255,0.015));
+}
+
+.forge-analysis-intro h2 { margin-bottom: 10px; }
+.forge-analysis-intro p { color: var(--muted); }
+.forge-analysis-intro .privacy-chip { margin-top: 16px; }
+
+.forge-analyze-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 18px;
+}
+
+.forge-save-status {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.forge-analysis-output {
+  margin-top: 28px;
+  padding: 34px;
+  border: 1px solid var(--line-hot);
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(255,122,45,0.07), transparent 38%), #0d0d10;
+}
+
+.forge-analysis-output[hidden] { display: none; }
+.forge-analysis-output h2 { margin-bottom: 8px; }
+.forge-analysis-output > p { color: var(--muted); }
+
+.forge-analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.forge-analysis-card {
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255,255,255,0.018);
+}
+
+.forge-analysis-card h3 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  color: var(--ember-pale);
+}
+
+.forge-analysis-card p,
+.forge-analysis-card li {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.forge-analysis-card ul { margin: 0; padding-left: 19px; }
+.forge-analysis-card li + li { margin-top: 8px; }
+
+.forge-analysis-card.full { grid-column: 1 / -1; }
+
+.forge-balance-meter {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.forge-meter-cell {
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  text-align: center;
+  background: rgba(255,255,255,0.015);
+}
+.forge-meter-cell strong { display: block; color: var(--text); font-size: 1.05rem; }
+.forge-meter-cell span { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; }
+
+.forge-draft {
+  margin-top: 12px;
+  padding: 18px;
+  border-left: 3px solid var(--ember-bright);
+  border-radius: 0 14px 14px 0;
+  background: rgba(255,122,45,0.055);
+  color: var(--text);
+  line-height: 1.7;
+}
+
+.forge-caution {
+  margin-top: 20px;
+  padding: 18px 20px;
+  border: 1px solid rgba(255,122,45,0.42);
+  border-radius: 14px;
+  background: rgba(255,122,45,0.08);
+}
+.forge-caution strong { color: var(--ember-pale); }
+.forge-caution p { margin: 8px 0 0; color: var(--muted); }
+
+.forge-analysis-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+@media (max-width: 760px) {
+  .forge-analysis-grid { grid-template-columns: 1fr; }
+  .forge-analysis-card.full { grid-column: auto; }
+  .forge-balance-meter { grid-template-columns: repeat(2, 1fr); }
+  .forge-analysis-output { padding: 26px 20px; }
+  .forge-analyze-actions .button,
+  .forge-analysis-actions .button { width: 100%; justify-content: center; }
+}

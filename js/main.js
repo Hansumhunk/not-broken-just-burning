@@ -78,6 +78,18 @@ if (!document.querySelector('meta[name="twitter:card"]')) {
   document.head.appendChild(twitterCard);
 }
 
+// Primary navigation layer: Founder is a first-class public route, not a buried subpage.
+if (siteNav && !siteNav.querySelector('a[href="founder.html"]')) {
+  const founderLink = document.createElement('a');
+  founderLink.href = 'founder.html';
+  founderLink.textContent = 'Founder';
+  if (currentPage === 'founder.html') founderLink.classList.add('active');
+
+  const existingJoin = siteNav.querySelector('a[href="join.html"]');
+  if (existingJoin) siteNav.insertBefore(founderLink, existingJoin);
+  else siteNav.appendChild(founderLink);
+}
+
 // V0.6 engagement layer: expose Join from every existing page without rewriting every header.
 if (siteNav && !siteNav.querySelector('a[href="join.html"]')) {
   const joinLink = document.createElement('a');

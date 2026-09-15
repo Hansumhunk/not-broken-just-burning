@@ -223,3 +223,128 @@ document.querySelector('#clear-stone')?.addEventListener('click', () => {
   flashStatus(stoneStatus, 'Planner cleared.');
   stoneMountain?.focus();
 });
+
+// PATTERN MAP: organizes repetition while explicitly separating evidence from inference.
+const patternEvent = document.querySelector('#pattern-event');
+const patternFields = document.querySelectorAll('[data-pattern]');
+const patternSummary = document.querySelector('#pattern-summary');
+const patternStatus = document.querySelector('#pattern-status');
+
+function patternValue(name) {
+  return document.querySelector(`[data-pattern="${name}"]`)?.value.trim() || '';
+}
+
+function buildPatternSummary() {
+  const repeated = patternValue('repeat');
+  const evidence = patternValue('evidence');
+  const inference = patternValue('inference');
+  const changed = patternValue('changed');
+  const pieces = [];
+
+  if (repeated) pieces.push(`I notice this repetition: ${repeated}`);
+  if (evidence) pieces.push(`What I can verify: ${evidence}`);
+  if (inference) pieces.push(`What I am still inferring: ${inference}`);
+  if (changed) pieces.push(`Important differences or exceptions: ${changed}`);
+
+  if (!pieces.length) return '';
+  return `${pieces.join('. ')}. This pattern may be worth examining, but repetition by itself does not prove motive or cause.`;
+}
+
+function buildPatternNotes() {
+  const labels = {
+    before: 'What happened before',
+    after: 'What happened after',
+    repeat: 'What has repeated',
+    changed: 'What is different this time',
+    evidence: 'What I can verify',
+    inference: 'What I am inferring'
+  };
+  const sections = [
+    'NOT BROKEN JUST BURNING — PATTERN MAP', '',
+    `ANCHOR EVENT\n${patternEvent?.value.trim() || '(blank)'}`, ''
+  ];
+
+  patternFields.forEach((field) => {
+    sections.push(`${labels[field.dataset.pattern]}\n${field.value.trim() || '(blank)'}`, '');
+  });
+
+  sections.push(
+    `CAREFUL SUMMARY\n${patternSummary?.value.trim() || buildPatternSummary() || '(blank)'}`, '',
+    'Reminder: a pattern can guide questions and verification. It does not by itself prove motive, intent, or cause.'
+  );
+  return sections.join('\n');
+}
+
+document.querySelector('#build-pattern')?.addEventListener('click', () => {
+  const summary = buildPatternSummary();
+  if (!summary) return flashStatus(patternStatus, 'Add some repetition, evidence, inference, or differences first.');
+  if (patternSummary && !patternSummary.value.trim()) patternSummary.value = summary;
+  flashStatus(patternStatus, 'Pattern notes organized.');
+});
+
+document.querySelector('#copy-pattern')?.addEventListener('click', async () => {
+  const hasContent = patternEvent?.value.trim() || Array.from(patternFields).some((field) => field.value.trim()) || patternSummary?.value.trim();
+  if (!hasContent) return flashStatus(patternStatus, 'Add something to the map first.');
+  flashStatus(patternStatus, await copyText(buildPatternNotes()) ? 'Pattern notes copied.' : 'Copy failed.');
+});
+
+document.querySelector('#clear-pattern')?.addEventListener('click', () => {
+  if (patternEvent) patternEvent.value = '';
+  if (patternSummary) patternSummary.value = '';
+  patternFields.forEach((field) => { field.value = ''; });
+  flashStatus(patternStatus, 'Pattern Map cleared.');
+  patternEvent?.focus();
+});
+
+// FLAME CHECK-IN: a short daily state snapshot, intentionally lighter than The Forge.
+const checkinFields = document.querySelectorAll('[data-checkin]');
+const checkinPreview = document.querySelector('#checkin-preview');
+const checkinStatus = document.querySelector('#checkin-status');
+
+function checkinValue(name) {
+  return document.querySelector(`[data-checkin="${name}"]`)?.value.trim() || '';
+}
+
+function buildCheckinText() {
+  const labels = {
+    body: 'BODY',
+    emotion: 'EMOTION',
+    thought: 'THOUGHT',
+    boundary: 'BOUNDARY',
+    need: 'NEED',
+    next: 'NEXT ACTION'
+  };
+  const sections = ['NOT BROKEN JUST BURNING — FLAME CHECK-IN', new Date().toLocaleString(), ''];
+  checkinFields.forEach((field) => {
+    if (field.value.trim()) sections.push(`${labels[field.dataset.checkin]}: ${field.value.trim()}`);
+  });
+  sections.push('', 'Personal reflection only. Not medical, mental-health, legal, or emergency advice.');
+  return sections.join('\n');
+}
+
+document.querySelector('#build-checkin')?.addEventListener('click', () => {
+  const emotion = checkinValue('emotion');
+  const need = checkinValue('need');
+  const next = checkinValue('next');
+  const body = checkinValue('body');
+  const parts = [];
+  if (body) parts.push(`Body: ${body}`);
+  if (emotion) parts.push(`Emotion: ${emotion}`);
+  if (need) parts.push(`Need: ${need}`);
+  if (next) parts.push(`Next: ${next}`);
+  if (checkinPreview) checkinPreview.textContent = parts.length ? parts.join(' • ') : 'Add whatever is useful. You do not need to complete every field.';
+  flashStatus(checkinStatus, parts.length ? 'Check-in built.' : 'No problem. Blank is data too.');
+});
+
+document.querySelector('#copy-checkin')?.addEventListener('click', async () => {
+  const hasContent = Array.from(checkinFields).some((field) => field.value.trim());
+  if (!hasContent) return flashStatus(checkinStatus, 'Add at least one check-in item first.');
+  flashStatus(checkinStatus, await copyText(buildCheckinText()) ? 'Check-in copied.' : 'Copy failed.');
+});
+
+document.querySelector('#clear-checkin')?.addEventListener('click', () => {
+  checkinFields.forEach((field) => { field.value = ''; });
+  if (checkinPreview) checkinPreview.textContent = 'Fill in what matters. Blank fields are allowed. Humans are not forms to be completed at 100%.';
+  flashStatus(checkinStatus, 'Check-in cleared.');
+  checkinFields[0]?.focus();
+});

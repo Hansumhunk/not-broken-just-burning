@@ -34,14 +34,21 @@ const navLinks = document.querySelectorAll('.site-nav a');
 
 if (year) year.textContent = new Date().getFullYear();
 
-// Add permanent support/privacy routes to legacy footers.
+// Permanent public routes: Contact, Support & Safety, and Privacy & Data Use.
 const footerMeta = document.querySelector('.footer-meta');
-if (footerMeta && !footerMeta.querySelector('a[href="support.html"]')) {
-  const legalLinks = document.createElement('p');
-  legalLinks.className = 'footer-links';
-  legalLinks.innerHTML = '<a href="support.html">Support &amp; Safety</a> · <a href="privacy.html">Privacy &amp; Data Use</a>';
-  const disclaimer = footerMeta.querySelector('.disclaimer');
-  footerMeta.insertBefore(legalLinks, disclaimer || null);
+if (footerMeta) {
+  let footerLinks = footerMeta.querySelector('.footer-links');
+  if (!footerLinks) {
+    const existingSupport = footerMeta.querySelector('a[href="support.html"]');
+    footerLinks = existingSupport?.closest('p') || null;
+  }
+  if (!footerLinks) {
+    footerLinks = document.createElement('p');
+    const disclaimer = footerMeta.querySelector('.disclaimer');
+    footerMeta.insertBefore(footerLinks, disclaimer || null);
+  }
+  footerLinks.classList.add('footer-links');
+  footerLinks.innerHTML = '<a href="contact.html">Contact</a> · <a href="support.html">Support &amp; Safety</a> · <a href="privacy.html">Privacy &amp; Data Use</a>';
 }
 
 function closeNavigation() {

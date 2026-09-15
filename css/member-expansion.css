@@ -1,0 +1,148 @@
+.member-expansion-grid,
+.member-commerce-grid,
+.member-community-grid,
+.member-media-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.member-expansion-card,
+.member-commerce-card,
+.member-community-card,
+.member-media-card,
+.member-history-card,
+.member-insight-panel {
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: linear-gradient(150deg, rgba(255,255,255,.025), rgba(255,255,255,.012));
+}
+
+.member-expansion-card h3,
+.member-commerce-card h3,
+.member-community-card h3,
+.member-media-card h3,
+.member-history-card h3,
+.member-insight-panel h3 { margin: 10px 0 8px; }
+
+.member-expansion-card p,
+.member-commerce-card p,
+.member-community-card p,
+.member-media-card p,
+.member-history-card p,
+.member-insight-panel p { color: var(--muted); }
+
+.member-expansion-card > span,
+.member-commerce-card > span,
+.member-community-card > span,
+.member-media-card > span,
+.member-lock-badge {
+  color: var(--ember-bright);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.member-lock-badge {
+  display: inline-flex;
+  padding: 7px 10px;
+  border: 1px solid var(--line-hot);
+  border-radius: 999px;
+  background: rgba(255,122,45,.055);
+}
+
+.member-history-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.member-history-stat {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255,255,255,.018);
+}
+.member-history-stat span { display: block; color: var(--muted); font-size: .82rem; }
+.member-history-stat strong { display: block; margin-top: 8px; font-size: 1.5rem; color: var(--text); }
+
+.member-history-list { display: grid; gap: 14px; }
+.member-history-top { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; }
+.member-history-top strong { color: var(--ember-pale); }
+.member-history-top span { color: var(--muted); font-size: .8rem; }
+.member-history-remove {
+  margin-top: 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+.member-history-remove:hover,
+.member-history-remove:focus-visible { color: var(--text); border-color: var(--line-hot); }
+.member-empty-state { padding: 24px; border: 1px dashed var(--line); border-radius: 16px; color: var(--muted); }
+
+.member-insight-panel { border-color: var(--line-hot); background: linear-gradient(145deg, rgba(255,122,45,.07), rgba(255,255,255,.012)); }
+.member-insight-caution { margin-top: 14px; font-size: .9rem; }
+
+.member-history-optin {
+  margin-top: 26px;
+  padding: 22px;
+  border: 1px solid var(--line-hot);
+  border-radius: 18px;
+  background: rgba(255,122,45,.045);
+}
+.member-history-optin label { display: flex; gap: 10px; align-items: flex-start; color: var(--muted); }
+.member-history-optin input { margin-top: 4px; accent-color: var(--ember-bright); }
+.member-history-optin .forge-actions { margin-top: 16px; }
+
+.member-video-placeholder {
+  aspect-ratio: 16 / 9;
+  display: grid;
+  place-items: center;
+  margin-bottom: 16px;
+  border: 1px dashed var(--line-hot);
+  border-radius: 16px;
+  background: radial-gradient(circle at 50% 50%, rgba(255,122,45,.11), rgba(255,255,255,.01) 58%);
+  color: var(--ember-pale);
+  font-weight: 800;
+  text-align: center;
+  padding: 18px;
+}
+
+.member-commerce-card button,
+.member-community-card button,
+.member-media-card button {
+  margin-top: 12px;
+}
+
+.member-commerce-card button[disabled],
+.member-community-card button[disabled],
+.member-media-card button[disabled] {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.member-platform-note {
+  margin: 26px 0;
+  padding: 22px;
+  border-left: 3px solid var(--ember-bright);
+  border-radius: 0 14px 14px 0;
+  background: rgba(255,122,45,.045);
+}
+.member-platform-note p { margin: 0; color: var(--muted); }
+.member-platform-note p + p { margin-top: 10px; }
+
+@media (max-width: 820px) {
+  .member-expansion-grid,
+  .member-commerce-grid,
+  .member-community-grid,
+  .member-media-grid,
+  .member-history-summary { grid-template-columns: 1fr; }
+  .member-history-top { flex-direction: column; gap: 4px; }
+}

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="Development prototype of the Flamewalker progress and saved member-history view."><meta name="theme-color" content="#09090b">
+  <title>My Progress | Flamewalker Platform</title><link rel="canonical" href="https://notbrokenjustburning.com/member-progress.html"><link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/brand.css"><link rel="stylesheet" href="css/experience.css"><link rel="stylesheet" href="css/members.css"><link rel="stylesheet" href="css/member-expansion.css">
+</head>
+<body data-member-page="progress">
+  <a class="skip-link" href="#main-content">Skip to content</a><div class="ember-field" aria-hidden="true"></div>
+  <header class="site-header"><a class="brand" href="index.html" aria-label="Not Broken Just Burning home"><span class="brand-mark" aria-hidden="true"></span><span class="brand-name">Not Broken <span>Just Burning</span></span></a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation"><span></span><span></span><span></span></button><nav class="site-nav" id="site-nav" aria-label="Primary navigation"><a href="path.html">The Path</a><a href="forge.html">The Forge</a><a href="fire.html">The Fire</a><a href="movement.html">The Movement</a><a href="resources.html">Resources</a><a class="nav-join" href="join.html">Join</a></nav></header>
+  <main id="main-content">
+    <section class="page-hero section-shell reveal"><p class="eyebrow">Flamewalker Platform · Progress</p><h1>See what repeats.<br><span>Keep interpretation honest.</span></h1><p class="hero-lead">This prototype can track deliberately saved member-tool history on this device so you can compare reflections over time without pretending repetition automatically proves a conclusion.</p></section>
+    <section class="member-shell" aria-label="Member platform navigation"><div class="member-shell-copy"><strong>Flamewalker Hub</strong><span>Device-local development prototype</span></div><nav class="member-subnav"><a data-member-nav="dashboard" href="members.html">Dashboard</a><a data-member-nav="path" href="member-path.html">My Path</a><a data-member-nav="tools" href="member-tools.html">Tools</a><a data-member-nav="library" href="member-library.html">Library</a><a data-member-nav="profile" href="member-profile.html">Profile</a><a data-member-nav="settings" href="member-settings.html">Settings</a><a class="member-exit" href="index.html">Exit to site</a></nav></section>
+
+    <section class="section-shell member-panel reveal">
+      <p class="eyebrow">Saved activity</p><h2>History should help you compare, not grade yourself.</h2>
+      <div class="member-history-summary"><article class="member-history-stat"><span>Saved tool entries</span><strong data-activity-count>0</strong></article><article class="member-history-stat"><span>Saved Pattern Maps</span><strong data-pattern-count>0</strong></article><article class="member-history-stat"><span>Last saved activity</span><strong data-last-activity>No saved activity yet</strong></article></div>
+      <div class="member-actions"><a class="button button-primary" href="member-tools.html">Open the Toolbox</a><button class="button button-ghost" id="clear-member-activity" type="button">Clear Saved Tool History</button><span class="member-status-line" data-member-status role="status" aria-live="polite"></span></div>
+    </section>
+
+    <section class="section-shell member-panel reveal"><p class="eyebrow">Pattern history</p><h2>Five entries can become a longitudinal review.</h2><div class="member-insight-panel" id="pattern-longitudinal-review"><h3>Build enough history to compare over time.</h3><p>Save Pattern Maps intentionally from the Pattern Map tool.</p></div></section>
+
+    <section class="section-shell member-panel reveal"><p class="eyebrow">Timeline</p><h2>What have I intentionally saved?</h2><div class="member-history-list" id="member-history-list"></div></section>
+
+    <section class="section-shell member-panel reveal"><p class="eyebrow">Privacy boundary</p><h2>Saving history is explicit.</h2><p>Opening a tool does not automatically copy private writing into member history. A reflection is added only when the tool offers a clear Save to My History action and you choose it. This prototype stores that history only on this device.</p><div class="member-platform-note"><p><strong>Future cloud design:</strong> member history should require a deliberate sync choice, deletion controls, and clear separation from highly sensitive therapy, medical, legal, or private journal material.</p></div></section>
+  </main>
+  <footer class="site-footer section-shell"><div><strong>NOT BROKEN JUST BURNING</strong><p>Track the work without turning it into a verdict.</p></div><div class="footer-meta"><p>Development-only member experience.</p><p class="footer-links"><a href="support.html">Support & Safety</a> · <a href="privacy.html">Privacy & Data Use</a></p></div></footer>
+  <script src="js/main.js"></script><script src="js/member-service.js"></script><script src="js/member-platform.js"></script>
+</body>
+</html>

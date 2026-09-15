@@ -19,6 +19,26 @@
     });
   }
 
+  function ensureMemberNav() {
+    const nav = document.querySelector('.member-subnav');
+    if (!nav) return;
+    const additions = [
+      ['progress', 'member-progress.html', 'Progress'],
+      ['watch', 'member-media.html', 'Watch'],
+      ['store', 'member-store.html', 'Store'],
+      ['community', 'member-community.html', 'Circle']
+    ];
+    const profileLink = nav.querySelector('[data-member-nav="profile"]');
+    additions.forEach(([key, href, label]) => {
+      if (nav.querySelector(`[data-member-nav="${key}"]`)) return;
+      const link = document.createElement('a');
+      link.dataset.memberNav = key;
+      link.href = href;
+      link.textContent = label;
+      nav.insertBefore(link, profileLink || nav.querySelector('.member-exit') || null);
+    });
+  }
+
   function progressPercent(data = service.load()) {
     const weights = { 'not-started': 0, 'in-progress': 0.5, practicing: 1 };
     const values = service.stages.map((stage) => weights[data.journey.progress[stage]] ?? 0);
@@ -62,6 +82,86 @@
     return Promise.resolve(copied);
   }
 
+  function formatDate(timestamp) {
+    if (!timestamp) return 'No activity yet';
+    return new Date(timestamp).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+  }
+
+  function repeatedPatternTerms(entries) {
+    const stop = new Set(['this','that','with','from','have','what','when','where','which','were','been','they','them','their','then','than','into','about','because','could','would','should','there','here','just','really','very','more','some','same','also','still','only','does','did','doing','after','before','again','pattern','notice','noticed','verify','evidence','inference','summary']);
+    const counts = new Map();
+    entries.forEach((entry) => {
+      const source = [entry.summary, entry.data?.repeat, entry.data?.event, entry.data?.changed].filter(Boolean).join(' ').toLowerCase();
+      const words = new Set((source.match(/[a-z0-9']+/g) || []).filter((word) => word.length >= 4 && !stop.has(word)));
+      words.forEach((word) => counts.set(word, (counts.get(word) || 0) + 1));
+    });
+    return [...counts.entries()].filter(([, count]) => count >= 2).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 8);
+  }
+
+  function renderProgressHistory() {
+    const entries = service.listEntries();
+    const patternEntries = service.listEntries('Pattern Map');
+    fillText('[data-activity-count]', String(entries.length), '0');
+    fillText('[data-pattern-count]', String(patternEntries.length), '0');
+    fillText('[data-last-activity]', entries[0] ? formatDate(entries[0].createdAt) : '', 'No saved activity yet');
+
+    const history = document.querySelector('#member-history-list');
+    if (history) {
+      history.replaceChildren();
+      if (!entries.length) {
+        const empty = document.createElement('p');
+        empty.className = 'member-empty-state';
+        empty.textContent = 'Nothing has been saved to member history on this device yet. Tool history appears only when you explicitly choose to save it.';
+        history.appendChild(empty);
+      } else {
+        entries.slice(0, 20).forEach((entry) => {
+          const card = document.createElement('article');
+          card.className = 'member-history-card';
+          const top = document.createElement('div');
+          top.className = 'member-history-top';
+          const tool = document.createElement('strong');
+          tool.textContent = entry.tool;
+          const date = document.createElement('span');
+          date.textContent = formatDate(entry.createdAt);
+          top.append(tool, date);
+          const title = document.createElement('h3');
+          title.textContent = entry.title || 'Saved reflection';
+          const summary = document.createElement('p');
+          summary.textContent = entry.summary || 'No summary saved.';
+          const remove = document.createElement('button');
+          remove.type = 'button';
+          remove.className = 'member-history-remove';
+          remove.dataset.deleteEntry = entry.id;
+          remove.textContent = 'Remove from this device';
+          card.append(top, title, summary, remove);
+          history.appendChild(card);
+        });
+      }
+    }
+
+    const review = document.querySelector('#pattern-longitudinal-review');
+    if (review) {
+      review.replaceChildren();
+      const heading = document.createElement('h3');
+      heading.textContent = patternEntries.length >= 5 ? 'Longitudinal review is ready.' : 'Build enough history to compare over time.';
+      const body = document.createElement('p');
+      if (!patternEntries.length) {
+        body.textContent = 'Save Pattern Maps intentionally from the Pattern Map tool. Nothing is imported automatically.';
+      } else if (patternEntries.length < 5) {
+        body.textContent = `You have ${patternEntries.length} saved Pattern Map${patternEntries.length === 1 ? '' : 's'}. Five or more gives the review enough material to start showing repeated language across separate entries.`;
+      } else {
+        const terms = repeatedPatternTerms(patternEntries);
+        body.textContent = terms.length
+          ? `Across ${patternEntries.length} saved Pattern Maps, recurring language includes: ${terms.map(([term, count]) => `${term} (${count})`).join(', ')}.`
+          : `Across ${patternEntries.length} saved Pattern Maps, no strong repeated terms meet the current transparent rule yet.`;
+      }
+      const caution = document.createElement('p');
+      caution.className = 'member-insight-caution';
+      caution.textContent = 'This is a language-frequency aid, not proof of motive, diagnosis, causation, or objective truth. Repetition is a prompt for better questions.';
+      review.append(heading, body, caution);
+    }
+  }
+
   // Dashboard quick action.
   const quickAction = document.querySelector('#member-quick-action');
   if (quickAction) quickAction.value = state.journey.nextAction || '';
@@ -102,7 +202,7 @@
     });
   });
 
-  // Tool tracking stays low-sensitivity: only the tool name is stored, not its contents.
+  // Tool tracking stays low-sensitivity unless a tool offers an explicit Save to History action.
   document.querySelectorAll('[data-member-tool]').forEach((link) => {
     link.addEventListener('click', () => service.noteTool(link.dataset.memberTool || ''));
   });
@@ -178,13 +278,30 @@
     status(copied ? 'Device-local member data copied as JSON.' : 'Copy failed.');
   });
 
+  document.querySelector('#clear-member-activity')?.addEventListener('click', () => {
+    if (!window.confirm('Clear saved member tool history from this device? Your profile and Path progress will remain.')) return;
+    const result = service.clearActivity();
+    status(result.ok ? 'Saved tool history cleared from this device.' : 'Your browser blocked clearing local history.');
+    renderProgressHistory();
+  });
+
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-delete-entry]');
+    if (!button) return;
+    if (!window.confirm('Remove this saved reflection from member history on this device?')) return;
+    service.removeEntry(button.dataset.deleteEntry || '');
+    renderProgressHistory();
+  });
+
   document.querySelector('#clear-member-device')?.addEventListener('click', () => {
-    if (!window.confirm('Clear the Flamewalker profile and progress stored on this device? This cannot be undone here.')) return;
+    if (!window.confirm('Clear the Flamewalker profile, progress, and saved member history stored on this device? This cannot be undone here.')) return;
     const cleared = service.reset();
     status(cleared ? 'Member data cleared from this device.' : 'Your browser blocked clearing local data.');
     if (cleared) window.setTimeout(() => { window.location.href = 'member-onboarding.html'; }, 500);
   });
 
+  ensureMemberNav();
   renderCommon(state);
   paintFocus(state);
+  if (page === 'progress') renderProgressHistory();
 })();

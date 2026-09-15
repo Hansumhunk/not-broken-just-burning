@@ -1,6 +1,7 @@
 (() => {
   const KEY = 'nbjb.member.v2';
   const LEGACY_KEY = 'nbjb.member.v1';
+  const MAX_ACTIVITY_ENTRIES = 75;
 
   const stages = [
     'Fire Reclamation',
@@ -34,10 +35,14 @@
       syncNextActionLater: false,
       memberUpdatesLater: false,
       motion: 'system'
+    },
+    activity: {
+      entries: []
     }
   });
 
   function merge(base, patch) {
+    const patchEntries = patch?.activity?.entries;
     return {
       ...base,
       ...patch,
@@ -47,7 +52,12 @@
         ...(patch?.journey || {}),
         progress: { ...base.journey.progress, ...(patch?.journey?.progress || {}) }
       },
-      preferences: { ...base.preferences, ...(patch?.preferences || {}) }
+      preferences: { ...base.preferences, ...(patch?.preferences || {}) },
+      activity: {
+        ...base.activity,
+        ...(patch?.activity || {}),
+        entries: Array.isArray(patchEntries) ? patchEntries : base.activity.entries
+      }
     };
   }
 
@@ -118,6 +128,43 @@
   function noteTool(tool) {
     const data = load();
     data.journey.lastTool = tool || '';
+    data.journey.lastVisited = tool ? Date.now() : data.journey.lastVisited;
+    return save(data);
+  }
+
+  function recordToolEntry(tool, payload = {}) {
+    const data = load();
+    const now = Date.now();
+    const entry = {
+      id: `${String(tool || 'tool').toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${now}-${Math.random().toString(36).slice(2, 8)}`,
+      tool: tool || 'Member Tool',
+      createdAt: now,
+      title: String(payload.title || '').slice(0, 160),
+      summary: String(payload.summary || '').slice(0, 2400),
+      tags: Array.isArray(payload.tags) ? payload.tags.slice(0, 12).map((tag) => String(tag).slice(0, 60)) : [],
+      data: payload.data && typeof payload.data === 'object' ? payload.data : {}
+    };
+    data.activity.entries = [entry, ...(data.activity.entries || [])].slice(0, MAX_ACTIVITY_ENTRIES);
+    data.journey.lastTool = entry.tool;
+    data.journey.lastVisited = now;
+    const result = save(data);
+    return { ...result, entry };
+  }
+
+  function listEntries(tool = '') {
+    const entries = load().activity.entries || [];
+    return tool ? entries.filter((entry) => entry.tool === tool) : entries;
+  }
+
+  function removeEntry(id) {
+    const data = load();
+    data.activity.entries = (data.activity.entries || []).filter((entry) => entry.id !== id);
+    return save(data);
+  }
+
+  function clearActivity() {
+    const data = load();
+    data.activity.entries = [];
     return save(data);
   }
 
@@ -145,6 +192,10 @@
     setFocus,
     setStageProgress,
     noteTool,
+    recordToolEntry,
+    listEntries,
+    removeEntry,
+    clearActivity,
     reset,
     exportJson
   };

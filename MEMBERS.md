@@ -6,7 +6,7 @@ The member system exists to give people a place to **return**, not merely a page
 
 The intended journey is:
 
-**discover → join → onboard → dashboard → choose a current focus → use a practice/tool → return → deepen connection**
+**discover → join → onboard → dashboard → choose a current focus → use a practice/tool → return → review progress → deepen connection**
 
 Membership should create useful access, continuity, and community without turning NBJB into a rank hierarchy or pretending reflective tools are clinical treatment.
 
@@ -22,27 +22,34 @@ Guardian remains a future service / leadership role with responsibilities and de
 
 ## Front-end first, backend second
 
-The member experience is being designed and built before the final authentication/database provider is connected. That is the preferred approach for the current development phase.
+The member experience is being designed before the final authentication/database provider is connected.
 
-The current member platform shell includes:
+Current development-only member routes:
 
-- `member-onboarding.html` — first-run member journey and device-local snapshot setup
-- `members.html` — Flamewalker dashboard
-- `member-path.html` — current Path focus and stage progress UI
-- `member-tools.html` — member-facing tool hub and last-tool routing
-- `member-library.html` — public material plus clearly marked future locked-content placeholders
-- `member-profile.html` — minimal member profile and future visibility choices
-- `member-settings.html` — prototype privacy/data preferences, export, and clear-device controls
-- `member-auth.html` — disabled sign-in/create/recovery workflow mockups for the future authentication bridge
-- `css/members.css` — shared member platform layout and responsive styles
-- `js/member-service.js` — storage/service boundary between UI and data source
+- `member-onboarding.html` — first-run setup
+- `members.html` — dashboard
+- `member-path.html` — current Path focus and stage progress
+- `member-tools.html` — Toolbox
+- `member-progress.html` — saved member-tool history and longitudinal review
+- `member-library.html` — member library shell
+- `member-media.html` — video/learning hub shell
+- `member-store.html` — storefront and entitlement shell
+- `member-community.html` — discussion / Discord companion shell
+- `member-profile.html` — profile
+- `member-settings.html` — privacy/data controls
+- `member-auth.html` — future sign-in/signup/recovery bridge mockup
+
+Shared layers:
+
+- `css/members.css` — core member platform layout
+- `css/member-expansion.css` — progress/media/store/community extensions
+- `js/member-service.js` — storage/service adapter
 - `js/member-platform.js` — shared member interactions and rendering
+- `js/pattern-member-history.js` — explicit Pattern Map → member history bridge prototype
 
-The UI is intentionally separated from its storage mechanism:
+The UI is separated from its storage mechanism:
 
 `member UI → member service/adapter → localStorage now / authenticated backend later`
-
-This lets the account bridge replace or extend the service layer later without rebuilding the member experience from scratch.
 
 ## Current device-local data model
 
@@ -50,127 +57,170 @@ The current prototype stores low-sensitivity continuity data under:
 
 `nbjb.member.v2`
 
-The service can migrate the earlier `nbjb.member.v1` snapshot.
+It can migrate the earlier `nbjb.member.v1` snapshot.
 
-Current local member data includes:
+Current local member data can include:
 
 - optional display name / nickname
 - optional short profile description
 - prototype profile visibility choice
 - current Flamewalker Path focus
 - per-stage progress state: `not-started`, `in-progress`, or `practicing`
-- one next honest action
-- Guardian Code values being actively practiced
-- last tool name opened from the member tools hub
+- one Next Honest Action
+- Guardian Code values being practiced
+- last tool opened
 - onboarding completion state
-- prototype preferences for future cloud sync / member updates / motion behavior
+- prototype preferences
+- explicitly saved member-tool history
 
-This data stays on the current browser/device. It is not currently sent to GitHub, NBJB email, an analytics service, an NBJB database, or an AI model.
+The service currently caps saved activity history to a bounded local list so the prototype does not grow browser storage without limit.
 
-The member settings screen provides a device-local JSON copy action and a clear-device action.
+## Tool history and longitudinal progress
+
+Tool content is **not automatically copied** into member history merely because a member opens a tool.
+
+The preferred pattern is explicit save:
+
+`use tool → review result → choose Save to My History → local member record → Progress page`
+
+The first implemented example is Pattern Map.
+
+A saved Pattern Map record can contain:
+
+- anchor event
+- before / after context
+- repeated observations
+- differences or exceptions
+- evidence entered by the member
+- inference entered by the member
+- careful summary
+- timestamp
+
+The Progress page can compare multiple saved Pattern Maps over time. The first rule-based longitudinal review is intentionally transparent: after multiple entries, it surfaces repeated language across separate saved maps. It does **not** claim that word repetition proves motive, diagnosis, causation, or objective truth.
+
+Five saved Pattern Maps is the current UX threshold for calling the view a longitudinal review. This is a product threshold, not a scientific or clinical threshold.
+
+Future versions may add better structured comparison or AI-assisted summaries only after privacy, consent, and backend design are explicit.
 
 ## Privacy boundary
 
 A member account does **not** automatically mean private reflections should be uploaded.
 
-The member profile/service intentionally does not ingest the contents of:
-
-- Forge notes
-- Pattern Maps
-- Six Sacred Questions answers
-- shame reflections
-- therapy/medical material
-- legal evidence or active-case material
-- sensitive journals or private source documents
-
-Those should remain device-local by default unless a future feature deliberately offers secure storage with explicit purpose, consent, deletion controls, and appropriate protection.
-
 A useful product principle is:
 
 > **Your account can remember your journey without needing to read your journal.**
+
+Highly sensitive material should remain device-local by default, including:
+
+- therapy or medical material
+- legal evidence / active-case material
+- private journals or source documents
+- highly sensitive Forge or pattern notes unless the member deliberately chooses a future secure-storage feature
+
+The current Pattern Map history prototype is device-local and explicitly opt-in. Future cloud history should require a deliberate sync choice, deletion controls, and clear explanation of what is stored.
+
+## Video / learning strategy
+
+The preferred content model is:
+
+**website = organized learning home**
+
+**Discord = conversation / announcements / live community companion**
+
+Members should not have to search Discord history to find the official lesson, replay, worksheet, or course module.
+
+Large video files should not be stored directly in the GitHub repository. A dedicated video host should provide playback. Future protected member video should use a provider / delivery model that supports real access control or signed/private playback where appropriate.
+
+Possible member media collections:
+
+- Start Here / foundation videos
+- Path-stage lessons
+- recorded workshops and talks
+- replay library
+- founder updates
+- member-only releases
+
+## Storefront strategy
+
+`member-store.html` reserves the product experience for:
+
+- books / e-books
+- released workbooks and downloads
+- workshops and courses
+- special member releases
+
+The eventual commerce flow should be:
+
+`member → checkout provider → successful purchase → entitlement on member account → owned item appears in Member Library`
+
+A storefront card is not security. Private manuscripts, paid courses, unreleased books, and proprietary files must not be committed as public static assets and hidden behind links.
+
+## Community / discussion strategy
+
+The member platform reserves a Circle area for future discussion.
+
+A useful split is:
+
+- website: identity, structured prompts, official resources, program pages, event pages, account progress
+- Discord: fast conversation, live rooms, announcements, informal community interaction
+
+Potential spaces:
+
+- general member lounge
+- Path-stage circles
+- book/video/workshop discussion
+- live event circles and Q&A
+
+Before any real community launch, define:
+
+- community guidelines
+- moderation workflow
+- reporting and blocking
+- privacy defaults
+- age policy
+- crisis/safety boundaries
+- harassment and doxxing rules
+- limits on legal/medical advice
+- moderator visibility and permissions
 
 ## Important security boundary
 
 A static page in a public GitHub Pages repository is **not protected member content** merely because it is linked only after a login screen.
 
-The current `member-library.html` therefore contains only public routes and architecture placeholders for future protected material. Private manuscripts, paid curricula, personal records, and proprietary member content must not be committed as public static assets and “protected” only by hidden links.
-
-When real protected content exists, authorization must occur before the data/content is returned from a backend or private storage layer.
+Real protected content must be returned only after authenticated authorization from backend/private storage.
 
 ## Phase 2 — Real member accounts
 
-A real member system requires authentication and persistent server-side storage. GitHub Pages is a static host and cannot securely provide this by itself.
-
-The preferred current backend candidate is **Supabase** because it can provide authentication, Postgres, Row Level Security, and server/Edge Function capabilities while allowing the current static front end to remain largely intact. Firebase remains a viable alternative if requirements change.
+The preferred current backend candidate remains **Supabase** because it can provide authentication, Postgres, Row Level Security, and server/Edge Function capabilities while allowing the current static front end to remain largely intact.
 
 Required capabilities before live accounts:
 
 - secure account creation and login
-- email verification or passwordless login decision
-- credential handling delegated to the auth provider
+- verification / recovery design
 - authenticated session management
 - member profile persistence across devices
-- Row Level Security or equivalent isolation between members
-- member-only content/access-control checks
+- Row Level Security or equivalent member isolation
+- opt-in sync rules for appropriate progress/history data
+- member-only content/access checks
+- purchase entitlement storage
 - account deletion
-- appropriate data export
-- privacy notice updated for provider behavior
+- appropriate account data export
+- provider-specific privacy notice
 - admin/moderator roles separated from ordinary membership
-- rate limiting / abuse protection where appropriate
+- abuse/rate limiting where appropriate
 - unauthorized-access and account-edge-case testing
 
 ### Supabase bridge concept
 
-The eventual connection should behave like a bridge between the existing public/member UI and secure account services:
+1. public Join/sign-in starts authentication
+2. Supabase Auth establishes the signed-in member
+3. the member service reads/writes only that member's permitted profile/progress under RLS
+4. the existing Flamewalker dashboard renders the returned state
+5. optional history sync is handled according to explicit privacy preferences
+6. protected media/store/library entitlements are checked before content is returned
+7. logout returns the person to a public/signed-out state
 
-1. the public Join/sign-in screen starts authentication
-2. Supabase Auth establishes the signed-in user
-3. the member service reads/writes only that user's permitted profile/progress data under Row Level Security
-4. the existing Flamewalker dashboard renders the returned profile/progress
-5. protected entitlements/content are requested only after authorization succeeds
-6. logout returns the person to a public/signed-out state
-
-The browser may use the Supabase project URL and public/anon publishable key only with correctly configured Row Level Security. A service-role/private secret must never be placed in browser JavaScript or committed to the repository.
-
-Privileged operations such as account deletion should run through trusted server/Edge Function code, not through a service-role secret exposed to the browser.
-
-## Future member library
-
-The current member library reserves UX space for future deliberately released content such as:
-
-- deeper guided practices
-- intentionally released member-only Stories From the Fire
-- recorded talks or workshops
-- courses/programs with access entitlements
-- live event/circle information
-- founder updates
-- purchased book/course access
-
-These are placeholders only. They do not represent currently protected content.
-
-## Phase 4 — Community
-
-Community features should be designed only after moderation and safety rules exist.
-
-Possible features:
-
-- discussion spaces organized by Path stage
-- structured reflection prompts
-- event circles
-- peer encouragement
-- opt-in public member profiles
-
-Before community launch, define:
-
-- community guidelines
-- moderation workflow
-- reporting/blocking tools
-- privacy defaults
-- age policy
-- crisis/safety escalation boundaries
-- harassment and doxxing rules
-- prohibited legal/medical advice behavior
-- what moderators can and cannot see
+A Supabase service-role/private secret must never be placed in browser JavaScript or committed to the repository.
 
 ## Member culture
 
@@ -184,11 +234,11 @@ The Guardian Code applies to member spaces:
 
 These are conduct filters, not demands for obedience.
 
-The member experience should avoid:
+Avoid:
 
 - artificial rank/status pressure
 - shame-based engagement
-- manipulative streaks or fear-of-missing-out mechanics
+- manipulative streak mechanics
 - implying site participation is treatment
 - presenting unverified beliefs as fact
 - turning private conflict into community entertainment
@@ -197,4 +247,4 @@ The member experience should avoid:
 
 `main` remains the public/live branch.
 
-Member-system development occurs on `development` until the front-end member experience, authentication bridge, authorization model, privacy/security rules, and release QA are ready for deliberate launch.
+Member-system development occurs on `development` until the front-end experience, authentication bridge, authorization model, privacy/security rules, protected-content delivery, commerce/community safeguards, and release QA are ready for deliberate launch.

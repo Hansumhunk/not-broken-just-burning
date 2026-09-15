@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Validate NBJB's static HTML before launch.
+"""Validate NBJB's static HTML and launch-critical files.
 
 Uses only the Python standard library so it can run locally or in GitHub Actions.
-The validator intentionally checks structure, not the truth of editorial content.
+The validator checks structure and launch wiring, not the truth of editorial content.
 """
 
 from __future__ import annotations
@@ -15,6 +15,11 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 HTML_FILES = sorted(ROOT.glob("*.html"))
 MAIN_JS = ROOT / "js" / "main.js"
+CNAME = ROOT / "CNAME"
+ROBOTS = ROOT / "robots.txt"
+SITEMAP = ROOT / "sitemap.xml"
+SITE_ORIGIN = "https://notbrokenjustburning.com"
+OLD_PAGES_ORIGIN = "https://hansumhunk.github.io/not-broken-just-burning"
 
 
 class PageParser(HTMLParser):
@@ -79,6 +84,38 @@ def local_target(page: Path, reference: str) -> Path | None:
     return target.resolve()
 
 
+def check_launch_files(errors: list[str]) -> None:
+    if not CNAME.exists():
+        errors.append("CNAME: missing custom-domain file.")
+    elif CNAME.read_text(encoding="utf-8").strip() != "notbrokenjustburning.com":
+        errors.append("CNAME: must contain exactly notbrokenjustburning.com.")
+
+    if not ROBOTS.exists():
+        errors.append("robots.txt: missing.")
+    else:
+        robots_text = ROBOTS.read_text(encoding="utf-8")
+        if f"Sitemap: {SITE_ORIGIN}/sitemap.xml" not in robots_text:
+            errors.append("robots.txt: sitemap must use the custom domain.")
+        if OLD_PAGES_ORIGIN in robots_text:
+            errors.append("robots.txt: still references the temporary GitHub Pages URL.")
+
+    if not SITEMAP.exists():
+        errors.append("sitemap.xml: missing.")
+    else:
+        sitemap_text = SITEMAP.read_text(encoding="utf-8")
+        if OLD_PAGES_ORIGIN in sitemap_text:
+            errors.append("sitemap.xml: still references the temporary GitHub Pages URL.")
+        if f"<loc>{SITE_ORIGIN}/</loc>" not in sitemap_text:
+            errors.append("sitemap.xml: missing custom-domain homepage URL.")
+
+        for page in HTML_FILES:
+            if page.name == "404.html":
+                continue
+            expected = f"{SITE_ORIGIN}/" if page.name == "index.html" else f"{SITE_ORIGIN}/{page.name}"
+            if f"<loc>{expected}</loc>" not in sitemap_text:
+                errors.append(f"sitemap.xml: missing {page.name}.")
+
+
 def main() -> int:
     errors: list[str] = []
     warnings: list[str] = []
@@ -90,6 +127,9 @@ def main() -> int:
     main_js_text = MAIN_JS.read_text(encoding="utf-8") if MAIN_JS.exists() else ""
     shared_support = "support.html" in main_js_text
     shared_privacy = "privacy.html" in main_js_text
+    shared_canonical = SITE_ORIGIN in main_js_text and 'rel = \'canonical\'' in main_js_text
+
+    check_launch_files(errors)
 
     for page in HTML_FILES:
         parser = PageParser()
@@ -108,6 +148,11 @@ def main() -> int:
             errors.append(f"{rel}: missing meta description.")
         if not parser.has_main:
             errors.append(f"{rel}: missing <main> landmark.")
+
+        if page.name != "404.html":
+            has_static_canonical = 'rel="canonical"' in text or "rel='canonical'" in text
+            if not has_static_canonical and not (uses_main_js and shared_canonical):
+                errors.append(f"{rel}: missing custom-domain canonical URL or shared fallback.")
 
         duplicate_ids = sorted({value for value in parser.ids if parser.ids.count(value) > 1})
         if duplicate_ids:
@@ -135,7 +180,10 @@ def main() -> int:
         if "target=\"_blank\"" in text and "rel=\"noopener noreferrer\"" not in text:
             warnings.append(f"{rel}: review external _blank links for rel=\"noopener noreferrer\".")
 
-    print(f"Validated {len(HTML_FILES)} HTML pages.")
+        if OLD_PAGES_ORIGIN in text:
+            errors.append(f"{rel}: still references the temporary GitHub Pages URL.")
+
+    print(f"Validated {len(HTML_FILES)} HTML pages plus launch-critical domain files.")
     for warning in warnings:
         print(f"WARNING: {warning}")
     if errors:

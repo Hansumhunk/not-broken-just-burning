@@ -1,0 +1,218 @@
+/* Not Broken Just Burning — V0.3 visual identity layer */
+
+:root {
+  --nbjb-ivory: #f5efe7;
+  --nbjb-ember: #ff7a2d;
+  --nbjb-ember-deep: #d85f24;
+  --nbjb-ember-pale: #ffad72;
+  --nbjb-void: #09090b;
+}
+
+/* Replace the temporary NBJB circle with the actual Eye + Flame mark. */
+.brand-mark {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  border: 0;
+  border-radius: 0;
+  font-size: 0;
+  color: transparent;
+  background: url('../assets/sigil.svg') center / contain no-repeat;
+  box-shadow: none;
+  filter: drop-shadow(0 0 12px rgba(255, 122, 45, 0.16));
+}
+
+.brand:hover .brand-mark {
+  filter: drop-shadow(0 0 18px rgba(255, 122, 45, 0.28));
+}
+
+/* Hero sigil */
+.hero-symbol .sigil-ring,
+.hero-symbol .eye-mark {
+  display: none;
+}
+
+.hero-symbol::before {
+  content: '';
+  width: min(390px, 86vw);
+  aspect-ratio: 1;
+  background: url('../assets/sigil.svg') center / contain no-repeat;
+  filter: drop-shadow(0 0 34px rgba(255, 122, 45, 0.16));
+  opacity: 0.98;
+  animation: sigil-breathe 5.5s ease-in-out infinite;
+}
+
+.hero-symbol::after {
+  content: '';
+  position: absolute;
+  width: 56%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,122,45,0.11), rgba(255,122,45,0) 70%);
+  filter: blur(18px);
+  z-index: -1;
+}
+
+@keyframes sigil-breathe {
+  0%, 100% { transform: scale(0.985); filter: drop-shadow(0 0 26px rgba(255,122,45,0.13)); }
+  50% { transform: scale(1.015); filter: drop-shadow(0 0 42px rgba(255,122,45,0.24)); }
+}
+
+/* Movement page symbol */
+.symbol-visual {
+  position: relative;
+  overflow: hidden;
+}
+
+.symbol-visual .eye-mark {
+  display: none;
+}
+
+.symbol-visual::before {
+  content: '';
+  width: min(340px, 76vw);
+  aspect-ratio: 1;
+  background: url('../assets/sigil.svg') center / contain no-repeat;
+  filter: drop-shadow(0 0 28px rgba(255, 122, 45, 0.17));
+}
+
+.symbol-visual::after {
+  content: 'EYE + FLAME';
+  position: absolute;
+  bottom: 22px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: rgba(245, 239, 231, 0.38);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+}
+
+/* Give the platform a more deliberate visual hierarchy. */
+.site-header {
+  backdrop-filter: blur(12px);
+}
+
+.site-header::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,122,45,0.32), transparent);
+  pointer-events: none;
+}
+
+.eyebrow::before {
+  content: '◆';
+  margin-right: 9px;
+  font-size: 0.72em;
+  vertical-align: 0.08em;
+}
+
+.door-card,
+.journey-card,
+.story-card,
+.value-card,
+.forge-field {
+  position: relative;
+  overflow: hidden;
+}
+
+.door-card::before,
+.journey-card::before,
+.story-card::before,
+.value-card::before,
+.forge-field::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(120deg, transparent 15%, rgba(255,122,45,0.045) 48%, transparent 80%);
+  transform: translateX(-120%);
+  transition: transform 550ms ease;
+}
+
+.door-card:hover::before,
+.journey-card:hover::before,
+.story-card:hover::before,
+.value-card:hover::before,
+.forge-field:focus-within::before {
+  transform: translateX(120%);
+}
+
+/* A subtle visual anchor repeated through the movement. */
+.statement,
+.callout,
+.closing {
+  position: relative;
+}
+
+.statement::before,
+.callout::before,
+.closing::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 92px;
+  height: 2px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, var(--nbjb-ember), transparent);
+  box-shadow: 0 0 18px rgba(255,122,45,0.26);
+}
+
+/* More distinctive typography without turning every paragraph into a prophecy. */
+.statement-accent,
+.signature,
+.pull-quote {
+  text-wrap: balance;
+}
+
+.hero h1,
+.page-hero h1 {
+  text-wrap: balance;
+}
+
+.hero-lead,
+.section-heading p,
+.symbol-copy p,
+.story-copy p,
+.feature-story p {
+  text-wrap: pretty;
+}
+
+/* Footer identity lockup */
+.site-footer > div:first-child {
+  position: relative;
+  padding-left: 58px;
+}
+
+.site-footer > div:first-child::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -4px;
+  width: 44px;
+  height: 44px;
+  background: url('../assets/sigil.svg') center / contain no-repeat;
+  opacity: 0.82;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-symbol::before { animation: none; }
+  .door-card::before,
+  .journey-card::before,
+  .story-card::before,
+  .value-card::before,
+  .forge-field::before { transition: none; }
+}
+
+@media (max-width: 560px) {
+  .brand-mark { width: 42px; height: 42px; flex-basis: 42px; }
+  .hero-symbol::before { width: min(300px, 84vw); }
+  .symbol-visual::before { width: min(285px, 78vw); }
+  .site-footer > div:first-child { padding-left: 52px; }
+}

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://hansumhunk.github.io/not-broken-just-burning/sitemap.xml
+Sitemap: https://notbrokenjustburning.com/sitemap.xml

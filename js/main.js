@@ -20,6 +20,64 @@ const siteNav = document.querySelector('.site-nav');
 const year = document.querySelector('#year');
 const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
+// V0.8 launch metadata fallback. Static tags remain preferred on major pages,
+// but every public page gets a canonical custom-domain URL at runtime.
+const SITE_ORIGIN = 'https://notbrokenjustburning.com';
+const canonicalPath = currentPage === 'index.html' ? '/' : `/${currentPage}`;
+const canonicalUrl = `${SITE_ORIGIN}${canonicalPath}`;
+
+if (!document.querySelector('link[rel="canonical"]')) {
+  const canonical = document.createElement('link');
+  canonical.rel = 'canonical';
+  canonical.href = canonicalUrl;
+  document.head.appendChild(canonical);
+}
+
+if (!document.querySelector('meta[property="og:url"]')) {
+  const ogUrl = document.createElement('meta');
+  ogUrl.setAttribute('property', 'og:url');
+  ogUrl.content = canonicalUrl;
+  document.head.appendChild(ogUrl);
+}
+
+if (!document.querySelector('meta[property="og:title"]')) {
+  const ogTitle = document.createElement('meta');
+  ogTitle.setAttribute('property', 'og:title');
+  ogTitle.content = document.title;
+  document.head.appendChild(ogTitle);
+}
+
+if (!document.querySelector('meta[property="og:description"]')) {
+  const description = document.querySelector('meta[name="description"]')?.content;
+  if (description) {
+    const ogDescription = document.createElement('meta');
+    ogDescription.setAttribute('property', 'og:description');
+    ogDescription.content = description;
+    document.head.appendChild(ogDescription);
+  }
+}
+
+if (!document.querySelector('meta[property="og:type"]')) {
+  const ogType = document.createElement('meta');
+  ogType.setAttribute('property', 'og:type');
+  ogType.content = 'website';
+  document.head.appendChild(ogType);
+}
+
+if (!document.querySelector('meta[property="og:site_name"]')) {
+  const siteName = document.createElement('meta');
+  siteName.setAttribute('property', 'og:site_name');
+  siteName.content = 'Not Broken Just Burning';
+  document.head.appendChild(siteName);
+}
+
+if (!document.querySelector('meta[name="twitter:card"]')) {
+  const twitterCard = document.createElement('meta');
+  twitterCard.name = 'twitter:card';
+  twitterCard.content = 'summary';
+  document.head.appendChild(twitterCard);
+}
+
 // V0.6 engagement layer: expose Join from every existing page without rewriting every header.
 if (siteNav && !siteNav.querySelector('a[href="join.html"]')) {
   const joinLink = document.createElement('a');

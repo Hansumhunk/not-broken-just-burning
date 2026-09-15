@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Use the Not Broken Just Burning Flame Check-In for a short daily reflection on body, emotion, thought, boundary, need, and next action.">
+  <meta name="theme-color" content="#09090b">
+  <title>Flame Check-In | Not Broken Just Burning</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/brand.css">
+  <link rel="stylesheet" href="css/experience.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <div class="ember-field" aria-hidden="true"></div>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Not Broken Just Burning home"><span class="brand-mark" aria-hidden="true"></span><span class="brand-name">Not Broken <span>Just Burning</span></span></a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation"><span></span><span></span><span></span></button>
+    <nav class="site-nav" id="site-nav" aria-label="Primary navigation">
+      <a href="path.html">The Path</a><a href="forge.html">The Forge</a><a href="fire.html">The Fire</a><a href="movement.html">The Movement</a><a class="active" href="resources.html">Resources</a>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <section class="page-hero section-shell reveal">
+      <p class="eyebrow">Flame Check-In</p>
+      <h1>Six questions.<br><span>One honest snapshot.</span></h1>
+      <p class="hero-lead">This is the lighter daily tool. No diagnosis, no grand theory, no need to turn Tuesday afternoon into a doctoral dissertation. Notice what is happening and choose the next workable action.</p>
+      <span class="privacy-chip">Private by design: your entries stay in this browser session.</span>
+    </section>
+
+    <section class="forge-shell section-shell reveal" id="checkin-tool">
+      <div class="checkin-grid">
+        <label class="checkin-card"><span>01 · Body</span><strong>What is my body telling me?</strong><textarea data-checkin="body" rows="4" placeholder="Tight shoulders, hungry, restless, tired, steady, energized..."></textarea></label>
+        <label class="checkin-card"><span>02 · Emotion</span><strong>What am I feeling?</strong><textarea data-checkin="emotion" rows="4" placeholder="Angry, relieved, sad, anxious, hopeful, numb..."></textarea></label>
+        <label class="checkin-card"><span>03 · Thought</span><strong>What thought is loudest?</strong><textarea data-checkin="thought" rows="4" placeholder="Write the thought without arguing with it yet."></textarea></label>
+        <label class="checkin-card"><span>04 · Boundary</span><strong>Is anything crossing a line?</strong><textarea data-checkin="boundary" rows="4" placeholder="A person, task, demand, habit, or even my own expectations..."></textarea></label>
+        <label class="checkin-card"><span>05 · Need</span><strong>What do I actually need?</strong><textarea data-checkin="need" rows="4" placeholder="Rest, food, clarity, distance, help, movement, a conversation..."></textarea></label>
+        <label class="checkin-card"><span>06 · Next action</span><strong>What is one thing I can do next?</strong><textarea data-checkin="next" rows="4" placeholder="One realistic action, not twelve heroic ones."></textarea></label>
+      </div>
+
+      <div class="tool-output checkin-output" aria-live="polite">
+        <p class="eyebrow">My check-in</p>
+        <p id="checkin-preview">Fill in what matters. Blank fields are allowed. Humans are not forms to be completed at 100%.</p>
+      </div>
+      <div class="forge-actions">
+        <button class="button button-primary" id="build-checkin" type="button">Build My Check-In</button>
+        <button class="button button-ghost" id="copy-checkin" type="button">Copy</button>
+        <button class="button button-ghost" id="clear-checkin" type="button">Clear</button>
+        <span class="forge-status" id="checkin-status" role="status" aria-live="polite"></span>
+      </div>
+    </section>
+
+    <section class="callout section-shell reveal">
+      <p class="eyebrow">Small enough to repeat</p>
+      <h2>The point is not to solve your life every morning.</h2>
+      <p>The check-in is useful when it helps you notice your current state and choose a next action. If you need deeper thought examination, use The Forge. If you are tracking repetition, use Pattern Map.</p>
+      <div class="hero-actions center"><a class="button button-primary" href="forge.html">Use The Forge</a><a class="button button-ghost" href="pattern-map.html">Open Pattern Map</a></div>
+    </section>
+  </main>
+
+  <footer class="site-footer section-shell"><div><strong>NOT BROKEN JUST BURNING</strong><p>Notice. Name. Choose the next step.</p></div><div class="footer-meta"><p>© <span id="year"></span> Not Broken Just Burning.</p><p class="disclaimer">Educational and personal-development content only. Not a substitute for professional medical, mental-health, legal, or emergency services.</p></div></footer>
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="The Not Broken Just Burning Flamewalker Hub: a private-by-default member workspace for choosing a current Path focus, practicing the Guardian Code, and returning to the tools that support deliberate rebuilding.">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#09090b">
+  <meta property="og:title" content="Flamewalker Hub | Not Broken Just Burning">
+  <meta property="og:description" content="A device-local member workspace for the Not Broken Just Burning movement.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Not Broken Just Burning">
+  <meta property="og:url" content="https://notbrokenjustburning.com/members.html">
+  <title>Flamewalker Hub | Not Broken Just Burning</title>
+  <link rel="canonical" href="https://notbrokenjustburning.com/members.html">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/brand.css">
+  <link rel="stylesheet" href="css/experience.css">
+  <link rel="stylesheet" href="css/members.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <div class="ember-field" aria-hidden="true"></div>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Not Broken Just Burning home"><span class="brand-mark" aria-hidden="true"></span><span class="brand-name">Not Broken <span>Just Burning</span></span></a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation"><span></span><span></span><span></span></button>
+    <nav class="site-nav" id="site-nav" aria-label="Primary navigation">
+      <a href="path.html">The Path</a><a href="forge.html">The Forge</a><a href="fire.html">The Fire</a><a href="movement.html">The Movement</a><a href="resources.html">Resources</a><a class="active nav-join" href="join.html">Join</a>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <section class="page-hero section-shell reveal member-hero">
+      <p class="eyebrow">Flamewalker Member Hub</p>
+      <h1>A place to return to.<br><span>Not another badge to collect.</span></h1>
+      <p class="hero-lead">This is the first member layer of Not Broken Just Burning: a device-local workspace for choosing what you are working on, carrying the Guardian Code into practice, and returning to the right tool without starting from zero every time.</p>
+      <div class="member-status"><span>Phase 1</span><strong>Device-local member profile</strong><p>No login yet. Your member snapshot is stored only in this browser on this device.</p></div>
+    </section>
+
+    <section class="section-shell member-dashboard reveal" aria-labelledby="member-snapshot-title">
+      <div class="member-dashboard-copy">
+        <p class="eyebrow">My Flamewalker Snapshot</p>
+        <h2 id="member-snapshot-title">Where am I working right now?</h2>
+        <p>This is not a score, diagnosis, rank, or permanent identity. It is a practical marker for what deserves your attention today.</p>
+      </div>
+      <div class="member-form">
+        <label><span>Name or nickname <small>(optional)</small></span><input id="member-name" type="text" maxlength="60" autocomplete="nickname" placeholder="What should this hub call you?"></label>
+        <label><span>Current Path focus</span><select id="member-focus"><option value="">Choose a stage</option><option>Fire Reclamation</option><option>The Guardian's Path</option><option>Sacred Mirror Work</option><option>Masculine Restoration</option><option>Voice of Fire</option><option>Circle of the Flame</option></select></label>
+        <label class="member-wide"><span>My next honest action</span><textarea id="member-action" rows="4" maxlength="500" placeholder="One action you can actually take, not an oath to solve your entire life by Thursday."></textarea></label>
+        <fieldset class="member-wide guardian-practice"><legend>Guardian Code values I am actively practicing</legend>
+          <label><input type="checkbox" data-member-value value="Trust"> Trust</label>
+          <label><input type="checkbox" data-member-value value="Honor"> Honor</label>
+          <label><input type="checkbox" data-member-value value="Respect"> Respect</label>
+          <label><input type="checkbox" data-member-value value="Honesty"> Honesty</label>
+          <label><input type="checkbox" data-member-value value="Loyalty"> Loyalty</label>
+        </fieldset>
+        <div class="forge-actions member-wide"><button class="button button-primary" id="save-member" type="button">Save My Snapshot</button><button class="button button-ghost" id="clear-member" type="button">Clear This Device</button><span class="forge-status" id="member-status" role="status" aria-live="polite"></span></div>
+      </div>
+      <aside class="member-summary" aria-live="polite">
+        <p class="eyebrow">Right now</p>
+        <h3 id="member-greeting">Your work does not need a performance review.</h3>
+        <dl><div><dt>Path focus</dt><dd id="member-focus-preview">Not chosen yet</dd></div><div><dt>Practicing</dt><dd id="member-values-preview">Choose the values that need attention</dd></div><div><dt>Next action</dt><dd id="member-action-preview">Choose one workable next step</dd></div></dl>
+      </aside>
+    </section>
+
+    <section class="section-shell member-section">
+      <div class="section-heading reveal"><p class="eyebrow">My Path</p><h2>Six places to work. No hierarchy required.</h2><p>Use the stage that matches the problem. Setting a focus here updates your member snapshot on this device.</p></div>
+      <div class="member-path-grid">
+        <article class="member-path-card reveal" data-focus-card="Fire Reclamation"><span>01</span><h3>Fire Reclamation</h3><p>Name what happened without handing it permanent authorship.</p><button type="button" data-set-focus="Fire Reclamation">Set as my focus</button><a href="path.html#stage-1">Open stage →</a></article>
+        <article class="member-path-card reveal" data-focus-card="The Guardian's Path"><span>02</span><h3>The Guardian's Path</h3><p>Build boundaries, emotional discipline, and a personal code.</p><button type="button" data-set-focus="The Guardian's Path">Set as my focus</button><a href="path.html#stage-2">Open stage →</a></article>
+        <article class="member-path-card reveal" data-focus-card="Sacred Mirror Work"><span>03</span><h3>Sacred Mirror Work</h3><p>Separate accountability from shame and evidence from cruelty.</p><button type="button" data-set-focus="Sacred Mirror Work">Set as my focus</button><a href="path.html#stage-3">Open stage →</a></article>
+        <article class="member-path-card reveal" data-focus-card="Masculine Restoration"><span>04</span><h3>Masculine Restoration</h3><p>Rebuild strength, responsibility, steadiness, and identity deliberately.</p><button type="button" data-set-focus="Masculine Restoration">Set as my focus</button><a href="path.html#stage-4">Open stage →</a></article>
+        <article class="member-path-card reveal" data-focus-card="Voice of Fire"><span>05</span><h3>Voice of Fire</h3><p>Recover a clear voice without turning every truth into combat.</p><button type="button" data-set-focus="Voice of Fire">Set as my focus</button><a href="path.html#stage-5">Open stage →</a></article>
+        <article class="member-path-card reveal" data-focus-card="Circle of the Flame"><span>06</span><h3>Circle of the Flame</h3><p>Practice healthy connection without rescuing or self-erasure.</p><button type="button" data-set-focus="Circle of the Flame">Set as my focus</button><a href="path.html#stage-6">Open stage →</a></article>
+      </div>
+    </section>
+
+    <section class="section-shell member-section">
+      <div class="section-heading reveal"><p class="eyebrow">Member Practices</p><h2>Return to the right tool for the job.</h2><p>The Hub is the map. The tools are where the work happens.</p></div>
+      <div class="member-tool-grid">
+        <a class="member-tool-card reveal" href="check-in.html"><span>Notice</span><h3>Flame Check-In</h3><p>Body, emotion, thought, boundary, need, next action.</p></a>
+        <a class="member-tool-card reveal" href="forge.html"><span>Examine</span><h3>The Forge</h3><p>Cross-examine a difficult thought instead of obeying it automatically.</p></a>
+        <a class="member-tool-card reveal" href="pattern-map.html"><span>Verify</span><h3>Pattern Map</h3><p>Separate repetition, evidence, and inference.</p></a>
+        <a class="member-tool-card reveal" href="resources.html#boundary-builder"><span>Protect</span><h3>Boundary Builder</h3><p>Turn discomfort into a boundary and an action you control.</p></a>
+        <a class="member-tool-card reveal" href="resources.html#one-stone"><span>Move</span><h3>One Stone</h3><p>Reduce the mountain to the next workable action.</p></a>
+        <a class="member-tool-card reveal" href="fire.html"><span>Reflect</span><h3>Stories From the Fire</h3><p>Use another person's reflection as a mirror, not a commandment.</p></a>
+      </div>
+    </section>
+
+    <section class="section-shell member-code reveal">
+      <div><p class="eyebrow">Member Culture</p><h2>The Guardian Code applies inward too.</h2></div>
+      <div class="member-code-grid"><article><strong>Trust</strong><p>Earn it. Do not demand it.</p></article><article><strong>Honor</strong><p>Act in ways you can stand beside later.</p></article><article><strong>Respect</strong><p>Protect dignity, including your own.</p></article><article><strong>Honesty</strong><p>Tell the truth without weaponizing it.</p></article><article><strong>Loyalty</strong><p>Stay loyal without abandoning reality.</p></article></div>
+    </section>
+
+    <section class="section-shell member-future reveal">
+      <div><p class="eyebrow">What comes next</p><h2>This is the member foundation, not the finished account system.</h2></div>
+      <div><p><strong>Available now in this development build:</strong> a device-local Flamewalker snapshot, Path focus, Guardian Code practice, and direct member routes into the tools and stories.</p><p><strong>Phase 2 requires a real backend:</strong> secure login, member profiles, cross-device progress, member-only resources, account deletion/export, and carefully designed community features.</p><p>Private reflection content will not automatically become server data just because accounts exist. Sensitive journaling should remain local by default unless a member deliberately chooses otherwise.</p></div>
+    </section>
+
+    <section class="callout section-shell reveal"><p class="eyebrow">Membership without hierarchy theater</p><h2>Belonging should create access and practice, not artificial superiority.</h2><p>Flamewalker remains the identity for someone doing the work. Guardian remains a future service and leadership role with responsibilities, not a shiny rank for collecting internet points.</p><div class="hero-actions center"><a class="button button-primary" href="join.html">Back to Join</a><a class="button button-ghost" href="support.html">Support & Safety</a></div></section>
+  </main>
+
+  <footer class="site-footer section-shell"><div><strong>NOT BROKEN JUST BURNING</strong><p>See clearly. Burn clean. Build deliberately.</p></div><div class="footer-meta"><p>© <span id="year"></span> Not Broken Just Burning.</p><p class="footer-links"><a href="contact.html">Contact</a> · <a href="support.html">Support & Safety</a> · <a href="privacy.html">Privacy & Data Use</a></p><p class="disclaimer">Educational and personal-development content only. Not a substitute for professional medical, mental-health, legal, or emergency services.</p></div></footer>
+  <script src="js/main.js"></script>
+  <script src="js/members.js"></script>
+</body>
+</html>

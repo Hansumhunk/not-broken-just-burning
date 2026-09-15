@@ -1,12 +1,22 @@
 # Not Broken Just Burning — Brand System
 
-Version 0.3
+Version 0.7
 
 ## Core idea
 
-**See clearly. Carry the fire differently. Build deliberately.**
+**See clearly. Burn clean. Build deliberately.**
 
-Not Broken Just Burning is a survivor-led movement about turning lived experience into clarity, boundaries, identity, meaning, and deliberate rebuilding.
+Not Broken Just Burning is a survivor-led, fire-forged movement about turning lived experience into clarity, boundaries, identity, meaning, purpose, and deliberate rebuilding.
+
+The founding mission used three verbs: **awaken, guide, protect**.
+
+In the current public platform, those ideas mean:
+
+- **Awaken** — help people notice what is happening inside and around them with greater clarity.
+- **Guide** — offer questions, language, stories, tools, and maps rather than pretending to possess somebody else's answers.
+- **Protect** — strengthen agency, boundaries, discernment, dignity, and routes to appropriate real-world support. NBJB does not present itself as security, crisis response, therapy, medical care, or legal representation.
+
+The recurring transformation idea is **pain into power**, but the phrase must stay grounded. Pain is not automatically noble, useful, or necessary. The work is deciding what can be learned, reclaimed, built, or carried forward without allowing pain to become identity.
 
 The brand should feel forged rather than polished, serious rather than gloomy, sacred without pretending every sentence is prophecy, and strong without confusing strength with aggression.
 
@@ -24,6 +34,35 @@ The Eye does not mean surveillance. The Flame does not mean destruction. Togethe
 > See what is true. Keep what is useful. Burn away what is false. Build what comes next.
 
 Primary asset: `assets/sigil.svg`
+
+## Founding language worth preserving
+
+The original public description of NBJB included several ideas that remain part of the brand's DNA:
+
+- more than a company, a movement
+- trauma to transformation
+- awaken, guide, and protect survivors
+- turn pain into power
+- emotional healing / rebuilding
+- spiritual awareness and meaning-making
+- psychological truth and disciplined curiosity
+- Trust, Honor, Respect, Honesty, Loyalty
+- digital storytelling and community
+- guided journaling and practical resources
+- meeting people wherever they are on their path
+- turning the ashes of the past into something that can light the way for others
+
+These themes may be refined for accuracy, safety, and current scope, but they should remain recognizable in the public voice.
+
+## Early vision versus current offering
+
+Early NBJB descriptions also imagined coaching, workbooks, ceremonies, an in-person sanctuary, healing circles, retreats, tarot, energy readings, and other spiritual or community experiences.
+
+Treat these as **historical or future vision unless actually launched**.
+
+Do not advertise a session, sanctuary, retreat, circle, reading, certification, coaching relationship, or other service as currently available unless it exists, its scope is defined, and it can be responsibly delivered.
+
+This is especially important where an offering could be mistaken for licensed mental-health treatment, crisis care, medical care, or another regulated professional service.
 
 ## Community language
 
@@ -99,6 +138,7 @@ Use:
 - symbolic language when it adds meaning
 - questions that lead toward agency
 - strength paired with responsibility
+- spiritual language framed as meaning-making, symbolism, or personal belief rather than universal fact
 
 Avoid:
 
@@ -109,6 +149,17 @@ Avoid:
 - promises of treatment or healing outcomes
 - generic motivational sludge
 - claiming spiritual interpretations are objective fact
+- advertising future services as if they currently exist
+
+## Public channels
+
+Current official public channels include:
+
+- Website repository/platform
+- Email: `notbrokenjustburning@gmail.com`
+- Facebook: `https://www.facebook.com/profile.php?id=61575787773619`
+
+Ordinary email contact must remain separate from future newsletter/subscriber consent.
 
 ## Publishing boundary
 

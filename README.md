@@ -4,11 +4,11 @@ Official website and digital platform for the **Not Broken Just Burning** moveme
 
 ## Current version
 
-**Version 0.7 — Launch Engineering**
+**Version 0.8 — Release-Candidate Hardening**
 
-Current deployment:
+Primary public domain:
 
-**https://hansumhunk.github.io/not-broken-just-burning/**
+**https://notbrokenjustburning.com/**
 
 Official public channels:
 
@@ -40,7 +40,7 @@ The public site intentionally remains lightweight:
 - GitHub Pages
 - GitHub Actions validation
 
-There is currently no account system, reflection database, or newsletter backend.
+There is currently no account system, reflection database, newsletter backend, or first-party analytics layer.
 
 ## Public architecture
 
@@ -62,7 +62,8 @@ story-armor.html        Full reflection
 story-boundaries.html   Full reflection
 story-one-stone.html    Full reflection
 story-shame.html        Shame / accountability reflection
-sitemap.xml             Current GitHub Pages sitemap
+CNAME                   Custom GitHub Pages domain
+sitemap.xml             Custom-domain sitemap
 robots.txt              Crawl policy and sitemap location
 BRAND.md                Brand language and publishing boundaries
 ENGAGEMENT.md           Contact, subscriber, safety, and privacy architecture
@@ -175,7 +176,13 @@ Current engagement includes:
 
 Emailing NBJB once does **not** count as consent to receive marketing or newsletter messages.
 
-Newsletter signup remains intentionally inactive until a real subscriber provider, consent flow, unsubscribe process, retention policy, and privacy disclosure are configured and tested.
+Newsletter signup is intentionally deferred until after V1.0. A future release can add a real subscriber provider, explicit consent, unsubscribe controls, retention/deletion rules, and an updated privacy notice without delaying the initial public launch.
+
+## Privacy and analytics launch decision
+
+V1.0 launches with **no first-party analytics or tracking layer** beyond routine hosting-provider technical logs. This keeps the initial privacy model simple and avoids collecting behavior data merely because the software industry has developed a spiritual attachment to dashboards.
+
+Analytics can be reconsidered later only if there is a clear purpose, a privacy-conscious implementation, and a corresponding update to the privacy notice.
 
 ## Support & Safety
 
@@ -189,34 +196,44 @@ The Support & Safety page includes U.S. routes for:
 
 These should be periodically rechecked.
 
-## V0.7 launch engineering completed so far
+## V0.8 release-candidate hardening completed so far
 
 - [x] GitHub Pages deployment active
+- [x] Custom domain attached to the repository
+- [x] `CNAME` set to `notbrokenjustburning.com`
+- [x] `sitemap.xml` moved to the custom domain
+- [x] `robots.txt` points to the custom-domain sitemap
 - [x] Official public contact email
 - [x] Official Facebook channel
 - [x] Contact page
 - [x] Privacy disclosure for public email contact
 - [x] Custom 404 page
-- [x] `robots.txt`
-- [x] `sitemap.xml`
 - [x] `.nojekyll`
 - [x] automated static-site validator
 - [x] GitHub Actions validation workflow
 - [x] initial Open Graph metadata on major launch pages
+- [x] newsletter removed from the V1.0 critical path
+- [x] launch with no first-party analytics
 
 ## Remaining before V1.0
 
-- [ ] choose and connect real newsletter provider
-- [ ] define subscriber consent / unsubscribe / retention behavior
-- [ ] update privacy notice for newsletter provider
-- [ ] choose whether to keep GitHub Pages URL or add a custom domain
-- [ ] finish canonical URLs and Open Graph metadata across all public pages
+- [ ] confirm GitHub Pages DNS check succeeds for `notbrokenjustburning.com`
+- [ ] enable **Enforce HTTPS** in GitHub Pages once available
+- [ ] finish canonical URL / Open Graph URL polish on the most important public pages
 - [ ] create a proper raster social-sharing image
 - [ ] full desktop / tablet / phone QA
 - [ ] keyboard and accessibility review
 - [ ] verify every interactive tool with blank, normal, and very long input
 - [ ] final private-name / legal-allegation / unpublished-IP audit
-- [ ] decide whether to launch with privacy-minimal analytics or no analytics
+- [ ] recheck live crisis/support links immediately before V1.0
+
+## Post-launch backlog
+
+- real newsletter/subscriber infrastructure with consent and unsubscribe controls
+- privacy-conscious analytics only if there is a clear use case
+- expanded Stories From the Fire
+- future Library / books / guides / courses when deliberately released
+- future events, community, or service offerings only when they actually exist
 
 ## Publishing guardrails
 

@@ -32,6 +32,7 @@ class PageParser(HTMLParser):
         self.has_description = False
         self.has_main = False
         self.html_lang = ""
+        self.noindex = False
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         data = {key: value or "" for key, value in attrs}
@@ -43,8 +44,13 @@ class PageParser(HTMLParser):
             self.has_main = True
         if "id" in data and data["id"]:
             self.ids.append(data["id"])
-        if tag == "meta" and data.get("name", "").lower() == "description" and data.get("content", "").strip():
-            self.has_description = True
+        if tag == "meta":
+            name = data.get("name", "").lower().strip()
+            content = data.get("content", "").lower().strip()
+            if name == "description" and content:
+                self.has_description = True
+            if name == "robots" and "noindex" in content:
+                self.noindex = True
         if tag == "a" and data.get("href"):
             self.links.append(("href", data["href"]))
         if tag == "link" and data.get("href"):
@@ -84,6 +90,12 @@ def local_target(page: Path, reference: str) -> Path | None:
     return target.resolve()
 
 
+def parse_page(page: Path) -> PageParser:
+    parser = PageParser()
+    parser.feed(page.read_text(encoding="utf-8"))
+    return parser
+
+
 def check_launch_files(errors: list[str]) -> None:
     if not CNAME.exists():
         errors.append("CNAME: missing custom-domain file.")
@@ -109,7 +121,9 @@ def check_launch_files(errors: list[str]) -> None:
             errors.append("sitemap.xml: missing custom-domain homepage URL.")
 
         for page in HTML_FILES:
-            if page.name == "404.html":
+            parser = parse_page(page)
+            # 404 and intentional noindex/member-workspace pages should not be advertised in the public sitemap.
+            if page.name == "404.html" or parser.noindex:
                 continue
             expected = f"{SITE_ORIGIN}/" if page.name == "index.html" else f"{SITE_ORIGIN}/{page.name}"
             if f"<loc>{expected}</loc>" not in sitemap_text:
@@ -127,14 +141,13 @@ def main() -> int:
     main_js_text = MAIN_JS.read_text(encoding="utf-8") if MAIN_JS.exists() else ""
     shared_support = "support.html" in main_js_text
     shared_privacy = "privacy.html" in main_js_text
-    shared_canonical = SITE_ORIGIN in main_js_text and 'rel = \'canonical\'' in main_js_text
+    shared_canonical = SITE_ORIGIN in main_js_text and "rel = 'canonical'" in main_js_text
 
     check_launch_files(errors)
 
     for page in HTML_FILES:
-        parser = PageParser()
+        parser = parse_page(page)
         text = page.read_text(encoding="utf-8")
-        parser.feed(text)
 
         rel = page.relative_to(ROOT)
         title = "".join(parser.title_parts).strip()
@@ -177,7 +190,7 @@ def main() -> int:
             if not target.exists():
                 errors.append(f"{rel}: broken local {kind}: {reference}")
 
-        if "target=\"_blank\"" in text and "rel=\"noopener noreferrer\"" not in text:
+        if 'target="_blank"' in text and 'rel="noopener noreferrer"' not in text:
             warnings.append(f"{rel}: review external _blank links for rel=\"noopener noreferrer\".")
 
         if OLD_PAGES_ORIGIN in text:

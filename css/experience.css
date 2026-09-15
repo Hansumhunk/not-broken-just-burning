@@ -1,0 +1,122 @@
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 999;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--text);
+  color: var(--bg);
+  font-weight: 800;
+  transform: translateY(-180%);
+  transition: transform 160ms ease;
+}
+.skip-link:focus { transform: translateY(0); }
+
+.path-check {
+  margin-bottom: 28px;
+  padding: 36px;
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 42px;
+  align-items: start;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(255,122,45,0.06), rgba(255,255,255,0.015));
+}
+.path-check h2 { margin-bottom: 0; font-size: clamp(1.8rem, 3vw, 2.8rem); }
+.path-check-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.path-check-grid a {
+  padding: 15px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--muted);
+  background: rgba(255,255,255,0.018);
+  font-size: 0.9rem;
+  font-weight: 700;
+  transition: border-color 180ms ease, color 180ms ease, transform 180ms ease;
+}
+.path-check-grid a:hover,
+.path-check-grid a:focus-visible { border-color: var(--line-hot); color: var(--text); transform: translateY(-2px); }
+
+.stage-practice {
+  margin-top: 24px;
+  padding: 18px;
+  border-left: 3px solid var(--ember-bright);
+  border-radius: 0 14px 14px 0;
+  background: rgba(255,122,45,0.055);
+}
+.stage-practice strong { display: block; margin-bottom: 5px; color: var(--ember-pale); font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.stage-practice p { margin: 0; }
+.stage-practice a { color: var(--ember-pale); text-decoration: underline; text-underline-offset: 3px; }
+
+.resource-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 30px 0 110px;
+}
+.resource-card {
+  min-height: 340px;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: linear-gradient(150deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012));
+}
+.resource-card > span { color: var(--ember-bright); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.15em; }
+.resource-card h2 { margin-top: auto; margin-bottom: 12px; font-size: clamp(1.8rem, 2.5vw, 2.45rem); }
+.resource-card p { color: var(--muted); }
+.resource-card > strong { margin-top: 12px; color: var(--ember-pale); font-size: 0.88rem; }
+.resource-card .text-link { margin-top: 12px; }
+
+.tool-panel {
+  padding: 64px;
+  margin-bottom: 28px;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) + 6px);
+  background: linear-gradient(145deg, rgba(255,122,45,0.055), transparent 32%), var(--panel);
+  box-shadow: var(--shadow);
+}
+.tool-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.tool-grid.three { grid-template-columns: repeat(3, 1fr); }
+.tool-output {
+  margin-top: 18px;
+  padding: 24px;
+  border: 1px solid var(--line-hot);
+  border-radius: 18px;
+  background: #0d0d10;
+}
+.tool-output p:last-child { margin: 0; color: var(--text); font-size: 1rem; }
+.tool-output .eyebrow { margin-bottom: 8px; }
+
+.story-card details { margin-top: 14px; }
+.story-card summary {
+  cursor: pointer;
+  color: var(--ember-pale);
+  font-weight: 800;
+  font-size: 0.88rem;
+  list-style: none;
+}
+.story-card summary::-webkit-details-marker { display: none; }
+.story-card summary::after { content: ' +'; }
+.story-card details[open] summary::after { content: ' −'; }
+.story-card .story-expand { padding-top: 12px; color: var(--muted); }
+.story-card .story-prompt { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--text); font-weight: 700; }
+
+@media (max-width: 900px) {
+  .path-check { grid-template-columns: 1fr; gap: 24px; }
+  .resource-grid { grid-template-columns: 1fr; }
+  .resource-card { min-height: 260px; }
+  .tool-panel { padding: 38px 28px; }
+  .tool-grid.three { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 620px) {
+  .path-check { padding: 25px 20px; }
+  .path-check-grid,
+  .tool-grid { grid-template-columns: 1fr; }
+  .tool-panel { padding: 30px 20px; }
+  .resource-grid { padding-bottom: 80px; }
+}

@@ -8,6 +8,9 @@ on:
       - 'css/**'
       - 'js/**'
       - 'assets/**'
+      - 'CNAME'
+      - 'robots.txt'
+      - 'sitemap.xml'
       - 'scripts/validate_site.py'
       - '.github/workflows/validate-site.yml'
   pull_request:
@@ -16,6 +19,9 @@ on:
       - 'css/**'
       - 'js/**'
       - 'assets/**'
+      - 'CNAME'
+      - 'robots.txt'
+      - 'sitemap.xml'
       - 'scripts/validate_site.py'
       - '.github/workflows/validate-site.yml'
 
@@ -32,5 +38,5 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Validate site structure and internal links
+      - name: Validate site structure, links, and launch wiring
         run: python scripts/validate_site.py

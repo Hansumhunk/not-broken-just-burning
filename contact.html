@@ -18,6 +18,19 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/brand.css">
   <link rel="stylesheet" href="css/experience.css">
+  <style>
+    .contact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 26px 0 44px; }
+    .contact-card { min-height: 350px; padding: 34px; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--radius); background: linear-gradient(150deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012)); }
+    .contact-card h2 { margin-bottom: 14px; font-size: clamp(1.8rem, 2.7vw, 2.6rem); }
+    .contact-card p:not(.eyebrow) { color: var(--muted); }
+    .contact-card .button { margin-top: auto; align-self: flex-start; }
+    .contact-address { margin-bottom: 34px; padding: 48px; border: 1px solid var(--line-hot); border-radius: calc(var(--radius) + 6px); background: linear-gradient(145deg, rgba(255,122,45,0.075), transparent 42%), var(--panel); }
+    .contact-address h2 { margin-bottom: 16px; font-size: clamp(1.45rem, 3vw, 2.7rem); overflow-wrap: anywhere; }
+    .contact-address h2 a { color: var(--ember-pale); }
+    .contact-address p:last-child { max-width: 780px; margin-bottom: 0; color: var(--muted); }
+    @media (max-width: 900px) { .contact-grid { grid-template-columns: 1fr; } .contact-card { min-height: 270px; } }
+    @media (max-width: 620px) { .contact-card, .contact-address { padding: 28px 22px; } }
+  </style>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -80,7 +93,7 @@
     </section>
   </main>
 
-  <footer class="site-footer section-shell"><div><strong>NOT BROKEN JUST BURNING</strong><p>See clearly. Burn clean. Build deliberately.</p></div><div class="footer-meta"><p>© <span id="year"></span> Not Broken Just Burning.</p><p><a href="contact.html">Contact</a> · <a href="support.html">Support & Safety</a> · <a href="privacy.html">Privacy & Data Use</a></p><p class="disclaimer">Educational and personal-development content only. Not a substitute for professional medical, mental-health, legal, or emergency services.</p></div></footer>
+  <footer class="site-footer section-shell"><div><strong>NOT BROKEN JUST BURNING</strong><p>See clearly. Burn clean. Build deliberately.</p></div><div class="footer-meta"><p>© <span id="year"></span> Not Broken Just Burning.</p><p class="footer-links"><a href="contact.html">Contact</a> · <a href="support.html">Support & Safety</a> · <a href="privacy.html">Privacy & Data Use</a></p><p class="disclaimer">Educational and personal-development content only. Not a substitute for professional medical, mental-health, legal, or emergency services.</p></div></footer>
   <script src="js/main.js"></script>
 </body>
 </html>

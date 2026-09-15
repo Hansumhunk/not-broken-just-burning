@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Plain-language privacy and data-use information for the Not Broken Just Burning website, browser-based reflection tools, and public contact email.">
+  <meta name="description" content="Plain-language privacy and data-use information for the Not Broken Just Burning website, browser-based reflection tools, member hub, and public contact email.">
   <meta name="theme-color" content="#09090b">
   <meta property="og:title" content="Privacy & Data Use | Not Broken Just Burning">
-  <meta property="og:description" content="How NBJB handles browser-based reflection tools, public email contact, and future data collection.">
+  <meta property="og:description" content="How NBJB handles browser-based reflection tools, device-local member preferences, public email contact, and future data collection.">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Not Broken Just Burning">
   <meta property="og:url" content="https://notbrokenjustburning.com/privacy.html">
@@ -36,18 +36,19 @@
     <section class="page-hero section-shell reveal">
       <p class="eyebrow">Privacy & Data Use</p>
       <h1>Your reflection should not become<br><span>somebody else's dataset.</span></h1>
-      <p class="hero-lead">The current NBJB site is deliberately simple. Its interactive reflection tools run in your browser and are designed not to submit or store what you type on an NBJB server.</p>
+      <p class="hero-lead">NBJB is deliberately designed to collect less. Reflection tools stay in your browser, and the first Member Hub stores only a lightweight member snapshot on your own device rather than creating a server-side profile.</p>
     </section>
 
     <section class="section-shell privacy-stack">
-      <article class="privacy-card reveal"><h2>What the current tools do</h2><p>The Forge, Flame Check-In, Pattern Map, Boundary Builder, One Stone Planner, and Flamewalker commitment operate with client-side JavaScript. Your entries exist in the page while it is open. The current code does not send those entries to an NBJB database, account system, analytics service, or email platform.</p></article>
+      <article class="privacy-card reveal"><h2>What the reflection tools do</h2><p>The Forge, Flame Check-In, Pattern Map, Boundary Builder, One Stone Planner, and Flamewalker commitment operate with client-side JavaScript. Your entries exist in the page while it is open. The current code does not send those entries to an NBJB database, account system, analytics service, or email platform.</p></article>
+      <article class="privacy-card reveal"><h2>What the Flamewalker Member Hub stores</h2><p>The development Member Hub can remember an optional name or nickname, current Path focus, next honest action, and selected Guardian Code values using your browser's <strong>localStorage</strong>. That information stays on that browser/device unless local software, browser sync, backups, or another person using the device can access it. The Hub includes a <strong>Clear This Device</strong> action that removes the NBJB member snapshot from localStorage. It is not currently uploaded to NBJB, GitHub, Gmail, or an analytics service.</p></article>
       <article class="privacy-card reveal"><h2>What “copy” does</h2><p>When you press a copy button, the site asks your browser to place the generated text on your device clipboard. The site does not receive a copy of that text.</p></article>
       <article class="privacy-card reveal"><h2>Public email contact</h2><p>NBJB can currently be contacted at <a href="mailto:notbrokenjustburning@gmail.com">notbrokenjustburning@gmail.com</a>. If you choose to email that address, the message and ordinary email metadata are processed through Gmail/Google and may remain in the mailbox until intentionally deleted. Emailing NBJB does <strong>not</strong> enroll you in a newsletter or mailing list.</p></article>
-      <article class="privacy-card reveal"><h2>No account or newsletter signup yet</h2><p>There is currently no NBJB account system, newsletter database, or website contact-form backend. Newsletter infrastructure is intentionally deferred until after the initial public launch. Any future subscriber system will be connected only after its provider, consent language, retention behavior, unsubscribe process, and privacy implications are documented here.</p></article>
+      <article class="privacy-card reveal"><h2>No server-side member account or newsletter signup yet</h2><p>The Member Hub does not currently create an NBJB login or cloud profile. There is also no newsletter database or website contact-form backend. Real member accounts and newsletter infrastructure will only be connected after the chosen providers, security rules, consent language, retention behavior, deletion/export options, unsubscribe process, and privacy implications are documented and tested.</p></article>
       <article class="privacy-card reveal"><h2>No first-party analytics at launch</h2><p>NBJB is launching without a first-party analytics or behavioral-tracking layer. The site does not currently add Google Analytics, Meta Pixel, or a similar visitor-tracking script. If analytics are added later, this notice should be updated before or alongside that change.</p></article>
       <article class="privacy-card reveal"><h2>Third-party requests</h2><p>The current pages load web fonts from Google Fonts. That means your browser may connect to Google's font infrastructure and transmit ordinary technical request information. Email links may open your chosen mail application. External links, including Facebook, crisis resources, and support resources, have their own privacy practices.</p></article>
-      <article class="privacy-card reveal"><h2>Hosting and technical logs</h2><p>The site is hosted with GitHub Pages at <strong>notbrokenjustburning.com</strong>. GitHub may process routine technical information such as IP address, browser details, request time, requested page, and security-related request data as part of operating and protecting the hosting service. NBJB does not receive reflection-tool entries through this hosting layer.</p></article>
-      <article class="privacy-card reveal"><h2>Do not enter or email secrets you cannot afford to expose</h2><p>Browser-only tools and ordinary email are useful communication methods, not magic armor. Shared devices, browser extensions, malware, screenshots, clipboard history, email forwarding, device backups, or other local software can affect privacy. Avoid entering or emailing passwords, financial credentials, government identifiers, medical records, or other high-risk secrets unless there is a specific and appropriate reason.</p></article>
+      <article class="privacy-card reveal"><h2>Hosting and technical logs</h2><p>The site is hosted with GitHub Pages at <strong>notbrokenjustburning.com</strong>. GitHub may process routine technical information such as IP address, browser details, request time, requested page, and security-related request data as part of operating and protecting the hosting service. NBJB does not receive reflection-tool entries or the device-local member snapshot through this hosting layer.</p></article>
+      <article class="privacy-card reveal"><h2>Do not enter or email secrets you cannot afford to expose</h2><p>Browser-only tools, localStorage, and ordinary email are useful technologies, not magic armor. Shared devices, browser extensions, malware, screenshots, clipboard history, browser sync, email forwarding, device backups, or other local software can affect privacy. Avoid entering or emailing passwords, financial credentials, government identifiers, medical records, or other high-risk secrets unless there is a specific and appropriate reason.</p></article>
     </section>
 
     <section class="section-shell privacy-principles reveal">
@@ -56,14 +57,14 @@
       <div class="principle-row"><span>01</span><p>Do not collect sensitive reflection content merely because technology makes it possible.</p></div>
       <div class="principle-row"><span>02</span><p>When data collection becomes necessary, ask clearly and explain the purpose before collection.</p></div>
       <div class="principle-row"><span>03</span><p>Separate public community participation from private therapeutic or legal material.</p></div>
-      <div class="principle-row"><span>04</span><p>Give people a realistic way to unsubscribe, leave, or stop sharing future data.</p></div>
+      <div class="principle-row"><span>04</span><p>Give people realistic ways to clear local data, delete an account, unsubscribe, leave, or stop future sharing.</p></div>
       <div class="principle-row"><span>05</span><p>Do not treat a one-time email as consent for future marketing.</p></div>
     </section>
 
     <section class="callout section-shell reveal">
       <p class="eyebrow">Current status</p>
       <h2>Privacy by limitation.</h2>
-      <p>The current site intentionally does less with personal data. That will remain the default unless a future feature has a clear reason to collect more.</p>
+      <p>The current site intentionally does less with personal data. That remains the default for the member system too. A login should not become an excuse to upload somebody's private reflections.</p>
       <div class="hero-actions center"><a class="button button-primary" href="contact.html">Contact NBJB</a><a class="button button-ghost" href="support.html">Support & Safety</a></div>
     </section>
   </main>

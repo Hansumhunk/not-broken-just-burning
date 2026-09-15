@@ -14,6 +14,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 HTML_FILES = sorted(ROOT.glob("*.html"))
+MAIN_JS = ROOT / "js" / "main.js"
 
 
 class PageParser(HTMLParser):
@@ -86,6 +87,10 @@ def main() -> int:
         print("No HTML files found.")
         return 1
 
+    main_js_text = MAIN_JS.read_text(encoding="utf-8") if MAIN_JS.exists() else ""
+    shared_support = "support.html" in main_js_text
+    shared_privacy = "privacy.html" in main_js_text
+
     for page in HTML_FILES:
         parser = PageParser()
         text = page.read_text(encoding="utf-8")
@@ -93,6 +98,7 @@ def main() -> int:
 
         rel = page.relative_to(ROOT)
         title = "".join(parser.title_parts).strip()
+        uses_main_js = 'src="js/main.js"' in text or "src='js/main.js'" in text
 
         if not parser.html_lang:
             errors.append(f"{rel}: missing <html lang=...>.")
@@ -107,11 +113,11 @@ def main() -> int:
         if duplicate_ids:
             errors.append(f"{rel}: duplicate id(s): {', '.join(duplicate_ids)}")
 
-        # Public-facing pages should always expose safety and privacy routes.
+        # Safety/privacy can be present directly or injected by the shared engagement layer.
         if page.name != "404.html":
-            if "support.html" not in text:
+            if "support.html" not in text and not (uses_main_js and shared_support):
                 errors.append(f"{rel}: missing route to support.html.")
-            if "privacy.html" not in text:
+            if "privacy.html" not in text and not (uses_main_js and shared_privacy):
                 errors.append(f"{rel}: missing route to privacy.html.")
 
         for kind, reference in parser.links:

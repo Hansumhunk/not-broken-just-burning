@@ -2,66 +2,96 @@
 
 Official website and digital platform for the **Not Broken Just Burning** movement.
 
-## Mission
-
-Build a public platform rooted in lived experience, emotional healing, spiritual awareness, psychological truth, boundaries, reclamation, and purpose.
-
 ## Current version
 
-**Version 0.6 — Engagement Foundation**
+**Version 0.7 — Launch Engineering**
 
-The project remains a lightweight static site using:
+Current deployment:
+
+**https://hansumhunk.github.io/not-broken-just-burning/**
+
+Official public channels:
+
+- Email: `notbrokenjustburning@gmail.com`
+- Facebook: `https://www.facebook.com/profile.php?id=61575787773619`
+
+## Mission
+
+Not Broken Just Burning is a survivor-led, fire-forged movement born from lived experience and aimed beyond one life.
+
+The founding mission used three verbs: **awaken, guide, protect**.
+
+The current public platform translates those into:
+
+- **Awaken** — increase clarity about what is happening inside and around us.
+- **Guide** — offer stories, questions, tools, language, and maps rather than pretending to own somebody else's answers.
+- **Protect** — strengthen agency, boundaries, discernment, dignity, and routes to appropriate real-world support.
+
+A recurring NBJB idea is **pain into power**. The site keeps that grounded: suffering is not automatically useful or noble. The work is deciding what can be learned, reclaimed, built, or carried forward without allowing pain to become identity.
+
+## Technology
+
+The public site intentionally remains lightweight:
 
 - HTML
 - CSS
-- Vanilla JavaScript
+- vanilla JavaScript
 - SVG brand assets
+- GitHub Pages
+- GitHub Actions validation
 
-This keeps the site fast, understandable, inexpensive to host, and easy to evolve.
+There is currently no account system, reflection database, or newsletter backend.
 
 ## Public architecture
 
 ```text
 index.html              Home / platform gateway
 path.html               Six-stage actionable Flamewalker Path
-forge.html              Evidence-based thought reflection tool
+forge.html              Thought reflection tool
 fire.html               Stories From the Fire library
-movement.html           Values, symbolism, founder, movement philosophy
+movement.html           Mission, values, symbolism, founder, future vision
 resources.html          Free tools and resources hub
-pattern-map.html        Pattern/evidence/inference mapping tool
-check-in.html           Short daily Flame Check-In
-join.html               Participation / Join the Movement page
+pattern-map.html        Pattern / evidence / inference mapping tool
+check-in.html           Daily Flame Check-In
+join.html               Participation / Join the Movement
+contact.html            Official email and social contact routes
 support.html            Crisis, domestic-violence, and safety routing
 privacy.html            Plain-language privacy and data-use notice
-story-armor.html        Full long-form reflection
-story-boundaries.html   Full long-form reflection
-story-one-stone.html    Full long-form reflection
-story-shame.html        Full shame/accountability reflection
-BRAND.md                Visual identity, terminology, voice, publishing rules
-ENGAGEMENT.md           Join, email, contact, safety, and privacy rules
-assets/
-  sigil.svg             Primary Eye + Flame vector mark
-  favicon.svg           Browser icon
-css/
-  style.css             Shared responsive design system
-  brand.css             Brand identity layer
-  experience.css        Tools, long-form reading, engagement, accessibility styles
-js/
-  main.js               Navigation, engagement wiring, and interactive tool behavior
+404.html                Custom not-found page
+story-armor.html        Full reflection
+story-boundaries.html   Full reflection
+story-one-stone.html    Full reflection
+story-shame.html        Shame / accountability reflection
+sitemap.xml             Current GitHub Pages sitemap
+robots.txt              Crawl policy and sitemap location
+BRAND.md                Brand language and publishing boundaries
+ENGAGEMENT.md           Contact, subscriber, safety, and privacy architecture
+scripts/validate_site.py Static-site validation
+.github/workflows/validate-site.yml Automated validation on site changes
 ```
 
 ## Brand system
 
-The identity is built around the **Eye + Flame** sigil:
+The Eye + Flame identity uses:
 
-- Eye = witness, memory, accountability, discernment
-- Flame = transformation, heat, purification, surviving energy
-- Triangle = structure, discipline, direction
-- Radiance = clarity carried outward
+- **Eye** — witness, memory, accountability, discernment
+- **Flame** — transformation and surviving energy
+- **Triangle** — structure, discipline, direction
+- **Radiance** — clarity carried outward
 
-Primary movement phrase:
+Primary phrase:
 
 **See clearly. Burn clean. Build deliberately.**
+
+### Guardian Code
+
+- Trust
+- Honor
+- Respect
+- Honesty
+- Loyalty
+
+These are behavioral filters, not demands for obedience.
 
 ### Flamewalker
 
@@ -69,7 +99,7 @@ A Flamewalker is the movement identity for a person doing the work of reclamatio
 
 ### Guardian
 
-Guardian is reserved as a future service and leadership identity grounded in emotional discipline, dignity, boundaries, and the Guardian Code. The public site should not imply that formal Guardian training or certification currently exists until such programs are actually launched.
+Guardian remains a future service / leadership identity. The public site must not imply that formal Guardian training, certification, paid mentorship, or professional services exist until they actually do.
 
 ## The Path
 
@@ -80,139 +110,126 @@ Guardian is reserved as a future service and leadership identity grounded in emo
 5. Voice of Fire
 6. Circle of the Flame
 
-The Path is a map, not a hierarchy. It includes a starting-point selector and one practical reflection/action at each stage.
+The Path is a map, not a hierarchy.
 
-Sacred Mirror Work explicitly includes **shame versus accountability**: learning what can be owned, repaired, or changed without converting mistakes, trauma responses, loyalty, love, or missed warnings into a verdict about personal worth.
+Sacred Mirror Work explicitly includes **shame versus accountability**, including the distinction between learning from choices or trauma responses and converting them into a verdict about personal worth.
 
 ## Free reflection tools
 
 ### Flame Check-In
 
-A short repeatable snapshot built around body, emotion, thought, boundary, need, and next action.
+A quick snapshot of body, emotion, thought, boundary, need, and next action.
 
 ### The Forge
 
-Examines difficult thoughts through fact versus assumption, evidence for and against, pattern recognition, compassionate perspective, the Six Sacred Questions, and a final rewritten thought.
+Separates fact from assumption, examines evidence for and against a thought, maps patterns, and rewrites the thought more accurately.
 
 ### Pattern Map
 
-Organizes an anchor event, before/after context, repetition, differences, verifiable evidence, inference, and a careful summary. It explicitly warns that repetition does not by itself prove motive, intent, or cause.
+Separates repetition, context, verifiable evidence, differences, and inference. It explicitly warns that repetition alone does not prove motive, intent, or cause.
 
 ### Boundary Builder
 
-Helps convert a vague sense that something is wrong into the behavior, impact, boundary, and action the user controls.
+Turns a vague sense that something is wrong into behavior, impact, boundary, and an action the user controls.
 
 ### One Stone Planner
 
-Helps separate an overwhelming problem into the larger mountain, one realistic action to take now, and what can intentionally wait.
+Breaks an overwhelming mountain into one realistic next action and what can intentionally wait.
 
-**Privacy design:** Current interactive entries are not submitted to a server or stored by the website. The tools run entirely in the visitor's browser and provide copy-to-clipboard functionality where appropriate.
+**Privacy design:** Current reflection entries remain in the visitor's browser session and are not submitted to an NBJB server.
 
 ## Content system
 
-Current long-form Stories From the Fire include:
+Current full Stories From the Fire include:
 
 - The Armor We Don't Need Forever
 - Boundaries Can Hurt
 - One Stone at a Time
 - The Shame That Wasn't Mine
 
-The shame reflection is adapted from Rickey Partin Jr.'s private journal while removing third-party identities and private legal/clinical claims. Its public lesson is the distinction between shame and accountability: loyalty is not stupidity, love is not blindness, and a trauma response is not a complete character reference.
+The content model is:
 
-Each long-form reflection follows a reusable **read → reflect → act** structure:
+**read → recognize → reflect → use a tool → choose an action → return**
 
-1. human experience / story theme
-2. grounded interpretation
-3. memorable anchor idea
-4. reflection question
-5. related NBJB tool or next action
-6. navigation back into the broader story library
+Private journals may inspire public reflections, but names, private case details, legal allegations, medical records, therapy records, and sensitive third-party information are removed unless there is a deliberate and appropriate reason to publish them.
 
-## V0.6 engagement foundation
+## Founding vision versus current offering
 
-V0.6 adds the first honest participation layer.
+Early NBJB descriptions imagined a larger ecosystem including digital storytelling, guided journaling, workbooks, coaching, ceremonies, community spaces, an in-person sanctuary, circles, retreats, tarot, energy readings, and other spiritual exploration.
 
-### Join the Movement
+Those ideas are historical or future vision unless deliberately launched.
 
-The Join page explains that participation currently means:
+**Do not present an imagined program as a current service.**
 
-- walking the Path
-- using the Resources
-- reading and applying Stories From the Fire
-- carrying the Guardian Code into ordinary life
-- optionally generating a browser-only personal Flamewalker commitment
+This matters especially where an offering could be mistaken for licensed mental-health treatment, crisis care, medical care, legal services, or another regulated profession.
 
-It does **not** pretend that the visitor created an account, joined a certification program, entered therapy, or enrolled in an email database.
+## Engagement and contact
 
-### Email updates
+Current engagement includes:
 
-Email/newsletter signup is intentionally **not active yet**. A real provider must be selected and documented before a form is enabled. See `ENGAGEMENT.md` for the provider and privacy requirements.
+- Join the Movement
+- optional browser-only Flamewalker commitment
+- official public Gmail inbox
+- official Facebook page
+- permanent Contact / Support / Privacy routes
 
-### Support & Safety
+Emailing NBJB once does **not** count as consent to receive marketing or newsletter messages.
 
-The site now has a dedicated Support & Safety page that clearly distinguishes reflective tools from crisis care. U.S. resources currently included and verified September 14, 2026:
+Newsletter signup remains intentionally inactive until a real subscriber provider, consent flow, unsubscribe process, retention policy, and privacy disclosure are configured and tested.
+
+## Support & Safety
+
+NBJB is educational and reflective. It is not crisis response, diagnosis, treatment, legal representation, or proof of motive / abuse / wrongdoing.
+
+The Support & Safety page includes U.S. routes for:
 
 - 911 for immediate life-threatening danger
-- 988 Suicide & Crisis Lifeline: call or text 988 / official chat
-- National Domestic Violence Hotline: 800-799-SAFE (7233), text START to 88788, official live chat
+- 988 Suicide & Crisis Lifeline
+- National Domestic Violence Hotline
 
-These resources should be rechecked before major public launches or periodically as the site is maintained.
+These should be periodically rechecked.
 
-### Privacy & Data Use
+## V0.7 launch engineering completed so far
 
-The site now documents:
+- [x] GitHub Pages deployment active
+- [x] Official public contact email
+- [x] Official Facebook channel
+- [x] Contact page
+- [x] Privacy disclosure for public email contact
+- [x] Custom 404 page
+- [x] `robots.txt`
+- [x] `sitemap.xml`
+- [x] `.nojekyll`
+- [x] automated static-site validator
+- [x] GitHub Actions validation workflow
+- [x] initial Open Graph metadata on major launch pages
 
-- browser-only reflection-tool behavior
-- clipboard behavior
-- absence of an account/newsletter/contact backend
-- Google Fonts third-party requests
-- future hosting-provider technical logs
-- the principle **Collect less. Explain more.**
+## Remaining before V1.0
 
-## Accessibility direction
-
-Current accessibility work includes:
-
-- skip-to-content links
-- keyboard-friendly navigation
-- Escape-key mobile-menu closing
-- visible focus-compatible interactive elements
-- reduced-motion support
-- semantic labels and live status text for interactive tools
-- permanent Support & Safety and Privacy routes
-
-Accessibility should continue to be checked as new features are added.
+- [ ] choose and connect real newsletter provider
+- [ ] define subscriber consent / unsubscribe / retention behavior
+- [ ] update privacy notice for newsletter provider
+- [ ] choose whether to keep GitHub Pages URL or add a custom domain
+- [ ] finish canonical URLs and Open Graph metadata across all public pages
+- [ ] create a proper raster social-sharing image
+- [ ] full desktop / tablet / phone QA
+- [ ] keyboard and accessibility review
+- [ ] verify every interactive tool with blank, normal, and very long input
+- [ ] final private-name / legal-allegation / unpublished-IP audit
+- [ ] decide whether to launch with privacy-minimal analytics or no analytics
 
 ## Publishing guardrails
 
-Project source material may include books, manuscripts, curricula, paid resources, merchandise concepts, private journals, therapy material, personal correspondence, legal material, and other sensitive or commercial intellectual property.
+Project storage may contain books, manuscripts, curricula, paid resources, private journals, therapy material, correspondence, legal material, merchandise ideas, and other sensitive or commercial IP.
 
-**Do not publish source material merely because it exists in connected storage.**
+**Do not publish source material merely because it exists.**
 
-Public content should follow these rules:
+Public content should:
 
-- Do not identify private third parties without an intentional editorial/legal decision.
-- Do not turn private legal or therapy records into public case files.
-- Adapt personal lessons into universal, useful concepts where appropriate.
-- Keep unpublished books, manuscripts, paid curricula, and future commercial products off the public site until deliberately prepared for release.
-- Present survivor-originated psychological or neurocognitive models as survivor-originated concepts unless independent research supports stronger claims.
-- Keep clear educational/personal-development disclaimers on reflective or mental-health-adjacent tools.
-
-## Next milestone: V0.7 — Launch Engineering
-
-Before public launch, the project should add or verify:
-
-- real email/newsletter provider and consent flow
-- non-crisis contact channel
-- custom domain decision
-- GitHub Pages deployment
-- sitemap and robots.txt
-- Open Graph/social-sharing metadata
-- SEO cleanup and structured metadata
-- broken-link and mobile QA
-- accessibility pass
-- privacy notice update for final hosting/email providers
-- analytics decision, preferably privacy-minimal
-- final review for private names, legal allegations, and unpublished paid IP
-
-Future commercial architecture such as books, paid guides, courses, events, merchandise, and Guardian training remains reserved until deliberately prepared for release.
+- avoid identifying private third parties without a deliberate editorial/legal reason
+- avoid turning private legal or therapy records into public case files
+- adapt personal lessons into universal, useful concepts where appropriate
+- keep unpublished books, curricula, and commercial materials private until deliberately released
+- label survivor-originated psychological or neurocognitive models accurately
+- avoid presenting spiritual interpretations as established scientific fact
+- keep clear scope and safety boundaries on mental-health-adjacent tools

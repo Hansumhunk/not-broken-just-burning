@@ -64,12 +64,21 @@
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: linear-gradient(150deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012));
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+a.resource-card:hover,
+a.resource-card:focus-visible {
+  transform: translateY(-4px);
+  border-color: var(--line-hot);
+  background: linear-gradient(150deg, rgba(255,122,45,0.07), rgba(255,255,255,0.012));
 }
 .resource-card > span { color: var(--ember-bright); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.15em; }
 .resource-card h2 { margin-top: auto; margin-bottom: 12px; font-size: clamp(1.8rem, 2.5vw, 2.45rem); }
 .resource-card p { color: var(--muted); }
 .resource-card > strong { margin-top: 12px; color: var(--ember-pale); font-size: 0.88rem; }
 .resource-card .text-link { margin-top: 12px; }
+.resource-grid-five .resource-card:nth-child(4),
+.resource-grid-five .resource-card:nth-child(5) { min-height: 300px; }
 
 .tool-panel {
   padding: 64px;
@@ -91,6 +100,34 @@
 .tool-output p:last-child { margin: 0; color: var(--text); font-size: 1rem; }
 .tool-output .eyebrow { margin-bottom: 8px; }
 
+.checkin-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.checkin-card {
+  display: flex;
+  flex-direction: column;
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: linear-gradient(150deg, rgba(255,255,255,0.03), rgba(255,255,255,0.012));
+}
+.checkin-card > span {
+  margin-bottom: 16px;
+  color: var(--ember-bright);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+.checkin-card > strong { margin-bottom: 12px; font-family: "Cinzel", serif; font-size: 1.18rem; }
+.checkin-card textarea { margin-top: auto; }
+.checkin-output { margin-top: 18px; }
+
+.pattern-grid .forge-field:nth-child(5),
+.pattern-grid .forge-field:nth-child(6) { border-color: rgba(255,122,45,0.24); }
+
 .story-card details { margin-top: 14px; }
 .story-card summary {
   cursor: pointer;
@@ -108,9 +145,15 @@
 @media (max-width: 900px) {
   .path-check { grid-template-columns: 1fr; gap: 24px; }
   .resource-grid { grid-template-columns: 1fr; }
-  .resource-card { min-height: 260px; }
+  .resource-card,
+  .resource-grid-five .resource-card:nth-child(4),
+  .resource-grid-five .resource-card:nth-child(5) { min-height: 260px; }
   .tool-panel { padding: 38px 28px; }
   .tool-grid.three { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 700px) {
+  .checkin-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 620px) {
@@ -119,4 +162,5 @@
   .tool-grid { grid-template-columns: 1fr; }
   .tool-panel { padding: 30px 20px; }
   .resource-grid { padding-bottom: 80px; }
+  .checkin-card { padding: 22px 18px; }
 }

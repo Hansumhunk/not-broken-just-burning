@@ -17,10 +17,32 @@ if (!document.querySelector('link[rel="icon"]')) {
 
 const navToggle = document.querySelector('.nav-toggle');
 const siteNav = document.querySelector('.site-nav');
-const navLinks = document.querySelectorAll('.site-nav a');
 const year = document.querySelector('#year');
+const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+
+// V0.6 engagement layer: expose Join from every existing page without rewriting every header.
+if (siteNav && !siteNav.querySelector('a[href="join.html"]')) {
+  const joinLink = document.createElement('a');
+  joinLink.href = 'join.html';
+  joinLink.textContent = 'Join';
+  joinLink.className = 'nav-join';
+  if (currentPage === 'join.html') joinLink.classList.add('active');
+  siteNav.appendChild(joinLink);
+}
+
+const navLinks = document.querySelectorAll('.site-nav a');
 
 if (year) year.textContent = new Date().getFullYear();
+
+// Add permanent support/privacy routes to legacy footers.
+const footerMeta = document.querySelector('.footer-meta');
+if (footerMeta && !footerMeta.querySelector('a[href="support.html"]')) {
+  const legalLinks = document.createElement('p');
+  legalLinks.className = 'footer-links';
+  legalLinks.innerHTML = '<a href="support.html">Support &amp; Safety</a> · <a href="privacy.html">Privacy &amp; Data Use</a>';
+  const disclaimer = footerMeta.querySelector('.disclaimer');
+  footerMeta.insertBefore(legalLinks, disclaimer || null);
+}
 
 function closeNavigation() {
   if (!siteNav || !navToggle) return;
@@ -347,4 +369,44 @@ document.querySelector('#clear-checkin')?.addEventListener('click', () => {
   if (checkinPreview) checkinPreview.textContent = 'Fill in what matters. Blank fields are allowed. Humans are not forms to be completed at 100%.';
   flashStatus(checkinStatus, 'Check-in cleared.');
   checkinFields[0]?.focus();
+});
+
+// FLAMEWALKER COMMITMENT: optional, private, and intentionally not a membership record.
+const commitmentBoxes = document.querySelectorAll('[data-commitment]');
+const commitmentPreview = document.querySelector('#commitment-preview');
+const commitmentStatus = document.querySelector('#commitment-status');
+
+function selectedCommitments() {
+  return Array.from(commitmentBoxes).filter((box) => box.checked).map((box) => box.value);
+}
+
+function buildCommitmentText() {
+  const selected = selectedCommitments();
+  if (!selected.length) return '';
+  return [
+    'NOT BROKEN JUST BURNING — MY FLAMEWALKER COMMITMENT', '',
+    ...selected.map((item) => `• ${item}`), '',
+    'See clearly. Burn clean. Build deliberately.', '',
+    'Personal reflection only. This is not membership, certification, or a contract.'
+  ].join('\n');
+}
+
+document.querySelector('#build-commitment')?.addEventListener('click', () => {
+  const selected = selectedCommitments();
+  if (!selected.length) return flashStatus(commitmentStatus, 'Choose at least one statement first.');
+  if (commitmentPreview) commitmentPreview.textContent = selected.join(' ');
+  flashStatus(commitmentStatus, 'Commitment built.');
+});
+
+document.querySelector('#copy-commitment')?.addEventListener('click', async () => {
+  const text = buildCommitmentText();
+  if (!text) return flashStatus(commitmentStatus, 'Choose at least one statement first.');
+  flashStatus(commitmentStatus, await copyText(text) ? 'Commitment copied.' : 'Copy failed.');
+});
+
+document.querySelector('#clear-commitment')?.addEventListener('click', () => {
+  commitmentBoxes.forEach((box) => { box.checked = false; });
+  if (commitmentPreview) commitmentPreview.textContent = 'Choose one or more statements, then build your commitment.';
+  flashStatus(commitmentStatus, 'Commitment cleared.');
+  commitmentBoxes[0]?.focus();
 });

@@ -47,6 +47,7 @@ Shared layers:
 - `js/member-service.js` — storage/service adapter
 - `js/member-platform.js` — shared member navigation, My Work, Progress, profile, Path, and settings behavior
 - `js/tool-member-history.js` — shared explicit Save to My Work bridge for all six Toolbox tools
+- `js/member-history-insights.js` — structured My Work filters and transparent 7 / 30 / 90-day review summaries
 
 The UI is separated from its storage mechanism:
 
@@ -82,9 +83,9 @@ Keeping archive and interpretation separate makes both easier to understand.
 
 The explicit-save flow is:
 
-`use tool → review result → choose Save to My Work → confirm device-local save → My Work → optional longitudinal Progress review`
+`use tool → review result → optionally add comparison context → choose Save to My Work → confirm device-local save → My Work → optional longitudinal Progress review`
 
-All six Toolbox tools now use the same shared save bridge:
+All six Toolbox tools use the same shared save bridge:
 
 - The Forge
 - Flame Check-In
@@ -95,11 +96,41 @@ All six Toolbox tools now use the same shared save bridge:
 
 Normal tool use does **not** add anything to My Work. Saving requires a separate member-controlled action and confirmation.
 
-Current saved records can include tool-specific fields, a title, summary, timestamp, and future tags. My Work can search, filter, copy, inspect, and remove saved entries.
+## Structured saved-work metadata
+
+A saved entry can now carry optional member-selected comparison metadata in addition to its tool-specific fields, title, summary, and timestamp.
+
+Current optional themes are:
+
+- Work
+- Relationships
+- Family
+- Parenting
+- Money
+- Identity
+- Boundaries
+- Conflict
+- Grief
+- Wellbeing
+- Purpose
+- Trust
+
+A member can select up to six themes for a saved entry. These themes are not inferred by the system.
+
+Optional structured context can also include:
+
+- context — what was happening around the entry
+- outcome — member-marked as improved, mixed, unchanged, harder, still unfolding, or not recorded
+- what helped
+- what changed
+
+These fields exist so later reviews can compare what the member chose to record. They are not clinical measures, scores, truth ratings, or automated conclusions.
+
+My Work can now search saved details and filter by tool, theme, and member-marked outcome.
 
 ## Current longitudinal review
 
-Pattern Map remains the first tool with a dedicated longitudinal comparison because its structure naturally supports repeated-event review.
+Pattern Map remains the first tool with a dedicated repeated-language comparison because its structure naturally supports repeated-event review.
 
 A saved Pattern Map can include:
 
@@ -116,28 +147,21 @@ After multiple saved Pattern Maps, Progress can surface repeated language across
 
 Five saved Pattern Maps is the current UX threshold for calling the view a longitudinal review. This is a product threshold, not a scientific or clinical threshold.
 
-## Next history layer
+## Flame Review prototype
 
-The next useful development phase is structured, member-selected metadata rather than increasingly clever guesswork.
+Progress now includes transparent **7-day, 30-day, and 90-day Flame Review** windows.
 
-Potential optional tags / themes include:
+Each review can summarize only the member's deliberately saved information within that period:
 
-- work
-- relationship
-- parenting
-- money
-- boundary
-- conflict
-- identity
-- fear
-- anger
-- grief
-- health
-- decision
+- number of saved entries
+- themes the member selected most often
+- outcomes the member explicitly marked
+- tools used
+- one reflection question based on the saved history
 
-Future saved-work metadata may also distinguish trigger/context, response, outcome, what helped, and what changed. The member should remain able to correct or ignore any suggested pattern.
+The review does not diagnose, score, rank, or announce a hidden pattern as fact. When structured metadata is absent, it says so rather than inferring it from private writing.
 
-After structured history exists, the platform can build transparent 7-day, 30-day, and 90-day Flame Reviews.
+This is the foundation for a future richer periodic review that may compare actions, exceptions, recurring contexts, and member-chosen Pattern Lenses while preserving the distinction between observation and interpretation.
 
 ## Privacy boundary
 

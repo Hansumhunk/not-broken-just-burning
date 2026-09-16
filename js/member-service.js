@@ -132,16 +132,35 @@
     return save(data);
   }
 
+  function normalizeMeta(meta = {}) {
+    const themes = Array.isArray(meta.themes)
+      ? [...new Set(meta.themes.map((theme) => String(theme).trim()).filter(Boolean))].slice(0, 6)
+      : [];
+    const allowedOutcomes = ['', 'improved', 'mixed', 'unchanged', 'harder', 'still-unfolding'];
+    const outcome = allowedOutcomes.includes(String(meta.outcome || '')) ? String(meta.outcome || '') : '';
+    return {
+      themes,
+      context: String(meta.context || '').trim().slice(0, 1200),
+      outcome,
+      helped: String(meta.helped || '').trim().slice(0, 1200),
+      changed: String(meta.changed || '').trim().slice(0, 1200)
+    };
+  }
+
   function recordToolEntry(tool, payload = {}) {
     const data = load();
     const now = Date.now();
+    const meta = normalizeMeta(payload.meta || {});
     const entry = {
       id: `${String(tool || 'tool').toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${now}-${Math.random().toString(36).slice(2, 8)}`,
       tool: tool || 'Member Tool',
       createdAt: now,
       title: String(payload.title || '').slice(0, 160),
       summary: String(payload.summary || '').slice(0, 2400),
-      tags: Array.isArray(payload.tags) ? payload.tags.slice(0, 12).map((tag) => String(tag).slice(0, 60)) : [],
+      tags: meta.themes.length
+        ? meta.themes
+        : (Array.isArray(payload.tags) ? payload.tags.slice(0, 12).map((tag) => String(tag).slice(0, 60)) : []),
+      meta,
       data: payload.data && typeof payload.data === 'object' ? payload.data : {}
     };
     data.activity.entries = [entry, ...(data.activity.entries || [])].slice(0, MAX_ACTIVITY_ENTRIES);
@@ -154,6 +173,21 @@
   function listEntries(tool = '') {
     const entries = load().activity.entries || [];
     return tool ? entries.filter((entry) => entry.tool === tool) : entries;
+  }
+
+  function updateEntry(id, patch = {}) {
+    const data = load();
+    const index = (data.activity.entries || []).findIndex((entry) => entry.id === id);
+    if (index < 0) return { ok: false, data, error: new Error('Entry not found') };
+    const current = data.activity.entries[index];
+    data.activity.entries[index] = {
+      ...current,
+      ...patch,
+      tags: Array.isArray(patch.tags) ? patch.tags.slice(0, 12).map((tag) => String(tag).slice(0, 60)) : current.tags,
+      meta: patch.meta ? normalizeMeta(patch.meta) : normalizeMeta(current.meta || { themes: current.tags || [] }),
+      data: patch.data && typeof patch.data === 'object' ? patch.data : current.data
+    };
+    return save(data);
   }
 
   function removeEntry(id) {
@@ -194,6 +228,7 @@
     noteTool,
     recordToolEntry,
     listEntries,
+    updateEntry,
     removeEntry,
     clearActivity,
     reset,

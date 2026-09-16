@@ -1,0 +1,68 @@
+/* Mobile reading guardrails for long display headings.
+   Keep the typography dramatic without making visitors drag the page sideways. */
+@media (max-width: 760px) {
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .section-shell,
+  .story-panel,
+  .founder-panel,
+  .long-read,
+  .article-shell,
+  .long-read-header,
+  .article-header,
+  .story-panel > div,
+  .founder-panel > div {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .long-read-header h1,
+  .article-header h1,
+  .page-hero h1 {
+    max-width: 100%;
+    font-size: clamp(2.15rem, 9.8vw, 2.9rem);
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+    overflow-wrap: break-word;
+    word-break: normal;
+  }
+
+  .story-panel h2,
+  .founder-panel h2 {
+    max-width: 100%;
+    font-size: clamp(1.9rem, 8.8vw, 2.55rem);
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    overflow-wrap: break-word;
+    word-break: normal;
+  }
+
+  .long-read-header h1 span,
+  .article-header h1 span {
+    max-width: 100%;
+  }
+
+  img,
+  svg,
+  video,
+  iframe {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  .long-read-header h1,
+  .article-header h1,
+  .page-hero h1 {
+    font-size: clamp(2rem, 9.2vw, 2.5rem);
+  }
+
+  .story-panel h2,
+  .founder-panel h2 {
+    font-size: clamp(1.8rem, 8.3vw, 2.25rem);
+  }
+}

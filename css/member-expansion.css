@@ -186,6 +186,13 @@
 .member-work-details dt { color: var(--text); font-weight: 800; text-transform: capitalize; }
 .member-work-details dd { margin: 5px 0 0; color: var(--muted); white-space: pre-wrap; overflow-wrap: anywhere; }
 
+.member-work-editor { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+.member-work-editor > summary { color: var(--ember-pale); font-weight: 800; cursor: pointer; }
+.member-work-editor > p { margin: 10px 0 14px; color: var(--muted); font-size: .9rem; }
+.member-work-editor .member-history-themes { margin-top: 10px; }
+.member-work-editor .member-history-meta-grid { margin-top: 14px; }
+.member-work-editor .member-actions { margin-top: 14px; }
+
 .member-review-heading { display: flex; justify-content: space-between; gap: 24px; align-items: end; }
 .member-review-heading > div:first-child { max-width: 760px; }
 .member-review-switch { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -210,6 +217,35 @@
 .member-review-question { margin-top: 14px; padding: 20px; border-left: 3px solid var(--ember-bright); border-radius: 0 14px 14px 0; background: rgba(255,122,45,.045); }
 .member-review-question span { display: block; margin-bottom: 7px; color: var(--ember-pale); font-size: .76rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
 .member-review-question strong { color: var(--text); font-size: 1.05rem; }
+.member-review-save { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 18px; padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.016); }
+.member-review-save > div { display: grid; gap: 7px; }
+.member-review-save > .member-actions { grid-column: 1 / -1; }
+.member-review-save label,
+.member-lens-form label { color: var(--text); font-size: .86rem; font-weight: 800; }
+.member-review-save textarea,
+.member-lens-form input,
+.member-lens-form textarea,
+.member-lens-entry select { width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; background: #0e0e12; color: var(--text); font: inherit; }
+.member-review-save textarea,
+.member-lens-form textarea { resize: vertical; line-height: 1.45; }
+.member-review-save textarea:focus,
+.member-lens-form input:focus,
+.member-lens-form textarea:focus,
+.member-lens-entry select:focus { outline: 2px solid rgba(255,122,45,.28); border-color: var(--ember-bright); }
+
+.member-lens-form { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 14px; margin-top: 18px; }
+.member-lens-form label { display: grid; gap: 7px; }
+.member-lens-form .member-actions { grid-column: 1 / -1; }
+.member-lens-summary { margin-top: 18px; padding: 16px 18px; border-left: 3px solid var(--ember-bright); border-radius: 0 14px 14px 0; background: rgba(255,122,45,.045); }
+.member-lens-summary strong { color: var(--ember-pale); }
+.member-lens-summary p { margin: 6px 0 0; color: var(--muted); }
+.member-lens-list { display: grid; gap: 10px; margin-top: 16px; }
+.member-lens-entry { display: grid; grid-template-columns: minmax(0, 1fr) minmax(190px, .42fr); gap: 14px; align-items: center; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.016); }
+.member-lens-entry > div { display: grid; gap: 3px; }
+.member-lens-entry span { color: var(--ember-pale); font-size: .78rem; font-weight: 800; }
+.member-lens-entry strong { color: var(--text); }
+.member-lens-entry small { color: var(--muted); }
+.member-lens-entry select:disabled { opacity: .48; cursor: not-allowed; }
 
 .member-video-placeholder {
   aspect-ratio: 16 / 9;
@@ -256,7 +292,12 @@
   .member-work-stats,
   .member-work-controls,
   .member-history-meta-grid,
-  .member-review-grid { grid-template-columns: 1fr; }
+  .member-review-grid,
+  .member-review-save,
+  .member-lens-form,
+  .member-lens-entry { grid-template-columns: 1fr; }
   .member-history-top,
   .member-review-heading { flex-direction: column; align-items: stretch; gap: 8px; }
+  .member-review-save > .member-actions,
+  .member-lens-form .member-actions { grid-column: auto; }
 }

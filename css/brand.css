@@ -222,7 +222,20 @@
   .forge-field::before { transition: none; }
 }
 
+/* Story libraries keep whole words intact on phones. The shared experience layer
+   allows emergency wrapping for generic card titles, so this more specific rule
+   prevents words such as “framework” and “reciprocity” from being split mid-word. */
+@media (max-width: 760px) {
+  .story-card h3 {
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    hyphens: none;
+  }
+}
+
+/* On narrow phones, one readable card is better than two cramped columns. */
 @media (max-width: 560px) {
+  .story-card-grid { grid-template-columns: 1fr; }
   .brand-mark { width: 42px; height: 42px; flex-basis: 42px; }
   .hero-symbol::before { width: min(300px, 84vw); }
   .symbol-visual::before { width: min(285px, 78vw); }

@@ -280,6 +280,12 @@
     document.querySelectorAll('[data-review-window]').forEach((button) => {
       button.addEventListener('click', () => renderReview(Number(button.dataset.reviewWindow) || 30));
     });
+    document.querySelector('#clear-member-activity')?.addEventListener('click', () => {
+      window.setTimeout(() => {
+        const active = document.querySelector('[data-review-window].active');
+        renderReview(Number(active?.dataset.reviewWindow) || 30);
+      }, 0);
+    });
     renderReview(30);
   }
 

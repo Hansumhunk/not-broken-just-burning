@@ -74,6 +74,10 @@
     return 'Public / Guest';
   }
 
+  function blockLockedLink(event) {
+    if (event.currentTarget?.dataset?.accessState === 'locked') event.preventDefault();
+  }
+
   function apply() {
     const state = load();
 
@@ -87,10 +91,13 @@
       node.dataset.accessState = allowed ? 'available' : 'locked';
       node.setAttribute('aria-disabled', allowed ? 'false' : 'true');
 
-      if (node instanceof HTMLButtonElement) node.disabled = !allowed;
+      if (node instanceof HTMLButtonElement) {
+        const isPlaceholder = node.hasAttribute('data-placeholder');
+        node.disabled = isPlaceholder || !allowed;
+      }
 
-      if (node instanceof HTMLAnchorElement && !allowed) {
-        node.addEventListener('click', (event) => event.preventDefault(), { once: true });
+      if (node instanceof HTMLAnchorElement) {
+        node.addEventListener('click', blockLockedLink);
       }
     });
 

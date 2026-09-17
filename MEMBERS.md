@@ -20,6 +20,21 @@ A Flamewalker is the movement identity for a person doing the work of reclamatio
 
 Guardian remains a future service / leadership role with responsibilities and defined scope. It is not automatically unlocked by time, purchases, clicks, or status points.
 
+## Access model
+
+Phase Two is designed around four access classes:
+
+1. **Public**
+2. **Free Flamewalker**
+3. **Paid Flamewalker**
+4. **Separate product / event entitlements**
+
+Public remains genuinely useful. Free membership creates the return point and opens the starter Library. Paid membership provides the deeper recurring learning and continuity layer. Flagship courses, books, workbooks, specialty programs, and live events may remain separate purchases with paid-member preferred pricing where designated.
+
+The detailed architecture lives in `ACCESS_MODEL.md`.
+
+Current development includes `js/member-entitlements.js`, a local prototype-only entitlement service for testing Free vs Paid member UI before real authentication and billing exist. It is not security.
+
 ## Front-end first, backend second
 
 The member experience is being designed before the final authentication/database provider is connected.
@@ -48,6 +63,7 @@ Shared layers:
 - `js/member-platform.js` — shared member navigation, My Work, Progress, profile, Path, and settings behavior
 - `js/tool-member-history.js` — shared explicit Save to My Work bridge for all six Toolbox tools
 - `js/member-history-insights.js` — structured My Work filters and transparent 7 / 30 / 90-day review summaries
+- `js/member-entitlements.js` — prototype-only Free / Paid / product / event access vocabulary for front-end testing
 
 The UI is separated from its storage mechanism:
 
@@ -56,6 +72,8 @@ The UI is separated from its storage mechanism:
 ## Current device-local data model
 
 The current prototype stores low-sensitivity continuity data under `nbjb.member.v2` and can migrate the earlier `nbjb.member.v1` snapshot.
+
+A separate development-only entitlement simulator stores a local Free/Paid test tier under `nbjb.member.entitlement.prototype.v1`. This exists only so the front end can be tested before the backend becomes authoritative.
 
 Current local member data can include:
 
@@ -175,11 +193,21 @@ Future cloud history should require a deliberate sync choice, deletion controls,
 
 ## Video / learning strategy
 
-**website = organized learning home**
+**Public channels = discovery, trailers, clips, excerpts, and movement introductions**
+
+**Free Flamewalker = first organized instructional video layer**
+
+**Paid Flamewalker = deeper recurring video / learning library**
+
+**Separate product entitlement = flagship course or specialty-program video**
 
 **Discord = conversation / announcements / live community companion**
 
-Members should not have to search Discord history to find an official lesson, replay, worksheet, or course module. Large video files should not be stored directly in the GitHub repository. Future protected video should use a delivery model that supports real access control where appropriate.
+The organized instructional NBJB video library begins at Free Flamewalker access. Public YouTube may introduce the movement and publish promotional clips or excerpts, but it should not be treated as the protected learning library.
+
+Members should not have to search Discord history to find an official lesson, replay, worksheet, or course module.
+
+Large video files should not be stored directly in the public GitHub repository. Unlisted YouTube URLs are not reliable authorization. Future protected video should use a delivery model that supports authenticated or signed access.
 
 ## Storefront strategy
 
@@ -187,7 +215,11 @@ The eventual commerce flow should be:
 
 `member → checkout provider → successful purchase → entitlement on member account → owned item appears in Member Library`
 
-A storefront card is not security. Private manuscripts, paid courses, unreleased books, and proprietary files must not be committed as public static assets and hidden behind links.
+The account model must distinguish Free Flamewalker, Paid Flamewalker, separately owned products, and event access. Do not reduce final authorization to one `is_member` boolean.
+
+Paid membership can provide preferred pricing on designated standalone products without automatically bundling every flagship course, book, workbook, workshop, or specialty program into the recurring subscription.
+
+A storefront card is not security. Private manuscripts, paid courses, protected videos, unreleased books, and proprietary files must not be committed as public static assets and hidden behind links.
 
 ## Community / discussion strategy
 

@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
-"""Validate NBJB's static HTML, internal navigation, SEO wiring, and launch-critical files.
+"""Validate NBJB's static site, navigation, internal links, SEO, and launch wiring.
 
 Uses only the Python standard library so it can run locally or in GitHub Actions.
-The validator checks structure and wiring, not the truth of editorial content.
+The validator checks structure and technical consistency, not the truth of editorial content.
 """
+
 from __future__ import annotations
+
+from collections import Counter, defaultdict
+from dataclasses import dataclass
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
-import re
 import sys
+import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 HTML_FILES = sorted(ROOT.glob("*.html"))
@@ -17,123 +21,388 @@ MAIN_JS = ROOT / "js" / "main.js"
 CNAME = ROOT / "CNAME"
 ROBOTS = ROOT / "robots.txt"
 SITEMAP = ROOT / "sitemap.xml"
+SOCIAL_IMAGE = ROOT / "assets" / "social-share.png"
 SITE_ORIGIN = "https://notbrokenjustburning.com"
 OLD_PAGES_ORIGIN = "https://hansumhunk.github.io/not-broken-just-burning"
+CORE_NAV = {
+    "path.html",
+    "forge.html",
+    "fire.html",
+    "movement.html",
+    "resources.html",
+}
+RUNTIME_NAV = {"founder.html", "join.html"}
+SITEMAP_NS = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+
+
+@dataclass
+class LinkRef:
+    tag: str
+    attr: str
+    reference: str
+    target_blank: bool = False
+    rel: str = ""
+
 
 class PageParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
-        self.links=[]; self.ids=[]; self.title_parts=[]; self.in_title=False
-        self.has_description=False; self.has_main=False; self.html_lang=""; self.noindex=False
-        self.h1_count=0; self.images_missing_alt=[]; self.meta={}; self.canonical=""
-    def handle_starttag(self, tag, attrs):
-        data={k:(v or "") for k,v in attrs}
-        if tag=="html": self.html_lang=data.get("lang","").strip()
-        if tag=="title": self.in_title=True
-        if tag=="main": self.has_main=True
-        if tag=="h1": self.h1_count += 1
-        if "id" in data and data["id"]: self.ids.append(data["id"])
-        if tag=="meta":
-            key=(data.get("name") or data.get("property") or "").lower().strip()
-            content=data.get("content","").strip()
-            if key: self.meta[key]=content
-            if key=="description" and content: self.has_description=True
-            if key=="robots" and "noindex" in content.lower(): self.noindex=True
-        if tag=="a" and data.get("href"): self.links.append(("href",data["href"]))
-        if tag=="link" and data.get("href"):
-            self.links.append(("href",data["href"]))
-            if "canonical" in data.get("rel","").lower(): self.canonical=data["href"]
-        if tag=="script" and data.get("src"): self.links.append(("src",data["src"]))
-        if tag in {"img","source"} and data.get("src"):
-            self.links.append(("src",data["src"]))
-            if tag=="img" and "alt" not in data: self.images_missing_alt.append(data["src"])
-    def handle_endtag(self, tag):
-        if tag=="title": self.in_title=False
-    def handle_data(self,data):
-        if self.in_title: self.title_parts.append(data)
+        self.links: list[LinkRef] = []
+        self.ids: list[str] = []
+        self.title_parts: list[str] = []
+        self.in_title = False
+        self.has_description = False
+        self.description = ""
+        self.has_main = False
+        self.html_lang = ""
+        self.noindex = False
+        self.h1_count = 0
+        self.canonical_urls: list[str] = []
+        self.og: dict[str, list[str]] = defaultdict(list)
+        self.twitter_card = ""
+        self.site_nav_links: list[str] = []
+        self.in_site_nav = False
+        self.images_missing_alt = 0
 
-def is_external(ref):
-    return ref.lower().strip().startswith(("http://","https://","mailto:","tel:","sms:","data:","javascript:"))
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        data = {key: value or "" for key, value in attrs}
+        classes = set(data.get("class", "").split())
 
-def local_target(page, ref):
-    if not ref or ref.startswith("#") or is_external(ref): return None
-    path=unquote(urlsplit(ref).path)
-    if not path: return None
-    target=(ROOT/path.lstrip("/")) if path.startswith("/") else (page.parent/path)
-    if path.endswith("/"): target=target/"index.html"
+        if tag == "html":
+            self.html_lang = data.get("lang", "").strip()
+        if tag == "title":
+            self.in_title = True
+        if tag == "main":
+            self.has_main = True
+        if tag == "h1":
+            self.h1_count += 1
+        if tag == "nav" and "site-nav" in classes:
+            self.in_site_nav = True
+
+        if "id" in data and data["id"]:
+            self.ids.append(data["id"])
+
+        if tag == "meta":
+            name = data.get("name", "").lower().strip()
+            prop = data.get("property", "").lower().strip()
+            content = data.get("content", "").strip()
+            if name == "description" and content:
+                self.has_description = True
+                self.description = content
+            if name == "robots" and "noindex" in content.lower():
+                self.noindex = True
+            if name == "twitter:card" and content:
+                self.twitter_card = content
+            if prop.startswith("og:") and content:
+                self.og[prop].append(content)
+
+        if tag == "link" and data.get("href"):
+            rel_tokens = set(data.get("rel", "").lower().split())
+            if "canonical" in rel_tokens:
+                self.canonical_urls.append(data["href"])
+
+        if tag == "a" and data.get("href"):
+            ref = data["href"]
+            self.links.append(
+                LinkRef(
+                    tag="a",
+                    attr="href",
+                    reference=ref,
+                    target_blank=data.get("target", "").lower() == "_blank",
+                    rel=data.get("rel", "").lower(),
+                )
+            )
+            if self.in_site_nav:
+                self.site_nav_links.append(urlsplit(ref).path)
+
+        if tag == "link" and data.get("href"):
+            self.links.append(LinkRef(tag="link", attr="href", reference=data["href"]))
+        if tag == "script" and data.get("src"):
+            self.links.append(LinkRef(tag="script", attr="src", reference=data["src"]))
+        if tag in {"img", "source"} and data.get("src"):
+            self.links.append(LinkRef(tag=tag, attr="src", reference=data["src"]))
+        if tag == "img" and "alt" not in data:
+            self.images_missing_alt += 1
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "title":
+            self.in_title = False
+        if tag == "nav" and self.in_site_nav:
+            self.in_site_nav = False
+
+    def handle_data(self, data: str) -> None:
+        if self.in_title:
+            self.title_parts.append(data)
+
+
+def is_external(reference: str) -> bool:
+    lower = reference.lower().strip()
+    return lower.startswith(
+        ("http://", "https://", "mailto:", "tel:", "sms:", "data:", "javascript:")
+    )
+
+
+def local_target(page: Path, reference: str) -> Path | None:
+    if not reference or is_external(reference):
+        return None
+    split = urlsplit(reference)
+    path = unquote(split.path)
+    if not path:
+        return page.resolve() if split.fragment else None
+    if path.startswith("/"):
+        target = ROOT / path.lstrip("/")
+    else:
+        target = page.parent / path
+    if path.endswith("/"):
+        target = target / "index.html"
     return target.resolve()
 
-def parse_page(page):
-    p=PageParser(); p.feed(page.read_text(encoding="utf-8")); return p
 
-def check_launch_files(errors):
-    if not CNAME.exists(): errors.append("CNAME: missing custom-domain file.")
-    elif CNAME.read_text(encoding="utf-8").strip()!="notbrokenjustburning.com": errors.append("CNAME: must contain exactly notbrokenjustburning.com.")
-    if not ROBOTS.exists(): errors.append("robots.txt: missing.")
+def expected_page_url(page: Path) -> str:
+    return SITE_ORIGIN + ("/" if page.name == "index.html" else f"/{page.name}")
+
+
+PAGE_CACHE: dict[Path, PageParser] = {}
+
+
+def parse_page(page: Path) -> PageParser:
+    resolved = page.resolve()
+    if resolved not in PAGE_CACHE:
+        parser = PageParser()
+        parser.feed(page.read_text(encoding="utf-8"))
+        PAGE_CACHE[resolved] = parser
+    return PAGE_CACHE[resolved]
+
+
+def sitemap_urls(errors: list[str]) -> list[str]:
+    if not SITEMAP.exists():
+        errors.append("sitemap.xml: missing.")
+        return []
+    try:
+        root = ET.parse(SITEMAP).getroot()
+    except ET.ParseError as exc:
+        errors.append(f"sitemap.xml: invalid XML: {exc}")
+        return []
+
+    urls = [
+        (node.text or "").strip()
+        for node in root.findall(".//sm:loc", SITEMAP_NS)
+        if (node.text or "").strip()
+    ]
+    duplicates = sorted(url for url, count in Counter(urls).items() if count > 1)
+    if duplicates:
+        errors.append(f"sitemap.xml: duplicate URL(s): {', '.join(duplicates)}")
+    return urls
+
+
+def check_launch_files(errors: list[str], warnings: list[str]) -> set[str]:
+    if not CNAME.exists():
+        errors.append("CNAME: missing custom-domain file.")
+    elif CNAME.read_text(encoding="utf-8").strip() != "notbrokenjustburning.com":
+        errors.append("CNAME: must contain exactly notbrokenjustburning.com.")
+
+    if not ROBOTS.exists():
+        errors.append("robots.txt: missing.")
     else:
-        text=ROBOTS.read_text(encoding="utf-8")
-        if f"Sitemap: {SITE_ORIGIN}/sitemap.xml" not in text: errors.append("robots.txt: sitemap must use the custom domain.")
-        if OLD_PAGES_ORIGIN in text: errors.append("robots.txt: still references temporary Pages URL.")
-    if not SITEMAP.exists(): errors.append("sitemap.xml: missing."); return
-    text=SITEMAP.read_text(encoding="utf-8")
-    if OLD_PAGES_ORIGIN in text: errors.append("sitemap.xml: still references temporary Pages URL.")
-    locs=re.findall(r"<loc>(.*?)</loc>",text)
-    dupes=sorted({x for x in locs if locs.count(x)>1})
-    if dupes: errors.append("sitemap.xml: duplicate URL(s): "+", ".join(dupes))
-    if f"{SITE_ORIGIN}/" not in locs: errors.append("sitemap.xml: missing custom-domain homepage URL.")
-    for page in HTML_FILES:
-        p=parse_page(page)
-        if page.name=="404.html" or p.noindex: continue
-        expected=f"{SITE_ORIGIN}/" if page.name=="index.html" else f"{SITE_ORIGIN}/{page.name}"
-        if expected not in locs: errors.append(f"sitemap.xml: missing {page.name}.")
+        robots_text = ROBOTS.read_text(encoding="utf-8")
+        if f"Sitemap: {SITE_ORIGIN}/sitemap.xml" not in robots_text:
+            errors.append("robots.txt: sitemap must use the custom domain.")
+        if OLD_PAGES_ORIGIN in robots_text:
+            errors.append("robots.txt: still references the temporary GitHub Pages URL.")
 
-def main():
-    errors=[]; warnings=[]
-    if not HTML_FILES: print("No HTML files found."); return 1
-    parsed={p:parse_page(p) for p in HTML_FILES}
-    main_js=MAIN_JS.read_text(encoding="utf-8") if MAIN_JS.exists() else ""
-    shared_support="support.html" in main_js; shared_privacy="privacy.html" in main_js
-    shared_canonical=SITE_ORIGIN in main_js and "canonical" in main_js
-    check_launch_files(errors)
-    for page,p in parsed.items():
-        rel=page.relative_to(ROOT); text=page.read_text(encoding="utf-8"); title="".join(p.title_parts).strip()
-        uses_main_js='src="js/main.js"' in text or "src='js/main.js'" in text
-        if not p.html_lang: errors.append(f"{rel}: missing <html lang>.")
-        if not title: errors.append(f"{rel}: missing non-empty <title>.")
-        if not p.has_description: errors.append(f"{rel}: missing meta description.")
-        if not p.has_main: errors.append(f"{rel}: missing <main> landmark.")
-        if page.name!="404.html" and p.h1_count!=1: warnings.append(f"{rel}: expected one H1; found {p.h1_count}.")
-        if p.images_missing_alt: errors.append(f"{rel}: image(s) missing alt attribute: {', '.join(p.images_missing_alt)}")
-        if page.name!="404.html":
-            if not p.canonical and not (uses_main_js and shared_canonical): errors.append(f"{rel}: missing custom-domain canonical URL or shared fallback.")
-            if p.canonical and not p.canonical.startswith(SITE_ORIGIN): errors.append(f"{rel}: canonical is not on custom domain: {p.canonical}")
-            for key in ("og:title","og:description","og:url"):
-                if not p.meta.get(key): warnings.append(f"{rel}: missing {key} metadata.")
-            if p.meta.get("og:url") and not p.meta["og:url"].startswith(SITE_ORIGIN): errors.append(f"{rel}: og:url is not on custom domain.")
-        dupes=sorted({x for x in p.ids if p.ids.count(x)>1})
-        if dupes: errors.append(f"{rel}: duplicate id(s): {', '.join(dupes)}")
-        if page.name!="404.html":
-            if "support.html" not in text and not (uses_main_js and shared_support): errors.append(f"{rel}: missing route to support.html.")
-            if "privacy.html" not in text and not (uses_main_js and shared_privacy): errors.append(f"{rel}: missing route to privacy.html.")
-        for kind,ref in p.links:
-            target=local_target(page,ref)
-            if target is not None:
-                try: target.relative_to(ROOT.resolve())
-                except ValueError: errors.append(f"{rel}: {kind} escapes repository root: {ref}"); continue
-                if not target.exists(): errors.append(f"{rel}: broken local {kind}: {ref}"); continue
-            split=urlsplit(ref)
-            if kind=="href" and split.fragment and not is_external(ref):
-                target_page=page if not split.path else local_target(page,ref)
-                if target_page and target_page.suffix==".html" and target_page.exists():
-                    target_parser=parsed.get(target_page,parse_page(target_page))
-                    if unquote(split.fragment) not in target_parser.ids: errors.append(f"{rel}: broken anchor: {ref}")
-        if 'target="_blank"' in text and 'rel="noopener noreferrer"' not in text: warnings.append(f"{rel}: review external _blank links for rel=\"noopener noreferrer\".")
-        if OLD_PAGES_ORIGIN in text: errors.append(f"{rel}: still references temporary GitHub Pages URL.")
-    print(f"Validated {len(HTML_FILES)} HTML pages plus internal anchors, SEO metadata, sitemap, and launch wiring.")
-    for w in warnings: print(f"WARNING: {w}")
+    urls = sitemap_urls(errors)
+    url_set = set(urls)
+
+    if urls:
+        if OLD_PAGES_ORIGIN in SITEMAP.read_text(encoding="utf-8"):
+            errors.append("sitemap.xml: still references the temporary GitHub Pages URL.")
+        if f"{SITE_ORIGIN}/" not in url_set:
+            errors.append("sitemap.xml: missing custom-domain homepage URL.")
+
+        for page in HTML_FILES:
+            parser = parse_page(page)
+            expected = expected_page_url(page)
+            if page.name == "404.html" or parser.noindex:
+                if expected in url_set:
+                    errors.append(f"sitemap.xml: {page.name} is noindex/special and should not be listed.")
+                continue
+            if expected not in url_set:
+                errors.append(f"sitemap.xml: missing {page.name}.")
+
+    if not SOCIAL_IMAGE.exists():
+        warnings.append("assets/social-share.png: missing raster social-sharing image.")
+
+    return url_set
+
+
+def main() -> int:
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    if not HTML_FILES:
+        print("No HTML files found.")
+        return 1
+
+    main_js_text = MAIN_JS.read_text(encoding="utf-8") if MAIN_JS.exists() else ""
+    shared_support = "support.html" in main_js_text
+    shared_privacy = "privacy.html" in main_js_text
+    shared_canonical = SITE_ORIGIN in main_js_text and "rel = 'canonical'" in main_js_text
+    shared_founder = 'founder.html' in main_js_text
+    shared_join = 'join.html' in main_js_text
+    shared_social = "assets/social-share.png" in main_js_text and "og:image" in main_js_text
+
+    sitemap_set = check_launch_files(errors, warnings)
+
+    titles: dict[str, list[str]] = defaultdict(list)
+    descriptions: dict[str, list[str]] = defaultdict(list)
+    incoming: Counter[str] = Counter()
+    public_pages: set[str] = set()
+
+    for page in HTML_FILES:
+        parser = parse_page(page)
+        text = page.read_text(encoding="utf-8")
+        rel = page.relative_to(ROOT)
+        title = "".join(parser.title_parts).strip()
+        uses_main_js = 'src="js/main.js"' in text or "src='js/main.js'" in text
+        expected_url = expected_page_url(page)
+
+        if not parser.noindex and page.name != "404.html":
+            public_pages.add(page.name)
+
+        if not parser.html_lang:
+            errors.append(f"{rel}: missing <html lang=...>.")
+        if not title:
+            errors.append(f"{rel}: missing non-empty <title>.")
+        else:
+            titles[title].append(page.name)
+            if len(title) < 20:
+                warnings.append(f"{rel}: title is unusually short ({len(title)} chars).")
+            elif len(title) > 72:
+                warnings.append(f"{rel}: title is long for search/social display ({len(title)} chars).")
+
+        if not parser.has_description:
+            errors.append(f"{rel}: missing meta description.")
+        else:
+            descriptions[parser.description].append(page.name)
+            if len(parser.description) < 70:
+                warnings.append(f"{rel}: meta description is short ({len(parser.description)} chars).")
+            elif len(parser.description) > 180:
+                warnings.append(f"{rel}: meta description is long ({len(parser.description)} chars).")
+
+        if not parser.has_main:
+            errors.append(f"{rel}: missing <main> landmark.")
+        if parser.h1_count == 0 and page.name != "404.html":
+            errors.append(f"{rel}: missing <h1>.")
+        elif parser.h1_count > 1:
+            warnings.append(f"{rel}: contains {parser.h1_count} <h1> elements; review heading hierarchy.")
+        if parser.images_missing_alt:
+            errors.append(f"{rel}: {parser.images_missing_alt} image(s) missing alt attributes.")
+
+        if page.name != "404.html":
+            if parser.canonical_urls:
+                if len(parser.canonical_urls) > 1:
+                    errors.append(f"{rel}: multiple canonical URLs.")
+                if parser.canonical_urls[0] != expected_url:
+                    errors.append(
+                        f"{rel}: canonical must be {expected_url}, found {parser.canonical_urls[0]}."
+                    )
+            elif not (uses_main_js and shared_canonical):
+                errors.append(f"{rel}: missing custom-domain canonical URL or shared fallback.")
+
+            og_urls = parser.og.get("og:url", [])
+            if og_urls and og_urls[0] != expected_url:
+                errors.append(f"{rel}: og:url must be {expected_url}, found {og_urls[0]}.")
+
+            has_social = bool(parser.og.get("og:image")) or (uses_main_js and shared_social)
+            if not has_social:
+                warnings.append(f"{rel}: no og:image and no shared social-image fallback.")
+
+        duplicate_ids = sorted({value for value in parser.ids if parser.ids.count(value) > 1})
+        if duplicate_ids:
+            errors.append(f"{rel}: duplicate id(s): {', '.join(duplicate_ids)}")
+
+        if page.name != "404.html":
+            if "support.html" not in text and not (uses_main_js and shared_support):
+                errors.append(f"{rel}: missing route to support.html.")
+            if "privacy.html" not in text and not (uses_main_js and shared_privacy):
+                errors.append(f"{rel}: missing route to privacy.html.")
+
+            nav_links = {Path(link).name for link in parser.site_nav_links if link}
+            missing_core = sorted(CORE_NAV - nav_links)
+            if missing_core:
+                errors.append(f"{rel}: primary navigation missing: {', '.join(missing_core)}")
+            if "founder.html" not in nav_links and not (uses_main_js and shared_founder):
+                errors.append(f"{rel}: primary navigation missing Founder route.")
+            if "join.html" not in nav_links and not (uses_main_js and shared_join):
+                errors.append(f"{rel}: primary navigation missing Join route.")
+
+        for link in parser.links:
+            reference = link.reference.strip()
+            if link.target_blank and not {"noopener", "noreferrer"}.issubset(set(link.rel.split())):
+                warnings.append(
+                    f"{rel}: external/new-tab link should use rel=\"noopener noreferrer\": {reference}"
+                )
+            if reference.lower().startswith("http://") and not reference.startswith("http://localhost"):
+                warnings.append(f"{rel}: non-HTTPS external reference: {reference}")
+
+            target = local_target(page, reference)
+            if target is None:
+                continue
+            try:
+                target.relative_to(ROOT.resolve())
+            except ValueError:
+                errors.append(f"{rel}: {link.attr} escapes repository root: {reference}")
+                continue
+            if not target.exists():
+                errors.append(f"{rel}: broken local {link.attr}: {reference}")
+                continue
+
+            split = urlsplit(reference)
+            if split.fragment and target.suffix.lower() == ".html":
+                target_parser = parse_page(target)
+                if split.fragment not in target_parser.ids:
+                    errors.append(f"{rel}: broken fragment #{split.fragment} in {reference}")
+
+            if (
+                link.tag == "a"
+                and target.suffix.lower() == ".html"
+                and target.name != page.name
+                and target.exists()
+            ):
+                incoming[target.name] += 1
+
+        if OLD_PAGES_ORIGIN in text:
+            errors.append(f"{rel}: still references the temporary GitHub Pages URL.")
+
+    for title, pages in titles.items():
+        if len(pages) > 1:
+            warnings.append(f"Duplicate title across {', '.join(sorted(pages))}: {title}")
+    for description, pages in descriptions.items():
+        if len(pages) > 1:
+            warnings.append(
+                f"Duplicate meta description across {', '.join(sorted(pages))}: {description[:80]}..."
+            )
+
+    for page_name in sorted(public_pages):
+        if page_name == "index.html":
+            continue
+        if incoming[page_name] == 0:
+            warnings.append(f"{page_name}: no incoming internal HTML links detected (possible orphan page).")
+
+    print(
+        f"Validated {len(HTML_FILES)} HTML pages, navigation, fragments, internal-link graph, SEO metadata, and launch-critical files."
+    )
+    for warning in sorted(set(warnings)):
+        print(f"WARNING: {warning}")
     if errors:
         print("\nValidation failed:")
-        for e in errors: print(f"- {e}")
+        for error in sorted(set(errors)):
+            print(f"- {error}")
         return 1
-    print("Validation passed."); return 0
-if __name__=="__main__": sys.exit(main())
+
+    print("Validation passed.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

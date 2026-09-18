@@ -91,6 +91,39 @@ Current local member data can include:
 
 Saved activity is capped to a bounded local list so the prototype does not grow browser storage without limit.
 
+## Today / Continue dashboard
+
+The dashboard is now the member return point rather than a generic collection of links.
+
+Both Free and Paid Flamewalkers receive:
+
+- a central **Next Honest Action**
+- **Continue Where I Left Off** routing for all six current tools
+- current Path focus and practice state
+- first-run guidance when no member continuity exists yet
+- privacy-safe Recent Work metadata
+- tier-aware learning recommendations
+- the existing Path practice overview
+
+The dashboard Recent Work surface intentionally displays only low-detail metadata:
+
+- tool name
+- date
+- member-selected themes
+- member-marked outcome
+
+It does not read or display saved reflection titles, summaries, tool bodies, private context, what-helped / what-changed fields, or follow-up notes. Full saved work remains in My Work.
+
+The Paid Flamewalker prototype additionally surfaces:
+
+- the current member-authored Pattern Lens statement
+- the latest saved Flame Review takeaway
+- active One Stone / Boundary Builder follow-up metadata
+
+Free membership receives a quiet explanation of the deeper continuity layer rather than an aggressive upgrade prompt.
+
+Current automated validation checks the dashboard hooks, six-tool Continue routing, noindex status, JavaScript syntax, and the privacy-safe field boundary.
+
 ## My Work and Progress are different layers
 
 **My Work** answers: *What did I deliberately save, and where is it?*

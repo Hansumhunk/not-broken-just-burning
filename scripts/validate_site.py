@@ -268,10 +268,25 @@ def main() -> int:
         prohibited.extend(str(path.relative_to(ROOT)) for path in (ROOT / "css").glob("member*.css"))
         prohibited.extend(str(path.relative_to(ROOT)) for path in (ROOT / "js").glob("member*.js"))
         prohibited.extend(str(path.relative_to(ROOT)) for path in (ROOT / "js").glob("tool-member*.js"))
+
+        known_phase_two_only = {
+            "ACCESS_MODEL.md",
+            "MEMBERS.md",
+            "MASCULINE_RESTORATION.md",
+            "YOUTUBE.md",
+            "path-masculine-restoration-steadiness.html",
+            "css/masculine-restoration.css",
+            "js/masculine-restoration.js",
+        }
+        prohibited.extend(
+            path for path in sorted(known_phase_two_only)
+            if (ROOT / path).exists()
+        )
+
         if prohibited:
             errors.append(
                 "main production target contains Phase Two/member workspace artifacts: "
-                + ", ".join(sorted(prohibited))
+                + ", ".join(sorted(set(prohibited)))
             )
 
     # Regression guard for the long-form reveal bug: tall reveal containers must be
@@ -327,21 +342,26 @@ def main() -> int:
             errors.append(f"{rel}: {parser.images_missing_alt} image(s) missing alt attributes.")
 
         if page.name != "404.html":
-            if parser.canonical_urls:
-                if len(parser.canonical_urls) > 1:
-                    errors.append(f"{rel}: multiple canonical URLs.")
-                if parser.canonical_urls[0] != expected_url:
+            if not parser.noindex:
+                if len(parser.canonical_urls) != 1:
+                    errors.append(f"{rel}: public page must have exactly one static canonical URL.")
+                elif parser.canonical_urls[0] != expected_url:
                     errors.append(
                         f"{rel}: canonical must be {expected_url}, found {parser.canonical_urls[0]}."
                     )
-            elif not (uses_main_js and shared_canonical):
-                errors.append(f"{rel}: missing custom-domain canonical URL or shared fallback.")
 
-            og_urls = parser.og.get("og:url", [])
-            if og_urls and og_urls[0] != expected_url:
-                errors.append(f"{rel}: og:url must be {expected_url}, found {og_urls[0]}.")
+                og_titles = parser.og.get("og:title", [])
+                og_descriptions = parser.og.get("og:description", [])
+                og_urls = parser.og.get("og:url", [])
+                if len(og_titles) != 1:
+                    errors.append(f"{rel}: public page must have exactly one static og:title.")
+                if len(og_descriptions) != 1:
+                    errors.append(f"{rel}: public page must have exactly one static og:description.")
+                if len(og_urls) != 1:
+                    errors.append(f"{rel}: public page must have exactly one static og:url.")
+                elif og_urls[0] != expected_url:
+                    errors.append(f"{rel}: og:url must be {expected_url}, found {og_urls[0]}.")
 
-            if not parser.noindex:
                 expected_social = f"{SITE_ORIGIN}/assets/social-share.png"
                 og_images = parser.og.get("og:image", [])
                 if not og_images:

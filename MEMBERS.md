@@ -238,7 +238,25 @@ Real protected content must be returned only after authenticated authorization f
 
 ## Phase 2 — Real member accounts
 
-The preferred current backend candidate remains **Supabase** because it can provide authentication, Postgres, Row Level Security, and server/Edge Function capabilities while allowing the current static front end to remain largely intact.
+The backend foundation now uses **Supabase**. A Phase Two project has been created and the first migration is applied with Row Level Security enabled from the beginning.
+
+The current backend foundation includes:
+
+- low-sensitivity profiles
+- member preferences
+- current Path focus
+- per-stage Path progress
+- Next Honest Action / last-tool / Continue state
+- learning progress
+- authoritative Free / Paid membership entitlement state
+- separate product entitlements
+- separate event entitlements
+- private admin/moderator role support
+- new-account defaults that create a Free Flamewalker entitlement
+
+The schema and test notes live in `SUPABASE_SCHEMA.md`. The migration source lives in `supabase/migrations/`.
+
+The existing browser UI is **not yet connected** to the live Supabase project. Local prototype services remain in place until the auth/adapter integration is deliberately implemented and tested.
 
 Required capabilities before live accounts:
 

@@ -154,7 +154,10 @@ if (prefersReducedMotion || !('IntersectionObserver' in window)) {
       entry.target.classList.add('visible');
       activeObserver.unobserve(entry.target);
     });
-  }, { threshold: 0.1, rootMargin: '0px 0px -28px 0px' });
+  // Use threshold 0 so very tall reveal containers can become visible as soon
+  // as any part enters the viewport. A percentage threshold can permanently
+  // hide long-form pages when the required visible area exceeds the viewport.
+  }, { threshold: 0, rootMargin: '0px 0px -28px 0px' });
 
   revealItems.forEach((item) => observer.observe(item));
 }

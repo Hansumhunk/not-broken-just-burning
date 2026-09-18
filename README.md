@@ -4,7 +4,7 @@ Official website and digital platform for the **Not Broken Just Burning** moveme
 
 ## Current version
 
-**Version 0.8 — Release-Candidate Hardening**
+**Version 1.0 — Public Production Baseline**
 
 Primary public domain:
 
@@ -196,7 +196,7 @@ The Support & Safety page includes U.S. routes for:
 
 These should be periodically rechecked.
 
-## V0.8 release-candidate hardening completed so far
+## V1.0 production baseline
 
 - [x] GitHub Pages deployment active
 - [x] Custom domain attached to the repository
@@ -215,20 +215,19 @@ These should be periodically rechecked.
 - [x] newsletter removed from the V1.0 critical path
 - [x] launch with no first-party analytics
 
-## Remaining before V1.0
+## V1.0 external / account-level checks
 
-- [ ] confirm GitHub Pages DNS check succeeds for `notbrokenjustburning.com`
-- [ ] enable **Enforce HTTPS** in GitHub Pages once available
-- [ ] finish canonical URL / Open Graph URL polish on the most important public pages
-- [ ] create a proper raster social-sharing image
-- [ ] full desktop / tablet / phone QA
-- [ ] keyboard and accessibility review
-- [ ] verify every interactive tool with blank, normal, and very long input
-- [ ] final private-name / legal-allegation / unpublished-IP audit
-- [ ] recheck live crisis/support links immediately before V1.0
+The repository-side production handoff is complete. The remaining checks require GitHub or search-platform account settings rather than public-site code:
+
+- [ ] confirm the GitHub Pages DNS check reports success for `notbrokenjustburning.com`
+- [ ] enable **Enforce HTTPS** in GitHub Pages when the setting is available
+- [ ] protect `main` with a branch ruleset / required validation check so production cannot bypass the static-site gate
+
+These are operational controls, not missing public-page features.
 
 ## Post-launch backlog
 
+- Google Search Console verification and sitemap submission
 - real newsletter/subscriber infrastructure with consent and unsubscribe controls
 - privacy-conscious analytics only if there is a clear use case
 - expanded Stories From the Fire

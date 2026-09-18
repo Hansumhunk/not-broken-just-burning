@@ -11,6 +11,7 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from html.parser import HTMLParser
 from pathlib import Path
+import os
 from urllib.parse import unquote, urlsplit
 import sys
 import xml.etree.ElementTree as ET
@@ -60,6 +61,7 @@ class PageParser(HTMLParser):
         self.canonical_urls: list[str] = []
         self.og: dict[str, list[str]] = defaultdict(list)
         self.twitter_card = ""
+        self.twitter_image = ""
         self.site_nav_links: list[str] = []
         self.in_site_nav = False
         self.images_missing_alt = 0
@@ -93,6 +95,8 @@ class PageParser(HTMLParser):
                 self.noindex = True
             if name == "twitter:card" and content:
                 self.twitter_card = content
+            if name == "twitter:image" and content:
+                self.twitter_image = content
             if prop.startswith("og:") and content:
                 self.og[prop].append(content)
 
@@ -249,9 +253,48 @@ def main() -> int:
     shared_canonical = SITE_ORIGIN in main_js_text and "rel = 'canonical'" in main_js_text
     shared_founder = 'founder.html' in main_js_text
     shared_join = 'join.html' in main_js_text
-    shared_social = "assets/social-share.png" in main_js_text and "og:image" in main_js_text
 
     sitemap_set = check_launch_files(errors, warnings)
+
+    # Production-target guard: Phase Two/member workspace files may exist on development,
+    # but must never be merged into the public static site on main.
+    production_target = (
+        os.getenv("GITHUB_REF_NAME", "") == "main"
+        or os.getenv("GITHUB_BASE_REF", "") == "main"
+    )
+    if production_target:
+        prohibited = []
+        prohibited.extend(path.name for path in ROOT.glob("member*.html"))
+        prohibited.extend(str(path.relative_to(ROOT)) for path in (ROOT / "css").glob("member*.css"))
+        prohibited.extend(str(path.relative_to(ROOT)) for path in (ROOT / "js").glob("member*.js"))
+        prohibited.extend(str(path.relative_to(ROOT)) for path in (ROOT / "js").glob("tool-member*.js"))
+
+        known_phase_two_only = {
+            "ACCESS_MODEL.md",
+            "MEMBERS.md",
+            "MASCULINE_RESTORATION.md",
+            "YOUTUBE.md",
+            "path-masculine-restoration-steadiness.html",
+            "css/masculine-restoration.css",
+            "js/masculine-restoration.js",
+        }
+        prohibited.extend(
+            path for path in sorted(known_phase_two_only)
+            if (ROOT / path).exists()
+        )
+
+        if prohibited:
+            errors.append(
+                "main production target contains Phase Two/member workspace artifacts: "
+                + ", ".join(sorted(set(prohibited)))
+            )
+
+    # Regression guard for the long-form reveal bug: tall reveal containers must be
+    # eligible as soon as any part intersects, with a no-observer/reduced-motion fallback.
+    if "threshold: 0" not in main_js_text:
+        errors.append("js/main.js: reveal observer must use threshold: 0 for long-form content.")
+    if "prefersReducedMotion || !('IntersectionObserver' in window)" not in main_js_text:
+        errors.append("js/main.js: reveal logic is missing its reduced-motion/no-observer fallback.")
 
     titles: dict[str, list[str]] = defaultdict(list)
     descriptions: dict[str, list[str]] = defaultdict(list)
@@ -299,23 +342,36 @@ def main() -> int:
             errors.append(f"{rel}: {parser.images_missing_alt} image(s) missing alt attributes.")
 
         if page.name != "404.html":
-            if parser.canonical_urls:
-                if len(parser.canonical_urls) > 1:
-                    errors.append(f"{rel}: multiple canonical URLs.")
-                if parser.canonical_urls[0] != expected_url:
+            if not parser.noindex:
+                if len(parser.canonical_urls) != 1:
+                    errors.append(f"{rel}: public page must have exactly one static canonical URL.")
+                elif parser.canonical_urls[0] != expected_url:
                     errors.append(
                         f"{rel}: canonical must be {expected_url}, found {parser.canonical_urls[0]}."
                     )
-            elif not (uses_main_js and shared_canonical):
-                errors.append(f"{rel}: missing custom-domain canonical URL or shared fallback.")
 
-            og_urls = parser.og.get("og:url", [])
-            if og_urls and og_urls[0] != expected_url:
-                errors.append(f"{rel}: og:url must be {expected_url}, found {og_urls[0]}.")
+                og_titles = parser.og.get("og:title", [])
+                og_descriptions = parser.og.get("og:description", [])
+                og_urls = parser.og.get("og:url", [])
+                if len(og_titles) != 1:
+                    errors.append(f"{rel}: public page must have exactly one static og:title.")
+                if len(og_descriptions) != 1:
+                    errors.append(f"{rel}: public page must have exactly one static og:description.")
+                if len(og_urls) != 1:
+                    errors.append(f"{rel}: public page must have exactly one static og:url.")
+                elif og_urls[0] != expected_url:
+                    errors.append(f"{rel}: og:url must be {expected_url}, found {og_urls[0]}.")
 
-            has_social = bool(parser.og.get("og:image")) or (uses_main_js and shared_social)
-            if not has_social:
-                warnings.append(f"{rel}: no og:image and no shared social-image fallback.")
+                expected_social = f"{SITE_ORIGIN}/assets/social-share.png"
+                og_images = parser.og.get("og:image", [])
+                if not og_images:
+                    errors.append(f"{rel}: missing static og:image on public page.")
+                elif og_images[0] != expected_social:
+                    errors.append(f"{rel}: og:image must use {expected_social}, found {og_images[0]}.")
+                if parser.twitter_card != "summary_large_image":
+                    errors.append(f"{rel}: public page must use twitter:card=summary_large_image.")
+                if parser.twitter_image != expected_social:
+                    errors.append(f"{rel}: twitter:image must use {expected_social}.")
 
         duplicate_ids = sorted({value for value in parser.ids if parser.ids.count(value) > 1})
         if duplicate_ids:

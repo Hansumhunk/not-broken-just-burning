@@ -4,7 +4,7 @@ Official website and digital platform for the **Not Broken Just Burning** moveme
 
 ## Current version
 
-**Version 0.8 — Release-Candidate Hardening**
+**Version 1.0 — Public Production Baseline**
 
 Primary public domain:
 
@@ -141,12 +141,7 @@ Breaks an overwhelming mountain into one realistic next action and what can inte
 
 ## Content system
 
-Current full Stories From the Fire include:
-
-- The Armor We Don't Need Forever
-- Boundaries Can Hurt
-- One Stone at a Time
-- The Shame That Wasn't Mine
+The public Stories From the Fire library is maintained in `fire.html` and now includes dozens of full reflections rather than a four-story launch sample.
 
 The content model is:
 
@@ -196,7 +191,7 @@ The Support & Safety page includes U.S. routes for:
 
 These should be periodically rechecked.
 
-## V0.8 release-candidate hardening completed so far
+## V1.0 production baseline
 
 - [x] GitHub Pages deployment active
 - [x] Custom domain attached to the repository
@@ -211,24 +206,24 @@ These should be periodically rechecked.
 - [x] `.nojekyll`
 - [x] automated static-site validator
 - [x] GitHub Actions validation workflow
-- [x] initial Open Graph metadata on major launch pages
+- [x] static canonical, Open Graph, and Twitter/X sharing metadata across indexable public pages
+- [x] `main` protected by an active branch ruleset requiring pull requests and the `validate` status check
 - [x] newsletter removed from the V1.0 critical path
 - [x] launch with no first-party analytics
 
-## Remaining before V1.0
+## V1.0 external / account-level checks
 
-- [ ] confirm GitHub Pages DNS check succeeds for `notbrokenjustburning.com`
-- [ ] enable **Enforce HTTPS** in GitHub Pages once available
-- [ ] finish canonical URL / Open Graph URL polish on the most important public pages
-- [ ] create a proper raster social-sharing image
-- [ ] full desktop / tablet / phone QA
-- [ ] keyboard and accessibility review
-- [ ] verify every interactive tool with blank, normal, and very long input
-- [ ] final private-name / legal-allegation / unpublished-IP audit
-- [ ] recheck live crisis/support links immediately before V1.0
+The repository-side production handoff is complete. The remaining checks require GitHub or search-platform account settings rather than public-site code:
+
+- [ ] confirm the GitHub Pages DNS check reports success for `notbrokenjustburning.com`
+- [ ] enable **Enforce HTTPS** in GitHub Pages when the setting is available
+- [ ] verify `notbrokenjustburning.com` in Google Search Console and submit `https://notbrokenjustburning.com/sitemap.xml`
+
+These are operational controls, not missing public-page features.
 
 ## Post-launch backlog
 
+- monitor Google Search Console indexing/crawl reports after verification and sitemap submission
 - real newsletter/subscriber infrastructure with consent and unsubscribe controls
 - privacy-conscious analytics only if there is a clear use case
 - expanded Stories From the Fire

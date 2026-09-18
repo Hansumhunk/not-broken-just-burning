@@ -1,6 +1,6 @@
 # Not Broken Just Burning — Phase Two Access & Entitlement Model
 
-Status: development architecture. This document defines the intended product model before real authentication, authorization, billing, and protected-content delivery are connected.
+Status: development architecture. The initial Supabase authorization foundation now exists in the Phase Two project, but live authentication UI, protected-content delivery, and billing are not yet connected.
 
 ## Core access ladder
 
@@ -173,3 +173,38 @@ Membership level does not change the core data-minimization boundary:
 > **Your account can remember your journey without needing to read your journal.**
 
 Do not automatically upload highly sensitive Forge notes, Pattern Maps, Sacred Questions answers, therapy/medical information, legal evidence, or private journal content merely because a member upgrades.
+
+
+## Implemented Supabase foundation
+
+The Phase Two Supabase project now implements the first backend entitlement foundation described in this document.
+
+Implemented server-side structures:
+
+- authenticated member profile and low-sensitivity preferences
+- current Path focus and per-stage Path progress
+- Next Honest Action / last-tool / Continue state
+- learning-progress metadata
+- authoritative Free vs Paid membership entitlement state
+- separate product entitlements
+- separate event entitlements
+- private admin/moderator role support
+- Row Level Security on every user-facing table
+
+The database preserves the access vocabulary:
+
+- `public` — implicit signed-out/public-site access
+- `free_member`
+- `paid_member`
+- `product:<slug>`
+- `event:<slug>`
+
+Ordinary members may read only their own entitlement rows and cannot promote themselves, grant themselves a product, or grant themselves an event. An explicit admin role can cross the normal ownership boundary.
+
+The authoritative migration and security notes live in:
+
+- `supabase/migrations/20260918010500_phase_two_member_foundation.sql`
+- `SUPABASE_BACKEND_PLAN.md`
+- `SUPABASE_SCHEMA.md`
+
+No live billing is connected. Future checkout/webhook code must be server-side and must not make browser JavaScript authoritative for entitlement mutation.

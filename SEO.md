@@ -8,7 +8,7 @@ The goal is **relevance and clarity**, not keyword stuffing, diagnosis claims, o
 
 ## Current technical foundation
 
-Implemented or in progress on `development`:
+Current production foundation on `main`:
 
 - custom domain: `https://notbrokenjustburning.com/`
 - `robots.txt` allows crawling and points to the sitemap
@@ -142,25 +142,32 @@ Primary pages:
 9. Titles and descriptions should be unique and accurately match visible page content.
 10. Do not add pages merely to capture keywords. A page should teach something useful.
 
-## Before V1.0 public SEO launch
+## V1.0 production handoff
 
-- confirm HTTPS is enforced on the custom domain
-- complete unique title/description/canonical audit for every indexable HTML page
-- complete Open Graph metadata on every indexable page
-- add one permanent 1200×630 social-sharing image and `og:image` metadata
-- add static structured data where appropriate, especially WebSite/Organization on the homepage and Article on major long-form pages
-- validate structured data with Google's Rich Results / Schema tools where applicable
-- check sitemap against all indexable pages
-- confirm `robots.txt` remains correct
-- test all internal links on the deployed domain
-- test page performance and Core Web Vitals
-- check mobile rendering and accessible heading structure
-- connect Google Search Console
-- verify the custom domain in Search Console
+Repository-side SEO wiring is complete for the V1.0 static site:
+
+- custom-domain canonical URLs on every indexable HTML page
+- unique page titles and descriptions, with remaining length notices treated as editorial polish rather than crawl defects
+- static Open Graph title, description, URL, and shared 1200×630 image metadata on every indexable page
+- large Twitter/X card metadata on every indexable page
+- sitemap coverage for every indexable public page
+- robots wiring to the custom-domain sitemap
+- automated internal-link, fragment, metadata, accessibility-basics, sitemap, and production-guard validation
+
+External / account-level work:
+
+- confirm GitHub Pages DNS health
+- enforce HTTPS on the custom domain
+- verify the domain in Google Search Console
 - submit `https://notbrokenjustburning.com/sitemap.xml`
-- inspect indexing for the homepage and major hub pages
-- review Google-reported crawl/indexing problems before requesting broad indexing
-- decide whether privacy-respecting analytics are needed; analytics are not required for launch
+- inspect indexing and crawl reports once Google has processed the site
+
+Post-launch technical polish:
+
+- measure Core Web Vitals on real devices and field traffic
+- add structured data only where it accurately describes visible content
+- validate any future structured data with Google's current tooling
+- reconsider privacy-conscious analytics only if a concrete measurement need exists
 
 ## After V1.0
 

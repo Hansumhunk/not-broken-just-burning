@@ -5,7 +5,8 @@
   const pageScripts = {
     dashboard: ["js/member-dashboard.js"],
     progress: ["js/member-history-insights.js"],
-    work: ["js/member-history-insights.js"]
+    work: ["js/member-history-insights.js"],
+    store: ["js/member-billing.js"]
   };
 
   function loadScript(src) {

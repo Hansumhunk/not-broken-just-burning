@@ -1,0 +1,156 @@
+/* Mobile reading guardrails for long display headings and narrow layouts.
+   This file remains on pages that explicitly load it; the same rules also live
+   in the shared experience layer so every public page gets the protection. */
+@media (max-width: 760px) {
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  main,
+  .section-shell,
+  .story-panel,
+  .founder-panel,
+  .feature-story,
+  .long-read,
+  .article-shell,
+  .long-read-header,
+  .article-header,
+  .page-hero,
+  .section-heading,
+  .tool-panel,
+  .reflection-box,
+  .article-reflection,
+  .connection-panel,
+  .support-boundary,
+  .privacy-principles {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .story-panel > *,
+  .founder-panel > *,
+  .feature-story > *,
+  .connection-panel > *,
+  .support-boundary > *,
+  .tool-grid > *,
+  .story-card-grid > *,
+  .resource-grid > *,
+  .journey-grid > *,
+  .door-grid > *,
+  .value-grid > * {
+    min-width: 0;
+  }
+
+  .hero h1,
+  .page-hero h1,
+  .long-read-header h1,
+  .article-header h1 {
+    max-width: 100%;
+    font-size: clamp(2.15rem, 9.8vw, 2.95rem);
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  .section-heading h2,
+  .story-panel h2,
+  .founder-panel h2,
+  .callout h2,
+  .closing h2,
+  .long-read-body h2,
+  .article-body h2,
+  .reflection-box h2,
+  .article-reflection h2,
+  .feature-story h2,
+  .connection-panel h2,
+  .support-boundary h2,
+  .tool-panel h2,
+  .path-check h2 {
+    max-width: 100%;
+    font-size: clamp(1.8rem, 8.8vw, 2.55rem);
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  .journey-card h2,
+  .resource-card h2,
+  .join-card h2,
+  .safety-card h2,
+  .privacy-card h2,
+  .door-card h3,
+  .story-card h3,
+  .value-card h3 {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  .eyebrow {
+    max-width: 100%;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    overflow-wrap: anywhere;
+  }
+
+  .hero-lead,
+  .article-body p,
+  .long-read-body p,
+  .story-copy p,
+  .feature-story p,
+  .story-card p,
+  .journey-card p,
+  .resource-card p,
+  .privacy-card p,
+  .tool-panel p {
+    overflow-wrap: break-word;
+  }
+
+  .button,
+  .text-link,
+  .story-read-more,
+  .article-nav a {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+
+  img,
+  svg,
+  video,
+  iframe {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+@media (max-width: 380px) {
+  .hero h1,
+  .page-hero h1,
+  .long-read-header h1,
+  .article-header h1 {
+    font-size: clamp(2rem, 9.2vw, 2.55rem);
+  }
+
+  .section-heading h2,
+  .story-panel h2,
+  .founder-panel h2,
+  .callout h2,
+  .closing h2,
+  .long-read-body h2,
+  .article-body h2,
+  .reflection-box h2,
+  .article-reflection h2,
+  .feature-story h2,
+  .connection-panel h2,
+  .support-boundary h2,
+  .tool-panel h2,
+  .path-check h2 {
+    font-size: clamp(1.72rem, 8.2vw, 2.25rem);
+  }
+}

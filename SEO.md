@@ -2,7 +2,7 @@
 
 ## Purpose
 
-SEO should help people who are already searching for language around trauma, rebuilding, shame, boundaries, discernment, identity, and practical reflection discover useful NBJB material.
+SEO should help people who are already searching for language around trauma, abuse, betrayal, rebuilding, fatherhood under pressure, shame, boundaries, discernment, identity, and practical reflection discover useful NBJB material. NBJB is men-first, so search planning should intentionally include the language men use when trying to understand harm, isolation, loss of direction, and major life disruption without turning that focus into gender warfare or outrage marketing.
 
 The goal is **relevance and clarity**, not keyword stuffing, diagnosis claims, or pretending survivor-originated frameworks are established clinical treatment.
 
@@ -27,11 +27,14 @@ Current production foundation on `main`:
 
 Primary themes:
 
+- men rebuilding after abuse or controlling relationships
 - survivor-led personal growth
-- rebuilding after trauma
+- rebuilding after trauma and major life disruption
 - emotional rebuilding after betrayal
+- fatherhood under pressure
+- identity loss, isolation, and rebuilding direction
 - reflection after difficult experiences
-- clarity, boundaries, identity, voice, and purpose
+- clarity, boundaries, agency, voice, and purpose
 
 Primary pages:
 

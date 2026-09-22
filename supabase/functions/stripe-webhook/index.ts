@@ -193,7 +193,11 @@ export default {
 
         case "customer.subscription.created":
         case "customer.subscription.updated":
-        case "customer.subscription.deleted": {
+        case "customer.subscription.deleted":
+        case "customer.subscription.paused":
+        case "customer.subscription.resumed":
+        case "customer.subscription.collection_paused":
+        case "customer.subscription.collection_resumed": {
           const subscription = event.data.object as Stripe.Subscription;
           const synced = await syncSubscription(subscription.id, subscription.metadata?.nbjb_user_id);
           if (!synced) handled = false;

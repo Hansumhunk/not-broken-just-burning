@@ -7,6 +7,14 @@
   const listeners = new Set();
   let currentUser = null;
   let currentSession = null;
+  let resolveReady;
+  const ready = new Promise((resolve) => { resolveReady = resolve; });
+  let readyResolved = false;
+  function markReady() {
+    if (readyResolved) return;
+    readyResolved = true;
+    resolveReady({ user: currentUser, session: currentSession });
+  }
   function emit() {
     const snapshot = { user: currentUser, session: currentSession };
     listeners.forEach((fn) => { try { fn(snapshot); } catch (_) {} });
@@ -18,6 +26,7 @@
     currentSession = data.session || null;
     currentUser = currentSession?.user || null;
     emit();
+    markReady();
     return { user: currentUser, session: currentSession };
   }
   async function signUp(email, password) {
@@ -33,7 +42,7 @@
   async function updatePassword(password) { return client.auth.updateUser({ password }); }
   async function signOut() { return client.auth.signOut(); }
   function onChange(fn) { listeners.add(fn); fn({ user: currentUser, session: currentSession }); return () => listeners.delete(fn); }
-  client.auth.onAuthStateChange((_event, session) => { currentSession = session || null; currentUser = session?.user || null; emit(); });
-  window.NBJBAuth = { client, refresh, signUp, signIn, sendMagicLink, sendRecovery, updatePassword, signOut, onChange, get user(){return currentUser;}, get session(){return currentSession;} };
-  refresh().catch(() => emit());
+  client.auth.onAuthStateChange((_event, session) => { currentSession = session || null; currentUser = session?.user || null; emit(); markReady(); });
+  window.NBJBAuth = { client, ready, refresh, signUp, signIn, sendMagicLink, sendRecovery, updatePassword, signOut, onChange, get user(){return currentUser;}, get session(){return currentSession;} };
+  refresh().catch(() => { emit(); markReady(); });
 })();

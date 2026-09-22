@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Development prototype of the Not Broken Just Burning Flamewalker member dashboard for Path focus, progress, tools, saved work, profile, media, storefront, and future member access.">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#09090b">
+  <meta property="og:title" content="Flamewalker Dashboard | Not Broken Just Burning">
+  <meta property="og:description" content="Development-only Flamewalker member platform prototype.">
+  <meta property="og:type" content="website"><meta property="og:site_name" content="Not Broken Just Burning"><meta property="og:url" content="https://notbrokenjustburning.com/members.html">
+  <title>Flamewalker Dashboard | Not Broken Just Burning</title>
+  <link rel="canonical" href="https://notbrokenjustburning.com/members.html">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/brand.css"><link rel="stylesheet" href="css/experience.css"><link rel="stylesheet" href="css/members.css"><link rel="stylesheet" href="css/member-expansion.css"><link rel="stylesheet" href="css/member-dashboard.css">
+  <style>
+    body[data-member-page="dashboard"] .member-hero { padding-top: 52px; padding-bottom: 26px; }
+    body[data-member-page="dashboard"] .member-hero h1 { max-width: 1100px; margin-bottom: 20px; font-size: clamp(3.15rem, 5.2vw, 5.15rem); line-height: .99; }
+    body[data-member-page="dashboard"] .member-hero .hero-lead { max-width: 880px; }
+    body[data-member-page="dashboard"] .member-status { max-width: 900px; margin-top: 20px; padding: 14px 18px; }
+    @media (max-width: 760px) {
+      body[data-member-page="dashboard"] .member-hero { padding-top: 28px; padding-bottom: 22px; }
+      body[data-member-page="dashboard"] .member-hero h1 { font-size: clamp(2.3rem, 10.5vw, 3.35rem); line-height: 1.02; }
+      body[data-member-page="dashboard"] .member-status { margin-top: 16px; padding: 14px 16px; }
+    }
+  </style>
+</head>
+<body data-member-page="dashboard">
+  <a class="skip-link" href="#main-content">Skip to content</a><div class="ember-field" aria-hidden="true"></div>
+  <header class="site-header"><a class="brand" href="index.html" aria-label="Not Broken Just Burning home"><span class="brand-mark" aria-hidden="true"></span><span class="brand-name">Not Broken <span>Just Burning</span></span></a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation"><span></span><span></span><span></span></button><nav class="site-nav" id="site-nav" aria-label="Primary navigation"><a href="path.html">The Path</a><a href="forge.html">The Forge</a><a href="fire.html">The Fire</a><a href="movement.html">The Movement</a><a href="resources.html">Resources</a><a class="active nav-join" href="join.html">Join</a></nav></header>
+
+  <main id="main-content">
+    <section class="page-hero section-shell member-hero reveal">
+      <p class="eyebrow">Flamewalker Platform · Development</p>
+      <h1>Your work has a place<br><span>to return to.</span></h1>
+      <p class="hero-lead">The dashboard keeps the member experience oriented around one question: what deserves your attention now? It is a workspace, not a scorecard.</p>
+      <div class="member-status"><span>Prototype</span><strong>Device-local member experience</strong><p>No real account is created yet. Low-sensitivity profile, progress, and explicitly saved tool history stay in this browser until the authentication bridge is connected.</p></div>
+    </section>
+
+    <section class="member-shell" aria-label="Member platform navigation">
+      <div class="member-shell-copy"><strong>Flamewalker Hub</strong><span>Signed-in experience prototype · local device only</span></div>
+      <nav class="member-subnav"><a data-member-nav="dashboard" href="members.html">Dashboard</a><a data-member-nav="path" href="member-path.html">My Path</a><a data-member-nav="tools" href="member-tools.html">Tools</a><a data-member-nav="library" href="member-library.html">Library</a><a data-member-nav="profile" href="member-profile.html">Profile</a><a data-member-nav="settings" href="member-settings.html">Settings</a><a class="member-exit" href="index.html">Exit to site</a></nav>
+    </section>
+
+    <section class="section-shell member-dashboard-layout">
+      <div class="member-dashboard-primary">
+        <article class="member-dashboard-first-run reveal" data-dashboard-first-run hidden>
+          <p class="eyebrow">Start here</p>
+          <h2>Give the dashboard three pieces of information.</h2>
+          <p>You do not need a complete life plan. Choose the part of the Path that fits now, name one action inside your control, then use one tool when a specific problem needs examination.</p>
+          <div class="member-first-run-steps">
+            <div class="member-first-run-step"><span>01 · Locate</span><strong>Choose a current Path focus.</strong><p>This tells the platform what kind of rebuilding deserves attention right now.</p></div>
+            <div class="member-first-run-step"><span>02 · Act</span><strong>Name one Next Honest Action.</strong><p>Make it small enough to perform, not impressive enough to avoid.</p></div>
+            <div class="member-first-run-step"><span>03 · Use</span><strong>Open one tool when you need it.</strong><p>Save something to My Work only when you deliberately want to keep it.</p></div>
+          </div>
+          <div class="member-actions"><a class="button button-primary" href="member-path.html">Choose My Focus</a><a class="button button-ghost" href="member-tools.html">Open the Toolbox</a><a class="button button-ghost" href="member-library.html">Open Free Library</a></div>
+        </article>
+
+        <article class="member-welcome reveal" data-dashboard-returning>
+          <p class="eyebrow">Today</p>
+          <h2><span data-member-name>Flamewalker</span>, what deserves your attention now?</h2>
+          <p>The dashboard is a return point, not a performance report. Keep one action visible, continue the work already in motion, and let everything else wait its turn.</p>
+        </article>
+
+        <article class="member-dashboard-card member-quick-action member-today-card reveal">
+          <p class="eyebrow">My Next Honest Action</p>
+          <h2>One move is enough for now.</h2>
+          <p>Keep this inside your control and small enough that you can tell whether you actually did it.</p>
+          <label for="member-quick-action">What is one action you can actually take next?</label>
+          <textarea id="member-quick-action" rows="4" maxlength="500" placeholder="One concrete next step. Keep it inside your control."></textarea>
+          <div class="member-actions"><button class="button button-primary" id="save-quick-action" type="button">Save Next Action</button><span class="member-status-line" data-member-status role="status" aria-live="polite"></span></div>
+        </article>
+
+        <div class="member-today-grid reveal" aria-label="Continue and current focus">
+          <article class="member-today-block">
+            <span>Continue where I left off</span>
+            <h3 data-dashboard-continue-tool>No tool started yet</h3>
+            <p data-dashboard-continue-time>Use the Toolbox when a specific problem needs a specific tool.</p>
+            <a class="text-link" data-dashboard-continue-link href="member-tools.html">Choose a tool</a>
+          </article>
+          <article class="member-today-block">
+            <span>Current Path focus</span>
+            <h3 data-dashboard-focus-name>Choose a current Path focus</h3>
+            <p data-dashboard-focus-state>No focus selected yet</p>
+            <a class="text-link" data-dashboard-focus-link href="member-path.html">Choose my focus</a>
+          </article>
+        </div>
+
+        <article class="member-dashboard-card reveal">
+          <p class="eyebrow">Recent Work</p>
+          <h2>Remember what you saved without reopening the journal.</h2>
+          <p>The dashboard shows only privacy-safe metadata here: tool, date, member-selected themes, and member-marked outcome. Full saved reflections stay in My Work.</p>
+          <div class="member-dashboard-recent-list" data-dashboard-recent-list aria-live="polite"></div>
+          <div class="member-actions"><a class="button button-primary" href="member-work.html">Open My Work</a><span><strong data-dashboard-saved-count>0</strong> saved entries on this device</span></div>
+        </article>
+
+        <article class="member-dashboard-card reveal">
+          <p class="eyebrow">Path Practice</p>
+          <h2>Practice, not completion theater.</h2>
+          <div class="member-progress-track" aria-label="Overall Path practice progress"><span data-member-progress-bar role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></span></div>
+          <div class="member-progress-caption"><span>Not started</span><strong data-member-progress-text>0%</strong><span>Practicing</span></div>
+          <div class="member-journey-strip" aria-label="Six Flamewalker stages"><div class="member-journey-step"><span>01</span><strong>Fire Reclamation</strong></div><div class="member-journey-step"><span>02</span><strong>Guardian's Path</strong></div><div class="member-journey-step"><span>03</span><strong>Sacred Mirror</strong></div><div class="member-journey-step"><span>04</span><strong>Masculine Restoration</strong></div><div class="member-journey-step"><span>05</span><strong>Voice of Fire</strong></div><div class="member-journey-step"><span>06</span><strong>Circle of the Flame</strong></div></div>
+          <div class="member-actions"><a class="button button-primary" href="member-path.html">Manage My Path</a><a class="button button-ghost" href="member-progress.html">Review Progress</a></div>
+        </article>
+      </div>
+
+      <aside class="member-dashboard-side">
+        <article class="member-dashboard-card member-dashboard-learning reveal">
+          <p class="eyebrow">Learning</p>
+          <h3 data-dashboard-learning-title>Start with the Free Library</h3>
+          <p data-dashboard-learning-copy>Free Flamewalker access includes the starter learning layer, foundational videos, and selected exercises.</p>
+          <a class="text-link" data-dashboard-learning-link href="member-library.html">Open the Free Library</a>
+        </article>
+
+        <article class="member-dashboard-card reveal" data-dashboard-paid-depth hidden>
+          <p class="eyebrow">Paid Flamewalker · Continuity</p>
+          <h3>Depth without hidden conclusions.</h3>
+          <div class="member-dashboard-depth">
+            <div class="member-dashboard-depth-card">
+              <span>Pattern Lens</span>
+              <h3 data-dashboard-lens-statement>No Pattern Lens saved yet.</h3>
+              <small data-dashboard-lens-date>Create a member-authored lens in Progress when a question deserves comparison.</small>
+            </div>
+            <div class="member-dashboard-depth-card">
+              <span data-dashboard-review-window>Flame Review</span>
+              <p data-dashboard-review-takeaway>No saved review takeaway yet.</p>
+              <small data-dashboard-review-date>Use Progress after you have enough deliberately saved work to review.</small>
+            </div>
+            <div class="member-dashboard-depth-card">
+              <span>Active follow-ups · <strong data-dashboard-followup-count>0</strong></span>
+              <div class="member-dashboard-followups" data-dashboard-followup-list></div>
+            </div>
+          </div>
+          <div class="member-actions"><a class="button button-ghost" href="member-progress.html">Open Progress</a></div>
+        </article>
+
+        <article class="member-dashboard-card member-depth-preview reveal" data-dashboard-free-depth>
+          <p class="eyebrow">Deeper continuity</p>
+          <h3>Free membership is useful on purpose.</h3>
+          <p>Pattern Lens, Flame Reviews, richer follow-up continuity, and the deeper recurring learning layer belong to Paid Flamewalker. Nothing here blocks the public tools or the Free starter experience.</p>
+          <a class="text-link" href="member-library.html">See Library access →</a>
+        </article>
+
+        <article class="member-dashboard-card reveal">
+          <p class="eyebrow">Membership Access</p>
+          <h3 data-member-tier-label>Free Flamewalker</h3>
+          <p>The current development tier determines which continuity and learning surfaces appear. Real access will be enforced by the authenticated backend later.</p>
+          <div class="member-actions"><a class="button button-ghost" href="member-library.html">Open Library</a><a class="button button-ghost" href="member-settings.html">Development Tier</a></div>
+        </article>
+
+        <article class="member-dashboard-card reveal">
+          <p class="eyebrow">Private by default</p>
+          <h3>Your account should remember the journey, not read your journal.</h3>
+          <p>Private reflection is not automatically copied into member history. The Today screen intentionally uses low-detail metadata unless you deliberately open My Work or Progress.</p>
+          <a class="text-link" href="member-settings.html">Review member privacy →</a>
+        </article>
+      </aside>
+    </section>
+
+    <section class="section-shell member-panel reveal"><p class="eyebrow">The member platform</p><h2>More than a dashboard.</h2><div class="member-expansion-grid"><a class="member-expansion-card" href="member-work.html"><span>Keep</span><h3>My Work</h3><p>Search and revisit reflections you deliberately chose to save from the Toolbox.</p></a><a class="member-expansion-card" href="member-progress.html"><span>Track</span><h3>Progress & History</h3><p>Review Path progress, saved tool activity, and longitudinal Pattern Map language.</p></a><a class="member-expansion-card" href="member-media.html"><span>Watch</span><h3>Video & Learning Hub</h3><p>Future lessons, workshops, replays, and Path-based video tracks organized on the site.</p></a><a class="member-expansion-card" href="member-store.html"><span>Acquire</span><h3>Member Store</h3><p>Future books, guides, programs, downloads, and purchase entitlements.</p></a><a class="member-expansion-card" href="member-community.html"><span>Connect</span><h3>The Circle</h3><p>Future discussion spaces, Discord bridge, event conversation, and community prompts.</p></a></div></section>
+
+    <section class="section-shell member-panel reveal"><p class="eyebrow">Guardian Code</p><h2>What are you practicing, not merely agreeing with?</h2><div class="member-code-grid"><article><strong>Trust</strong><p>Earn it. Calibrate it.</p></article><article><strong>Honor</strong><p>Stand beside your actions later.</p></article><article><strong>Respect</strong><p>Protect dignity, including your own.</p></article><article><strong>Honesty</strong><p>Tell truth without weaponizing it.</p></article><article><strong>Loyalty</strong><p>Stay committed without abandoning reality.</p></article></div><div class="member-actions"><a class="button button-ghost" href="member-profile.html">Edit What I'm Practicing</a></div></section>
+
+    <section class="callout section-shell reveal"><p class="eyebrow">Development boundary</p><h2>This feels like a platform before it becomes an account system.</h2><p>That is intentional. Real sign-in, authorization, cross-device data, purchase entitlements, protected content, and discussions will connect later through the backend bridge.</p><div class="hero-actions center"><a class="button button-primary" href="member-auth.html">Preview Account Bridge</a><a class="button button-ghost" href="privacy.html">Privacy & Data Use</a></div></section>
+  </main>
+
+  <footer class="site-footer section-shell"><div><strong>NOT BROKEN JUST BURNING</strong><p>See clearly. Burn clean. Build deliberately.</p></div><div class="footer-meta"><p>Development-only member experience.</p><p class="footer-links"><a href="contact.html">Contact</a> · <a href="support.html">Support & Safety</a> · <a href="privacy.html">Privacy & Data Use</a></p><p class="disclaimer">Educational and personal-development content only. Not a substitute for professional medical, mental-health, legal, or emergency services.</p></div></footer>
+  <script src="js/main.js"></script><script src="js/member-service.js"></script><script src="js/member-platform.js"></script><script src="js/member-entitlements.js"></script><script src="js/member-dashboard.js"></script>
+</body>
+</html>

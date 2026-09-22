@@ -1,0 +1,220 @@
+.restoration-system {
+  margin-top: 42px;
+}
+
+.restoration-system-head {
+  max-width: 860px;
+  margin-bottom: 26px;
+}
+
+.restoration-anchor-grid,
+.restoration-branch-grid,
+.restoration-practice-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.restoration-anchor-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.restoration-branch-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.restoration-practice-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 22px;
+}
+
+.restoration-card,
+.restoration-branch,
+.restoration-practice,
+.restoration-audit {
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: linear-gradient(150deg, rgba(255,255,255,0.028), rgba(255,122,45,0.025));
+  padding: 24px;
+}
+
+.restoration-card h3,
+.restoration-branch h3,
+.restoration-practice h3 {
+  margin: 8px 0 12px;
+}
+
+.restoration-card > span,
+.restoration-branch > span,
+.restoration-practice > span {
+  color: var(--ember-pale);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.76rem;
+}
+
+.restoration-card ul,
+.restoration-branch ul,
+.restoration-practice ul {
+  margin: 14px 0 0;
+  padding-left: 18px;
+}
+
+.restoration-card li,
+.restoration-branch li,
+.restoration-practice li {
+  margin: 6px 0;
+}
+
+.restoration-card.is-live {
+  border-color: var(--line-hot);
+  box-shadow: 0 18px 55px rgba(0,0,0,0.18);
+}
+
+.restoration-card a {
+  display: inline-block;
+  margin-top: 18px;
+  color: var(--ember-pale);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.restoration-card a:hover,
+.restoration-card a:focus-visible {
+  text-decoration: underline;
+}
+
+.restoration-status {
+  display: inline-flex;
+  margin-top: 16px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.restoration-map {
+  margin: 28px 0;
+  padding: 22px;
+  border-left: 3px solid var(--ember);
+  background: rgba(255,122,45,0.045);
+}
+
+.restoration-map strong {
+  color: var(--ember-pale);
+}
+
+.restoration-audit {
+  margin-top: 28px;
+}
+
+.restoration-audit fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.restoration-audit legend {
+  font-family: "Cinzel", serif;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.restoration-audit-intro {
+  max-width: 800px;
+  margin-bottom: 24px;
+}
+
+.restoration-audit-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(220px, 0.75fr);
+  gap: 18px;
+  align-items: center;
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+
+.restoration-audit-row:first-of-type {
+  border-top: 0;
+}
+
+.restoration-audit-row label {
+  font-weight: 700;
+}
+
+.restoration-audit select,
+.restoration-audit textarea {
+  width: 100%;
+}
+
+.restoration-audit textarea {
+  min-height: 120px;
+  margin-top: 14px;
+}
+
+.restoration-audit-output {
+  margin-top: 22px;
+  padding: 20px;
+  border: 1px solid var(--line-hot);
+  border-radius: 16px;
+  background: rgba(255,122,45,0.05);
+}
+
+.restoration-audit-output[hidden] {
+  display: none;
+}
+
+.restoration-audit-output h3 {
+  margin-top: 0;
+}
+
+.restoration-module-step {
+  margin: 40px 0;
+  scroll-margin-top: 110px;
+}
+
+.restoration-control-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.restoration-control-list > div {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.restoration-control-list strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+@media (max-width: 920px) {
+  .restoration-anchor-grid,
+  .restoration-practice-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .restoration-anchor-grid,
+  .restoration-branch-grid,
+  .restoration-practice-grid,
+  .restoration-control-list,
+  .restoration-audit-row {
+    grid-template-columns: 1fr;
+  }
+
+  .restoration-card,
+  .restoration-branch,
+  .restoration-practice,
+  .restoration-audit {
+    padding: 20px;
+  }
+}

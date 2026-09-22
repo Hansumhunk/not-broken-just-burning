@@ -141,12 +141,7 @@ Breaks an overwhelming mountain into one realistic next action and what can inte
 
 ## Content system
 
-Current full Stories From the Fire include:
-
-- The Armor We Don't Need Forever
-- Boundaries Can Hurt
-- One Stone at a Time
-- The Shame That Wasn't Mine
+The public Stories From the Fire library is maintained in `fire.html` and now includes dozens of full reflections rather than a four-story launch sample.
 
 The content model is:
 
@@ -211,7 +206,8 @@ These should be periodically rechecked.
 - [x] `.nojekyll`
 - [x] automated static-site validator
 - [x] GitHub Actions validation workflow
-- [x] initial Open Graph metadata on major launch pages
+- [x] static canonical, Open Graph, and Twitter/X sharing metadata across indexable public pages
+- [x] `main` protected by an active branch ruleset requiring pull requests and the `validate` status check
 - [x] newsletter removed from the V1.0 critical path
 - [x] launch with no first-party analytics
 
@@ -221,13 +217,13 @@ The repository-side production handoff is complete. The remaining checks require
 
 - [ ] confirm the GitHub Pages DNS check reports success for `notbrokenjustburning.com`
 - [ ] enable **Enforce HTTPS** in GitHub Pages when the setting is available
-- [ ] protect `main` with a branch ruleset / required validation check so production cannot bypass the static-site gate
+- [ ] verify `notbrokenjustburning.com` in Google Search Console and submit `https://notbrokenjustburning.com/sitemap.xml`
 
 These are operational controls, not missing public-page features.
 
 ## Post-launch backlog
 
-- Google Search Console verification and sitemap submission
+- monitor Google Search Console indexing/crawl reports after verification and sitemap submission
 - real newsletter/subscriber infrastructure with consent and unsubscribe controls
 - privacy-conscious analytics only if there is a clear use case
 - expanded Stories From the Fire

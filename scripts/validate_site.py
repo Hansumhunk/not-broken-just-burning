@@ -439,8 +439,14 @@ def main() -> int:
         dashboard_parser = parse_page(member_dashboard)
         if not dashboard_parser.noindex:
             errors.append("members.html: development member dashboard must remain noindex.")
-        if 'src="js/member-dashboard.js"' not in dashboard_text:
-            errors.append("members.html: missing Today / Continue dashboard behavior script.")
+        direct_dashboard_script = 'src="js/member-dashboard.js"' in dashboard_text
+        bootstrap_dashboard_script = (
+            'src="js/member-bootstrap.js"' in dashboard_text
+            and (ROOT / "js" / "member-bootstrap.js").exists()
+            and '"js/member-dashboard.js"' in (ROOT / "js" / "member-bootstrap.js").read_text(encoding="utf-8")
+        )
+        if not (direct_dashboard_script or bootstrap_dashboard_script):
+            errors.append("members.html: missing Today / Continue dashboard behavior script or authenticated bootstrap wiring.")
         if 'href="css/member-dashboard.css"' not in dashboard_text:
             errors.append("members.html: missing Today / Continue dashboard stylesheet.")
 

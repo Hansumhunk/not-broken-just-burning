@@ -52,6 +52,55 @@ Focus: isolation, trust between men, mentors, friends, teams, asking for help wi
 
 Core question: **Who can stand beside me without controlling me, rescuing me, or requiring me to disappear?**
 
+## Foundation Module Map
+
+The Google Drive foundation now expands Masculine Restoration beyond the original six-anchor operating system. The six anchors remain the practical operating system. The following twelve modules describe the larger curriculum skeleton that those anchors serve.
+
+1. The Wounded Boy and Inherited Manhood
+2. Masculine Identity After Relational Collapse
+3. Institutional Betrayal, Weaponized Systems, and the Male Identity
+4. The Body and Embodied Masculinity
+5. Emotional Command
+6. Boundaries, Access, and Self-Respect
+7. Purpose, Work, Provision, and Competence
+8. Fatherhood and Generational Leadership
+9. Relationships, Intimacy, and Sexual Masculinity
+10. Brotherhood and Male Connection
+11. Leadership and Self-Governance
+12. The Integrated Man
+
+These modules are not a linear masculinity score. A man may enter wherever his actual pressure is. Future curriculum should map each module back to the six anchors and the NBJB sequence: Chaos → Clarity → Agency → Action → Integration.
+
+### Module 3 — Institutional Betrayal, Weaponized Systems, and the Male Identity
+
+Core concern: what happens when an institution a man expected to provide fairness, care, protection, due process, competence, or neutral treatment becomes another source of pressure, invalidation, misrepresentation, or harm.
+
+Working sequence:
+
+**Promise → Entry Point → Breach → Leverage → Masculine Injury → Adaptation → Reaction → Narrative Aftermath → Risk → Restoration**
+
+Primary psychological injuries to explore:
+- credibility injury,
+- protector injury,
+- competence injury,
+- identity destabilization,
+- hypervigilance,
+- documentation dependence,
+- help-seeking injury,
+- authority distrust,
+- rage mixed with helplessness,
+- isolation.
+
+Reactive-abuse terminology should be handled carefully. Public-facing material should generally prefer **reactive provocation**, **reactive behavior**, or **contextualized reaction** unless the underlying abuse pattern has actually been established. Context matters, but preceding pressure does not automatically excuse harmful conduct.
+
+Institutional feedback loop to preserve for later research:
+
+**Pressure → Reaction → Institutional Scrutiny → More Pressure → Increased Likelihood of Another Reaction**
+
+Core restoration question:
+
+**How do I stand on my own feet after people or systems used institutional power in ways that harmed me without becoming bitter, reckless, permanently isolated, or powerless?**
+
 ## Specialized Branches
 
 Specialized branches are life-context routes through multiple anchors, not separate philosophies.
@@ -85,6 +134,13 @@ Topics may include threat scanning, compartmentalization, mission identity, exha
 Primary anchors: all six.
 
 This branch can offer language, education, reflection, structure, and agency while keeping diagnosis and treatment with qualified clinicians. Do not frame survival adaptations as moral weakness or spiritual failure.
+
+### Institutional Betrayal and Weaponized Systems
+Primary anchors: Steadiness, Protection, Responsibility, Direction.
+
+Topics may include institutional trust, complaints, reports, legal or clinical narratives, procedural pressure, credibility injury, authority distrust, documentation dependence, reactive provocation, strategic help-seeking, second opinions, appeals, and learning to use systems without allowing conflict with systems to become identity.
+
+Public translation rule: describe documented behavior, process, impact, pattern, and unknowns. Do not present disputed motive, criminality, diagnosis, or coordinated intent as established fact.
 
 ### Loneliness and Rebuilding Brotherhood
 Primary anchors: Brotherhood, Steadiness, Direction.

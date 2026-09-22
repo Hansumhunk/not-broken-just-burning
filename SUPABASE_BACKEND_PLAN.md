@@ -235,3 +235,8 @@ The database is migration-first.
 - no service-role/secret key is committed
 - no live billing is connected
 - GitHub documentation and Issue #3 reflect the implemented state
+
+
+## Stripe / Billing integration
+
+See `STRIPE_INTEGRATION.md`. Stripe-hosted Checkout and Customer Portal are the preferred payment surfaces. Stripe webhooks are payment truth; Supabase entitlement rows remain access truth. Browser code must never self-promote a member or grant purchased content.

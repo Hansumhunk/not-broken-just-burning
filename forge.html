@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Use the Not Broken Just Burning Forge to examine a difficult thought with evidence, patterns, and the Six Sacred Questions.">
+  <meta name="description" content="Use the Not Broken Just Burning Forge to examine a difficult thought with evidence, patterns, the Six Sacred Questions, and private on-device analysis.">
   <meta name="theme-color" content="#09090b">
   <meta property="og:title" content="The Forge | Not Broken Just Burning">
-  <meta property="og:description" content="Examine a difficult thought, separate fact from assumption, test the evidence, and rewrite it more accurately.">
+  <meta property="og:description" content="Examine a difficult thought, separate fact from assumption, test the evidence, and receive a private structured analysis in your browser.">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Not Broken Just Burning">
   <meta property="og:url" content="https://notbrokenjustburning.com/forge.html">
@@ -25,6 +25,7 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/brand.css">
   <link rel="stylesheet" href="css/experience.css">
+  <link rel="stylesheet" href="css/forge-analysis.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -41,8 +42,8 @@
     <section class="page-hero section-shell reveal">
       <p class="eyebrow">The Forge</p>
       <h1>Put the thought<br><span>under heat.</span></h1>
-      <p class="hero-lead">Strong emotions deserve respect, but they are not automatically evidence. Use the Forge to slow the thought down, test it, and rewrite it into something more accurate and useful.</p>
-      <div class="privacy-chip">🔒 Your answers stay in this browser. Nothing is submitted or saved by this site.</div>
+      <p class="hero-lead">Strong emotions deserve respect, but they are not automatically evidence. Use the Forge to slow the thought down, test it, and rebuild it into something more accurate and useful.</p>
+      <div class="privacy-chip">🔒 Your Forge draft is saved only in this browser on this device. It is not submitted to NBJB, an AI service, or a server.</div>
     </section>
 
     <section class="forge-shell section-shell reveal" id="forge-tool">
@@ -56,24 +57,43 @@
       <div class="forge-grid">
         <label class="forge-field"><span>What do I actually know?</span><textarea data-forge="know" rows="5" placeholder="Facts I can verify..."></textarea></label>
         <label class="forge-field"><span>What am I assuming?</span><textarea data-forge="assume" rows="5" placeholder="Interpretations, fears, predictions..."></textarea></label>
-        <label class="forge-field"><span>What evidence supports the thought?</span><textarea data-forge="support" rows="5" placeholder="Evidence for it..."></textarea></label>
-        <label class="forge-field"><span>What evidence challenges the thought?</span><textarea data-forge="challenge" rows="5" placeholder="Evidence against it or missing context..."></textarea></label>
-        <label class="forge-field"><span>What pattern am I seeing?</span><textarea data-forge="pattern" rows="5" placeholder="What repeats? What changed? What is actually connected?"></textarea></label>
+        <label class="forge-field"><span>What evidence supports the thought?</span><textarea data-forge="support" rows="5" placeholder="Evidence for it, as I currently understand it..."></textarea></label>
+        <label class="forge-field"><span>What evidence challenges the thought?</span><textarea data-forge="challenge" rows="5" placeholder="Evidence against it, exceptions, or missing context..."></textarea></label>
+        <label class="forge-field"><span>What pattern am I seeing?</span><textarea data-forge="pattern" rows="5" placeholder="What repeats? What changes? What is actually connected?"></textarea></label>
         <label class="forge-field"><span>What would I tell someone I love?</span><textarea data-forge="compassion" rows="5" placeholder="Use the same standards you would use for someone you care about..."></textarea></label>
       </div>
 
       <div class="six-questions forge-questions">
         <p class="eyebrow">The Six Sacred Questions</p>
-        <p>Who is involved? What happened? When did it happen? Where did it happen? Why do I think it matters? How do I know?</p>
+        <p><strong>Who</strong> is involved? <strong>What</strong> happened? <strong>When</strong> did it happen? <strong>Where</strong> did it happen? <strong>Why</strong> do I think it matters? <strong>How</strong> do I know?</p>
+        <p class="forge-save-status" id="forge-save-status" role="status" aria-live="polite"></p>
       </div>
 
-      <div class="forge-final">
-        <label for="forge-rewrite">Forge the thought into its most accurate version</label>
-        <textarea id="forge-rewrite" rows="5" placeholder="Example: I made mistakes and I am still learning. Some things were outside my control. I can decide what I do next."></textarea>
-        <div class="forge-actions">
-          <button class="button button-primary" id="copy-forge" type="button">Copy My Forge Notes</button>
-          <button class="button button-ghost" id="clear-forge" type="button">Clear the Forge</button>
+      <section class="forge-analysis-intro" aria-labelledby="forge-analysis-heading">
+        <p class="eyebrow">Step 2</p>
+        <h2 id="forge-analysis-heading">Ask the Forge to analyze what you wrote.</h2>
+        <p>This first version uses transparent, rule-based analysis inside your browser. It does not decide who is right, diagnose anyone, verify allegations, or determine legal truth. It looks at how you separated facts, assumptions, supporting and challenging evidence, patterns, predictions, motive claims, and the standard you would use for someone you care about.</p>
+        <div class="forge-analyze-actions">
+          <button class="button button-primary" id="analyze-forge" type="button">Analyze What I Wrote</button>
           <span class="forge-status" id="forge-status" role="status" aria-live="polite"></span>
+        </div>
+        <div class="privacy-chip">On-device analysis only. Nothing you type here is sent to an AI model or NBJB server.</div>
+      </section>
+
+      <section class="forge-analysis-output" id="forge-analysis-output" aria-live="polite" hidden>
+        <p class="eyebrow">Forge Analysis</p>
+        <h2>What the Forge sees in your reasoning.</h2>
+        <p>This is a structured reflection, not a truth score. Its job is to show you where your thinking is grounded, where uncertainty remains, and what deserves another question.</p>
+        <div id="forge-analysis-body"></div>
+      </section>
+
+      <div class="forge-final">
+        <p class="eyebrow">Step 3</p>
+        <label for="forge-rewrite">Forge the thought into its most accurate version</label>
+        <textarea id="forge-rewrite" rows="6" placeholder="After reviewing the analysis, rewrite the thought so it keeps what is true, labels what is uncertain, and leaves room for what you can do next."></textarea>
+        <div class="forge-actions">
+          <button class="button button-primary" id="copy-forge-v2" type="button">Copy My Forged Notes</button>
+          <button class="button button-ghost" id="clear-forge-v2" type="button">Clear the Forge</button>
         </div>
       </div>
     </section>
@@ -88,5 +108,6 @@
 
   <footer class="site-footer section-shell"><div><strong>NOT BROKEN JUST BURNING</strong><p>Truth survives examination.</p></div><div class="footer-meta"><p>© <span id="year"></span> Not Broken Just Burning.</p><p class="footer-links"><a href="contact.html">Contact</a> · <a href="support.html">Support & Safety</a> · <a href="privacy.html">Privacy & Data Use</a></p><p class="disclaimer">Educational and personal-development content only. Not a substitute for professional medical, mental-health, legal, or emergency services.</p></div></footer>
   <script src="js/main.js"></script>
+  <script src="js/forge-analysis.js"></script>
 </body>
 </html>

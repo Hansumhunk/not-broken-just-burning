@@ -289,6 +289,17 @@ def main() -> int:
                 + ", ".join(sorted(set(prohibited)))
             )
 
+    required_runtime_seo = {
+        "application/ld+json": "runtime JSON-LD injector",
+        "ProfilePage": "Founder ProfilePage schema",
+        "'@type': 'Article'": "Article schema",
+        "'@type': 'BreadcrumbList'": "breadcrumb schema",
+        "content-byline": "visible article authorship signal",
+    }
+    for token, label in required_runtime_seo.items():
+        if token not in main_js_text:
+            errors.append(f"js/main.js: missing {label}.")
+
     # Regression guard for the long-form reveal bug: tall reveal containers must be
     # eligible as soon as any part intersects, with a no-observer/reduced-motion fallback.
     if "threshold: 0" not in main_js_text:

@@ -78,6 +78,128 @@ if (!document.querySelector('meta[name="twitter:card"]')) {
   document.head.appendChild(twitterCard);
 }
 
+// Search identity and trust layer. Google supports JSON-LD generated with JavaScript;
+// keep the markup tied to visible page content and the permanent custom-domain URLs.
+const SITE_NAME = 'Not Broken Just Burning';
+const FOUNDER_NAME = 'Rickey Partin Jr.';
+const FOUNDER_URL = `${SITE_ORIGIN}/founder.html`;
+const SOCIAL_IMAGE_URL = `${SITE_ORIGIN}/assets/social-share.png`;
+
+function addStructuredData(id, data) {
+  if (document.querySelector(`script[data-schema="${id}"]`)) return;
+  const script = document.createElement('script');
+  script.type = 'application/ld+json';
+  script.dataset.schema = id;
+  script.textContent = JSON.stringify(data);
+  document.head.appendChild(script);
+}
+
+const pageDescription = document.querySelector('meta[name="description"]')?.content || '';
+const pageHeading = document.querySelector('h1')?.textContent?.replace(/\\s+/g, ' ').trim() || document.title;
+const ogType = document.querySelector('meta[property="og:type"]')?.content || 'website';
+const organizationNode = {
+  '@type': 'Organization',
+  '@id': `${SITE_ORIGIN}/#organization`,
+  name: SITE_NAME,
+  url: `${SITE_ORIGIN}/`,
+  founder: { '@id': `${FOUNDER_URL}#person` }
+};
+const founderNode = {
+  '@type': 'Person',
+  '@id': `${FOUNDER_URL}#person`,
+  name: FOUNDER_NAME,
+  url: FOUNDER_URL,
+  jobTitle: 'Founder',
+  worksFor: { '@id': `${SITE_ORIGIN}/#organization` }
+};
+
+if (currentPage === 'index.html') {
+  addStructuredData('site', {
+    '@context': 'https://schema.org',
+    '@graph': [
+      organizationNode,
+      founderNode,
+      {
+        '@type': 'WebSite',
+        '@id': `${SITE_ORIGIN}/#website`,
+        url: `${SITE_ORIGIN}/`,
+        name: SITE_NAME,
+        description: pageDescription,
+        publisher: { '@id': `${SITE_ORIGIN}/#organization` }
+      }
+    ]
+  });
+}
+
+if (currentPage === 'founder.html') {
+  addStructuredData('profile', {
+    '@context': 'https://schema.org',
+    '@graph': [
+      organizationNode,
+      founderNode,
+      {
+        '@type': 'ProfilePage',
+        '@id': `${canonicalUrl}#profile`,
+        url: canonicalUrl,
+        name: document.title,
+        description: pageDescription,
+        mainEntity: { '@id': `${FOUNDER_URL}#person` },
+        isPartOf: { '@id': `${SITE_ORIGIN}/#website` }
+      }
+    ]
+  });
+}
+
+const breadcrumbParents = (() => {
+  if (currentPage.startsWith('story-')) return [{ name: 'Stories From the Fire', url: `${SITE_ORIGIN}/fire.html` }];
+  if (currentPage.startsWith('lesson-')) return [{ name: 'Lessons From the Fire', url: `${SITE_ORIGIN}/lessons.html` }];
+  if (currentPage.startsWith('guardian-')) return [{ name: 'The Movement', url: `${SITE_ORIGIN}/movement.html` }];
+  if (currentPage.startsWith('question-')) return [{ name: 'Six Sacred Questions', url: `${SITE_ORIGIN}/six-sacred-questions.html` }];
+  if (currentPage.startsWith('path-')) return [{ name: 'The Flamewalker Path', url: `${SITE_ORIGIN}/path.html` }];
+  if (['forge.html', 'check-in.html', 'pattern-map.html', 'six-sacred-questions.html'].includes(currentPage)) {
+    return [{ name: 'Resources', url: `${SITE_ORIGIN}/resources.html` }];
+  }
+  return [];
+})();
+
+if (breadcrumbParents.length) {
+  const items = [
+    { '@type': 'ListItem', position: 1, name: SITE_NAME, item: `${SITE_ORIGIN}/` },
+    ...breadcrumbParents.map((item, index) => ({
+      '@type': 'ListItem', position: index + 2, name: item.name, item: item.url
+    })),
+    { '@type': 'ListItem', position: breadcrumbParents.length + 2, name: pageHeading, item: canonicalUrl }
+  ];
+  addStructuredData('breadcrumbs', {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items
+  });
+}
+
+if (ogType === 'article' && currentPage !== 'founder.html') {
+  addStructuredData('article', {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    '@id': `${canonicalUrl}#article`,
+    mainEntityOfPage: canonicalUrl,
+    headline: pageHeading,
+    description: pageDescription,
+    image: [SOCIAL_IMAGE_URL],
+    author: { '@id': `${FOUNDER_URL}#person` },
+    publisher: { '@id': `${SITE_ORIGIN}/#organization` },
+    isAccessibleForFree: true
+  });
+
+  const longReadHeader = document.querySelector('.long-read-header');
+  if (longReadHeader && !longReadHeader.querySelector('.content-byline')) {
+    const byline = document.createElement('p');
+    byline.className = 'content-byline';
+    byline.innerHTML = `Written by <a href="founder.html">${FOUNDER_NAME}</a> · Founder, NBJB · Lived-experience educator · <span>Not a licensed mental-health clinician</span>`;
+    longReadHeader.appendChild(byline);
+  }
+}
+
 // Primary navigation layer: Founder is a first-class public route, not a buried subpage.
 if (siteNav && !siteNav.querySelector('a[href="founder.html"]')) {
   const founderLink = document.createElement('a');

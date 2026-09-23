@@ -512,3 +512,14 @@ textarea::placeholder { color: #6f6963; }
   .statement { padding: 58px 0; }
   .closing { padding: 100px 0; }
 }
+
+
+/* SEO trust signal: visible authorship on long-form article pages. */
+.content-byline {
+  margin-top: 18px;
+  font-size: .82rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.content-byline a { color: var(--ember-pale); font-weight: 700; }
+.content-byline span { white-space: normal; }

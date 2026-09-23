@@ -16,6 +16,9 @@ Current production foundation on `main`:
 - canonical URLs use the permanent domain
 - major pages use unique title and description metadata
 - major pages use Open Graph metadata
+- runtime JSON-LD provides WebSite/Organization identity, Founder ProfilePage markup, Article markup, and contextual BreadcrumbList markup
+- long-form article pages expose a visible Rickey Partin Jr. byline and non-clinical role disclosure
+- core search-entry pages pair NBJB brand language with clearer search intent around rebuilding, betrayal, divorce, boundaries, self-trust, and reflection tools
 - public deep-dive pages use one clear H1 and semantic article/page structure
 - internal links connect Path stages, Guardian Code values, Six Sacred Questions, Fire reflections, Lessons, Resources, Founder, and Support
 - Phase Two/member workspace pages remain off `main` and outside the public sitemap
@@ -165,12 +168,13 @@ External / account-level work:
 - verify the domain in Google Search Console
 - submit `https://notbrokenjustburning.com/sitemap.xml`
 - inspect indexing and crawl reports once Google has processed the site
+- replenish Semrush API units before running quantified keyword, competitor, backlink, and organic-position research
 
 Post-launch technical polish:
 
 - measure Core Web Vitals on real devices and field traffic
-- add structured data only where it accurately describes visible content
-- validate any future structured data with Google's current tooling
+- validate deployed structured data with Google's Rich Results Test and URL Inspection after Search Console verification
+- add article-specific representative images over time where they materially improve the content rather than manufacturing decorative assets for SEO
 - reconsider privacy-conscious analytics only if a concrete measurement need exists
 
 ## After V1.0
@@ -189,3 +193,24 @@ Useful measurements:
 - broken links / crawl errors
 
 SEO is a feedback loop, not a one-time ranking button.
+
+
+## September 2026 SEO hardening pass
+
+Completed on production:
+
+- added site-wide search entity and structured-data layer through the shared JavaScript runtime
+- added Founder ProfilePage / Person identity wiring
+- added Article author/publisher markup and visible authorship on long-form content
+- added breadcrumb structured data for Path, Guardian Code, Six Sacred Questions, Stories, Lessons, and reflection-tool hierarchies
+- rewrote the eight major search-entry page titles/descriptions around clearer human search intent
+- expanded Flame Check-In, The Forge, and Pattern Map with useful explanatory copy rather than filler
+- tightened overlong story titles and weak snippets found by the second audit
+- extended automated validation so the runtime SEO schema/authorship layer cannot disappear silently
+
+Current external blockers:
+
+- Google Search Console account is connected to GSC Wizard, but no verified NBJB property exists yet
+- sitemap submission and URL inspection must wait for Search Console property verification
+- Semrush is connected but currently has insufficient API units for domain, keyword, competitor, backlink, and organic-position reports
+- Core Web Vitals field data should be evaluated after the site has enough real traffic and the Search Console property is available

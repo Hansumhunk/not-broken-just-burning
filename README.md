@@ -207,6 +207,9 @@ These should be periodically rechecked.
 - [x] automated static-site validator
 - [x] GitHub Actions validation workflow
 - [x] static canonical, Open Graph, and Twitter/X sharing metadata across indexable public pages
+- [x] runtime WebSite / Organization / ProfilePage / Article / BreadcrumbList structured data
+- [x] visible founder authorship disclosure on long-form article pages
+- [x] search-intent optimization on core public entry pages
 - [x] `main` protected by an active branch ruleset requiring pull requests and the `validate` status check
 - [x] newsletter removed from the V1.0 critical path
 - [x] launch with no first-party analytics
@@ -218,6 +221,7 @@ The repository-side production handoff is complete. The remaining checks require
 - [ ] confirm the GitHub Pages DNS check reports success for `notbrokenjustburning.com`
 - [ ] enable **Enforce HTTPS** in GitHub Pages when the setting is available
 - [ ] verify `notbrokenjustburning.com` in Google Search Console and submit `https://notbrokenjustburning.com/sitemap.xml`
+- [ ] replenish Semrush API units before quantified keyword, competitor, backlink, and organic-position analysis
 
 These are operational controls, not missing public-page features.
 

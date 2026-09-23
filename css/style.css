@@ -395,6 +395,9 @@ textarea::placeholder { color: #6f6963; }
 .value-card > span { color: rgba(255,122,45,0.25); font-family: "Cinzel", serif; font-size: 4.5rem; line-height: 1; }
 .value-card h3 { margin-top: auto; }
 .value-card p { color: var(--muted); font-size: 0.92rem; }
+.sacred-question-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.sacred-question-grid .value-card { min-height: 330px; padding: 32px; }
+.sacred-question-grid .value-card p { font-size: 1rem; line-height: 1.65; }
 .six-sacred .section-note { max-width: 760px; margin-top: 26px; }
 
 .closing { padding: 145px 0; text-align: center; border-top: 1px solid var(--line); }

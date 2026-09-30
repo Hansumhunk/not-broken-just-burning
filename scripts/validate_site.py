@@ -248,6 +248,26 @@ def main() -> int:
         return 1
 
     main_js_text = MAIN_JS.read_text(encoding="utf-8") if MAIN_JS.exists() else ""
+    # Privacy-conscious analytics marker: traffic measurement must remain cookieless,
+    # pageview-focused, and free of replay or interaction autocapture.
+    analytics_markers = (
+        "cookieless_mode: 'always'",
+        "person_profiles: 'identified_only'",
+        "autocapture: false",
+        "capture_pageview: true",
+        "disable_session_recording: true",
+        "capture_exceptions: false",
+        "navigator.globalPrivacyControl",
+        "navigator.doNotTrack",
+    )
+    for marker in analytics_markers:
+        if marker not in main_js_text:
+            errors.append(f"js/main.js: privacy-conscious analytics marker missing: {marker}")
+
+    privacy_notice = (ROOT / "privacy.html").read_text(encoding="utf-8") if (ROOT / "privacy.html").exists() else ""
+    if "Minimal cookieless analytics" not in privacy_notice or "PostHog" not in privacy_notice:
+        errors.append("privacy.html: analytics disclosure must describe the active cookieless PostHog setup.")
+
     shared_support = "support.html" in main_js_text
     shared_privacy = "privacy.html" in main_js_text
     shared_canonical = SITE_ORIGIN in main_js_text and "rel = 'canonical'" in main_js_text

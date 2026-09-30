@@ -39,8 +39,9 @@ The public site intentionally remains lightweight:
 - SVG brand assets
 - GitHub Pages
 - GitHub Actions validation
+- PostHog cookieless aggregate web analytics
 
-There is currently no account system, reflection database, newsletter backend, or first-party analytics layer.
+There is currently no account system, reflection database, or newsletter backend. Basic public-site traffic is measured with privacy-conscious cookieless analytics; reflection-tool contents remain browser-only.
 
 ## Public architecture
 
@@ -179,11 +180,26 @@ Emailing NBJB once does **not** count as consent to receive marketing or newslet
 
 Newsletter signup is intentionally deferred until after V1.0. A future release can add a real subscriber provider, explicit consent, unsubscribe controls, retention/deletion rules, and an updated privacy notice without delaying the initial public launch.
 
-## Privacy and analytics launch decision
+## Privacy-conscious analytics
 
-V1.0 launches with **no first-party analytics or tracking layer** beyond routine hosting-provider technical logs. This keeps the initial privacy model simple and avoids collecting behavior data merely because the software industry has developed a spiritual attachment to dashboards.
+NBJB uses PostHog only for basic aggregate website measurement: daily visitors, pageviews, sessions, page popularity, and ordinary traffic-source information. The implementation is intentionally narrower than a default product-analytics install.
 
-Analytics can be reconsidered later only if there is a clear purpose, a privacy-conscious implementation, and a corresponding update to the privacy notice.
+Production analytics are configured to:
+
+- use PostHog cookieless mode with stateless server hashing
+- discard raw client IP data
+- create no identified person profiles
+- disable interaction/click autocapture
+- disable session replay
+- disable heatmaps
+- disable automatic JavaScript exception capture
+- disable console-log and performance/network capture at the project level
+- honor browser Global Privacy Control and Do Not Track signals by not loading analytics
+- run only on the production NBJB hostname, not local or branch previews
+
+The Forge, Flame Check-In, Pattern Map, Boundary Builder, One Stone, and other reflection fields remain browser-only. Their typed contents are not analytics events.
+
+The purpose is editorial feedback, not surveillance: learn which public pages people use, which material is ignored, and how overall reach changes over time.
 
 ## Support & Safety
 
@@ -215,7 +231,7 @@ These should be periodically rechecked.
 - [x] static canonical, Open Graph, and Twitter/X sharing metadata across indexable public pages
 - [x] `main` protected by an active branch ruleset requiring pull requests and the `validate` status check
 - [x] newsletter removed from the V1.0 critical path
-- [x] launch with no first-party analytics
+- [x] privacy-conscious cookieless aggregate analytics with no reflection-content capture
 
 ## V1.0 external / account-level checks
 
@@ -231,7 +247,6 @@ These are operational controls, not missing public-page features.
 
 - monitor Google Search Console indexing/crawl reports after verification and sitemap submission
 - real newsletter/subscriber infrastructure with consent and unsubscribe controls
-- privacy-conscious analytics only if there is a clear use case
 - expanded Stories From the Fire
 - future Library / books / guides / courses when deliberately released
 - future events, community, or service offerings only when they actually exist

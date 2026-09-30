@@ -19,6 +19,31 @@ const navToggle = document.querySelector('.nav-toggle');
 const siteNav = document.querySelector('.site-nav');
 const year = document.querySelector('#year');
 const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+// Privacy-conscious aggregate analytics.
+// Production only: no cookies/localStorage, no person identification, no click autocapture,
+// no replay/heatmaps, and honor browser Global Privacy Control / Do Not Track signals.
+const analyticsHostnames = new Set(['notbrokenjustburning.com', 'www.notbrokenjustburning.com']);
+const privacySignalEnabled =
+  navigator.globalPrivacyControl === true ||
+  navigator.doNotTrack === '1' ||
+  window.doNotTrack === '1';
+
+if (analyticsHostnames.has(window.location.hostname) && !privacySignalEnabled) {
+  !function(t,e){var o,n,p,r;e.__SV||(window.posthog&&window.posthog.__loaded)||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2===o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}p||((p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",p.onerror=function(){p=null},(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r));var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],Object.defineProperty(u,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e}}),Object.defineProperty(u.people,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(){return u.toString(1)+".people (stub)"}}),o="init capture register register_once register_for_session unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group identify setPersonProperties setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags resetGroups onFeatureFlags addFeatureFlagsHandler onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey getNextSurveyStep".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+
+  posthog.init('phc_AnVpuc8EtDx6gsTSnyYHMnRHQwtYzrAbPFn4ZUozcrxR', {
+    api_host: 'https://us.i.posthog.com',
+    ui_host: 'https://us.posthog.com',
+    defaults: '2026-05-30',
+    cookieless_mode: 'always',
+    person_profiles: 'identified_only',
+    autocapture: false,
+    capture_pageview: true,
+    disable_session_recording: true,
+    capture_exceptions: false
+  });
+}
+
 
 // V0.8 launch metadata fallback. Static tags remain preferred on major pages,
 // but every public page gets a canonical custom-domain URL at runtime.

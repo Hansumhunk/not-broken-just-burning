@@ -92,6 +92,14 @@ Current interactive tools are deliberately client-side and should remain that wa
 
 Ordinary contact email is processed through Gmail/Google and is documented separately from browser-only reflection tools.
 
+### Aggregate traffic measurement
+
+NBJB measures basic public-site usage with a deliberately narrow PostHog configuration. The goal is to answer editorial questions such as how many people visited, which pages receive attention, and which resources are rarely opened.
+
+The production tracker is cookieless, anonymous, and pageview-focused. It does not enable click autocapture, session replay, heatmaps, console-log capture, automatic exception capture, or identified person profiles. Reflection-tool field contents are never intentionally sent as analytics properties or events. Browser Global Privacy Control and Do Not Track signals prevent the analytics loader from running.
+
+Use aggregate trends to improve navigation and content. Do not use analytics to build dossiers on individual visitors.
+
 ## Pre-launch engagement checklist
 
 - [ ] Select real email/newsletter provider

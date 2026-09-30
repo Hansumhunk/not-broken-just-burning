@@ -139,6 +139,12 @@ Breaks an overwhelming mountain into one realistic next action and what can inte
 
 **Privacy design:** Current reflection entries remain in the visitor's browser session and are not submitted to an NBJB server.
 
+## Masculine Restoration: Breakdown & Betrayal
+
+The development site now includes **The Placeholder Wound**, an eight-lesson relationship-rebuilding track inside Masculine Restoration. It covers being needed versus chosen, unspoken relationship bargains, red flags and responsibility, betrayal-related memory rewriting, fatherhood after relationship collapse, loyalty without self-abandonment, grief for an imagined future, and comparison after rejection.
+
+The track is intentionally de-identified and follows the project's evidence discipline: lived experience can generate a lesson without turning assumptions about another person's motives into public facts. Each lesson routes readers toward relevant reflection tools and back into the wider Masculine Restoration system.
+
 ## Content system
 
 The public Stories From the Fire library is maintained in `fire.html` and now includes dozens of full reflections rather than a four-story launch sample.

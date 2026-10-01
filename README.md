@@ -140,6 +140,20 @@ Breaks an overwhelming mountain into one realistic next action and what can inte
 
 **Privacy design:** Current reflection entries remain in the visitor's browser session and are not submitted to an NBJB server.
 
+## Masculine Restoration production track
+
+Masculine Restoration is the men-first Stage 04 rebuilding system within the Flamewalker Path. The current public release includes:
+
+- a six-anchor operating system: Steadiness, Direction, Strength, Protection, Responsibility, and Brotherhood
+- the first full anchor module, **Steadiness**, with an on-device audit
+- a specialized **Institutional Betrayal** branch
+- **The Placeholder Wound**, an eight-lesson relationship-rebuilding track covering unequal commitment, hindsight, fatherhood, loyalty, grief, comparison, and self-respect
+- cross-links into existing NBJB reflection tools and related Stories From the Fire
+
+The material is educational and de-identified. Lived experience can generate public lessons without turning assumptions about another person's motives into established facts.
+
+See `MASCULINE_RESTORATION.md` for the current architecture and publishing rules.
+
 ## Content system
 
 The public Stories From the Fire library is maintained in `fire.html` and now includes dozens of full reflections rather than a four-story launch sample.

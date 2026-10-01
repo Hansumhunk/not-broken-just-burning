@@ -1,6 +1,6 @@
 # Masculine Restoration Program Architecture
 
-Status: development architecture. Not a public product promise.
+Status: public architecture and publishing reference. Only pages and features actually deployed to the public site are current offerings; deeper modules, member layers, workshops, and future services remain roadmap material until deliberately released.
 
 ## Purpose
 

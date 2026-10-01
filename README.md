@@ -154,6 +154,8 @@ The material is educational and de-identified. Lived experience can generate pub
 
 See `MASCULINE_RESTORATION.md` for the current architecture and publishing rules.
 
+The architecture file is a public publishing reference; unreleased member layers, deeper modules, workshops, and future services remain roadmap material until deliberately launched.
+
 ## Content system
 
 The public Stories From the Fire library is maintained in `fire.html` and now includes dozens of full reflections rather than a four-story launch sample.

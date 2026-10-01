@@ -292,16 +292,26 @@ def main() -> int:
         known_phase_two_only = {
             "ACCESS_MODEL.md",
             "MEMBERS.md",
-            "MASCULINE_RESTORATION.md",
+            "STRIPE_INTEGRATION.md",
+            "SUPABASE_BACKEND_PLAN.md",
+            "SUPABASE_SCHEMA.md",
             "YOUTUBE.md",
-            "path-masculine-restoration-steadiness.html",
-            "css/masculine-restoration.css",
-            "js/masculine-restoration.js",
+            "js/nbjb-auth.js",
+            "js/nbjb-config.js",
         }
         prohibited.extend(
             path for path in sorted(known_phase_two_only)
             if (ROOT / path).exists()
         )
+
+        # Backend/auth/billing implementation must remain off the public static branch.
+        supabase_root = ROOT / "supabase"
+        if supabase_root.exists():
+            prohibited.extend(
+                str(path.relative_to(ROOT))
+                for path in supabase_root.rglob("*")
+                if path.is_file()
+            )
 
         if prohibited:
             errors.append(

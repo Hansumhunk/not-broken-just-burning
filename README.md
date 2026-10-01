@@ -39,8 +39,9 @@ The public site intentionally remains lightweight:
 - SVG brand assets
 - GitHub Pages
 - GitHub Actions validation
+- PostHog cookieless aggregate web analytics
 
-There is currently no account system, reflection database, newsletter backend, or first-party analytics layer.
+There is currently no account system, reflection database, or newsletter backend. Basic public-site traffic is measured with privacy-conscious cookieless analytics; reflection-tool contents remain browser-only.
 
 ## Public architecture
 
@@ -139,14 +140,25 @@ Breaks an overwhelming mountain into one realistic next action and what can inte
 
 **Privacy design:** Current reflection entries remain in the visitor's browser session and are not submitted to an NBJB server.
 
+## Masculine Restoration production track
+
+Masculine Restoration is the men-first Stage 04 rebuilding system within the Flamewalker Path. The current public release includes:
+
+- a six-anchor operating system: Steadiness, Direction, Strength, Protection, Responsibility, and Brotherhood
+- the first full anchor module, **Steadiness**, with an on-device audit
+- a specialized **Institutional Betrayal** branch
+- **The Placeholder Wound**, an eight-lesson relationship-rebuilding track covering unequal commitment, hindsight, fatherhood, loyalty, grief, comparison, and self-respect
+- cross-links into existing NBJB reflection tools and related Stories From the Fire
+
+The material is educational and de-identified. Lived experience can generate public lessons without turning assumptions about another person's motives into established facts.
+
+See `MASCULINE_RESTORATION.md` for the current architecture and publishing rules.
+
+The architecture file is a public publishing reference; unreleased member layers, deeper modules, workshops, and future services remain roadmap material until deliberately launched.
+
 ## Content system
 
-Current full Stories From the Fire include:
-
-- The Armor We Don't Need Forever
-- Boundaries Can Hurt
-- One Stone at a Time
-- The Shame That Wasn't Mine
+The public Stories From the Fire library is maintained in `fire.html` and now includes dozens of full reflections rather than a four-story launch sample.
 
 The content model is:
 
@@ -178,11 +190,26 @@ Emailing NBJB once does **not** count as consent to receive marketing or newslet
 
 Newsletter signup is intentionally deferred until after V1.0. A future release can add a real subscriber provider, explicit consent, unsubscribe controls, retention/deletion rules, and an updated privacy notice without delaying the initial public launch.
 
-## Privacy and analytics launch decision
+## Privacy-conscious analytics
 
-V1.0 launches with **no first-party analytics or tracking layer** beyond routine hosting-provider technical logs. This keeps the initial privacy model simple and avoids collecting behavior data merely because the software industry has developed a spiritual attachment to dashboards.
+NBJB uses PostHog only for basic aggregate website measurement: daily visitors, pageviews, sessions, page popularity, and ordinary traffic-source information. The implementation is intentionally narrower than a default product-analytics install.
 
-Analytics can be reconsidered later only if there is a clear purpose, a privacy-conscious implementation, and a corresponding update to the privacy notice.
+Production analytics are configured to:
+
+- use PostHog cookieless mode with stateless server hashing
+- discard raw client IP data
+- create no identified person profiles
+- disable interaction/click autocapture
+- disable session replay
+- disable heatmaps
+- disable automatic JavaScript exception capture
+- disable console-log and performance/network capture at the project level
+- honor browser Global Privacy Control and Do Not Track signals by not loading analytics
+- run only on the production NBJB hostname, not local or branch previews
+
+The Forge, Flame Check-In, Pattern Map, Boundary Builder, One Stone, and other reflection fields remain browser-only. Their typed contents are not analytics events.
+
+The purpose is editorial feedback, not surveillance: learn which public pages people use, which material is ignored, and how overall reach changes over time.
 
 ## Support & Safety
 
@@ -211,9 +238,13 @@ These should be periodically rechecked.
 - [x] `.nojekyll`
 - [x] automated static-site validator
 - [x] GitHub Actions validation workflow
-- [x] initial Open Graph metadata on major launch pages
+- [x] static canonical, Open Graph, and Twitter/X sharing metadata across indexable public pages
+- [x] search-intent optimization on core public entry pages
+- [x] visible founder authorship disclosure on long-form article pages
+- [x] runtime WebSite / Organization / ProfilePage / Article / BreadcrumbList structured data
+- [x] `main` protected by an active branch ruleset requiring pull requests and the `validate` status check
 - [x] newsletter removed from the V1.0 critical path
-- [x] launch with no first-party analytics
+- [x] privacy-conscious cookieless aggregate analytics with no reflection-content capture
 
 ## V1.0 external / account-level checks
 
@@ -221,15 +252,14 @@ The repository-side production handoff is complete. The remaining checks require
 
 - [ ] confirm the GitHub Pages DNS check reports success for `notbrokenjustburning.com`
 - [ ] enable **Enforce HTTPS** in GitHub Pages when the setting is available
-- [ ] protect `main` with a branch ruleset / required validation check so production cannot bypass the static-site gate
+- [ ] verify `notbrokenjustburning.com` in Google Search Console and submit `https://notbrokenjustburning.com/sitemap.xml`
 
 These are operational controls, not missing public-page features.
 
 ## Post-launch backlog
 
-- Google Search Console verification and sitemap submission
+- monitor Google Search Console indexing/crawl reports after verification and sitemap submission
 - real newsletter/subscriber infrastructure with consent and unsubscribe controls
-- privacy-conscious analytics only if there is a clear use case
 - expanded Stories From the Fire
 - future Library / books / guides / courses when deliberately released
 - future events, community, or service offerings only when they actually exist

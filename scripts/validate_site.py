@@ -248,6 +248,26 @@ def main() -> int:
         return 1
 
     main_js_text = MAIN_JS.read_text(encoding="utf-8") if MAIN_JS.exists() else ""
+    # Privacy-conscious analytics marker: traffic measurement must remain cookieless,
+    # pageview-focused, and free of replay or interaction autocapture.
+    analytics_markers = (
+        "cookieless_mode: 'always'",
+        "person_profiles: 'identified_only'",
+        "autocapture: false",
+        "capture_pageview: true",
+        "disable_session_recording: true",
+        "capture_exceptions: false",
+        "navigator.globalPrivacyControl",
+        "navigator.doNotTrack",
+    )
+    for marker in analytics_markers:
+        if marker not in main_js_text:
+            errors.append(f"js/main.js: privacy-conscious analytics marker missing: {marker}")
+
+    privacy_notice = (ROOT / "privacy.html").read_text(encoding="utf-8") if (ROOT / "privacy.html").exists() else ""
+    if "Minimal cookieless analytics" not in privacy_notice or "PostHog" not in privacy_notice:
+        errors.append("privacy.html: analytics disclosure must describe the active cookieless PostHog setup.")
+
     shared_support = "support.html" in main_js_text
     shared_privacy = "privacy.html" in main_js_text
     shared_canonical = SITE_ORIGIN in main_js_text and "rel = 'canonical'" in main_js_text
@@ -268,11 +288,47 @@ def main() -> int:
         prohibited.extend(str(path.relative_to(ROOT)) for path in (ROOT / "css").glob("member*.css"))
         prohibited.extend(str(path.relative_to(ROOT)) for path in (ROOT / "js").glob("member*.js"))
         prohibited.extend(str(path.relative_to(ROOT)) for path in (ROOT / "js").glob("tool-member*.js"))
+
+        known_phase_two_only = {
+            "ACCESS_MODEL.md",
+            "MEMBERS.md",
+            "STRIPE_INTEGRATION.md",
+            "SUPABASE_BACKEND_PLAN.md",
+            "SUPABASE_SCHEMA.md",
+            "YOUTUBE.md",
+            "js/nbjb-auth.js",
+            "js/nbjb-config.js",
+        }
+        prohibited.extend(
+            path for path in sorted(known_phase_two_only)
+            if (ROOT / path).exists()
+        )
+
+        # Backend/auth/billing implementation must remain off the public static branch.
+        supabase_root = ROOT / "supabase"
+        if supabase_root.exists():
+            prohibited.extend(
+                str(path.relative_to(ROOT))
+                for path in supabase_root.rglob("*")
+                if path.is_file()
+            )
+
         if prohibited:
             errors.append(
                 "main production target contains Phase Two/member workspace artifacts: "
-                + ", ".join(sorted(prohibited))
+                + ", ".join(sorted(set(prohibited)))
             )
+
+    required_runtime_seo = {
+        "application/ld+json": "runtime JSON-LD injector",
+        "ProfilePage": "Founder ProfilePage schema",
+        "'@type': 'Article'": "Article schema",
+        "'@type': 'BreadcrumbList'": "breadcrumb schema",
+        "content-byline": "visible article authorship signal",
+    }
+    for token, label in required_runtime_seo.items():
+        if token not in main_js_text:
+            errors.append(f"js/main.js: missing {label}.")
 
     # Regression guard for the long-form reveal bug: tall reveal containers must be
     # eligible as soon as any part intersects, with a no-observer/reduced-motion fallback.
@@ -327,21 +383,26 @@ def main() -> int:
             errors.append(f"{rel}: {parser.images_missing_alt} image(s) missing alt attributes.")
 
         if page.name != "404.html":
-            if parser.canonical_urls:
-                if len(parser.canonical_urls) > 1:
-                    errors.append(f"{rel}: multiple canonical URLs.")
-                if parser.canonical_urls[0] != expected_url:
+            if not parser.noindex:
+                if len(parser.canonical_urls) != 1:
+                    errors.append(f"{rel}: public page must have exactly one static canonical URL.")
+                elif parser.canonical_urls[0] != expected_url:
                     errors.append(
                         f"{rel}: canonical must be {expected_url}, found {parser.canonical_urls[0]}."
                     )
-            elif not (uses_main_js and shared_canonical):
-                errors.append(f"{rel}: missing custom-domain canonical URL or shared fallback.")
 
-            og_urls = parser.og.get("og:url", [])
-            if og_urls and og_urls[0] != expected_url:
-                errors.append(f"{rel}: og:url must be {expected_url}, found {og_urls[0]}.")
+                og_titles = parser.og.get("og:title", [])
+                og_descriptions = parser.og.get("og:description", [])
+                og_urls = parser.og.get("og:url", [])
+                if len(og_titles) != 1:
+                    errors.append(f"{rel}: public page must have exactly one static og:title.")
+                if len(og_descriptions) != 1:
+                    errors.append(f"{rel}: public page must have exactly one static og:description.")
+                if len(og_urls) != 1:
+                    errors.append(f"{rel}: public page must have exactly one static og:url.")
+                elif og_urls[0] != expected_url:
+                    errors.append(f"{rel}: og:url must be {expected_url}, found {og_urls[0]}.")
 
-            if not parser.noindex:
                 expected_social = f"{SITE_ORIGIN}/assets/social-share.png"
                 og_images = parser.og.get("og:image", [])
                 if not og_images:
@@ -409,6 +470,69 @@ def main() -> int:
 
         if OLD_PAGES_ORIGIN in text:
             errors.append(f"{rel}: still references the temporary GitHub Pages URL.")
+
+    # Phase Two dashboard guardrails are optional on the public branch, but when the
+    # development member dashboard exists it must preserve the privacy-safe Today contract.
+    member_dashboard = ROOT / "members.html"
+    member_dashboard_js = ROOT / "js" / "member-dashboard.js"
+    if member_dashboard.exists():
+        dashboard_text = member_dashboard.read_text(encoding="utf-8")
+        dashboard_parser = parse_page(member_dashboard)
+        if not dashboard_parser.noindex:
+            errors.append("members.html: development member dashboard must remain noindex.")
+        if 'src="js/member-dashboard.js"' not in dashboard_text:
+            errors.append("members.html: missing Today / Continue dashboard behavior script.")
+        if 'href="css/member-dashboard.css"' not in dashboard_text:
+            errors.append("members.html: missing Today / Continue dashboard stylesheet.")
+
+        required_dashboard_hooks = {
+            "data-dashboard-first-run",
+            "data-dashboard-continue-link",
+            "data-dashboard-focus-link",
+            "data-dashboard-recent-list",
+            "data-dashboard-learning-link",
+            "data-dashboard-paid-depth",
+            "data-dashboard-free-depth",
+        }
+        for hook in sorted(required_dashboard_hooks):
+            if hook not in dashboard_text:
+                errors.append(f"members.html: missing dashboard hook {hook}.")
+
+        if not member_dashboard_js.exists():
+            errors.append("js/member-dashboard.js: missing Today / Continue dashboard behavior.")
+        else:
+            dashboard_js_text = member_dashboard_js.read_text(encoding="utf-8")
+            for tool_name in (
+                "The Forge",
+                "Flame Check-In",
+                "Pattern Map",
+                "Boundary Builder",
+                "One Stone",
+                "Six Sacred Questions",
+            ):
+                if tool_name not in dashboard_js_text:
+                    errors.append(f"js/member-dashboard.js: missing Continue route for {tool_name}.")
+
+            # Recent-work cards may show low-detail comparison metadata, never saved
+            # reflection bodies or private context fields on the dashboard.
+            prohibited_dashboard_reads = (
+                "entry.summary",
+                "entry.title",
+                "entry.data",
+                "entry.meta?.context",
+                "entry.meta.context",
+                "entry.meta?.helped",
+                "entry.meta.helped",
+                "entry.meta?.changed",
+                "entry.meta.changed",
+                "entry.meta?.followUpNote",
+                "entry.meta.followUpNote",
+            )
+            for expression in prohibited_dashboard_reads:
+                if expression in dashboard_js_text:
+                    errors.append(
+                        f"js/member-dashboard.js: privacy-safe dashboard must not read {expression}."
+                    )
 
     for title, pages in titles.items():
         if len(pages) > 1:

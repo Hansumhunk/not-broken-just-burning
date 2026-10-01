@@ -19,6 +19,31 @@ const navToggle = document.querySelector('.nav-toggle');
 const siteNav = document.querySelector('.site-nav');
 const year = document.querySelector('#year');
 const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+// Privacy-conscious aggregate analytics.
+// Production only: no cookies/localStorage, no person identification, no click autocapture,
+// no replay/heatmaps, and honor browser Global Privacy Control / Do Not Track signals.
+const analyticsHostnames = new Set(['notbrokenjustburning.com', 'www.notbrokenjustburning.com']);
+const privacySignalEnabled =
+  navigator.globalPrivacyControl === true ||
+  navigator.doNotTrack === '1' ||
+  window.doNotTrack === '1';
+
+if (analyticsHostnames.has(window.location.hostname) && !privacySignalEnabled) {
+  !function(t,e){var o,n,p,r;e.__SV||(window.posthog&&window.posthog.__loaded)||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2===o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}p||((p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",p.onerror=function(){p=null},(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r));var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],Object.defineProperty(u,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e}}),Object.defineProperty(u.people,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(){return u.toString(1)+".people (stub)"}}),o="init capture register register_once register_for_session unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group identify setPersonProperties setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags resetGroups onFeatureFlags addFeatureFlagsHandler onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey getNextSurveyStep".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+
+  posthog.init('phc_AnVpuc8EtDx6gsTSnyYHMnRHQwtYzrAbPFn4ZUozcrxR', {
+    api_host: 'https://us.i.posthog.com',
+    ui_host: 'https://us.posthog.com',
+    defaults: '2026-05-30',
+    cookieless_mode: 'always',
+    person_profiles: 'identified_only',
+    autocapture: false,
+    capture_pageview: true,
+    disable_session_recording: true,
+    capture_exceptions: false
+  });
+}
+
 
 // V0.8 launch metadata fallback. Static tags remain preferred on major pages,
 // but every public page gets a canonical custom-domain URL at runtime.
@@ -76,6 +101,128 @@ if (!document.querySelector('meta[name="twitter:card"]')) {
   twitterCard.name = 'twitter:card';
   twitterCard.content = 'summary';
   document.head.appendChild(twitterCard);
+}
+
+// Search identity and trust layer. Google supports JSON-LD generated with JavaScript;
+// keep the markup tied to visible page content and the permanent custom-domain URLs.
+const SITE_NAME = 'Not Broken Just Burning';
+const FOUNDER_NAME = 'Rickey Partin Jr.';
+const FOUNDER_URL = `${SITE_ORIGIN}/founder.html`;
+const SOCIAL_IMAGE_URL = `${SITE_ORIGIN}/assets/social-share.png`;
+
+function addStructuredData(id, data) {
+  if (document.querySelector(`script[data-schema="${id}"]`)) return;
+  const script = document.createElement('script');
+  script.type = 'application/ld+json';
+  script.dataset.schema = id;
+  script.textContent = JSON.stringify(data);
+  document.head.appendChild(script);
+}
+
+const pageDescription = document.querySelector('meta[name="description"]')?.content || '';
+const pageHeading = document.querySelector('h1')?.textContent?.replace(/\\s+/g, ' ').trim() || document.title;
+const ogType = document.querySelector('meta[property="og:type"]')?.content || 'website';
+const organizationNode = {
+  '@type': 'Organization',
+  '@id': `${SITE_ORIGIN}/#organization`,
+  name: SITE_NAME,
+  url: `${SITE_ORIGIN}/`,
+  founder: { '@id': `${FOUNDER_URL}#person` }
+};
+const founderNode = {
+  '@type': 'Person',
+  '@id': `${FOUNDER_URL}#person`,
+  name: FOUNDER_NAME,
+  url: FOUNDER_URL,
+  jobTitle: 'Founder',
+  worksFor: { '@id': `${SITE_ORIGIN}/#organization` }
+};
+
+if (currentPage === 'index.html') {
+  addStructuredData('site', {
+    '@context': 'https://schema.org',
+    '@graph': [
+      organizationNode,
+      founderNode,
+      {
+        '@type': 'WebSite',
+        '@id': `${SITE_ORIGIN}/#website`,
+        url: `${SITE_ORIGIN}/`,
+        name: SITE_NAME,
+        description: pageDescription,
+        publisher: { '@id': `${SITE_ORIGIN}/#organization` }
+      }
+    ]
+  });
+}
+
+if (currentPage === 'founder.html') {
+  addStructuredData('profile', {
+    '@context': 'https://schema.org',
+    '@graph': [
+      organizationNode,
+      founderNode,
+      {
+        '@type': 'ProfilePage',
+        '@id': `${canonicalUrl}#profile`,
+        url: canonicalUrl,
+        name: document.title,
+        description: pageDescription,
+        mainEntity: { '@id': `${FOUNDER_URL}#person` },
+        isPartOf: { '@id': `${SITE_ORIGIN}/#website` }
+      }
+    ]
+  });
+}
+
+const breadcrumbParents = (() => {
+  if (currentPage.startsWith('story-')) return [{ name: 'Stories From the Fire', url: `${SITE_ORIGIN}/fire.html` }];
+  if (currentPage.startsWith('lesson-')) return [{ name: 'Lessons From the Fire', url: `${SITE_ORIGIN}/lessons.html` }];
+  if (currentPage.startsWith('guardian-')) return [{ name: 'The Movement', url: `${SITE_ORIGIN}/movement.html` }];
+  if (currentPage.startsWith('question-')) return [{ name: 'Six Sacred Questions', url: `${SITE_ORIGIN}/six-sacred-questions.html` }];
+  if (currentPage.startsWith('path-')) return [{ name: 'The Flamewalker Path', url: `${SITE_ORIGIN}/path.html` }];
+  if (['forge.html', 'check-in.html', 'pattern-map.html', 'six-sacred-questions.html'].includes(currentPage)) {
+    return [{ name: 'Resources', url: `${SITE_ORIGIN}/resources.html` }];
+  }
+  return [];
+})();
+
+if (breadcrumbParents.length) {
+  const items = [
+    { '@type': 'ListItem', position: 1, name: SITE_NAME, item: `${SITE_ORIGIN}/` },
+    ...breadcrumbParents.map((item, index) => ({
+      '@type': 'ListItem', position: index + 2, name: item.name, item: item.url
+    })),
+    { '@type': 'ListItem', position: breadcrumbParents.length + 2, name: pageHeading, item: canonicalUrl }
+  ];
+  addStructuredData('breadcrumbs', {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items
+  });
+}
+
+if (ogType === 'article' && currentPage !== 'founder.html') {
+  addStructuredData('article', {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    '@id': `${canonicalUrl}#article`,
+    mainEntityOfPage: canonicalUrl,
+    headline: pageHeading,
+    description: pageDescription,
+    image: [SOCIAL_IMAGE_URL],
+    author: { '@id': `${FOUNDER_URL}#person` },
+    publisher: { '@id': `${SITE_ORIGIN}/#organization` },
+    isAccessibleForFree: true
+  });
+
+  const longReadHeader = document.querySelector('.long-read-header');
+  if (longReadHeader && !longReadHeader.querySelector('.content-byline')) {
+    const byline = document.createElement('p');
+    byline.className = 'content-byline';
+    byline.innerHTML = `Written by <a href="founder.html">${FOUNDER_NAME}</a> · Founder, NBJB · Lived-experience educator · <span>Not a licensed mental-health clinician</span>`;
+    longReadHeader.appendChild(byline);
+  }
 }
 
 // Primary navigation layer: Founder is a first-class public route, not a buried subpage.

@@ -6,7 +6,7 @@ Version 0.7
 
 **See clearly. Burn clean. Build deliberately.**
 
-Not Broken Just Burning is a survivor-led, fire-forged movement about turning lived experience into clarity, boundaries, identity, meaning, purpose, and deliberate rebuilding.
+Not Broken Just Burning is a survivor-led, fire-forged, men-first personal-development and education movement about turning lived experience into clarity, boundaries, identity, meaning, purpose, and deliberate rebuilding.
 
 The founding mission used three verbs: **awaken, guide, protect**.
 
@@ -19,6 +19,16 @@ In the current public platform, those ideas mean:
 The recurring transformation idea is **pain into power**, but the phrase must stay grounded. Pain is not automatically noble, useful, or necessary. The work is deciding what can be learned, reclaimed, built, or carried forward without allowing pain to become identity.
 
 The brand should feel forged rather than polished, serious rather than gloomy, sacred without pretending every sentence is prophecy, and strong without confusing strength with aggression.
+
+## Audience position
+
+NBJB is **men-first, not men-only**.
+
+The movement intentionally centers men, especially men rebuilding after abuse, betrayal, controlling or coercive relationships, fatherhood under pressure, isolation, shame, identity loss, emotional overload, and major life disruption.
+
+This focus should not become gender warfare. Judge behavior by behavior rather than treating one gender as inherently harmful or inherently innocent. Women and people of other genders may use the work when it helps them, but public positioning should not erase the movement's deliberate focus on men whose suffering is often minimized, hidden, or endured in silence.
+
+Public language should make room for abuse and victimization without creating a permanent victim identity. NBJB can take harm seriously while still guiding people toward clarity, agency, responsibility for what happens next, and deliberate rebuilding.
 
 ## Primary symbol: The Eye + The Flame
 

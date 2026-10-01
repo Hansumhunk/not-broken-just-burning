@@ -292,22 +292,43 @@ def main() -> int:
         known_phase_two_only = {
             "ACCESS_MODEL.md",
             "MEMBERS.md",
-            "MASCULINE_RESTORATION.md",
+            "STRIPE_INTEGRATION.md",
+            "SUPABASE_BACKEND_PLAN.md",
+            "SUPABASE_SCHEMA.md",
             "YOUTUBE.md",
-            "path-masculine-restoration-steadiness.html",
-            "css/masculine-restoration.css",
-            "js/masculine-restoration.js",
+            "js/nbjb-auth.js",
+            "js/nbjb-config.js",
         }
         prohibited.extend(
             path for path in sorted(known_phase_two_only)
             if (ROOT / path).exists()
         )
 
+        # Backend/auth/billing implementation must remain off the public static branch.
+        supabase_root = ROOT / "supabase"
+        if supabase_root.exists():
+            prohibited.extend(
+                str(path.relative_to(ROOT))
+                for path in supabase_root.rglob("*")
+                if path.is_file()
+            )
+
         if prohibited:
             errors.append(
                 "main production target contains Phase Two/member workspace artifacts: "
                 + ", ".join(sorted(set(prohibited)))
             )
+
+    required_runtime_seo = {
+        "application/ld+json": "runtime JSON-LD injector",
+        "ProfilePage": "Founder ProfilePage schema",
+        "'@type': 'Article'": "Article schema",
+        "'@type': 'BreadcrumbList'": "breadcrumb schema",
+        "content-byline": "visible article authorship signal",
+    }
+    for token, label in required_runtime_seo.items():
+        if token not in main_js_text:
+            errors.append(f"js/main.js: missing {label}.")
 
     # Regression guard for the long-form reveal bug: tall reveal containers must be
     # eligible as soon as any part intersects, with a no-observer/reduced-motion fallback.

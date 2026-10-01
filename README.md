@@ -140,11 +140,21 @@ Breaks an overwhelming mountain into one realistic next action and what can inte
 
 **Privacy design:** Current reflection entries remain in the visitor's browser session and are not submitted to an NBJB server.
 
-## Masculine Restoration: Breakdown & Betrayal
+## Masculine Restoration production track
 
-The development site now includes **The Placeholder Wound**, an eight-lesson relationship-rebuilding track inside Masculine Restoration. It covers being needed versus chosen, unspoken relationship bargains, red flags and responsibility, betrayal-related memory rewriting, fatherhood after relationship collapse, loyalty without self-abandonment, grief for an imagined future, and comparison after rejection.
+Masculine Restoration is the men-first Stage 04 rebuilding system within the Flamewalker Path. The current public release includes:
 
-The track is intentionally de-identified and follows the project's evidence discipline: lived experience can generate a lesson without turning assumptions about another person's motives into public facts. Each lesson routes readers toward relevant reflection tools and back into the wider Masculine Restoration system.
+- a six-anchor operating system: Steadiness, Direction, Strength, Protection, Responsibility, and Brotherhood
+- the first full anchor module, **Steadiness**, with an on-device audit
+- a specialized **Institutional Betrayal** branch
+- **The Placeholder Wound**, an eight-lesson relationship-rebuilding track covering unequal commitment, hindsight, fatherhood, loyalty, grief, comparison, and self-respect
+- cross-links into existing NBJB reflection tools and related Stories From the Fire
+
+The material is educational and de-identified. Lived experience can generate public lessons without turning assumptions about another person's motives into established facts.
+
+See `MASCULINE_RESTORATION.md` for the current architecture and publishing rules.
+
+The architecture file is a public publishing reference; unreleased member layers, deeper modules, workshops, and future services remain roadmap material until deliberately launched.
 
 ## Content system
 
@@ -229,6 +239,9 @@ These should be periodically rechecked.
 - [x] automated static-site validator
 - [x] GitHub Actions validation workflow
 - [x] static canonical, Open Graph, and Twitter/X sharing metadata across indexable public pages
+- [x] search-intent optimization on core public entry pages
+- [x] visible founder authorship disclosure on long-form article pages
+- [x] runtime WebSite / Organization / ProfilePage / Article / BreadcrumbList structured data
 - [x] `main` protected by an active branch ruleset requiring pull requests and the `validate` status check
 - [x] newsletter removed from the V1.0 critical path
 - [x] privacy-conscious cookieless aggregate analytics with no reflection-content capture

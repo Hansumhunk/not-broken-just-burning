@@ -448,6 +448,37 @@ def main() -> int:
         if 'href="member-start-here.html"' not in dashboard_text or "member-start-here.html" not in dashboard_js:
             errors.append("Flamewalker dashboard: first-run and Learning surfaces must route to Start Here.")
 
+        member_css_text = (ROOT / "css" / "members.css").read_text(encoding="utf-8") if (ROOT / "css" / "members.css").exists() else ""
+        community_text = (ROOT / "member-community.html").read_text(encoding="utf-8") if (ROOT / "member-community.html").exists() else ""
+        future_surface_text = "\n".join((library_text, media_text, community_text, member_css_text))
+
+        if "top: 10px" not in member_css_text or "overflow-x: auto" not in member_css_text:
+            errors.append("css/members.css: member navigation must remain top-pinned and horizontally usable on mobile.")
+        if "member-page-head h1" not in member_css_text or "body[data-member-page] .member-panel h2" not in member_css_text:
+            errors.append("css/members.css: member-only heading scale overrides are missing.")
+        if "content: 'COMING SOON'" not in member_css_text:
+            errors.append("css/members.css: future locked member cards must visibly say Coming Soon.")
+
+        obsolete_placeholder_labels = (
+            "Paid access placeholder",
+            "Sealed until release",
+            "FUTURE LOCKED CONTENT",
+            "Track coming later",
+        )
+        if any(label in future_surface_text for label in obsolete_placeholder_labels):
+            errors.append("Flamewalker future surfaces contain obsolete placeholder/broken-state wording.")
+
+        for page_name, page_text in (
+            ("member-library.html", library_text),
+            ("member-media.html", media_text),
+            ("member-community.html", community_text),
+        ):
+            if re.search(r'<button[^>]*data-placeholder(?![^>]*disabled)[^>]*>', page_text):
+                errors.append(f"{page_name}: placeholder controls must remain disabled until the feature is real.")
+
+        if "Purchased Programs" not in library_text or "Coming Soon · Product / event entitlement" not in library_text:
+            errors.append("member-library.html: Purchased Programs must remain explicitly labeled Coming Soon.")
+
     required_runtime_seo = {
         "application/ld+json": "runtime JSON-LD injector",
         "ProfilePage": "Founder ProfilePage schema",

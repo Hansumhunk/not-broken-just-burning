@@ -18,7 +18,6 @@ on:
       - 'README.md'
       - 'scripts/validate_site.py'
       - 'scripts/validate_supabase_runtime.py'
-      - 'scripts/validate_supabase_runtime.py'
       - '.github/workflows/validate-site.yml'
   pull_request:
     paths:
@@ -32,6 +31,7 @@ on:
       - 'SEO.md'
       - 'README.md'
       - 'scripts/validate_site.py'
+      - 'scripts/validate_supabase_runtime.py'
       - '.github/workflows/validate-site.yml'
 
 permissions:

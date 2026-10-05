@@ -21,7 +21,7 @@ Current production foundation on `main`:
 - core search-entry pages pair NBJB brand language with clearer search intent around rebuilding, betrayal, divorce, boundaries, self-trust, and reflection tools
 - public deep-dive pages use one clear H1 and semantic article/page structure
 - internal links connect Path stages, Guardian Code values, Six Sacred Questions, Fire reflections, Lessons, Resources, Founder, and Support
-- Phase Two/member workspace pages remain off `main` and outside the public sitemap
+- member workspace and account-access pages use `noindex` and stay outside the public sitemap; the Join conversion page is also `noindex` and excluded from the sitemap
 - `main` is protected by an active branch ruleset requiring pull requests and the `validate` status check
 
 ## Search-intent map

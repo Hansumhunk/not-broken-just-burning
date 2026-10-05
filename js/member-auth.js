@@ -18,6 +18,7 @@
     if (signedOut) signedOut.hidden = Boolean(user);
     if (recovery) recovery.hidden = !recoveryMode;
     const email = q('[data-auth-email]'); if(email) email.textContent=user?.email||'';
+    const signedInLink = q('[data-auth-primary-link]'); if(signedInLink) signedInLink.href=nextDestination('members.html');
   }
   auth.onChange(render);
   q('#sign-in-form')?.addEventListener('submit', async (e)=>{ e.preventDefault(); setStatus('Signing in…'); const {error}=await auth.signIn(value('sign-in-email'),value('sign-in-password')); if(error)return setStatus(error.message,true); setStatus('Signed in. Opening the Flamewalker Hub…'); location.href=nextDestination('members.html'); });

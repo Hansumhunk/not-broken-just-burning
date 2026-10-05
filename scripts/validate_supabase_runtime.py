@@ -12,7 +12,8 @@ from pathlib import Path
 import re
 import sys
 from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+from urllib.parse import quote, urlsplit
+from urllib.request import Request, build_opener, HTTPRedirectHandler, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "js" / "nbjb-config.js"
@@ -29,6 +30,11 @@ def extract(pattern: str, text: str, label: str) -> str:
     if not match:
         raise ValueError(f"could not read {label} from js/nbjb-config.js")
     return match.group(1)
+
+
+class NoRedirect(HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
 
 
 def get_json(url: str, publishable_key: str) -> tuple[int, dict, dict[str, str]]:
@@ -51,6 +57,38 @@ def get_json(url: str, publishable_key: str) -> tuple[int, dict, dict[str, str]]
         raise RuntimeError(f"{url} returned HTTP {exc.code}: {raw[:500]}") from exc
     except URLError as exc:
         raise RuntimeError(f"{url} could not be reached: {exc.reason}") from exc
+
+
+def probe_redirect(url: str, publishable_key: str) -> tuple[int, str]:
+    request = Request(
+        url,
+        headers={
+            "apikey": publishable_key,
+            "Accept": "application/json",
+            "User-Agent": "NBJB-Flamewalker-Free-CI/1.0",
+        },
+        method="GET",
+    )
+    opener = build_opener(NoRedirect())
+    try:
+        response = opener.open(request, timeout=20)
+        return response.status, response.headers.get("Location", "")
+    except HTTPError as exc:
+        if exc.code in (301, 302, 303, 307, 308):
+            return exc.code, exc.headers.get("Location", "")
+        raw = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"{url} returned HTTP {exc.code}: {raw[:500]}") from exc
+    except URLError as exc:
+        raise RuntimeError(f"{url} could not be reached: {exc.reason}") from exc
+
+
+def assert_redirect_origin(location: str, expected_origin: str, label: str) -> None:
+    if not location:
+        raise RuntimeError(f"{label} did not return a redirect Location header")
+    parsed = urlsplit(location)
+    actual_origin = f"{parsed.scheme}://{parsed.netloc}"
+    if actual_origin != expected_origin:
+        raise RuntimeError(f"{label} points to {actual_origin}, expected {expected_origin}")
 
 
 def main() -> int:
@@ -93,9 +131,37 @@ def main() -> int:
     if allow_origin not in (None, "*", EXPECTED_ORIGIN):
         return fail(f"unexpected Auth CORS origin response: {allow_origin}")
 
+    # Use an intentionally invalid verification token. This creates or changes no user,
+    # but Auth still resolves its configured error redirect. That lets CI verify both
+    # the project's Site URL and the allowed production callback path.
+    invalid_token = "nbjb-ci-intentionally-invalid-token"
+    default_verify = f"{base_url}/auth/v1/verify?token={invalid_token}&type=signup"
+    callback = f"{EXPECTED_ORIGIN}/member-auth.html"
+    callback_verify = (
+        f"{base_url}/auth/v1/verify?token={invalid_token}&type=signup"
+        f"&redirect_to={quote(callback, safe='')}"
+    )
+    try:
+        default_status, default_location = probe_redirect(default_verify, publishable_key)
+        callback_status, callback_location = probe_redirect(callback_verify, publishable_key)
+        if default_status not in (301, 302, 303, 307, 308):
+            return fail(f"Site URL probe returned HTTP {default_status}, expected a redirect")
+        if callback_status not in (301, 302, 303, 307, 308):
+            return fail(f"callback allow-list probe returned HTTP {callback_status}, expected a redirect")
+        assert_redirect_origin(default_location, EXPECTED_ORIGIN, "Supabase Site URL")
+        if not callback_location.startswith(callback):
+            return fail(
+                "member-auth.html is not being honored as an Auth redirect; "
+                f"received {callback_location}"
+            )
+    except RuntimeError as exc:
+        return fail(str(exc))
+
     print("Supabase Auth endpoint: reachable")
     print("Supabase email auth: enabled")
     print("Supabase signup: enabled")
+    print("Supabase Site URL: production origin confirmed")
+    print("Supabase member-auth redirect: accepted")
     print("Browser key type: publishable")
     print("Secret browser credential check: passed")
     return 0

@@ -276,48 +276,128 @@ def main() -> int:
 
     sitemap_set = check_launch_files(errors, warnings)
 
-    # Production-target guard: Phase Two/member workspace files may exist on development,
-    # but must never be merged into the public static site on main.
+    # Production-target guard: Flamewalker Free is an approved production surface.
+    # Keep the allowlist narrow so unfinished Phase Two / paid-billing artifacts cannot
+    # silently ride along with a future merge.
     production_target = (
         os.getenv("GITHUB_REF_NAME", "") == "main"
         or os.getenv("GITHUB_BASE_REF", "") == "main"
     )
     if production_target:
-        prohibited = []
-        prohibited.extend(path.name for path in ROOT.glob("member*.html"))
-        prohibited.extend(str(path.relative_to(ROOT)) for path in (ROOT / "css").glob("member*.css"))
-        prohibited.extend(str(path.relative_to(ROOT)) for path in (ROOT / "js").glob("member*.js"))
-        prohibited.extend(str(path.relative_to(ROOT)) for path in (ROOT / "js").glob("tool-member*.js"))
-
-        known_phase_two_only = {
-            "ACCESS_MODEL.md",
-            "MEMBERS.md",
-            "STRIPE_INTEGRATION.md",
-            "SUPABASE_BACKEND_PLAN.md",
-            "SUPABASE_SCHEMA.md",
-            "YOUTUBE.md",
+        approved_member_artifacts = {
+            "member-auth.html",
+            "member-community.html",
+            "member-library.html",
+            "member-media.html",
+            "member-onboarding.html",
+            "member-path.html",
+            "member-profile.html",
+            "member-progress.html",
+            "member-settings.html",
+            "member-store.html",
+            "member-tools.html",
+            "member-work.html",
+            "members.html",
+            "css/member-dashboard.css",
+            "css/member-expansion.css",
+            "css/members.css",
+            "js/member-auth.js",
+            "js/member-bootstrap.js",
+            "js/member-dashboard.js",
+            "js/member-entitlements.js",
+            "js/member-history-insights.js",
+            "js/member-platform.js",
+            "js/member-service.js",
             "js/nbjb-auth.js",
             "js/nbjb-config.js",
+            "js/tool-member-history.js",
+            "FLAMEWALKER_ACCESS.md",
+            "supabase/migrations/20260918010500_phase_two_member_foundation.sql",
+            "supabase/migrations/20260921205000_tighten_entitlement_table_acl.sql",
         }
-        prohibited.extend(
-            path for path in sorted(known_phase_two_only)
-            if (ROOT / path).exists()
-        )
 
-        # Backend/auth/billing implementation must remain off the public static branch.
+        discovered_member_artifacts = set()
+        discovered_member_artifacts.update(path.name for path in ROOT.glob("member*.html"))
+        discovered_member_artifacts.update(
+            str(path.relative_to(ROOT)) for path in (ROOT / "css").glob("member*.css")
+        )
+        discovered_member_artifacts.update(
+            str(path.relative_to(ROOT)) for path in (ROOT / "js").glob("member*.js")
+        )
+        discovered_member_artifacts.update(
+            str(path.relative_to(ROOT)) for path in (ROOT / "js").glob("tool-member*.js")
+        )
+        for path in ("js/nbjb-auth.js", "js/nbjb-config.js", "FLAMEWALKER_ACCESS.md"):
+            if (ROOT / path).exists():
+                discovered_member_artifacts.add(path)
+
         supabase_root = ROOT / "supabase"
         if supabase_root.exists():
-            prohibited.extend(
+            discovered_member_artifacts.update(
                 str(path.relative_to(ROOT))
                 for path in supabase_root.rglob("*")
                 if path.is_file()
             )
 
-        if prohibited:
+        unexpected = sorted(discovered_member_artifacts - approved_member_artifacts)
+        if unexpected:
             errors.append(
-                "main production target contains Phase Two/member workspace artifacts: "
-                + ", ".join(sorted(set(prohibited)))
+                "main production target contains unapproved member/backend artifacts: "
+                + ", ".join(unexpected)
             )
+
+        # Flamewalker+ remains roadmap-only in this release. Browser billing controls,
+        # billing client code, and Stripe Edge Function source must not reach main yet.
+        paid_only_paths = {
+            "js/member-billing.js",
+            "STRIPE_INTEGRATION.md",
+            "supabase/config.toml",
+            "supabase/functions/create-checkout-session/index.ts",
+            "supabase/functions/create-customer-portal-session/index.ts",
+            "supabase/functions/stripe-webhook/index.ts",
+            "supabase/migrations/20260922034418_stripe_billing_authority.sql",
+            "supabase/migrations/20260922040840_index_stripe_webhook_user_id.sql",
+        }
+        present_paid_only = sorted(path for path in paid_only_paths if (ROOT / path).exists())
+        if present_paid_only:
+            errors.append(
+                "Flamewalker+ billing artifacts must remain off main for the Free launch: "
+                + ", ".join(present_paid_only)
+            )
+
+        store_text = (ROOT / "member-store.html").read_text(encoding="utf-8") if (ROOT / "member-store.html").exists() else ""
+        if "data-billing-offer" in store_text or "data-billing-portal" in store_text:
+            errors.append("member-store.html: paid checkout controls must remain disabled for Flamewalker Free.")
+
+        join_text = (ROOT / "join.html").read_text(encoding="utf-8") if (ROOT / "join.html").exists() else ""
+        if "member-auth.html" not in join_text or "Create Free Flamewalker Account" not in join_text:
+            errors.append("join.html: Flamewalker Free launch CTA must point to member-auth.html.")
+
+        required_free_runtime = {
+            "member-auth.html",
+            "members.html",
+            "js/member-bootstrap.js",
+            "js/member-entitlements.js",
+            "js/nbjb-auth.js",
+            "js/nbjb-config.js",
+        }
+        missing_free_runtime = sorted(path for path in required_free_runtime if not (ROOT / path).exists())
+        if missing_free_runtime:
+            errors.append(
+                "Flamewalker Free production runtime is incomplete: " + ", ".join(missing_free_runtime)
+            )
+
+        config_text = (ROOT / "js" / "nbjb-config.js").read_text(encoding="utf-8") if (ROOT / "js" / "nbjb-config.js").exists() else ""
+        secret_markers = ("service_role", "sb_secret_")
+        if any(marker in config_text for marker in secret_markers):
+            errors.append("js/nbjb-config.js: server secret/service-role credential must never ship to the browser.")
+
+        auth_text = (ROOT / "js" / "nbjb-auth.js").read_text(encoding="utf-8") if (ROOT / "js" / "nbjb-auth.js").exists() else ""
+        if "member-auth.html" not in auth_text or "signUp" not in auth_text or "resetPasswordForEmail" not in auth_text:
+            errors.append("js/nbjb-auth.js: signup/confirmation/recovery launch wiring is incomplete.")
+
+        if "Supabase" not in privacy_notice or "Flamewalker account data" not in privacy_notice:
+            errors.append("privacy.html: live Flamewalker account data and Supabase must be disclosed.")
 
     required_runtime_seo = {
         "application/ld+json": "runtime JSON-LD injector",

@@ -30,7 +30,7 @@
     return { user: currentUser, session: currentSession };
   }
   async function signUp(email, password) {
-    return client.auth.signUp({ email, password, options: { emailRedirectTo: location.origin + '/member-auth.html' } });
+    return client.auth.signUp({ email, password, options: { emailRedirectTo: location.origin + '/member-auth.html?next=member-onboarding.html' } });
   }
   async function signIn(email, password) { return client.auth.signInWithPassword({ email, password }); }
   async function sendMagicLink(email) {

@@ -49,6 +49,16 @@ jobs:
           python-version: '3.12'
       - name: Validate structure, navigation, links, SEO, accessibility basics, and launch wiring
         run: python scripts/validate_site.py
+      - name: Report Supabase management-token availability
+        if: ${{ github.base_ref == 'main' || github.ref_name == 'main' || startsWith(github.ref_name, 'release/') }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          if [ -n "$SUPABASE_ACCESS_TOKEN" ]; then
+            echo "Supabase management token: configured"
+          else
+            echo "Supabase management token: not configured"
+          fi
       - name: Smoke-test live Flamewalker Supabase Auth
         if: ${{ github.base_ref == 'main' || github.ref_name == 'main' || startsWith(github.ref_name, 'release/') }}
         run: python scripts/validate_supabase_runtime.py

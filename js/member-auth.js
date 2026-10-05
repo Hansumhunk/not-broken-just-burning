@@ -8,12 +8,22 @@
   const recovery = q('#recovery-state');
   function setStatus(message, bad=false){ if(!status) return; status.textContent=message||''; status.dataset.state=bad?'error':'ok'; }
   function value(id){ return (document.getElementById(id)?.value || '').trim(); }
+  function authFlowType(){
+    const searchType = new URLSearchParams(location.search).get('type') || '';
+    const hashType = new URLSearchParams(location.hash.replace(/^#/, '')).get('type') || '';
+    return (searchType || hashType).toLowerCase();
+  }
   function nextDestination(fallback='members.html'){
     const next = new URLSearchParams(location.search).get('next') || '';
-    return /^(?:members|member-[a-z0-9-]+)\.html(?:[?#].*)?$/i.test(next) ? next : fallback;
+    if (/^(?:members|member-[a-z0-9-]+)\.html(?:[?#].*)?$/i.test(next)) return next;
+    if (authFlowType() === 'signup') return 'member-onboarding.html';
+    return fallback;
   }
   function render({user}){
-    const recoveryMode = new URLSearchParams(location.search).get('mode') === 'recovery' && Boolean(user);
+    const recoveryMode = (
+      new URLSearchParams(location.search).get('mode') === 'recovery' ||
+      authFlowType() === 'recovery'
+    ) && Boolean(user);
     if (signedIn) signedIn.hidden = !user || recoveryMode;
     if (signedOut) signedOut.hidden = Boolean(user);
     if (recovery) recovery.hidden = !recoveryMode;

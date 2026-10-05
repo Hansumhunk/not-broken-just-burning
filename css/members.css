@@ -27,7 +27,7 @@
   border-radius: 18px;
   background: rgba(13,13,16,.92);
   position: sticky;
-  top: 82px;
+  top: 10px;
   z-index: 18;
   backdrop-filter: blur(12px);
 }
@@ -53,7 +53,7 @@
   padding-top: 46px;
   padding-bottom: 38px;
 }
-.member-page-head h1 { max-width: 900px; }
+.member-page-head h1 { max-width: 900px; font-size: clamp(2.65rem, 5.4vw, 4.6rem); }
 .member-page-head .hero-lead { max-width: 820px; }
 
 .member-grid { display: grid; gap: 16px; }
@@ -85,6 +85,17 @@
 .member-dashboard-card .eyebrow,
 .member-panel .eyebrow { color: var(--ember-bright); }
 
+body[data-member-page] .member-panel h2,
+body[data-member-page] .member-card h2,
+body[data-member-page] .member-dashboard-card h2,
+body[data-member-page] .member-locked-card h2 { font-size: clamp(1.55rem, 2.5vw, 2.25rem); }
+
+body[data-member-page] .member-card h3,
+body[data-member-page] .member-dashboard-card h3,
+body[data-member-page] .member-locked-card h3 { font-size: clamp(1.15rem, 2vw, 1.35rem); }
+
+body[data-member-page] .callout h2 { font-size: clamp(1.8rem, 3vw, 2.7rem); }
+
 .member-dashboard-layout {
   display: grid;
   grid-template-columns: minmax(0,1.35fr) minmax(300px,.65fr);
@@ -99,7 +110,7 @@
   border-radius: 20px;
   background: linear-gradient(145deg, rgba(255,122,45,.09), transparent 48%), var(--panel);
 }
-.member-welcome h2 { font-size: clamp(2rem,4vw,3.4rem); margin: 8px 0 10px; }
+.member-welcome h2 { font-size: clamp(1.85rem,3.2vw,2.65rem); margin: 8px 0 10px; }
 .member-welcome p { color: var(--muted); max-width: 760px; }
 .member-welcome-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
 
@@ -189,7 +200,7 @@
 .member-code-grid p { margin: 5px 0 0; color: var(--muted); font-size: .86rem; }
 
 .member-locked-card { position: relative; min-height: 225px; overflow: hidden; }
-.member-locked-card::after { content: 'FUTURE LOCKED CONTENT'; position: absolute; top: 16px; right: -44px; transform: rotate(35deg); width: 180px; padding: 5px; text-align: center; background: rgba(255,122,45,.12); color: var(--ember-pale); font-size: .58rem; font-weight: 900; letter-spacing: .1em; }
+.member-locked-card::after { content: 'COMING SOON'; position: absolute; top: 16px; right: -44px; transform: rotate(35deg); width: 180px; padding: 5px; text-align: center; background: rgba(255,122,45,.12); color: var(--ember-pale); font-size: .58rem; font-weight: 900; letter-spacing: .1em; }
 .member-lock-label { display: inline-flex; padding: 6px 9px; border: 1px solid var(--line-hot); border-radius: 999px; color: var(--ember-pale); font-size: .68rem; font-weight: 800; }
 .member-locked-card button[disabled] { margin-top: 14px; opacity: .55; cursor: not-allowed; }
 
@@ -242,7 +253,7 @@
 }
 
 @media (max-width: 1080px) {
-  .member-shell { grid-template-columns: 1fr; position: static; }
+  .member-shell { grid-template-columns: 1fr; }
   .member-subnav { justify-content: flex-start; }
   .member-dashboard-layout { grid-template-columns: 1fr; }
   .member-grid.four { grid-template-columns: repeat(2,minmax(0,1fr)); }
@@ -254,11 +265,29 @@
 }
 
 @media (max-width: 760px) {
-  .member-shell { width: min(calc(100% - 20px), var(--max)); padding: 12px; }
+  .member-shell { width: min(calc(100% - 20px), var(--max)); padding: 10px; top: 8px; }
   .member-shell-copy { display: none; }
-  .member-subnav { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); width: 100%; }
-  .member-subnav a { text-align: center; border-color: var(--line); border-radius: 12px; }
+  .member-subnav {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 6px;
+    width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .member-subnav::-webkit-scrollbar { display: none; }
+  .member-subnav a {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    text-align: center;
+    border-color: var(--line);
+    border-radius: 12px;
+  }
   .member-page-head { padding-top: 28px; }
+  .member-page-head h1 { font-size: clamp(2.05rem, 10vw, 3rem); }
   .member-dashboard-layout,
   .member-grid.two,
   .member-grid.three,

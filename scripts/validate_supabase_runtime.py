@@ -148,11 +148,15 @@ def main() -> int:
             return fail(f"Site URL probe returned HTTP {default_status}, expected a redirect")
         if callback_status not in (301, 302, 303, 307, 308):
             return fail(f"callback allow-list probe returned HTTP {callback_status}, expected a redirect")
-        assert_redirect_origin(default_location, EXPECTED_ORIGIN, "Supabase Site URL")
-        if not callback_location.startswith(callback):
+        default_parsed = urlsplit(default_location)
+        default_origin = f"{default_parsed.scheme}://{default_parsed.netloc}"
+        site_ok = default_origin == EXPECTED_ORIGIN
+        callback_ok = callback_location.startswith(callback)
+        if not site_ok or not callback_ok:
             return fail(
-                "member-auth.html is not being honored as an Auth redirect; "
-                f"received {callback_location}"
+                "Auth URL configuration mismatch: "
+                f"site_url resolves to {default_origin or default_location}; "
+                f"member-auth redirect resolves to {callback_location or '(none)'}"
             )
     except RuntimeError as exc:
         return fail(str(exc))

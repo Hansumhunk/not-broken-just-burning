@@ -396,6 +396,13 @@ def main() -> int:
         if "member-auth.html" not in auth_text or "signUp" not in auth_text or "resetPasswordForEmail" not in auth_text:
             errors.append("js/nbjb-auth.js: signup/confirmation/recovery launch wiring is incomplete.")
 
+        member_auth_text = (ROOT / "js" / "member-auth.js").read_text(encoding="utf-8") if (ROOT / "js" / "member-auth.js").exists() else ""
+        if "authFlowType" not in member_auth_text or "member-onboarding.html" not in member_auth_text or "recovery" not in member_auth_text:
+            errors.append("js/member-auth.js: signup/recovery fallback routing is incomplete.")
+
+        if "access_token" not in main_js_text or "member-auth.html" not in main_js_text or "type=signup" not in main_js_text:
+            errors.append("js/main.js: Supabase Site URL fallback bridge is incomplete.")
+
         if "Supabase" not in privacy_notice or "Flamewalker account data" not in privacy_notice:
             errors.append("privacy.html: live Flamewalker account data and Supabase must be disclosed.")
 

@@ -9,7 +9,8 @@
     'Pattern Map': 'pattern-map.html',
     'Boundary Builder': 'resources.html#boundary-builder',
     'One Stone': 'resources.html#one-stone',
-    'Six Sacred Questions': 'six-sacred-questions.html?worksheet=2#six-question-tool'
+    'Six Sacred Questions': 'six-sacred-questions.html?worksheet=2#six-question-tool',
+    'Start Here': 'member-start-here.html'
   });
 
   const pathRoutes = Object.freeze({
@@ -201,10 +202,12 @@
       return;
     }
 
-    title.textContent = focus ? `Start with ${focus}` : 'Start with the Free Library';
-    copy.textContent = 'Free Flamewalker access includes the starter learning layer, foundational videos, and selected exercises without turning the public site into a crippled preview.';
-    link.href = 'member-library.html';
-    link.textContent = 'Open the Free Library';
+    title.textContent = 'Start Here · Facts, Feelings, Control';
+    copy.textContent = focus
+      ? `Use the first free lesson to ground what is happening before you go deeper into ${focus}.`
+      : 'Use the first free lesson to understand NBJB, separate facts from feelings, and name one thing you can actually control next.';
+    link.href = 'member-start-here.html';
+    link.textContent = 'Open Start Here';
   }
 
   function renderFirstRun(state, entries) {

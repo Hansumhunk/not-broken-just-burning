@@ -294,6 +294,7 @@ def main() -> int:
             "member-profile.html",
             "member-progress.html",
             "member-settings.html",
+            "member-start-here.html",
             "member-store.html",
             "member-tools.html",
             "member-work.html",
@@ -308,6 +309,7 @@ def main() -> int:
             "js/member-history-insights.js",
             "js/member-platform.js",
             "js/member-service.js",
+            "js/member-start-here.js",
             "js/nbjb-auth.js",
             "js/nbjb-config.js",
             "js/tool-member-history.js",
@@ -375,9 +377,11 @@ def main() -> int:
 
         required_free_runtime = {
             "member-auth.html",
+            "member-start-here.html",
             "members.html",
             "js/member-bootstrap.js",
             "js/member-entitlements.js",
+            "js/member-start-here.js",
             "js/nbjb-auth.js",
             "js/nbjb-config.js",
         }
@@ -405,6 +409,31 @@ def main() -> int:
 
         if "Supabase" not in privacy_notice or "Flamewalker account data" not in privacy_notice:
             errors.append("privacy.html: live Flamewalker account data and Supabase must be disclosed.")
+
+        start_here_text = (ROOT / "member-start-here.html").read_text(encoding="utf-8") if (ROOT / "member-start-here.html").exists() else ""
+        start_here_js = (ROOT / "js" / "member-start-here.js").read_text(encoding="utf-8") if (ROOT / "js" / "member-start-here.js").exists() else ""
+        bootstrap_text = (ROOT / "js" / "member-bootstrap.js").read_text(encoding="utf-8") if (ROOT / "js" / "member-bootstrap.js").exists() else ""
+        library_text = (ROOT / "member-library.html").read_text(encoding="utf-8") if (ROOT / "member-library.html").exists() else ""
+        media_text = (ROOT / "member-media.html").read_text(encoding="utf-8") if (ROOT / "member-media.html").exists() else ""
+        dashboard_text = (ROOT / "members.html").read_text(encoding="utf-8") if (ROOT / "members.html").exists() else ""
+        dashboard_js = (ROOT / "js" / "member-dashboard.js").read_text(encoding="utf-8") if (ROOT / "js" / "member-dashboard.js").exists() else ""
+
+        if 'data-member-page="start-here"' not in start_here_text or 'src="js/member-bootstrap.js"' not in start_here_text:
+            errors.append("member-start-here.html: lesson must remain inside the authenticated member bootstrap.")
+        if 'name="robots" content="noindex,nofollow"' not in start_here_text:
+            errors.append("member-start-here.html: member lesson must remain noindex,nofollow.")
+        if "Facts. Feelings. Control." not in start_here_text or "Private by default:" not in start_here_text:
+            errors.append("member-start-here.html: core grounded reflection or privacy boundary is missing.")
+        if '"start-here": ["js/member-start-here.js"]' not in bootstrap_text:
+            errors.append("js/member-bootstrap.js: Start Here behavior must load after member authentication.")
+        if "recordToolEntry('Start Here'" not in start_here_js or "nextAction" not in start_here_js:
+            errors.append("js/member-start-here.js: local My Work save and Next Honest Action wiring are incomplete.")
+        if 'href="member-start-here.html"' not in library_text or "Available now" not in library_text:
+            errors.append("member-library.html: Start Here must be a live Free Library entry.")
+        if 'href="member-start-here.html"' not in media_text:
+            errors.append("member-media.html: Watch & Learn must route members to the written Start Here lesson.")
+        if 'href="member-start-here.html"' not in dashboard_text or "member-start-here.html" not in dashboard_js:
+            errors.append("Flamewalker dashboard: first-run and Learning surfaces must route to Start Here.")
 
     required_runtime_seo = {
         "application/ld+json": "runtime JSON-LD injector",

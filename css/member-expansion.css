@@ -301,3 +301,106 @@
   .member-review-save > .member-actions,
   .member-lens-form .member-actions { grid-column: auto; }
 }
+
+
+/* Flamewalker Start Here lesson */
+.member-locked-card.is-live::after {
+  content: 'AVAILABLE NOW';
+  background: rgba(255,122,45,.2);
+  color: var(--text);
+}
+
+.member-lesson-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr);
+  gap: 18px;
+  padding-bottom: 34px;
+}
+.member-lesson-main,
+.member-lesson-side { display: grid; align-content: start; gap: 16px; }
+
+.member-lesson-flow {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0,1fr));
+  gap: 8px;
+  margin: 20px 0;
+}
+.member-lesson-flow span {
+  padding: 12px 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255,255,255,.018);
+  color: var(--ember-pale);
+  font-weight: 800;
+  text-align: center;
+}
+
+.member-lesson-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+.member-lesson-grid > div {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255,255,255,.016);
+}
+.member-lesson-grid strong { color: var(--text); }
+.member-lesson-grid p { margin: 6px 0 0; }
+
+.member-lesson-form { margin-top: 20px; }
+.member-lesson-form label > span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-weight: 800;
+}
+.member-lesson-form textarea {
+  width: 100%;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.member-lesson-list {
+  margin: 18px 0 0;
+  padding-left: 22px;
+  color: var(--muted);
+}
+.member-lesson-list li + li { margin-top: 9px; }
+
+.member-lesson-path {
+  list-style: none;
+  margin: 18px 0 22px;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.member-lesson-path li {
+  display: grid;
+  gap: 4px;
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255,255,255,.014);
+}
+.member-lesson-path strong { color: var(--ember-pale); }
+.member-lesson-path span { color: var(--muted); font-size: .86rem; line-height: 1.45; }
+
+#start-here-status[data-state="error"] { color: #ff9a86; }
+#start-here-status[data-state="ok"] { color: var(--ember-pale); }
+
+@media (max-width: 980px) {
+  .member-lesson-layout { grid-template-columns: 1fr; }
+  .member-lesson-side { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .member-lesson-side > :first-child { grid-column: 1 / -1; }
+}
+
+@media (max-width: 760px) {
+  .member-lesson-flow,
+  .member-lesson-grid,
+  .member-lesson-side { grid-template-columns: 1fr; }
+  .member-lesson-side > :first-child { grid-column: auto; }
+  .member-lesson-flow span { text-align: left; }
+}

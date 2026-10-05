@@ -410,6 +410,19 @@ def main() -> int:
         if "Supabase" not in privacy_notice or "Flamewalker account data" not in privacy_notice:
             errors.append("privacy.html: live Flamewalker account data and Supabase must be disclosed.")
 
+        books_text = (ROOT / "books-projects.html").read_text(encoding="utf-8") if (ROOT / "books-projects.html").exists() else ""
+        if not books_text:
+            errors.append("books-projects.html: public publishing roadmap is missing.")
+        else:
+            required_statuses = ("Editorial Review", "In Development", "Coming Soon")
+            if not all(status in books_text for status in required_statuses):
+                errors.append("books-projects.html: publishing roadmap must preserve honest project-status labels.")
+            prohibited_sales_markers = ("Buy Now", "Preorder Now", "data-billing-offer")
+            if any(marker in books_text for marker in prohibited_sales_markers):
+                errors.append("books-projects.html: unfinished publishing roadmap must not expose live sales controls.")
+            if "Riding the Roller Coaster While Shuffling the Deck" not in books_text or "The Wounded Boy" not in books_text:
+                errors.append("books-projects.html: known active book projects are missing from the roadmap.")
+
         start_here_text = (ROOT / "member-start-here.html").read_text(encoding="utf-8") if (ROOT / "member-start-here.html").exists() else ""
         start_here_js = (ROOT / "js" / "member-start-here.js").read_text(encoding="utf-8") if (ROOT / "js" / "member-start-here.js").exists() else ""
         bootstrap_text = (ROOT / "js" / "member-bootstrap.js").read_text(encoding="utf-8") if (ROOT / "js" / "member-bootstrap.js").exists() else ""

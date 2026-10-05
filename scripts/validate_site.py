@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from html.parser import HTMLParser
 from pathlib import Path
 import os
+import re
 from urllib.parse import unquote, urlsplit
 import sys
 import xml.etree.ElementTree as ET

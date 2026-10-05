@@ -19,6 +19,24 @@ const navToggle = document.querySelector('.nav-toggle');
 const siteNav = document.querySelector('.site-nav');
 const year = document.querySelector('#year');
 const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+
+// Supabase may occasionally fall back to the configured Site URL after an email action.
+// If Auth lands on the homepage with session/error parameters, preserve them and hand
+// the browser to the dedicated account page so supabase-js can finish the flow.
+if (currentPage === 'index.html') {
+  const authPayload = `${window.location.search}${window.location.hash}`;
+  const hasAuthPayload =
+    /(?:^|[?#&])(?:access_token|refresh_token|error|error_code|error_description|type|code)=/i.test(authPayload);
+  if (hasAuthPayload) {
+    const isRecovery = /(?:^|[?#&])type=recovery(?:&|$)/i.test(authPayload);
+    const isSignup = /(?:^|[?#&])type=signup(?:&|$)/i.test(authPayload);
+    const params = new URLSearchParams(window.location.search);
+    if (isRecovery) params.set('mode', 'recovery');
+    else if (isSignup) params.set('next', 'member-onboarding.html');
+    const query = params.toString();
+    window.location.replace(`member-auth.html${query ? `?${query}` : ''}${window.location.hash}`);
+  }
+}
 // Privacy-conscious aggregate analytics.
 // Production only: no cookies/localStorage, no person identification, no click autocapture,
 // no replay/heatmaps, and honor browser Global Privacy Control / Do Not Track signals.

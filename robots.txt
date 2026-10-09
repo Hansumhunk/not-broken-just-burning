@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
 
+# Account/member pages use page-level noindex directives. Keep them crawlable
+# so search engines can process those removal signals instead of preserving stale URLs.
+
 Sitemap: https://notbrokenjustburning.com/sitemap.xml

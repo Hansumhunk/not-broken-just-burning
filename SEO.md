@@ -214,3 +214,18 @@ Current external blockers:
 - sitemap submission and URL inspection must wait for Search Console property verification
 - Semrush is connected but currently has insufficient API units for domain, keyword, competitor, backlink, and organic-position reports
 - Core Web Vitals field data should be evaluated after the site has enough real traffic and the Search Console property is available
+
+
+## October 2026 search-entry hardening
+
+Completed in response to early production traffic disproportionately landing on the account doorway:
+
+- strengthened the account-access and Join pages with explicit noindex/noarchive/nosnippet directives for generic, Google, and Bing crawlers
+- kept account/member URLs crawlable in robots.txt so crawlers can actually process their page-level noindex directives
+- added explicit index/follow directives to the homepage, Resources, and Founder search-entry pages
+- normalized modified-page home links to the canonical root URL rather than /index.html
+- added a direct homepage link to the Founder page to strengthen public-site discovery and internal search signals
+- added a visible public-site routing note on the account page for people arriving from stale search results
+- refreshed sitemap lastmod dates only for pages changed in this hardening pass
+
+External recrawl/index-removal timing remains controlled by the search engines. The repository can send clean signals immediately; search-result replacement still depends on each engine revisiting the affected URLs.

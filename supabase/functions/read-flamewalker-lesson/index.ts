@@ -16,6 +16,18 @@ export default {
     try { body = await req.json(); }
     catch { return reply({ error: "invalid_json" }, 400); }
 
+    // Catalog lists non-sensitive titles/statuses only, and works for all signed-in members.
+    // It NEVER returns the private lesson body or private source document IDs.
+    if (body?.action === "catalog") {
+      const { data: rows, error: listError } = await ctx.supabaseAdmin
+        .from("flamewalker_premium_lessons")
+        .select("slug,track_slug,lesson_number,title,summary,status")
+        .in("status", ["published", "editorial_review"])
+        .order("lesson_number", { ascending: true });
+      if (listError) return reply({ error: "catalog_unavailable" }, 503);
+      return reply({ lessons: rows || [] });
+    }
+
     const slug = body?.slug;
     if (typeof slug !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 100) {
       return reply({ error: "invalid_lesson" }, 400);

@@ -20,6 +20,7 @@ This first delivery uses **writing and guided exercises**, not unavailable video
 - Static preview/reader: `member-premium-lesson.html` and `js/member-premium-lesson.js`; any signed-in user can view the non-sensitive track preview.
 - Private content: `public.flamewalker_premium_lessons` under RLS, with `anon` and `authenticated` privileges revoked and an explicit deny policy. Only service-role operations can read unpublished bodies.
 - Reader API: `read-flamewalker-lesson` Edge Function, `verify_jwt=true`, `@supabase/server` `auth: 'user'`. It checks server-authoritative membership tier, billing status, start/end dates, and `status='published'` on each request. No client-supplied entitlements are trusted.
+- The same authenticated Edge Function serves a **metadata-only** `catalog` action to signed-in members: slug, title, summary, sequence and release status. No draft body is sent through the catalog. This lets later approved lessons appear without hard-coding every lesson ID into the reader.
 - No full premium text, private source URLs, or private member reflections are committed to GitHub.
 - The API responds with private no-store cache headers. JavaScript inserts lesson content using `textContent` (not remote HTML).
 - Exercise text is **not automatically saved or submitted**. The member may copy it manually; only a per-user completion timestamp is stored in localStorage. Clear This Device should eventually clear this metadata too.

@@ -12,7 +12,7 @@ function json(body: unknown, status = 200) {
 export default {
   fetch: withSupabase({ auth: "user" }, async (req, ctx) => {
     if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
-    if (!stripe) return json({ error: "billing_not_configured" }, 503);
+    if (!stripe || !stripeSecret?.startsWith("sk_test_")) return json({ error: "sandbox_billing_not_configured" }, 503);
 
     const userId = ctx.userClaims?.id;
     if (!userId) return json({ error: "unauthorized" }, 401);
@@ -35,7 +35,7 @@ export default {
     try {
       const session = await stripe.billingPortal.sessions.create({
         customer: entitlement.provider_customer_ref,
-        return_url: `${SITE_URL}/join.html`,
+        return_url: `${SITE_URL}/member-store.html`,
       });
 
       return json({ url: session.url });

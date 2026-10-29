@@ -321,8 +321,8 @@ def main() -> int:
             "supabase/migrations/20260918010500_phase_two_member_foundation.sql",
             "supabase/migrations/20260921205000_tighten_entitlement_table_acl.sql",
             "supabase/functions/read-flamewalker-lesson/index.ts",
-            "supabase/migrations/20261029232500_flamewalker_plus_protected_lessons.sql",
-            "supabase/migrations/20261029233500_flamewalker_plus_explicit_browser_deny.sql",
+            "supabase/migrations/20261029232818_flamewalker_plus_protected_lessons.sql",
+            "supabase/migrations/20261029233250_flamewalker_plus_explicit_browser_deny.sql",
         }
 
         discovered_member_artifacts = set()

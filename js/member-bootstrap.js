@@ -6,7 +6,8 @@
     dashboard: ["js/member-dashboard.js"],
     progress: ["js/member-history-insights.js"],
     work: ["js/member-history-insights.js"],
-    "start-here": ["js/member-start-here.js"]
+    "start-here": ["js/member-start-here.js"],
+    "premium-lesson": ["js/member-premium-lesson.js"]
   };
 
   function loadScript(src) {

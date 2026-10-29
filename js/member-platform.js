@@ -436,7 +436,16 @@
   document.querySelector('#clear-member-device')?.addEventListener('click', () => {
     if (!window.confirm('Clear the Flamewalker profile, progress, and saved member history stored on this device? This cannot be undone here.')) return;
     const cleared = service.reset();
-    status(cleared ? 'Member data cleared from this device.' : 'Your browser blocked clearing local data.');
+    // Premium progress holds only per-user completion timestamps, but must honor Clear This Device.
+    let premiumCleared = true;
+    const userId = window.NBJBAuth?.user?.id;
+    if (cleared && userId) {
+      try { localStorage.removeItem('nbjb.plus.lesson-progress.v1.' + userId); }
+      catch (_) { premiumCleared = false; }
+    }
+    status(!cleared ? 'Your browser blocked clearing local data.' : premiumCleared
+      ? 'Member data and premium lesson progress cleared from this device.'
+      : 'Member data cleared, but premium lesson progress could not be removed. Check this browser\'s storage settings.');
     if (cleared) window.setTimeout(() => { window.location.href = 'member-onboarding.html'; }, 500);
   });
 

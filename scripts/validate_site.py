@@ -296,12 +296,14 @@ def main() -> int:
             "member-progress.html",
             "member-settings.html",
             "member-start-here.html",
+            "member-premium-lesson.html",
             "member-store.html",
             "member-tools.html",
             "member-work.html",
             "members.html",
             "css/member-dashboard.css",
             "css/member-expansion.css",
+            "css/member-premium-lesson.css",
             "css/members.css",
             "js/member-auth.js",
             "js/member-bootstrap.js",
@@ -309,6 +311,7 @@ def main() -> int:
             "js/member-entitlements.js",
             "js/member-history-insights.js",
             "js/member-platform.js",
+            "js/member-premium-lesson.js",
             "js/member-service.js",
             "js/member-start-here.js",
             "js/nbjb-auth.js",
@@ -317,6 +320,9 @@ def main() -> int:
             "FLAMEWALKER_ACCESS.md",
             "supabase/migrations/20260918010500_phase_two_member_foundation.sql",
             "supabase/migrations/20260921205000_tighten_entitlement_table_acl.sql",
+            "supabase/functions/read-flamewalker-lesson/index.ts",
+            "supabase/migrations/20261029232818_flamewalker_plus_protected_lessons.sql",
+            "supabase/migrations/20261029233250_flamewalker_plus_explicit_browser_deny.sql",
         }
 
         discovered_member_artifacts = set()

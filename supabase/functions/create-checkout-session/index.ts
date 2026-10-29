@@ -27,7 +27,7 @@ function json(body: unknown, status = 200) {
 export default {
   fetch: withSupabase({ auth: "user" }, async (req, ctx) => {
     if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
-    if (!stripe) return json({ error: "billing_not_configured" }, 503);
+    if (!stripe || !stripeSecret?.startsWith("sk_test_")) return json({ error: "sandbox_billing_not_configured" }, 503);
 
     const userId = ctx.userClaims?.id;
     const email = ctx.userClaims?.email;
@@ -117,8 +117,8 @@ export default {
         customer: customerId,
         client_reference_id: userId,
         line_items: [{ price: price.id, quantity: 1 }],
-        success_url: `${SITE_URL}/join.html?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${SITE_URL}/join.html?checkout=cancelled`,
+        success_url: `${SITE_URL}/member-store.html?checkout=success`,
+        cancel_url: `${SITE_URL}/member-store.html?checkout=cancelled`,
         metadata: {
           nbjb_user_id: userId,
           nbjb_offer: offerSlug,

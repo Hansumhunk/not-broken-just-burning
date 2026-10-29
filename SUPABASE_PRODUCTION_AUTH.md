@@ -3,7 +3,7 @@
 Project: **NBJB Phase Two**  
 Project ref: `plhbvtbvtxfzulsaxuim`
 
-This file records the hosted Auth settings required before Flamewalker Free may merge to production.
+This file records the hosted Auth settings required for Flamewalker Free, which was released to production in PR #77 on October 5, 2026.
 
 ## Required hosted Auth URL configuration
 
@@ -28,7 +28,7 @@ The homepage also contains a defensive bridge that forwards Supabase Auth payloa
 
 ## Release gate
 
-`scripts/validate_supabase_runtime.py` must pass before merging Flamewalker Free to `main`.
+`scripts/validate_supabase_runtime.py` must pass after a service recovery or production Auth configuration change, before member access is declared healthy.
 
 The live CI check verifies:
 
@@ -41,10 +41,18 @@ The live CI check verifies:
 
 The redirect probe uses an intentionally invalid verification token, so it creates or changes no user.
 
-## Current known blocker
+## Historical blocker and current recovery
 
-As of the Flamewalker Free release candidate, the live hosted Auth Site URL still resolves to:
+Issue #78 documented a historical pre-release auth URL problem. Do not assume the earlier `http://localhost:3000` setting is still present without retesting.
 
-`http://localhost:3000`
+On October 29, 2026, Supabase project `NBJB Phase Two` was reported `INACTIVE`. A restore request succeeded, and the immediate status changed to `COMING_UP`. This is not proof that production sign-in is already working.
 
-Do not merge the free account entry point to production until CI confirms the production Auth URL configuration.
+Before treating the recovered site as ready:
+
+1. Confirm Supabase reports `ACTIVE_HEALTHY`.
+2. Recheck the Site URL and allowed redirect list against the production routes above.
+3. Validate signup, email confirmation, login, password reset, logout, and onboarding through a real browser.
+4. Review authorization and Security Advisor. Confirm private user reflections remain device-local unless intentionally and safely synchronized.
+5. Preserve the free-only release boundary: paid checkout, cloud sync, and member community posting are not live.
+
+See `RELEASE_AUDIT_2026-10-29.md` for the complete verification checklist.

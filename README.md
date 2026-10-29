@@ -41,7 +41,7 @@ The public site intentionally remains lightweight:
 - GitHub Actions validation
 - PostHog cookieless aggregate web analytics
 
-There is currently no account system, reflection database, or newsletter backend. Basic public-site traffic is measured with privacy-conscious cookieless analytics; reflection-tool contents remain browser-only.
+Flamewalker Free accounts now use Supabase authentication and limited member entitlements. Reflection content remains browser/device-local by default, and paid checkout and newsletter signup are not yet launched. Basic public-site traffic uses privacy-conscious cookieless analytics.
 
 ## Public architecture
 
@@ -139,6 +139,12 @@ Turns a vague sense that something is wrong into behavior, impact, boundary, and
 Breaks an overwhelming mountain into one realistic next action and what can intentionally wait.
 
 **Privacy design:** Current reflection entries remain in the visitor's browser session and are not submitted to an NBJB server.
+
+## Flamewalker Free production status (October 2026)
+
+Free account sign-in, member onboarding, Dashboard, My Path, Toolbox, My Work, Progress, Library, and the Start Here lesson were released in October. PR #82 completed member navigation polish and Coming Soon status labeling; PRs #83 and #84 improved search-engine signals for public discovery pages.
+
+**Backend recovery:** On October 29, 2026, the Supabase project was found inactive. A restore request was accepted, but account availability still requires verification. See `RELEASE_AUDIT_2026-10-29.md` for the exact operational checks. Paid billing, cloud synchronization of private reflections, community posting, and protected paid delivery remain unreleased.
 
 ## Masculine Restoration production track
 

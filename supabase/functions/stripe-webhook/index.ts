@@ -60,7 +60,7 @@ function membershipState(status: Stripe.Subscription.Status) {
 export default {
   fetch: withSupabase({ auth: "none", cors: "disabled" }, async (req, ctx) => {
     if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
-    if (!stripe || !webhookSecret) return json({ error: "billing_not_configured" }, 503);
+    if (!stripe || !webhookSecret || !stripeSecret?.startsWith("sk_test_")) return json({ error: "sandbox_billing_not_configured" }, 503);
 
     const signature = req.headers.get("stripe-signature");
     if (!signature) return json({ error: "missing_signature" }, 400);
@@ -73,6 +73,9 @@ export default {
     } catch {
       return json({ error: "invalid_signature" }, 400);
     }
+
+    // Prevent test-only entitlements from being changed by live Stripe events.
+    if (event.livemode) return json({ error: "livemode_not_allowed" }, 400);
 
     const { data: existing, error: existingError } = await ctx.supabaseAdmin
       .from("stripe_webhook_events")

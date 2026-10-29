@@ -220,7 +220,16 @@ body[data-member-page] .callout h2 { font-size: clamp(1.8rem, 3vw, 2.7rem); }
 .member-danger { border-color: rgba(255,100,80,.35); }
 
 .member-auth-layout { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
-.member-auth-card { padding: 26px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,.018); }
+.member-auth-card { min-width: 0; padding: 26px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,.018); }
+/* Keep long account headings inside their grid card at desktop and narrow widths. */
+.member-auth-card h2 {
+  max-width: 100%;
+  margin: 6px 0 22px;
+  font-size: clamp(1.45rem, 2vw, 1.95rem);
+  line-height: 1.18;
+  letter-spacing: -.035em;
+  overflow-wrap: anywhere;
+}
 .member-auth-card input { margin-top: 8px; }
 .member-auth-card input:disabled { opacity: .55; }
 .member-auth-card button { margin-top: 14px; }

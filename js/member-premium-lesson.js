@@ -1,10 +1,10 @@
 (() => {
   const auth = window.NBJBAuth;
   const entitlements = window.NBJBEntitlements;
-  const allowed = new Set(['father-wound', 'mother-wound', 'learned-silence']);
   const fallback = 'father-wound';
   const requested = new URLSearchParams(location.search).get('lesson') || fallback;
-  const slug = allowed.has(requested) ? requested : fallback;
+  // Each new released lesson can appear without a new HTML page or hard-coded slug list.
+  const slug = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(requested) && requested.length <= 100 ? requested : fallback;
   const userId = auth?.user?.id || '';
   const progressKey = userId ? 'nbjb.plus.lesson-progress.v1.' + userId : null;
   const byId = (id) => document.getElementById(id);
@@ -29,6 +29,44 @@
       node.textContent = done[current] ? 'Practiced on this device' : 'Not yet practiced';
     });
   }
+  async function loadCatalog() {
+    try {
+      const { data, error } = await auth.client.functions.invoke('read-flamewalker-lesson', {
+        body: { action: 'catalog' }
+      });
+      if (error || !Array.isArray(data?.lessons)) return;
+      const nav = document.querySelector('.premium-track-nav');
+      if (!nav) return;
+      const items = data.lessons
+        .filter(item => item && item.track_slug === 'wounded-boy'
+          && typeof item.slug === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.slug)
+          && item.slug.length <= 100)
+        .sort((left, right) => Number(left.lesson_number) - Number(right.lesson_number));
+      if (!items.length) return;
+      nav.replaceChildren();
+      for (const item of items) {
+        const li = document.createElement('li');
+        const anchor = document.createElement('a');
+        anchor.href = 'member-premium-lesson.html?lesson=' + encodeURIComponent(item.slug);
+        anchor.dataset.premiumLessonLink = item.slug;
+        if (item.slug === slug) anchor.setAttribute('aria-current', 'page');
+        const num = document.createElement('span');
+        num.textContent = String(item.lesson_number).padStart(2, '0');
+        const name = document.createTextNode(' ' + item.title + ' ');
+        const label = document.createElement('small');
+        if (progress()[item.slug]) label.textContent = 'Practiced on this device';
+        else label.textContent = item.status === 'published'
+          ? 'Available to Flamewalker+'
+          : 'In editorial review';
+        anchor.append(num, name, label);
+        li.appendChild(anchor);
+        nav.appendChild(li);
+      }
+    } catch (_) {
+      // The static, copy-only preview is still useful if catalog service is offline.
+    }
+  }
+
   function setState(heading, message) {
     title.textContent = heading;
     status.textContent = message;
@@ -113,6 +151,7 @@
       setState('Sign in required', 'Sign in through your free Flamewalker account to view membership options.');
       return;
     }
+    await loadCatalog();
     await entitlements?.ready;
     const current = entitlements?.load?.();
     if (current?.tier !== 'paid') {

@@ -26,7 +26,7 @@
     });
     document.querySelectorAll('[data-premium-progress]').forEach((node) => {
       const current = node.getAttribute('data-premium-progress');
-      node.textContent = done[current] ? 'Practiced on this device' : 'Review / release in progress';
+      node.textContent = done[current] ? 'Practiced on this device' : 'Not yet practiced';
     });
   }
   function setState(heading, message) {

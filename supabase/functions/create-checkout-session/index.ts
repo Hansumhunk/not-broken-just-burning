@@ -120,8 +120,8 @@ export default {
         customer: customerId,
         client_reference_id: userId,
         line_items: [{ price: price.id, quantity: 1 }],
-        success_url: `${SITE_URL}/member-store.html?checkout=success`,
-        cancel_url: `${SITE_URL}/member-store.html?checkout=cancelled`,
+        success_url: `${SITE_URL}/qa-stripe-sandbox.html?checkout=success`,
+        cancel_url: `${SITE_URL}/qa-stripe-sandbox.html?checkout=cancelled`,
         metadata: {
           nbjb_user_id: userId,
           nbjb_offer: offerSlug,

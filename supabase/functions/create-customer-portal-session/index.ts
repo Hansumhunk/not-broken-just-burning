@@ -37,7 +37,8 @@ export default {
     try {
       const session = await stripe.billingPortal.sessions.create({
         customer: entitlement.provider_customer_ref,
-        return_url: `${SITE_URL}/member-store.html`,
+        // Sandbox-only billing must return to the authenticated QA dashboard, not the unfinished paid store.
+        return_url: `${SITE_URL}/qa-stripe-sandbox.html`,
       });
 
       return json({ url: session.url });

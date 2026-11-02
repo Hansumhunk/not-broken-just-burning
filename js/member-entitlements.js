@@ -17,7 +17,8 @@
   };
 
   function normalizeMembership(row) {
-    const paid = row?.tier === 'paid_member' && ['active', 'trialing', 'past_due'].includes(row?.status);
+    const withinPeriod = !row?.valid_until || (Number.isFinite(Date.parse(row.valid_until)) && Date.parse(row.valid_until) > Date.now());
+    const paid = row?.tier === 'paid_member' && ['active', 'trialing', 'past_due'].includes(row?.status) && withinPeriod;
     return {
       tier: paid ? 'paid' : 'free',
       membershipStatus: row?.status || 'active',

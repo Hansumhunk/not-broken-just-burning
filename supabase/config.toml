@@ -6,3 +6,14 @@ verify_jwt = true
 
 [functions.stripe-webhook]
 verify_jwt = false
+
+# These live functions must not be deployed until Stripe live activation,
+# separate live secrets, founding content, and policies are approved.
+[functions.create-live-checkout-session]
+verify_jwt = true
+
+[functions.create-live-customer-portal-session]
+verify_jwt = true
+
+[functions.stripe-live-webhook]
+verify_jwt = false

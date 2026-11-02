@@ -12,7 +12,7 @@ function json(body: unknown, status = 200) {
 export default {
   fetch: withSupabase({ auth: "user" }, async (req, ctx) => {
     if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
-    if (!stripe || !stripeSecret?.startsWith("sk_live_")) return json({ error: "live_billing_not_configured" }, 503);
+    if (!stripe || !(stripeSecret?.startsWith("sk_live_") || stripeSecret?.startsWith("rk_live_"))) return json({ error: "live_billing_not_configured" }, 503);
 
     const userId = ctx.userClaims?.id;
     if (!userId) return json({ error: "unauthorized" }, 401);

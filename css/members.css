@@ -19,8 +19,11 @@
   width: min(calc(100% - 32px), var(--max));
   margin: 0 auto 26px;
   display: grid;
-  grid-template-columns: minmax(0,1fr) auto;
-  gap: 16px;
+  /* The member hub has more links than fit beside its heading.
+     Keep the heading and links on separate tracks so nothing overlaps
+     at laptop, tablet, zoomed desktop or mobile widths. */
+  grid-template-columns: minmax(0,1fr);
+  gap: 10px;
   align-items: center;
   padding: 14px 16px;
   border: 1px solid var(--line);
@@ -31,10 +34,21 @@
   z-index: 18;
   backdrop-filter: blur(12px);
 }
-.member-shell-copy { display: flex; gap: 10px; align-items: center; min-width: 0; }
+.member-shell-copy { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; min-width: 0; max-width: 100%; }
 .member-shell-copy strong { color: var(--text); white-space: nowrap; }
 .member-shell-copy span { color: var(--muted); font-size: .82rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.member-subnav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.member-subnav {
+  display: flex;
+  min-width: 0;
+  max-width: 100%;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 6px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
 .member-subnav a {
   padding: 9px 11px;
   border: 1px solid transparent;
@@ -43,6 +57,8 @@
   font-size: .8rem;
   font-weight: 800;
   text-decoration: none;
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 .member-subnav a:hover,
 .member-subnav a:focus-visible,

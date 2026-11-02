@@ -329,6 +329,9 @@ def main() -> int:
             "supabase/functions/create-checkout-session/index.ts",
             "supabase/functions/create-customer-portal-session/index.ts",
             "supabase/functions/stripe-webhook/index.ts",
+            "supabase/functions/create-live-checkout-session/index.ts",
+            "supabase/functions/create-live-customer-portal-session/index.ts",
+            "supabase/functions/stripe-live-webhook/index.ts",
             "supabase/migrations/20261029232818_flamewalker_plus_protected_lessons.sql",
             "supabase/migrations/20261029233250_flamewalker_plus_explicit_browser_deny.sql",
         }
@@ -381,8 +384,34 @@ def main() -> int:
             errors.append("MVP billing client missing")
         else:
             client = billing_file.read_text(encoding="utf-8")
-            if "nbjb_sandbox_test" not in client or "checkoutEnabled" not in client:
-                errors.append("MVP checkout UI must be opt-in sandbox QA only")
+            if "checkoutEnabled = false" not in client or "nbjb_sandbox_test" in client:
+                errors.append("MVP public checkout must remain disabled and cannot be enabled by query flag")
+            if "create-live-checkout-session" not in client or "create-live-customer-portal-session" not in client:
+                errors.append("MVP client must target dedicated live-only billing endpoints")
+        live_endpoints = {
+            "supabase/functions/create-live-checkout-session/index.ts": (
+                'startsWith("sk_live_")', "NBJB_LIVE_BILLING_MODE",
+                "NBJB_LIVE_CANARY_USER_ID", "!price.livemode"
+            ),
+            "supabase/functions/create-live-customer-portal-session/index.ts": (
+                'startsWith("sk_live_")', "NBJB_SANDBOX_TEST_USER_ID",
+                "member-store.html"
+            ),
+            "supabase/functions/stripe-live-webhook/index.ts": (
+                'startsWith("sk_live_")', "STRIPE_LIVE_WEBHOOK_SECRET",
+                'if (!event.livemode)', "missing_paid_through_date",
+                "NBJB_SANDBOX_TEST_USER_ID"
+            ),
+        }
+        for filename, safety_markers in live_endpoints.items():
+            path = ROOT / filename
+            if not path.is_file():
+                errors.append(f"Live checkout staging component missing: {filename}")
+            else:
+                code = path.read_text(encoding="utf-8")
+                if any(marker not in code for marker in safety_markers):
+                    errors.append(f"Live billing guard missing from: {filename}")
+
         store_text = (ROOT / "member-store.html").read_text(encoding="utf-8") if (ROOT / "member-store.html").exists() else ""
         if "data-billing-offer" not in store_text or 'data-billing-portal' not in store_text:
             errors.append("MVP store needs upgrade and cancellation controls")

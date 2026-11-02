@@ -319,6 +319,7 @@ def main() -> int:
             "js/tool-member-history.js",
             "FLAMEWALKER_ACCESS.md",
             "supabase/functions/read-flamewalker-lesson/index.ts",
+            "supabase/functions/check-live-stripe-prices/index.ts",
             "supabase/migrations/20260918010500_phase_two_member_foundation.sql",
             "supabase/migrations/20260921205000_tighten_entitlement_table_acl.sql",
         }
@@ -371,6 +372,21 @@ def main() -> int:
             if 'auth: "user"' not in api_text or '"published"' not in api_text:
                 errors.append("premium lesson preview must enforce authenticated published-content access")
 
+        # The read-only live Stripe preflight must never launch a payment or
+        # respond to arbitrary signed-in users.
+        preflight_api = ROOT / "supabase/functions/check-live-stripe-prices/index.ts"
+        if preflight_api.exists():
+            preflight = preflight_api.read_text(encoding="utf-8")
+            for required in (
+                'auth: "user"', "NBJB_SANDBOX_TEST_USER_ID",
+                "STRIPE_LIVE_SECRET_KEY", "stripe.prices.list",
+                "public_checkout_enabled_by_this_test: false",
+            ):
+                if required not in preflight:
+                    errors.append("Live Stripe preflight security requirement missing: " + required)
+            for forbidden in ("stripe.checkout.sessions.create", "stripe.customers.create", "stripe.subscriptions.create"):
+                if forbidden in preflight:
+                    errors.append("Live Stripe preflight must not create payments or customers")
         # Flamewalker+ remains roadmap-only in this release. Browser billing controls,
         # billing client code, and Stripe Edge Function source must not reach main yet.
         paid_only_paths = {

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="description" content="Private read-only test of live NBJB Stripe price configuration. Not a public billing page.">
+<meta name="theme-color" content="#09090b">
+<title>Live Billing Readiness QA | Not Broken Just Burning</title>
+<link rel="canonical" href="https://notbrokenjustburning.com/qa-stripe-live-readiness.html">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/brand.css"><link rel="stylesheet" href="css/experience.css"><link rel="stylesheet" href="css/members.css?v=20261102-nav3">
+<style>
+.preflight {max-width:850px;padding:clamp(1.25rem,4vw,3rem);margin:5rem auto 8rem;border:1px solid rgba(216,95,36,.4);border-radius:20px;background:rgba(20,20,22,.95)}
+.preflight p,.preflight h1 {overflow-wrap:anywhere}
+.preflight button{margin-top:1.25rem;max-width:100%;white-space:normal}
+.preflight-results{margin-top:1.5rem;padding:1rem;border-left:3px solid #d85f24;background:rgba(216,95,36,.07)}
+.preflight-results[data-error="true"]{border-left-color:#e86c6c}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<div class="ember-field" aria-hidden="true"></div>
+<header class="site-header"><a class="brand" href="index.html" aria-label="Not Broken Just Burning home"><span class="brand-mark" aria-hidden="true"></span><span class="brand-name">Not Broken <span>Just Burning</span></span></a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation"><span></span><span></span><span></span></button><nav class="site-nav" id="site-nav" aria-label="Primary navigation"><a href="path.html">The Path</a><a href="forge.html">The Forge</a><a href="fire.html">The Fire</a><a href="movement.html">The Movement</a><a href="resources.html">Resources</a><a class="nav-join" href="join.html">Join</a></nav></header>
+<main id="main-content" class="preflight">
+<p class="eyebrow">NBJB · Authorized integration test</p>
+<h1>Live billing <span>readiness check</span></h1>
+<p><strong>Read-only check. No money changes hands.</strong> This test only confirms that the restricted live Stripe API key can read the correct monthly and annual prices. It cannot create Checkout sessions, charge a card, or activate paid membership.</p>
+<p>This page is unlisted and access-controlled by your nominated internal QA account.</p>
+<p id="preflight-user">Checking sign-in…</p>
+<button type="button" class="button button-primary" id="preflight-run" disabled>Verify live Stripe key and prices</button>
+<p id="preflight-result" class="preflight-results" role="status" aria-live="polite">Sign in to your Flamewalker Test Account to run the check.</p>
+<p><a href="member-auth.html">Manage sign-in</a> · <a href="member-store.html">Back to Member Store</a></p>
+</main>
+<footer class="site-footer section-shell"><div><strong>NOT BROKEN JUST BURNING</strong><p>Read-only live billing QA.</p></div><div class="footer-meta"><p>This test page is not part of the public membership offer.</p><p class="footer-links"><a href="privacy.html">Privacy &amp; Data Use</a></p></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
+<script src="js/nbjb-config.js"></script><script src="js/nbjb-auth.js"></script><script src="js/main.js"></script><script src="js/qa-stripe-live-readiness.js"></script>
+</body></html>

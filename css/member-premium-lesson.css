@@ -1,0 +1,18 @@
+.premium-track-intro { margin-bottom: 26px; }
+.premium-track-intro h2 { font-size: clamp(1.5rem, 2.8vw, 2.35rem); }
+.premium-track-nav { list-style:none; margin:22px 0 0; padding:0; display:grid; gap:10px; }
+.premium-track-nav li { min-width:0; }
+.premium-track-nav a { display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding:16px; border:1px solid var(--line); border-radius:12px; color:var(--text); text-decoration:none; }
+.premium-track-nav a:hover,.premium-track-nav a[aria-current="page"] { border-color:var(--ember-bright); background:rgba(255,122,45,.065); }
+.premium-track-nav a span { color:var(--ember-bright); font-weight:800; }
+.premium-track-nav a small { margin-left:auto; color:var(--muted); }
+.premium-lesson-layout { display:grid; grid-template-columns:minmax(0,1.65fr) minmax(240px,.7fr); gap:22px; padding-bottom:84px; }
+.premium-lesson-layout > div,.premium-lesson-aside { min-width:0; display:grid; align-content:start; gap:20px; }
+.premium-lesson-status h2 { font-size:clamp(1.45rem,2.7vw,2.2rem); overflow-wrap:anywhere; }
+.premium-lesson-body { overflow-wrap:anywhere; }
+.premium-lesson-body h3 { font-family:'Cinzel',serif; font-size:clamp(1.25rem,2.2vw,1.8rem); margin:36px 0 12px; }
+.premium-lesson-body p { white-space:pre-line; line-height:1.75; color:var(--text); }
+.premium-exercise-form label { display:block; margin:22px 0; font-weight:700; }
+.premium-exercise-form textarea { display:block; width:100%; min-height:112px; margin-top:8px; border:1px solid var(--line); border-radius:12px; background:#0e0e12; color:var(--text); font:inherit; padding:14px; resize:vertical; }
+.premium-exercise-form textarea:focus { outline:2px solid rgba(255,122,45,.32); border-color:var(--ember-bright); }
+@media(max-width:850px) { .premium-lesson-layout { grid-template-columns:1fr; } }

@@ -7,7 +7,8 @@
     progress: ["js/member-history-insights.js"],
     work: ["js/member-history-insights.js"],
     "start-here": ["js/member-start-here.js"],
-    "premium-lesson": ["js/member-premium-lesson.js"]
+    "premium-lesson": ["js/member-premium-lesson.js"],
+    store: ["js/member-billing.js"]
   };
 
   function loadScript(src) {

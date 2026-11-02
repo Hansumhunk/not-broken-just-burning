@@ -296,12 +296,14 @@ def main() -> int:
             "member-progress.html",
             "member-settings.html",
             "member-start-here.html",
+            "member-premium-lesson.html",
             "member-store.html",
             "member-tools.html",
             "member-work.html",
             "members.html",
             "css/member-dashboard.css",
             "css/member-expansion.css",
+            "css/member-premium-lesson.css",
             "css/members.css",
             "js/member-auth.js",
             "js/member-bootstrap.js",
@@ -309,14 +311,26 @@ def main() -> int:
             "js/member-entitlements.js",
             "js/member-history-insights.js",
             "js/member-platform.js",
+            "js/member-premium-lesson.js",
+            "js/member-billing.js",
             "js/member-service.js",
             "js/member-start-here.js",
             "js/nbjb-auth.js",
             "js/nbjb-config.js",
             "js/tool-member-history.js",
             "FLAMEWALKER_ACCESS.md",
+            "STRIPE_INTEGRATION.md",
+            "supabase/config.toml",
+            "supabase/migrations/20260922034418_stripe_billing_authority.sql",
+            "supabase/migrations/20260922040840_index_stripe_webhook_user_id.sql",
             "supabase/migrations/20260918010500_phase_two_member_foundation.sql",
             "supabase/migrations/20260921205000_tighten_entitlement_table_acl.sql",
+            "supabase/functions/read-flamewalker-lesson/index.ts",
+            "supabase/functions/create-checkout-session/index.ts",
+            "supabase/functions/create-customer-portal-session/index.ts",
+            "supabase/functions/stripe-webhook/index.ts",
+            "supabase/migrations/20261029232818_flamewalker_plus_protected_lessons.sql",
+            "supabase/migrations/20261029233250_flamewalker_plus_explicit_browser_deny.sql",
         }
 
         discovered_member_artifacts = set()
@@ -349,28 +363,33 @@ def main() -> int:
                 + ", ".join(unexpected)
             )
 
-        # Flamewalker+ remains roadmap-only in this release. Browser billing controls,
-        # billing client code, and Stripe Edge Function source must not reach main yet.
-        paid_only_paths = {
-            "js/member-billing.js",
-            "STRIPE_INTEGRATION.md",
-            "supabase/config.toml",
-            "supabase/functions/create-checkout-session/index.ts",
-            "supabase/functions/create-customer-portal-session/index.ts",
-            "supabase/functions/stripe-webhook/index.ts",
-            "supabase/migrations/20260922034418_stripe_billing_authority.sql",
-            "supabase/migrations/20260922040840_index_stripe_webhook_user_id.sql",
-        }
-        present_paid_only = sorted(path for path in paid_only_paths if (ROOT / path).exists())
-        if present_paid_only:
-            errors.append(
-                "Flamewalker+ billing artifacts must remain off main for the Free launch: "
-                + ", ".join(present_paid_only)
-            )
-
+        # MVP candidate: billing source may exist, but the publicly served page
+        # must not offer unrestricted checkout or grant paid access to normal users.
+        # Do not weaken these checks at go-live; replace them with explicit live QA.
+        checkout_file = ROOT / "supabase/functions/create-checkout-session/index.ts"
+        portal_file = ROOT / "supabase/functions/create-customer-portal-session/index.ts"
+        webhook_file = ROOT / "supabase/functions/stripe-webhook/index.ts"
+        billing_file = ROOT / "js/member-billing.js"
+        for filename in (checkout_file, portal_file, webhook_file):
+            if not filename.exists():
+                errors.append(f"MVP billing integration missing {filename.relative_to(ROOT)}")
+                continue
+            src = filename.read_text(encoding="utf-8")
+            if "NBJB_SANDBOX_TEST_USER_ID" not in src or 'startsWith("sk_test_")' not in src:
+                errors.append(f"MVP billing endpoint lacks sandbox-only QA guard: {filename.relative_to(ROOT)}")
+        if not billing_file.exists():
+            errors.append("MVP billing client missing")
+        else:
+            client = billing_file.read_text(encoding="utf-8")
+            if "nbjb_sandbox_test" not in client or "checkoutEnabled" not in client:
+                errors.append("MVP checkout UI must be opt-in sandbox QA only")
         store_text = (ROOT / "member-store.html").read_text(encoding="utf-8") if (ROOT / "member-store.html").exists() else ""
-        if "data-billing-offer" in store_text or "data-billing-portal" in store_text:
-            errors.append("member-store.html: paid checkout controls must remain disabled for Flamewalker Free.")
+        if "data-billing-offer" not in store_text or 'data-billing-portal' not in store_text:
+            errors.append("MVP store needs upgrade and cancellation controls")
+        if 'data-billing-offer="flamewalker_plus_monthly" disabled' not in store_text or 'data-billing-offer="flamewalker_plus_annual" disabled' not in store_text:
+            errors.append("MVP subscription checkout buttons must default to disabled")
+        if "terms.html" not in store_text or "refunds.html" not in store_text:
+            errors.append("MVP store must link the terms and cancellation/refund policy")
 
         join_text = (ROOT / "join.html").read_text(encoding="utf-8") if (ROOT / "join.html").exists() else ""
         if "member-auth.html" not in join_text or "Create Free Flamewalker Account" not in join_text:

@@ -35,8 +35,14 @@
   backdrop-filter: blur(12px);
 }
 .member-shell-copy { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; min-width: 0; max-width: 100%; }
-.member-shell-copy strong { color: var(--text); white-space: nowrap; }
-.member-shell-copy span { color: var(--muted); font-size: .82rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.member-shell-copy strong { color: var(--text); }
+.member-shell-copy span {
+  color: var(--muted);
+  font-size: .82rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
 .member-subnav {
   display: flex;
   min-width: 0;
@@ -45,6 +51,7 @@
   justify-content: flex-start;
   gap: 6px;
   overflow-x: auto;
+  overflow-y: hidden;
   overscroll-behavior-inline: contain;
   scrollbar-width: thin;
   -webkit-overflow-scrolling: touch;

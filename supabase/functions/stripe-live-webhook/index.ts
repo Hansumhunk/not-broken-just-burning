@@ -60,7 +60,7 @@ function membershipState(status: Stripe.Subscription.Status) {
 export default {
   fetch: withSupabase({ auth: "none", cors: "disabled" }, async (req, ctx) => {
     if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
-    if (!stripe || !webhookSecret || !stripeSecret?.startsWith("sk_live_")) return json({ error: "live_billing_not_configured" }, 503);
+    if (!stripe || !webhookSecret || !(stripeSecret?.startsWith("sk_live_") || stripeSecret?.startsWith("rk_live_"))) return json({ error: "live_billing_not_configured" }, 503);
 
     const signature = req.headers.get("stripe-signature");
     if (!signature) return json({ error: "missing_signature" }, 400);

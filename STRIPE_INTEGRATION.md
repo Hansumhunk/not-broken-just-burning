@@ -186,3 +186,17 @@ Do not switch to live Stripe credentials until:
 - one low-value real transaction is tested and reconciled end-to-end.
 
 At launch the customer-facing promise should remain simple: one paid digital membership, not a maze of microtransactions.
+
+## November 2, 2026 sandbox wiring status
+
+- Stripe sandbox account: **Not Broken Just Burning sandbox**. Live account access remains unconnected to the Stripe plugin.
+- Sandbox recurring prices confirmed: `flamewalker_plus_monthly` ($14.99/month), `flamewalker_plus_annual` ($149/year). No test Checkout sessions or subscriptions had been recorded at the time of the last check.
+- Sandbox Customer Portal configuration `bpc_1UIKh4GxoOD2zUCjDQLIklsx` supports cancellation **at period end**, invoice history and payment method updates. Its default return URL was corrected to `https://notbrokenjustburning.com/member-store.html`.
+- Created **test-mode only** webhook endpoint `we_1UXNnOGxoOD2zUCjSYZVsn22` at `https://plhbvtbvtxfzulsaxuim.supabase.co/functions/v1/stripe-webhook`. It receives Checkout completed, subscription lifecycle, invoice paid, and invoice payment failed events. This endpoint is **not** a live-mode webhook.
+- Deployed the current draft branch's three sandbox-guarded Supabase functions as version 3: `create-checkout-session` (JWT required), `create-customer-portal-session` (JWT required), `stripe-webhook` (JWT off; Stripe-Signature required). This is a deployed sandbox backend, NOT a live site checkout release.
+- **Outstanding manual security step:** Copy the sandbox endpoint's **signing secret** directly from Stripe Dashboard to Supabase Project → Edge Functions → Secrets, setting `STRIPE_WEBHOOK_SECRET` to that endpoint's signing secret. **Never paste the secret into GitHub, chat, email, browser JavaScript, or analytics.** This signed secret cannot be installed through the current connected Supabase tool. Do not test payments until this is done.
+- Confirm `STRIPE_SECRET_KEY` in Supabase Secrets is the matching **sandbox** credential; never swap it for a live key in this project. Stripe `sk_test_` guards explicitly block live credentials in current draft functions.
+- The separate draft [policy PR #89](https://github.com/Hansumhunk/not-broken-just-burning/pull/89) requires owner approval of the refund policy and publication before enabling live paid billing.
+- The protected lesson UI remains draft PR #88 and all three starter lessons remain in **editorial review**; they are not currently purchasable.
+- Run a real authenticated sandbox Checkout and webhook, verify server-side entitlement change, then cancel through the Customer Portal. Also test invalid signatures, duplicate deliveries, failure paths, and account isolation. **This QA is NOT yet complete.**
+- **Go-live is explicitly blocked** until a verified live Stripe account, approved/refined policies, truly published lesson content, secure separated production credentials/webhook, and all end-to-end tests are complete.

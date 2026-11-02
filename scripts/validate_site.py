@@ -293,6 +293,7 @@ def main() -> int:
             "member-onboarding.html",
             "member-path.html",
             "member-profile.html",
+            "member-premium-lesson.html",
             "member-progress.html",
             "member-settings.html",
             "member-start-here.html",
@@ -302,6 +303,7 @@ def main() -> int:
             "members.html",
             "css/member-dashboard.css",
             "css/member-expansion.css",
+            "css/member-premium-lesson.css",
             "css/members.css",
             "js/member-auth.js",
             "js/member-bootstrap.js",
@@ -309,12 +311,14 @@ def main() -> int:
             "js/member-entitlements.js",
             "js/member-history-insights.js",
             "js/member-platform.js",
+            "js/member-premium-lesson.js",
             "js/member-service.js",
             "js/member-start-here.js",
             "js/nbjb-auth.js",
             "js/nbjb-config.js",
             "js/tool-member-history.js",
             "FLAMEWALKER_ACCESS.md",
+            "supabase/functions/read-flamewalker-lesson/index.ts",
             "supabase/migrations/20260918010500_phase_two_member_foundation.sql",
             "supabase/migrations/20260921205000_tighten_entitlement_table_acl.sql",
         }
@@ -348,6 +352,24 @@ def main() -> int:
                 "main production target contains unapproved member/backend artifacts: "
                 + ", ".join(unexpected)
             )
+
+        # The unlisted editorial preview is approved, but unpublished lesson
+        # bodies must only be returned from the authenticated server to the
+        # nominated QA user. This is not a public paid-membership launch.
+        preview_file = ROOT / "member-premium-lesson.html"
+        preview_api = ROOT / "supabase/functions/read-flamewalker-lesson/index.ts"
+        if preview_file.exists():
+            page_text = preview_file.read_text(encoding="utf-8")
+            if 'name="robots" content="noindex,nofollow"' not in page_text:
+                errors.append("premium lesson preview must not be indexed")
+            if "editorial preview" not in page_text.lower():
+                errors.append("premium lesson preview must be marked as editorial review")
+        if preview_api.exists():
+            api_text = preview_api.read_text(encoding="utf-8")
+            if "NBJB_SANDBOX_TEST_USER_ID" not in api_text or 'isEditorialReviewer' not in api_text:
+                errors.append("premium lesson preview requires server-side QA account guard")
+            if 'auth: "user"' not in api_text or '"published"' not in api_text:
+                errors.append("premium lesson preview must enforce authenticated published-content access")
 
         # Flamewalker+ remains roadmap-only in this release. Browser billing controls,
         # billing client code, and Stripe Edge Function source must not reach main yet.

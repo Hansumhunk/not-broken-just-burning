@@ -5,7 +5,16 @@
   const upgradeButtons = [...document.querySelectorAll('[data-billing-offer]')];
   const portalButton = document.querySelector('[data-billing-portal]');
   // Fail closed until editorial approval, sandbox QA and live-mode launch are complete.
-  const checkoutEnabled = false;
+  // URL flag only exposes the sandbox test UI. The backend separately requires
+  // NBJB_SANDBOX_TEST_USER_ID to equal the signed-in user UUID.
+  const checkoutEnabled = new URLSearchParams(location.search).get('nbjb_sandbox_test') === '1';
+
+  if (checkoutEnabled) {
+    document.querySelectorAll('[data-billing-offer]').forEach((button) => {
+      button.textContent = button.textContent.replace(' · Coming Soon', ' · SANDBOX TEST');
+    });
+    setStatus('SANDBOX TEST MODE: no real payment. Only the nominated test account is authorized.');
+  }
 
   function setStatus(message, bad = false) {
     if (!statusNode) return;

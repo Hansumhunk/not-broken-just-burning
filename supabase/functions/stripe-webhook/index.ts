@@ -169,7 +169,10 @@ export default {
             provider_subscription_ref: subscription.id,
             valid_from: paid ? bounds.validFrom : new Date().toISOString(),
             valid_until: paid ? bounds.validUntil : null,
-            cancel_at_period_end: paid ? Boolean(subscription.cancel_at_period_end) : false,
+            // Stripe flexible billing schedules Customer Portal cancellation using cancel_at,
+            // even when cancel_at_period_end is false. Treat any future cancel_at as scheduled.
+            cancel_at_period_end: paid ? Boolean(subscription.cancel_at_period_end ||
+              (typeof subscription.cancel_at === "number" && subscription.cancel_at > Math.floor(Date.now() / 1000))) : false,
           },
           { onConflict: "user_id" },
         );

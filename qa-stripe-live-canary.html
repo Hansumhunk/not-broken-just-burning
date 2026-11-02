@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="description" content="Unlisted authorization-gated NBJB live monthly subscription canary. Real charges apply.">
+<meta name="theme-color" content="#09090b">
+<title>Live Canary QA | Not Broken Just Burning</title>
+<link rel="canonical" href="https://notbrokenjustburning.com/qa-stripe-live-canary.html">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/brand.css"><link rel="stylesheet" href="css/experience.css"><link rel="stylesheet" href="css/members.css?v=20261102-nav3">
+<style>
+.canary-layout{max-width:900px;margin:5rem auto 7rem;padding:0 1rem}
+.canary-panel{border:1px solid rgba(216,95,36,.32);border-radius:18px;padding:clamp(1.2rem,3vw,2rem);margin:1.5rem 0;background:rgba(20,20,22,.94)}
+.canary-panel p,.canary-panel h1,.canary-panel h2{overflow-wrap:anywhere}
+.canary-panel h2{font-size:clamp(1.4rem,3vw,1.9rem)}
+.canary-warning{border-left:4px solid #ff7b31;padding:1rem 1.1rem;background:rgba(216,95,36,.12)}
+.canary-warning strong{color:#ffb77e}
+.canary-actions{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1.2rem}
+.canary-actions button,.canary-actions a{max-width:100%;white-space:normal}
+.canary-confirm{display:flex;gap:.75rem;align-items:flex-start;margin:1.4rem 0;font-size:1rem;line-height:1.5}
+.canary-confirm input{accent-color:#ef722b;min-width:18px;min-height:18px;margin-top:.2rem}
+.canary-status{margin-top:1rem;padding:1rem;border-left:3px solid #d85f24;background:rgba(216,95,36,.07)}
+.canary-status[data-error="true"]{border-left-color:#e86c6c}
+[hidden]{display:none !important}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a><div class="ember-field" aria-hidden="true"></div>
+<header class="site-header"><a class="brand" href="index.html" aria-label="Not Broken Just Burning home"><span class="brand-mark" aria-hidden="true"></span><span class="brand-name">Not Broken <span>Just Burning</span></span></a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation"><span></span><span></span><span></span></button><nav class="site-nav" id="site-nav" aria-label="Primary navigation"><a href="path.html">The Path</a><a href="forge.html">The Forge</a><a href="fire.html">The Fire</a><a href="movement.html">The Movement</a><a href="resources.html">Resources</a><a class="nav-join" href="join.html">Join</a></nav></header>
+<main id="main-content" class="canary-layout">
+<section class="canary-panel">
+<p class="eyebrow">NBJB · Restricted internal live-payment QA</p>
+<h1>Flamewalker+ <span>live canary</span></h1>
+<p class="canary-warning"><strong>This is a REAL payment test.</strong> Stripe will charge a real payment method <strong>$14.99 USD</strong> if you complete the monthly subscription checkout. Unlike sandbox tests, normal processing fees and banking timelines apply. <strong>Do not use Stripe test card numbers.</strong> This is not a public sales page.</p>
+<p>Only the one account explicitly approved in Supabase's <code>NBJB_LIVE_CANARY_USER_ID</code> secret can start live checkout, and only when <code>NBJB_LIVE_BILLING_MODE=canary</code>. The backend verifies every request.</p>
+</section>
+<section class="canary-panel" aria-label="Canary account status">
+<h2>1. Verify live canary account</h2>
+<p id="canary-account">Checking sign-in…</p>
+<p id="canary-membership">Checking membership…</p>
+<div class="canary-actions"><button class="button button-ghost" type="button" id="canary-refresh">Refresh membership status</button><a class="button button-ghost" href="member-auth.html">Account access</a></div>
+</section>
+<section class="canary-panel" aria-label="Real monthly checkout">
+<h2>2. Test one real monthly payment</h2>
+<p>Test the <strong>$14.99 USD monthly</strong> Flamewalker+ plan only after confirming that this is the dedicated canary account. Public checkout remains disabled.</p>
+<label class="canary-confirm"><input id="canary-consent" type="checkbox"><span>I understand that completing Stripe Checkout charges my real payment method <strong>$14.99 USD</strong>, creates a renewing monthly subscription unless canceled, and that this is <strong>not</strong> a free sandbox payment.</span></label>
+<div class="canary-actions"><button class="button button-primary" type="button" id="canary-monthly" disabled>Start REAL $14.99 monthly Checkout</button></div>
+<p class="canary-status" id="canary-status" role="status" aria-live="polite">Waiting for signed-in canary account…</p>
+</section>
+<section class="canary-panel" aria-label="Webhook and cancellation verification">
+<h2>3. Verify payment, access and cancellation</h2>
+<p>After paying, Stripe will return you to the <a href="member-store.html">Member Store</a>. Open this QA page again and click <strong>Refresh membership status</strong>. Confirm <strong>paid_member · active</strong>, then test <strong>Open live Billing Portal</strong> and cancel future renewal. Reopen this page to verify the cancellation status.</p>
+<div class="canary-actions"><button class="button button-ghost" type="button" id="canary-portal" disabled>Open live Billing Portal</button><a class="button button-ghost" href="member-premium-lesson.html?lesson=father-wound">Check protected lesson access</a><a class="button button-ghost" href="member-store.html">Back to Member Store</a></div>
+<p>Do not approve public launch until payment, signed webhook processing, membership access and cancellation have all been checked.</p>
+</section>
+</main>
+<footer class="site-footer section-shell"><div><strong>NOT BROKEN JUST BURNING</strong><p>Restricted live billing integration QA.</p></div><div class="footer-meta"><p>This page is not linked in public purchase offers.</p><p class="footer-links"><a href="terms.html">Terms</a> · <a href="refunds.html">Refunds &amp; Cancellation</a> · <a href="privacy.html">Privacy &amp; Data Use</a></p></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
+<script src="js/nbjb-config.js"></script><script src="js/nbjb-auth.js"></script><script src="js/main.js"></script><script src="js/qa-stripe-live-canary.js"></script>
+</body></html>

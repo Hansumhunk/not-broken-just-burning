@@ -200,3 +200,16 @@ At launch the customer-facing promise should remain simple: one paid digital mem
 - The protected lesson UI remains draft PR #88 and all three starter lessons remain in **editorial review**; they are not currently purchasable.
 - Run a real authenticated sandbox Checkout and webhook, verify server-side entitlement change, then cancel through the Customer Portal. Also test invalid signatures, duplicate deliveries, failure paths, and account isolation. **This QA is NOT yet complete.**
 - **Go-live is explicitly blocked** until a verified live Stripe account, approved/refined policies, truly published lesson content, secure separated production credentials/webhook, and all end-to-end tests are complete.
+
+
+## November 2, 2026 live launch candidate status
+
+- Sandbox $14.99 checkout, signed webhook, active paid entitlement, Stripe Customer Portal cancellation and period-end state synchronization **all verified** with the nominated Flamewalker QA account. The QA subscription is scheduled to end December 2, 2026. Do not confuse it with a real payment.
+- The original description of the sandbox product was updated to a precise planned three-written-lesson founding offering. No complete video library, private coaching or future merch discount is promised at launch.
+- The public member store's accurate founding-offer wording is merged in PR #94. Private author review reader is merged in PR #95 and Supabase reader function v8; all three lesson rows remain `editorial_review`, none `published`.
+- **New source files staged, not deployed:** `create-live-checkout-session`, `create-live-customer-portal-session`, `stripe-live-webhook`. They use **separate** `STRIPE_LIVE_SECRET_KEY` and `STRIPE_LIVE_WEBHOOK_SECRET`. The test functions retain `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`.
+- Live checkout requires `NBJB_LIVE_BILLING_MODE` set explicitly to `canary` with `NBJB_LIVE_CANARY_USER_ID` for one real test account, or `public` after successful QA; absent or any other value fails closed. The live portal must remain available to existing paying members even if new checkout is paused. The signed live webhook must continue processing cancellations while checkout is paused.
+- Live-only code requires `sk_live_` API credential, rejects test-mode Stripe events, rejects the sandbox QA user, and demands a subscription paid-through date before paid entitlements are written. The test-only billing code continues to reject live credentials and live events.
+- The static store's `js/member-billing.js` keeps `checkoutEnabled = false` and references the dedicated live endpoints. Only open it after live credentials, policies, content release and canary QA are verified. **Never let a URL flag activate public billing.**
+- Still required: legal operator name/support verification, owner approval of refund terms and three manuscripts, Stripe live-account activation, create live product and monthly/annual prices with correct lookup keys/amounts, register live webhook and secure signing secret, deploy dedicated live functions, run real low-value canary Checkout and cancel, then open public checkout.
+- The current PR #90 is a draft that predates several merged website improvements. **Reconcile/rebase against current main before attempting a production merge.** Do not force-merge an outdated layout or policy page.

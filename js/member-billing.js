@@ -4,17 +4,10 @@
   const statusNode = document.querySelector('[data-billing-status]');
   const upgradeButtons = [...document.querySelectorAll('[data-billing-offer]')];
   const portalButton = document.querySelector('[data-billing-portal]');
-  // Fail closed until editorial approval, sandbox QA and live-mode launch are complete.
-  // URL flag only exposes the sandbox test UI. The backend separately requires
-  // NBJB_SANDBOX_TEST_USER_ID to equal the signed-in user UUID.
-  const checkoutEnabled = new URLSearchParams(location.search).get('nbjb_sandbox_test') === '1';
-
-  if (checkoutEnabled) {
-    document.querySelectorAll('[data-billing-offer]').forEach((button) => {
-      button.textContent = button.textContent.replace(' · Coming Soon', ' · SANDBOX TEST');
-    });
-    setStatus('SANDBOX TEST MODE: no real payment. Only the nominated test account is authorized.');
-  }
+  // Fail closed until the live account, published lessons, approved policies,
+  // and a completed canary Checkout/cancellation test are verified.
+  // Do not enable via a public URL/query flag.
+  const checkoutEnabled = false;
 
   function setStatus(message, bad = false) {
     if (!statusNode) return;
@@ -67,7 +60,7 @@
       setBusy(true);
       setStatus('Opening secure Stripe checkout…');
       try {
-        await invoke('create-checkout-session', { offer });
+        await invoke('create-live-checkout-session', { offer });
       } catch (error) {
         console.error('checkout_session_failed', error);
         setStatus(error?.message || 'Checkout could not be opened.', true);
@@ -80,7 +73,7 @@
     setBusy(true);
     setStatus('Opening Stripe billing portal…');
     try {
-      await invoke('create-customer-portal-session');
+      await invoke('create-live-customer-portal-session');
     } catch (error) {
       console.error('portal_session_failed', error);
       setStatus(error?.message || 'Billing portal could not be opened.', true);

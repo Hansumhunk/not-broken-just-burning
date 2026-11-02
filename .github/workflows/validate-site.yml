@@ -43,9 +43,10 @@ jobs:
           python-version: '3.12'
       - name: Validate structure, navigation, links, SEO, accessibility basics, and launch wiring
         run: python scripts/validate_site.py
-      - name: Validate member dashboard JavaScript syntax
+      - name: Validate JavaScript syntax
         shell: bash
         run: |
-          if [ -f js/member-dashboard.js ]; then
-            node --check js/member-dashboard.js
-          fi
+          shopt -s nullglob
+          for file in js/*.js; do
+            node --check "$file"
+          done

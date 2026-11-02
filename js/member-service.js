@@ -1,6 +1,15 @@
 (() => {
-  const KEY = 'nbjb.member.v2';
-  const LEGACY_KEY = 'nbjb.member.v1';
+  const KEY_BASE = 'nbjb.member.v2';
+  const LEGACY_KEY_BASE = 'nbjb.member.v1';
+
+  function currentUserId() {
+    return window.NBJBAuth?.user?.id || '';
+  }
+
+  function scopedKey(base) {
+    const userId = currentUserId();
+    return userId ? `${base}.${userId}` : `${base}.anonymous`;
+  }
   const MAX_ACTIVITY_ENTRIES = 75;
 
   const stages = [
@@ -96,7 +105,7 @@
   }
 
   function migrateLegacy() {
-    const legacy = readRaw(LEGACY_KEY);
+    const legacy = readRaw(scopedKey(LEGACY_KEY_BASE));
     if (!legacy) return null;
     const data = defaults();
     data.profile.displayName = legacy.name || '';
@@ -109,7 +118,7 @@
   }
 
   function load() {
-    const current = readRaw(KEY);
+    const current = readRaw(scopedKey(KEY_BASE));
     if (current) return merge(defaults(), current);
     const migrated = migrateLegacy();
     if (migrated) {
@@ -123,7 +132,7 @@
     const normalized = merge(defaults(), data);
     normalized.journey.updatedAt = Date.now();
     try {
-      localStorage.setItem(KEY, JSON.stringify(normalized));
+      localStorage.setItem(scopedKey(KEY_BASE), JSON.stringify(normalized));
       return { ok: true, data: normalized };
     } catch (error) {
       return { ok: false, data: normalized, error };
@@ -320,8 +329,8 @@
 
   function reset() {
     try {
-      localStorage.removeItem(KEY);
-      localStorage.removeItem(LEGACY_KEY);
+      localStorage.removeItem(scopedKey(KEY_BASE));
+      localStorage.removeItem(scopedKey(LEGACY_KEY_BASE));
       return true;
     } catch (error) {
       return false;
@@ -333,7 +342,7 @@
   }
 
   window.NBJBMemberService = {
-    KEY,
+    get KEY(){ return scopedKey(KEY_BASE); },
     stages,
     defaults,
     load,

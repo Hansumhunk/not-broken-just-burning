@@ -12,7 +12,7 @@ export default {
     const userId = ctx.userClaims?.id;
     if (!userId) return reply({ error: "unauthorized" }, 401);
 
-    let body: { slug?: unknown };
+    let body: { slug?: unknown; action?: unknown };
     try { body = await req.json(); }
     catch { return reply({ error: "invalid_json" }, 400); }
 

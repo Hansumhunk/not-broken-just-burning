@@ -63,9 +63,8 @@ Deno.serve(async (request) => {
       updated_at: new Date().toISOString()
     }).eq("id", job.id).eq("status", "processing");
   }
-  const isWav = heygenPattern.test(job.provider_url);
-  const extension = isWav ? ".wav" : ".mp3";
-  const path = job.slug + "/section-" + job.section + extension;
+  // The provider can serve MPEG bytes from a URL ending in .wav. Trust the
+  // actual file signature, not the filename or response extension.
   try {
     // Verify the target is missing; never replace founder-approved MP3s.
     const { data: existing, error: lookupError } = await admin.storage.from(bucket)
@@ -95,6 +94,9 @@ Deno.serve(async (request) => {
       return response({ error: "audio_too_large" }, 413);
     }
     const raw = new Uint8Array(await provider.arrayBuffer());
+    const isWav = raw.length > 12 &&
+      raw[0] === 0x52 && raw[1] === 0x49 && raw[2] === 0x46 && raw[3] === 0x46 &&
+      raw[8] === 0x57 && raw[9] === 0x41 && raw[10] === 0x56 && raw[11] === 0x45;
     if (!validAudio(raw, isWav)) {
       const mime = (provider.headers.get("content-type") || "unknown").slice(0,48).replace(/[^a-zA-Z0-9/;.=+ -]/g, "");
       const head = [...raw.slice(0, 12)].map((n) => n.toString(16).padStart(2, "0")).join("");
@@ -102,6 +104,7 @@ Deno.serve(async (request) => {
       await update(job.attempts + 1 >= 20 ? "failed" : "pending", reason);
       return response({ state: "provider_not_ready", mime, bytes: raw.length, header: head }, 202);
     }
+    const path = job.slug + "/section-" + job.section + (isWav ? ".wav" : ".mp3");
     const { error: uploadError } = await admin.storage.from(bucket).upload(path, raw, {
       contentType: isWav ? "audio/wav" : "audio/mpeg", cacheControl: "3600", upsert: false
     });

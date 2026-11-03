@@ -299,15 +299,18 @@ def main() -> int:
             "member-start-here.html",
             "member-store.html",
             "member-tools.html",
+            "member-workshop.html",
             "member-work.html",
             "members.html",
             "css/member-dashboard.css",
+            "css/member-workshop.css",
             "css/member-expansion.css",
             "css/member-premium-lesson.css",
             "css/members.css",
             "js/member-auth.js",
             "js/member-bootstrap.js",
             "js/member-dashboard.js",
+            "js/member-workshop.js",
             "js/member-entitlements.js",
             "js/member-history-insights.js",
             "js/member-platform.js",
@@ -357,22 +360,44 @@ def main() -> int:
                 + ", ".join(unexpected)
             )
 
-        # Public reflection tools must actually wire their explicit member-save module.
-        # Keep the tools usable by guests while retaining user-scoped storage.
-        public_tool_files = (
-            "forge.html", "check-in.html", "pattern-map.html",
-            "resources.html", "six-sacred-questions.html"
+        # Public tool pages are educational introductions; actual writing and
+        # saving live behind the free member-authentication workspace.
+        workshop_file = ROOT / "member-workshop.html"
+        workshop_text = workshop_file.read_text(encoding="utf-8") if workshop_file.exists() else ""
+        tool_root_ids = (
+            "forge-tool", "checkin-tool", "pattern-tool",
+            "boundary-builder", "one-stone", "six-question-tool"
         )
-        for tool_path in public_tool_files:
-            tool_text = (ROOT / tool_path).read_text(encoding="utf-8")
-            if 'js/nbjb-auth.js' not in tool_text or 'js/tool-member-bootstrap.js' not in tool_text:
-                errors.append(f"{tool_path}: public tool member-save wiring is missing.")
-        tool_bootstrap_text = (ROOT / "js" / "tool-member-bootstrap.js").read_text(encoding="utf-8")
-        if "auth.ready" not in tool_bootstrap_text or "tool-member-history.js" not in tool_bootstrap_text:
-            errors.append("js/tool-member-bootstrap.js: wait for auth before loading local member save.")
+        if 'data-member-page="workshop"' not in workshop_text or 'src="js/member-bootstrap.js"' not in workshop_text:
+            errors.append("member-workshop.html: authenticated member bootstrap is required.")
+        if 'name="robots" content="noindex,nofollow"' not in workshop_text:
+            errors.append("member-workshop.html: member workspace must be noindex,nofollow.")
+        if 'id="main-content" hidden' not in workshop_text:
+            errors.append("member-workshop.html: content must remain hidden until auth resolves.")
+        for root_id in tool_root_ids:
+            if workshop_text.count('id="' + root_id + '"') != 1:
+                errors.append("member-workshop.html: missing or duplicated tool " + root_id)
+        for tool_path in ("forge.html", "check-in.html", "pattern-map.html", "resources.html", "six-sacred-questions.html"):
+            page_text = (ROOT / tool_path).read_text(encoding="utf-8")
+            if "member-workshop.html#" not in page_text or "<textarea" in page_text:
+                errors.append(f"{tool_path}: public preview must link to member workspace without accepting private entries.")
+            if "js/tool-member-bootstrap.js" in page_text or "js/nbjb-auth.js" in page_text:
+                errors.append(f"{tool_path}: public page must not initialize account-scoped saved work.")
+        bootstrap_text = (ROOT / "js" / "member-bootstrap.js").read_text(encoding="utf-8")
+        if 'workshop: ["js/tool-member-history.js", "js/member-workshop.js"]' not in bootstrap_text:
+            errors.append("js/member-bootstrap.js: member archive must initialize after authentication.")
+        tool_js_text = (ROOT / "js" / "member-workshop.js").read_text(encoding="utf-8")
+        if "auth?.user?.id" not in tool_js_text or "main.hidden = false" not in tool_js_text:
+            errors.append("js/member-workshop.js: must not reveal member forms before auth.")
+        toolbox_text = (ROOT / "member-tools.html").read_text(encoding="utf-8")
+        if toolbox_text.count('href="member-workshop.html#') < len(tool_root_ids):
+            errors.append("member-tools.html: all six tools must lead into the signed-in workspace.")
+        dashboard_text = (ROOT / "js" / "member-dashboard.js").read_text(encoding="utf-8")
+        if dashboard_text.count("'member-workshop.html#") < len(tool_root_ids):
+            errors.append("js/member-dashboard.js: Continue links must stay in the member workspace.")
         save_module = (ROOT / "js" / "tool-member-history.js").read_text(encoding="utf-8")
         if "NBJBAuth?.user?.id" not in save_module or "recordToolEntry" not in save_module:
-            errors.append("js/tool-member-history.js: authenticated explicit-save control is incomplete.")
+            errors.append("js/tool-member-history.js: explicit authenticated save control is incomplete.")
 
         # The unlisted editorial preview is approved, but unpublished lesson
         # bodies must only be returned from the authenticated server to the

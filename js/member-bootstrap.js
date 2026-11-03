@@ -6,6 +6,7 @@
     dashboard: ["js/member-dashboard.js"],
     progress: ["js/member-history-insights.js"],
     work: ["js/member-history-insights.js"],
+    workshop: ["js/tool-member-history.js", "js/member-workshop.js"],
     "start-here": ["js/member-start-here.js"],
     "premium-lesson": ["js/member-premium-lesson.js"]
   };

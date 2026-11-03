@@ -1,0 +1,17 @@
+/* Flamewalker signed-in Toolbox. One exercise per view. */
+.member-workshop-loading { padding-top:100px; padding-bottom:100px; color:var(--muted); }
+.member-workshop-entry { margin-top:22px; margin-bottom:22px; }
+.member-workshop-heading { display:flex; gap:20px; justify-content:space-between; align-items:end; margin-bottom:20px; }
+.member-workshop-heading h2 { margin:4px 0 8px; }
+.member-workshop-heading p { margin-bottom:0; }
+.member-workshop-selectors { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.member-workshop-selector { border:1px solid var(--line); border-radius:14px; padding:14px 12px; color:var(--text); background:rgba(255,255,255,.025); text-align:left; font:inherit; font-weight:750; cursor:pointer; min-height:60px; }
+.member-workshop-selector:hover, .member-workshop-selector:focus-visible { border-color:var(--line-hot); outline-offset:2px; }
+.member-workshop-selector.active { background:rgba(255,122,45,.10); border-color:var(--ember-bright); }
+.member-workshop-context { min-height:1.6em; color:var(--muted); margin-top:14px; }
+.member-workshop-panel[hidden], #main-content[hidden] { display:none !important; }
+.member-workshop-panel > section { scroll-margin-top:110px; margin-bottom:26px; }
+.member-workshop-panel .member-history-optin { margin-top:24px; }
+.member-workshop-footer { margin-top:22px; margin-bottom:40px; }
+@media(max-width:760px) { .member-workshop-selectors {grid-template-columns:repeat(2,minmax(0,1fr));}.member-workshop-heading{flex-direction:column;align-items:flex-start;} }
+@media(max-width:440px) {.member-workshop-selectors{grid-template-columns:1fr;} }

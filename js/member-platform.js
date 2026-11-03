@@ -74,8 +74,9 @@
     });
 
     document.querySelectorAll('[data-member-nav]').forEach((link) => {
-      link.classList.toggle('active', link.dataset.memberNav === page);
-      if (link.dataset.memberNav === page) link.setAttribute('aria-current', 'page');
+      const selected = link.dataset.memberNav === page || (page === 'workshop' && link.dataset.memberNav === 'tools');
+      link.classList.toggle('active', selected);
+      if (selected) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     });
   }

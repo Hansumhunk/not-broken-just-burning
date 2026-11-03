@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Signed-in Flamewalker Toolbox workspace: six free guided reflection tools with intentional device-local saving to My Work.">
+<meta name="theme-color" content="#09090b">
+<title>My Toolbox Workspace | Flamewalker</title>
+<link rel="canonical" href="https://notbrokenjustburning.com/member-workshop.html">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/brand.css"><link rel="stylesheet" href="css/experience.css">
+<link rel="stylesheet" href="css/members.css?v=20261102-nav3"><link rel="stylesheet" href="css/member-expansion.css?v=20261103-save2"><link rel="stylesheet" href="css/member-workshop.css">
+</head>
+<body data-member-page="workshop">
+<a class="skip-link" href="#main-content">Skip to content</a><div class="ember-field" aria-hidden="true"></div>
+<header class="site-header"><a class="brand" href="/" aria-label="Not Broken Just Burning home"><span class="brand-mark" aria-hidden="true"></span><span class="brand-name">Not Broken <span>Just Burning</span></span></a>
+<button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation"><span></span><span></span><span></span></button><nav class="site-nav" id="site-nav" aria-label="Primary navigation"><a href="path.html">The Path</a><a href="forge.html">The Forge</a><a href="fire.html">The Fire</a><a href="movement.html">The Movement</a><a href="resources.html">Resources</a><a class="nav-join" href="join.html">Join</a></nav></header>
+<p class="section-shell member-workshop-loading" id="workshop-loading" role="status">Checking your Flamewalker account to open your workspace…</p>
+<main id="main-content" hidden>
+<section class="page-hero section-shell member-page-head">
+<p class="eyebrow">Flamewalker Free · Member Toolbox</p><h1>Your tools.<br><span>Your work. One home.</span></h1>
+<p class="hero-lead">Choose an exercise. Save it to My Work only when you decide. No second login between your Toolbox, archive, and Progress.</p>
+<p class="privacy-chip">Your reflection stays on this browser and device. Signing in does not upload the contents of your private writing.</p>
+</section>
+<section class="member-shell" aria-label="Member platform navigation"><div class="member-shell-copy"><strong>Flamewalker Hub</strong><span>Signed-in member workspace</span></div><nav class="member-subnav"><a data-member-nav="dashboard" href="members.html">Dashboard</a><a data-member-nav="tools" href="member-tools.html">Toolbox</a><a data-member-nav="work" href="member-work.html">My Work</a><a data-member-nav="progress" href="member-progress.html">Progress</a></nav></section>
+<section class="section-shell member-workshop-entry"><div class="member-workshop-heading"><div><p class="eyebrow">Choose your tool</p><h2>Start where you are.</h2><p>Everything below is part of your free Flamewalker account. Save only what you want to revisit.</p></div><a class="button button-ghost" href="member-work.html">Open My Work</a></div>
+<div class="member-workshop-selectors" role="group" aria-label="Select reflection tool"><button class="member-workshop-selector" type="button" data-open-workshop="checkin-tool" aria-pressed="false" aria-controls="panel-checkin">Flame Check-In</button>
+<button class="member-workshop-selector" type="button" data-open-workshop="forge-tool" aria-pressed="false" aria-controls="panel-forge">The Forge</button>
+<button class="member-workshop-selector" type="button" data-open-workshop="pattern-tool" aria-pressed="false" aria-controls="panel-pattern">Pattern Map</button>
+<button class="member-workshop-selector" type="button" data-open-workshop="boundary-builder" aria-pressed="false" aria-controls="panel-boundary">Boundary Builder</button>
+<button class="member-workshop-selector" type="button" data-open-workshop="one-stone" aria-pressed="false" aria-controls="panel-stone">One Stone</button>
+<button class="member-workshop-selector" type="button" data-open-workshop="six-question-tool" aria-pressed="false" aria-controls="panel-sacred">Six Sacred Questions</button></div>
+<p class="member-workshop-context" id="workshop-context" aria-live="polite"></p>
+</section>
+<div id="panel-checkin" class="member-workshop-panel" data-workshop-panel="checkin-tool" hidden>
+<section class="forge-shell section-shell reveal" id="checkin-tool">
+      <div class="checkin-grid">
+        <label class="checkin-card"><span>01 · Body</span><strong>What is my body telling me?</strong><textarea data-checkin="body" rows="4" placeholder="Tight shoulders, hungry, restless, tired, steady, energized..."></textarea></label>
+        <label class="checkin-card"><span>02 · Emotion</span><strong>What am I feeling?</strong><textarea data-checkin="emotion" rows="4" placeholder="Angry, relieved, sad, anxious, hopeful, numb..."></textarea></label>
+        <label class="checkin-card"><span>03 · Thought</span><strong>What thought is loudest?</strong><textarea data-checkin="thought" rows="4" placeholder="Write the thought without arguing with it yet."></textarea></label>
+        <label class="checkin-card"><span>04 · Boundary</span><strong>Is anything crossing a line?</strong><textarea data-checkin="boundary" rows="4" placeholder="A person, task, demand, habit, or even my own expectations..."></textarea></label>
+        <label class="checkin-card"><span>05 · Need</span><strong>What do I actually need?</strong><textarea data-checkin="need" rows="4" placeholder="Rest, food, clarity, distance, help, movement, a conversation..."></textarea></label>
+        <label class="checkin-card"><span>06 · Next action</span><strong>What is one thing I can do next?</strong><textarea data-checkin="next" rows="4" placeholder="One realistic action, not twelve heroic ones."></textarea></label>
+      </div>
+
+      <div class="tool-output checkin-output" aria-live="polite">
+        <p class="eyebrow">My check-in</p>
+        <p id="checkin-preview">Fill in what matters. Blank fields are allowed. Humans are not forms to be completed at 100%.</p>
+      </div>
+      <div class="forge-actions">
+        <button class="button button-primary" id="build-checkin" type="button">Build My Check-In</button>
+        <button class="button button-ghost" id="copy-checkin" type="button">Copy</button>
+        <button class="button button-ghost" id="clear-checkin" type="button">Clear</button>
+        <span class="forge-status" id="checkin-status" role="status" aria-live="polite"></span>
+      </div>
+    </section>
+</div>
+<div id="panel-forge" class="member-workshop-panel" data-workshop-panel="forge-tool" hidden>
+<section class="forge-shell section-shell reveal" id="forge-tool">
+      <div class="forge-intro">
+        <p class="eyebrow">Step 1</p>
+        <h2>Name what is burning.</h2>
+        <label for="forge-thought">The thought I want to examine</label>
+        <textarea id="forge-thought" rows="4" placeholder="Example: I ruined everything. I will never trust anyone again. I am failing."></textarea>
+      </div>
+
+      <div class="forge-grid">
+        <label class="forge-field"><span>What do I actually know?</span><textarea data-forge="know" rows="5" placeholder="Facts I can verify..."></textarea></label>
+        <label class="forge-field"><span>What am I assuming?</span><textarea data-forge="assume" rows="5" placeholder="Interpretations, fears, predictions..."></textarea></label>
+        <label class="forge-field"><span>What evidence supports the thought?</span><textarea data-forge="support" rows="5" placeholder="Evidence for it..."></textarea></label>
+        <label class="forge-field"><span>What evidence challenges the thought?</span><textarea data-forge="challenge" rows="5" placeholder="Evidence against it or missing context..."></textarea></label>
+        <label class="forge-field"><span>What pattern am I seeing?</span><textarea data-forge="pattern" rows="5" placeholder="What repeats? What changed? What is actually connected?"></textarea></label>
+        <label class="forge-field"><span>What would I tell someone I love?</span><textarea data-forge="compassion" rows="5" placeholder="Use the same standards you would use for someone you care about..."></textarea></label>
+      </div>
+
+      <div class="six-questions forge-questions">
+        <p class="eyebrow">The Six Sacred Questions</p>
+        <p>Who is involved? What happened? When did it happen? Where did it happen? Why do I think it matters? How do I know?</p>
+      </div>
+
+      <div class="forge-final">
+        <label for="forge-rewrite">Forge the thought into its most accurate version</label>
+        <textarea id="forge-rewrite" rows="5" placeholder="Example: I made mistakes and I am still learning. Some things were outside my control. I can decide what I do next."></textarea>
+        <div class="forge-actions">
+          <button class="button button-primary" id="copy-forge" type="button">Copy My Forge Notes</button>
+          <button class="button button-ghost" id="clear-forge" type="button">Clear the Forge</button>
+          <span class="forge-status" id="forge-status" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    </section>
+</div>
+<div id="panel-pattern" class="member-workshop-panel" data-workshop-panel="pattern-tool" hidden>
+<section class="forge-shell section-shell reveal" id="pattern-tool">
+      <div class="forge-intro">
+        <p class="eyebrow">Anchor event</p>
+        <h2>Start with one event you can describe plainly.</h2>
+        <label for="pattern-event">What happened?</label>
+        <textarea id="pattern-event" rows="4" placeholder="Describe the event without interpreting motive yet."></textarea>
+      </div>
+
+      <div class="forge-grid pattern-grid">
+        <label class="forge-field"><span>What happened before?</span><textarea data-pattern="before" rows="5" placeholder="Events, conditions, conversations, triggers, timing..."></textarea></label>
+        <label class="forge-field"><span>What happened after?</span><textarea data-pattern="after" rows="5" placeholder="What changed immediately afterward?"></textarea></label>
+        <label class="forge-field"><span>What has repeated?</span><textarea data-pattern="repeat" rows="5" placeholder="Behaviors, timing, outcomes, phrases, circumstances..."></textarea></label>
+        <label class="forge-field"><span>What is different this time?</span><textarea data-pattern="changed" rows="5" placeholder="Exceptions and differences matter too."></textarea></label>
+        <label class="forge-field"><span>What evidence can I verify?</span><textarea data-pattern="evidence" rows="5" placeholder="Documents, dates, messages, direct observations, measurable facts..."></textarea></label>
+        <label class="forge-field"><span>What am I inferring?</span><textarea data-pattern="inference" rows="5" placeholder="Motives, predictions, explanations, conclusions not directly proven..."></textarea></label>
+      </div>
+
+      <div class="forge-questions">
+        <p class="eyebrow">The Six Sacred Questions</p>
+        <p>Who? What? When? Where? Why do I think it matters? How do I know?</p>
+      </div>
+
+      <div class="forge-final">
+        <label for="pattern-summary">Most careful summary</label>
+        <textarea id="pattern-summary" rows="5" placeholder="Example: I see a repeated sequence around X. I can verify A and B. I suspect C, but I do not yet have enough evidence to treat C as fact."></textarea>
+        <div class="forge-actions">
+          <button class="button button-primary" id="build-pattern" type="button">Build My Pattern Notes</button>
+          <button class="button button-ghost" id="copy-pattern" type="button">Copy Notes</button>
+          <button class="button button-ghost" id="clear-pattern" type="button">Clear</button>
+          <span class="forge-status" id="pattern-status" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    </section>
+</div>
+<div id="panel-boundary" class="member-workshop-panel" data-workshop-panel="boundary-builder" hidden>
+<section class="section-shell tool-panel reveal" id="boundary-builder">
+      <div class="section-heading"><p class="eyebrow">Boundary Builder</p><h2>A boundary needs a behavior and an action.</h2><p>Boundaries are not instructions for controlling another person. They describe what <strong>you</strong> will do when a behavior crosses a line.</p></div>
+      <div class="tool-grid"><label class="forge-field"><span>The behavior</span><textarea id="boundary-behavior" placeholder="What specific behavior is crossing the line?"></textarea></label><label class="forge-field"><span>Why it matters</span><textarea id="boundary-impact" placeholder="What does this behavior affect: safety, trust, time, dignity, peace, finances, energy?"></textarea></label><label class="forge-field"><span>My boundary</span><textarea id="boundary-line" placeholder="What am I no longer willing to participate in or accept?"></textarea></label><label class="forge-field"><span>My action</span><textarea id="boundary-action" placeholder="What will I do if the behavior continues? Keep this inside your control."></textarea></label></div>
+      <div class="tool-output" aria-live="polite"><p class="eyebrow">Boundary statement</p><p id="boundary-preview">Fill in the four boxes above, then forge the boundary.</p></div>
+      <div class="forge-actions"><button class="button button-primary" id="build-boundary" type="button">Forge the Boundary</button><button class="button button-ghost" id="copy-boundary" type="button">Copy</button><button class="button button-ghost" id="clear-boundary" type="button">Clear</button><span class="forge-status" id="boundary-status" aria-live="polite"></span></div>
+    </section>
+</div>
+<div id="panel-stone" class="member-workshop-panel" data-workshop-panel="one-stone" hidden>
+<section class="section-shell tool-panel reveal" id="one-stone">
+      <div class="section-heading"><p class="eyebrow">One Stone Planner</p><h2>You do not have to move the mountain today.</h2><p>Overwhelm loves turning ten separate problems into one giant problem. Separate them again.</p></div>
+      <div class="tool-grid three"><label class="forge-field"><span>The mountain</span><textarea id="stone-mountain" placeholder="What feels impossibly large right now?"></textarea></label><label class="forge-field"><span>One stone I can move now</span><textarea id="stone-now" placeholder="One action that can realistically be completed next."></textarea></label><label class="forge-field"><span>What can wait</span><textarea id="stone-later" placeholder="What does not need to be solved in this moment?"></textarea></label></div>
+      <div class="tool-output"><p class="eyebrow">Next step</p><p id="stone-preview">Name one stone. The mountain can remain a mountain for the next five minutes.</p></div>
+      <div class="forge-actions"><button class="button button-primary" id="build-stone" type="button">Preview My Next Step</button><button class="button button-ghost" id="copy-stone" type="button">Copy</button><button class="button button-ghost" id="clear-stone" type="button">Clear</button><span class="forge-status" id="stone-status" aria-live="polite"></span></div>
+      <p class="member-history-preview-note">Previewing a step does not save it. To keep this plan, use <strong>Save to My Work</strong> below.</p>
+    </section>
+</div>
+<div id="panel-sacred" class="member-workshop-panel" data-workshop-panel="six-question-tool" hidden>
+<section class="section-shell tool-panel reveal" id="six-question-tool">
+      <div class="section-heading">
+        <p class="eyebrow">The worksheet</p>
+        <h2>Write through all six.</h2>
+        <p>Use plain language. Separate what you directly know from what you believe, suspect, remember, or still need to verify.</p>
+      </div>
+
+      <div class="tool-grid">
+        <div class="forge-field">
+          <label for="sacred-who"><span>01 · Who?</span></label>
+          <textarea id="sacred-who" data-sacred="who" rows="6" placeholder="Who is directly involved? Who witnessed it? Who is a direct source, secondhand source, decision-maker, or support person? Who actually knows what firsthand?"></textarea>
+          <a class="text-link" href="question-who.html">Learn how to use Who? →</a>
+        </div>
+        <div class="forge-field">
+          <label for="sacred-what"><span>02 · What?</span></label>
+          <textarea id="sacred-what" data-sacred="what" rows="6" placeholder="What actually happened? What was said, done, changed, decided, or observed? Try to describe the event before adding motive or character judgments."></textarea>
+          <a class="text-link" href="question-what.html">Learn how to use What? →</a>
+        </div>
+        <div class="forge-field">
+          <label for="sacred-when"><span>03 · When?</span></label>
+          <textarea id="sacred-when" data-sacred="when" rows="6" placeholder="When did it happen? What came before and after? How often has it happened? What changed over time? Are there important exceptions?"></textarea>
+          <a class="text-link" href="question-when.html">Learn how to use When? →</a>
+        </div>
+        <div class="forge-field">
+          <label for="sacred-where"><span>04 · Where?</span></label>
+          <textarea id="sacred-where" data-sacred="where" rows="6" placeholder="Where did this happen? In person, by text, online, at home, at work, in public, in private? What environmental or relational context matters?"></textarea>
+          <a class="text-link" href="question-where.html">Learn how to use Where? →</a>
+        </div>
+        <div class="forge-field">
+          <label for="sacred-why"><span>05 · Why?</span></label>
+          <textarea id="sacred-why" data-sacred="why" rows="6" placeholder="Why do I think this happened or matters? What explanation am I considering? What supports that explanation, and what part is still uncertain or inferred?"></textarea>
+          <a class="text-link" href="question-why.html">Learn how to use Why? →</a>
+        </div>
+        <div class="forge-field">
+          <label for="sacred-how"><span>06 · How?</span></label>
+          <textarea id="sacred-how" data-sacred="how" rows="6" placeholder="How did the situation develop? How did each step affect the next? How did I respond? How might I interrupt the pattern or choose the next action within my control?"></textarea>
+          <a class="text-link" href="question-how.html">Learn how to use How? →</a>
+        </div>
+      </div>
+
+      <div class="tool-output" aria-live="polite">
+        <p class="eyebrow">My Six-Question Notes</p>
+        <pre id="sacred-preview" style="white-space: pre-wrap; font: inherit; color: inherit; margin: 0;">Fill in any of the six questions, then build your notes.</pre>
+      </div>
+
+      <div class="forge-actions">
+        <button class="button button-primary" id="build-sacred" type="button">Build My Six-Question Notes</button>
+        <button class="button button-ghost" id="copy-sacred" type="button">Copy My Notes</button>
+        <button class="button button-ghost" id="clear-sacred" type="button">Clear</button>
+        <span class="forge-status" id="sacred-status" role="status" aria-live="polite"></span>
+      </div>
+    </section>
+</div>
+<section class="section-shell member-workshop-footer"><p>Finished reflecting? Your saved entries appear in <a href="member-work.html">My Work</a>. The <a href="member-progress.html">Progress</a> page summarizes only what you deliberately save.</p><div class="member-actions"><a class="button button-primary" href="member-work.html">Review My Work</a><a class="button button-ghost" href="member-tools.html">Back to Toolbox</a></div></section>
+</main>
+<noscript><p class="section-shell">JavaScript is required to use the authenticated member workspace. <a href="member-auth.html">Go to account access</a>.</p></noscript>
+<footer class="site-footer section-shell"><div><strong>NOT BROKEN JUST BURNING</strong><p>Clarity → Agency → Action</p></div><div class="footer-meta"><a href="privacy.html">Privacy</a> · <a href="support.html">Support &amp; Safety</a></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
+<script src="js/nbjb-config.js"></script><script src="js/nbjb-auth.js"></script>
+<script src="js/main.js"></script><script src="js/six-sacred.js"></script><script src="js/member-bootstrap.js"></script>
+</body></html>

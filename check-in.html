@@ -24,7 +24,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/brand.css">
-  <link rel="stylesheet" href="css/experience.css"><link rel="stylesheet" href="css/member-expansion.css?v=20261103-save2">
+  <link rel="stylesheet" href="css/experience.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -52,27 +52,11 @@
       <p>It is intentionally smaller than a journal session. Use it when you feel overloaded, irritated, numb, scattered, or unsure what deserves attention first. The goal is not to solve the whole situation. It is to turn a vague internal storm into one honest snapshot you can work with.</p>
     </section>
 
-    <section class="forge-shell section-shell reveal" id="checkin-tool">
-      <div class="checkin-grid">
-        <label class="checkin-card"><span>01 · Body</span><strong>What is my body telling me?</strong><textarea data-checkin="body" rows="4" placeholder="Tight shoulders, hungry, restless, tired, steady, energized..."></textarea></label>
-        <label class="checkin-card"><span>02 · Emotion</span><strong>What am I feeling?</strong><textarea data-checkin="emotion" rows="4" placeholder="Angry, relieved, sad, anxious, hopeful, numb..."></textarea></label>
-        <label class="checkin-card"><span>03 · Thought</span><strong>What thought is loudest?</strong><textarea data-checkin="thought" rows="4" placeholder="Write the thought without arguing with it yet."></textarea></label>
-        <label class="checkin-card"><span>04 · Boundary</span><strong>Is anything crossing a line?</strong><textarea data-checkin="boundary" rows="4" placeholder="A person, task, demand, habit, or even my own expectations..."></textarea></label>
-        <label class="checkin-card"><span>05 · Need</span><strong>What do I actually need?</strong><textarea data-checkin="need" rows="4" placeholder="Rest, food, clarity, distance, help, movement, a conversation..."></textarea></label>
-        <label class="checkin-card"><span>06 · Next action</span><strong>What is one thing I can do next?</strong><textarea data-checkin="next" rows="4" placeholder="One realistic action, not twelve heroic ones."></textarea></label>
-      </div>
-
-      <div class="tool-output checkin-output" aria-live="polite">
-        <p class="eyebrow">My check-in</p>
-        <p id="checkin-preview">Fill in what matters. Blank fields are allowed. Humans are not forms to be completed at 100%.</p>
-      </div>
-      <div class="forge-actions">
-        <button class="button button-primary" id="build-checkin" type="button">Build My Check-In</button>
-        <button class="button button-ghost" id="copy-checkin" type="button">Copy</button>
-        <button class="button button-ghost" id="clear-checkin" type="button">Clear</button>
-        <span class="forge-status" id="checkin-status" role="status" aria-live="polite"></span>
-      </div>
-    </section>
+    <section class="section-shell tool-panel reveal" id="checkin-tool">
+<div class="section-heading"><p class="eyebrow">Flamewalker Free · Personal workspace</p><h2>Six questions. One honest snapshot.</h2><p>The Flame Check-In helps you name what you notice, what you need, and one workable next action.</p>
+<p>The interactive worksheet and Save to My Work are now part of the free signed-in Flamewalker Toolbox. Your writing remains on this device by default.</p></div>
+<div class="hero-actions center"><a class="button button-primary" href="member-workshop.html#checkin-tool">Open in Free Flamewalker</a><a class="button button-ghost" href="member-auth.html">Create or use my account</a></div>
+</section>
 
     <section class="callout section-shell reveal">
       <p class="eyebrow">Small enough to repeat</p>
@@ -83,10 +67,10 @@
   </main>
 
   <footer class="site-footer section-shell"><div><strong>NOT BROKEN JUST BURNING</strong><p>Notice. Name. Choose the next step.</p></div><div class="footer-meta"><p>© <span id="year"></span> Not Broken Just Burning.</p><p class="disclaimer">Educational and personal-development content only. Not a substitute for professional medical, mental-health, legal, or emergency services.</p></div></footer>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-  <script src="js/nbjb-config.js"></script>
-  <script src="js/nbjb-auth.js"></script>
+  
+  
+  
   <script src="js/main.js"></script>
-  <script src="js/tool-member-bootstrap.js?v=20261103-save2"></script>
+  
 </body>
 </html>

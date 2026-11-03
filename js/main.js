@@ -265,6 +265,24 @@ if (siteNav && !siteNav.querySelector('a[href="join.html"]')) {
   siteNav.appendChild(joinLink);
 }
 
+// A member clicking the site-level Forge or Join link must stay in the
+// authenticated Flamewalker journey. Public visitors keep public routes.
+const memberContext = Boolean(document.body?.dataset?.memberPage) &&
+  document.body.dataset.memberPage !== 'auth';
+if (siteNav && memberContext) {
+  const forge = siteNav.querySelector('a[href="forge.html"]');
+  if (forge) {
+    forge.href = 'member-workshop.html#forge-tool';
+    forge.classList.toggle('active', currentPage === 'member-workshop.html');
+  }
+  const join = siteNav.querySelector('a[href="join.html"]');
+  if (join) {
+    join.href = 'members.html';
+    join.textContent = 'Dashboard';
+    join.classList.toggle('active', currentPage === 'members.html');
+  }
+}
+
 const navLinks = document.querySelectorAll('.site-nav a');
 
 if (year) year.textContent = new Date().getFullYear();

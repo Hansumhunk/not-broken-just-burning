@@ -41,7 +41,7 @@ Deno.serve(async (request) => {
   }
   const admin = createClient(sbUrl, key, { auth: { autoRefreshToken: false, persistSession: false } });
   const { data: job, error } = await admin.from("nbjb_audio_ingest_jobs")
-    .select("id,slug,section,provider_url,job_token,status,attempts")
+    .select("id,slug,section,provider_url,job_token,status,attempts,replace_existing")
     .eq("id", args.id).maybeSingle();
   if (error) return response({ error: "queue_unavailable" }, 503);
   if (!job || !safeCompare(args.token, job.job_token)) return response({ error: "unauthorized" }, 401);
@@ -73,9 +73,19 @@ Deno.serve(async (request) => {
       await update("pending", "storage_lookup_failed");
       return response({ error: "storage_unavailable" }, 503);
     }
-    if ((existing || []).some((item) => item.name === "section-" + job.section + ".mp3" || item.name === "section-" + job.section + ".wav")) {
+    const existingMp3 = (existing || []).find((item) => item.name === "section-" + job.section + ".mp3");
+    const existingWav = (existing || []).find((item) => item.name === "section-" + job.section + ".wav");
+    const allowedReplace = job.replace_existing === true &&
+      job.slug === "father-wound" && [1, 2].includes(job.section);
+    // Only founder-authorized pages 1 and 2 may be replaced; no other audio
+    // record can ever be silently overwritten.
+    if ((existingMp3 || existingWav) && !allowedReplace) {
       await update("conflict", "existing_recording_protected");
       return response({ error: "recording_already_present" }, 409);
+    }
+    if (allowedReplace && (!existingMp3 || existingWav)) {
+      await update("conflict", "original_mp3_missing_or_ambiguous");
+      return response({ error: "original_missing" }, 409);
     }
     // Audio Doc Maker can take time to finish a queued recording. The worker
     // retries later when the provider has not yet served an MP3.
@@ -105,12 +115,62 @@ Deno.serve(async (request) => {
       return response({ state: "provider_not_ready", mime, bytes: raw.length, header: head }, 202);
     }
     const path = job.slug + "/section-" + job.section + (isWav ? ".wav" : ".mp3");
-    const { error: uploadError } = await admin.storage.from(bucket).upload(path, raw, {
-      contentType: isWav ? "audio/wav" : "audio/mpeg", cacheControl: "3600", upsert: false
-    });
+    const store = admin.storage.from(bucket);
+    if (allowedReplace) {
+      if (isWav) {
+        await update("failed", "replacement_requires_actual_mp3");
+        return response({ error: "replacement_requires_mp3" }, 422);
+      }
+      const oldExpected = job.section === 1 ? 848640 : 366720;
+      if (Number(existingMp3.metadata?.size) !== oldExpected) {
+        await update("conflict", "original_has_changed");
+        return response({ error: "original_changed_protected" }, 409);
+      }
+      const archiveDir = job.slug + "/originals-before-ray-2026-11-03";
+      const backupName = "section-" + job.section + ".mp3";
+      const backupPath = archiveDir + "/" + backupName;
+      const { data: backups, error: backupListError } = await store.list(archiveDir, {limit: 10});
+      if (backupListError) {
+        await update("failed", "backup_listing_failed");
+        return response({ error: "backup_failed" }, 503);
+      }
+      const backup = (backups || []).find((item) => item.name === backupName);
+      if (backup && Number(backup.metadata?.size) !== oldExpected) {
+        await update("conflict", "backup_size_mismatch");
+        return response({ error: "backup_conflict" }, 409);
+      }
+      if (!backup) {
+        const { error: copyError } = await store.copy(job.slug + "/" + backupName, backupPath);
+        if (copyError) {
+          await update("failed", "backup_copy_failed");
+          return response({ error: "backup_failed" }, 503);
+        }
+      }
+      const { data: confirmedBackups, error: verifyBackupError } = await store.list(archiveDir, {limit: 10});
+      if (verifyBackupError || !(confirmedBackups || []).some(
+        (item) => item.name === backupName && Number(item.metadata?.size) === oldExpected
+      )) {
+        await update("failed", "backup_not_verified");
+        return response({ error: "backup_not_verified" }, 503);
+      }
+    }
+    const { error: uploadError } = allowedReplace
+      ? await store.update(path, raw, {contentType: "audio/mpeg", cacheControl: "300", upsert: true})
+      : await store.upload(path, raw, {
+          contentType: isWav ? "audio/wav" : "audio/mpeg", cacheControl: "3600", upsert: false
+        });
     if (uploadError) {
       await update("failed", "storage_upload_failed_check_target_before_retry");
       return response({ error: "storage_upload_failed" }, 503);
+    }
+    const { data: verified, error: verifyError } = await store.list(job.slug, {limit: 150});
+    const confirmed = !verifyError && (verified || []).some(
+      (item) => item.name === "section-" + job.section + (isWav ? ".wav" : ".mp3") &&
+        Number(item.metadata?.size) === raw.length
+    );
+    if (!confirmed) {
+      await update("failed", "upload_not_verified_check_storage");
+      return response({ error: "upload_not_verified" }, 503);
     }
     await update("saved", null, raw.length);
     return response({ saved: true, lesson: job.slug, section: job.section, format: isWav ? "wav" : "mp3", bytes: raw.length });

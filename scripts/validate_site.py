@@ -322,6 +322,7 @@ def main() -> int:
             "supabase/functions/check-live-stripe-prices/index.ts",
             "supabase/migrations/20260918010500_phase_two_member_foundation.sql",
             "supabase/migrations/20260921205000_tighten_entitlement_table_acl.sql",
+            "supabase/migrations/20261103013000_private_flamewalker_audio.sql",
         }
 
         discovered_member_artifacts = set()

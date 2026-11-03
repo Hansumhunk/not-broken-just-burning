@@ -240,6 +240,15 @@
     el('premium-save-status').textContent = saved
       ? 'Reading position saved on this device. Your reflection answers are not saved or uploaded.'
       : 'Reading position cannot be saved in this browser. Reflection answers are not uploaded.';
+    // Keep one lightweight return-to-lesson bookmark visible across the Hub.
+    // This stores only the lesson name and chapter index, not reflection text.
+    window.NBJBLearningContinuity?.record?.({
+      slug,
+      title: String(lesson?.title || 'Flamewalker+ lesson').slice(0, 140),
+      section: current + 1,
+      total: count,
+      sectionTitle: String(final ? 'Guided reflection' : label(step)).slice(0, 160)
+    });
     if (focus) {
       const target = final ? el('premium-exercise-title') : el('premium-step-title');
       target.setAttribute('tabindex', '-1');
@@ -280,7 +289,14 @@
       : 'Published material · Available only with server-authorized Flamewalker+ access.';
     buildSelector();
     const stored = Number(storageRead(positionKey));
-    current = Number.isInteger(stored) && stored >= 0 && stored < steps.length ? stored : 0;
+    const requestedSection = new URLSearchParams(location.search).get('section');
+    const direct = requestedSection && /^[1-9][0-9]{0,2}$/.test(requestedSection)
+      ? Number(requestedSection) - 1 : null;
+    // A return link can name a section directly. The lesson body is still
+    // fetched through server-side membership authorization first.
+    current = direct !== null && direct >= 0 && direct < steps.length
+      ? direct
+      : Number.isInteger(stored) && stored >= 0 && stored < steps.length ? stored : 0;
     render();
     audioStatus.textContent = speech
       ? 'Choose Listen to hear this section in your browser’s voice. Voice quality depends on your device.'

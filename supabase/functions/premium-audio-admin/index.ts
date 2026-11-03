@@ -13,10 +13,14 @@ function respond(data: unknown, status = 200) {
 type Block = { type?: string; text?: string };
 type Page = { number: number; title: string; characters: number; words: number; excerpt: string };
 
-function pagesFor(content: unknown): Page[] {
+function pagesFor(content: unknown, lessonSlug: string): Page[] {
   const input = content && typeof content === "object" && !Array.isArray(content)
     ? (content as { blocks?: unknown }).blocks : null;
   const blocks = Array.isArray(input) ? input.slice(0, 800) : [];
+  // Match the private member reader's per-lesson section limits exactly.
+  // Keep Father Wound section numbers unchanged: recordings already exist.
+  const minSplitLength = lessonSlug === "mother-wound" ? 1200 : 900;
+  const blockLimit = lessonSlug === "mother-wound" ? 22 : 11;
   const pages: Page[] = [];
   let title = "Opening";
   let text: string[] = [];
@@ -50,7 +54,7 @@ function pagesFor(content: unknown): Page[] {
       continuation = 0;
       continue;
     }
-    if (text.length && length > 900 && (length + value.length > 1800 || text.length >= 11)) flush();
+    if (text.length && length > minSplitLength && (length + value.length > 1800 || text.length >= blockLimit)) flush();
     text.push(value);
     length += value.length;
   }
@@ -84,7 +88,7 @@ export default {
         slug: lesson.slug,
         title: lesson.title,
         status: lesson.status,
-        pages: pagesFor(lesson.content).length
+        pages: pagesFor(lesson.content, lesson.slug).length
       })) });
     }
 
@@ -98,7 +102,7 @@ export default {
       .maybeSingle();
     if (lessonError) return respond({ error: "lesson_unavailable" }, 503);
     if (!lesson) return respond({ error: "lesson_not_found" }, 404);
-    const pages = pagesFor(lesson.content);
+    const pages = pagesFor(lesson.content, slug);
     if (!pages.length || pages.length > 100) return respond({ error: "invalid_lesson_pages" }, 503);
 
     const storage = ctx.supabaseAdmin.storage.from(BUCKET);

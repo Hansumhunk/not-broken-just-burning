@@ -172,6 +172,6 @@ test('early-release navigation has explicit sign out and honest planned-feature 
   assert.match(library, /href="member-tools.html">Open the Toolbox/);
   assert.doesNotMatch(library, /href="member-media.html">View paid video layer/);
   const dashboard = read('members.html');
-  assert.match(dashboard, /Flamewalker Free Early Access Feedback/);
+  assert.match(dashboard, /Flamewalker%20Free%20Early%20Access%20Feedback/);
   assert.match(dashboard, /Please do not send personal journal entries/);
 });

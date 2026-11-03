@@ -21,6 +21,7 @@ on:
       - 'FLAMEWALKER_ACCESS.md'
       - 'SUPABASE_PRODUCTION_AUTH.md'
       - 'scripts/validate_site.py'
+      - 'scripts/test_member_save_flow.js'
       - 'scripts/validate_supabase_runtime.py'
       - '.github/workflows/validate-site.yml'
   pull_request:
@@ -35,6 +36,7 @@ on:
       - 'SEO.md'
       - 'README.md'
       - 'scripts/validate_site.py'
+      - 'scripts/test_member_save_flow.js'
       - 'scripts/validate_supabase_runtime.py'
       - '.github/workflows/validate-site.yml'
 
@@ -53,6 +55,8 @@ jobs:
           python-version: '3.12'
       - name: Validate structure, navigation, links, SEO, accessibility basics, and launch wiring
         run: python scripts/validate_site.py
+      - name: Test save-to-My-Work sign-in and storage flow
+        run: node --test scripts/test_member_save_flow.js
       - name: Smoke-test live Flamewalker Supabase Auth
         if: ${{ github.base_ref == 'main' || github.ref_name == 'main' || startsWith(github.ref_name, 'release/') }}
         run: python scripts/validate_supabase_runtime.py

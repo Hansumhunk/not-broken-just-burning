@@ -13,44 +13,68 @@
     sacred: Object.fromEntries(['who','what','when','where','why','how'].map((name) => [name, '[data-sacred="' + name + '"]']))
   };
 
-  function restorePendingDraft(key, controls) {
-    if (!window.NBJBAuth?.user?.id) return;
+  function restorePendingDraft(key, config, controls) {
+    const currentUser = window.NBJBAuth?.user;
+    if (!currentUser?.id) return;
+    let pending;
     try {
       const raw = sessionStorage.getItem(PENDING_KEY);
       if (!raw) return;
-      const pending = JSON.parse(raw);
-      if (!pending || !pending.createdAt || Date.now() - pending.createdAt > 30 * 60 * 1000) {
+      pending = JSON.parse(raw);
+      if (!pending?.createdAt || Date.now() - pending.createdAt > 30 * 60 * 1000) {
         sessionStorage.removeItem(PENDING_KEY);
         return;
       }
       if (pending.path !== location.pathname.split('/').pop() || pending.key !== key) return;
-      const fields = fieldSelectors[key] || {};
+      if (!hasContent(pending.payload)) {
+        sessionStorage.removeItem(PENDING_KEY);
+        return;
+      }
+
+      // The person checked the consent box and selected "Sign in to save".
+      // Finish that same explicit save after login; do not silently require
+      // a second Save click. The saved reflection remains device-local.
+      const alreadySaved = service.listEntries(config.tool).some((entry) =>
+        entry.createdAt >= pending.createdAt - 1000 &&
+        entry.title === pending.payload.title &&
+        entry.summary === pending.payload.summary
+      );
+      if (!alreadySaved) {
+        const result = service.recordToolEntry(config.tool, pending.payload);
+        if (!result.ok || !result.entry?.id || !service.listEntries(config.tool).some((entry) => entry.id === result.entry.id)) {
+          throw new Error('The saved-work entry could not be verified in local storage.');
+        }
+      }
+      sessionStorage.removeItem(PENDING_KEY);
+      const note = document.createElement('p');
+      note.className = 'member-history-restore-note';
+      note.setAttribute('role', 'status');
+      note.textContent = config.tool + ' was saved to My Work after sign-in. You can open your saved work now.';
+      controls.panel.insertBefore(note, controls.consent.parentElement);
+      controls.status.textContent = 'Saved to My Work on this device.';
+      return;
+    } catch (error) {
+      // On failure, keep the temporary draft so the user can retry saving it.
+      console.error('tool_draft_save_failed', error?.message || 'Unknown local storage error');
+      if (!pending || pending.path !== location.pathname.split('/').pop() || pending.key !== key) return;
       Object.entries(pending.payload?.data || {}).forEach(([name, value]) => {
-        const input = document.querySelector(fields[name]);
+        const input = document.querySelector(fieldSelectors[key]?.[name]);
         if (input && !input.value.trim()) input.value = String(value || '');
       });
       const meta = pending.payload?.meta || {};
       controls.panel.querySelectorAll('[data-member-theme="' + key + '"]').forEach((input) => {
         input.checked = Array.isArray(meta.themes) && meta.themes.includes(input.value);
       });
-      const metadataSelectors = {
+      for (const [name, selector] of Object.entries({
         context: '[data-member-meta-context="' + key + '"]',
         outcome: '[data-member-meta-outcome="' + key + '"]',
         helped: '[data-member-meta-helped="' + key + '"]',
         changed: '[data-member-meta-changed="' + key + '"]'
-      };
-      Object.entries(metadataSelectors).forEach(([name, selector]) => {
+      })) {
         const control = controls.panel.querySelector(selector);
         if (control) control.value = String(meta[name] || '');
-      });
-      sessionStorage.removeItem(PENDING_KEY);
-      const note = document.createElement('p');
-      note.className = 'member-history-restore-note';
-      note.setAttribute('role', 'status');
-      note.textContent = 'Your draft was restored after sign-in. Review it and select consent before Save to My Work. Nothing was saved automatically.';
-      controls.panel.insertBefore(note, controls.panel.querySelector('.member-history-meta'));
-    } catch (error) {
-      console.error('tool_draft_restore_failed', error);
+      }
+      controls.status.textContent = 'Automatic save could not finish. Your draft was restored; please check consent and try Save to My Work again.';
     }
   }
 
@@ -305,7 +329,7 @@
     heading.textContent = config.heading;
 
     const description = document.createElement('p');
-    description.textContent = config.description + (!window.NBJBAuth?.user?.id ? ' If you sign in now, your draft will be held only in this tab and restored for your approval afterward.' : '');
+    description.textContent = config.description + (!window.NBJBAuth?.user?.id ? ' To save, check consent and sign in. Your draft will be saved automatically on this device when you return.' : '');
 
     const metadata = buildMetadataFields(key);
 
@@ -324,7 +348,7 @@
     button.type = 'button';
     button.className = 'button button-primary';
     button.dataset.memberWorkButton = key;
-    button.textContent = window.NBJBAuth?.user?.id ? 'Save to My Work' : 'Sign in to save this work';
+    button.textContent = window.NBJBAuth?.user?.id ? 'Save to My Work' : 'Sign in & save to My Work';
     const workLink = document.createElement('a');
     workLink.className = 'button button-ghost';
     workLink.href = 'member-work.html';
@@ -336,7 +360,23 @@
     status.setAttribute('aria-live', 'polite');
     actions.append(button, workLink, status);
 
-    panel.append(eyebrow, heading, description, metadata, consentLabel, actions);
+    const optional = document.createElement('details');
+    optional.className = 'member-history-extra-context';
+    const summary = document.createElement('summary');
+    summary.textContent = 'Optional: add themes and review context';
+    optional.append(summary, metadata);
+    const sessionNote = document.createElement('p');
+    sessionNote.className = 'member-history-session-note';
+    sessionNote.textContent = window.NBJBAuth?.user?.id
+      ? 'Flamewalker account recognized. Saving stays on this device.'
+      : 'Guest mode. Tools remain free; an account is needed only for My Work.';
+    panel.append(eyebrow, heading, description, sessionNote, consentLabel, actions, optional);
+    window.NBJBAuth?.onChange?.(({ user }) => {
+      button.textContent = user?.id ? 'Save to My Work' : 'Sign in & save to My Work';
+      sessionNote.textContent = user?.id
+        ? 'Flamewalker account recognized. Saving stays on this device.'
+        : 'Guest mode. Tools remain free; an account is needed only for My Work.';
+    });
     root.appendChild(panel);
     return { button, consent, status, panel };
   }
@@ -344,7 +384,7 @@
   Object.entries(configs).forEach(([key, config]) => {
     const controls = buildPanel(key, config);
     if (!controls) return;
-    restorePendingDraft(key, controls);
+    restorePendingDraft(key, config, controls);
 
     controls.panel.querySelectorAll(`[data-member-theme="${key}"]`).forEach((checkbox) => {
       checkbox.addEventListener('change', () => {
@@ -356,7 +396,7 @@
       });
     });
 
-    controls.button.addEventListener('click', () => {
+    controls.button.addEventListener('click', async () => {
       if (!controls.consent.checked) {
         return flash(controls.status, 'Confirm that you want this reflection stored in My Work on this device.');
       }
@@ -369,10 +409,21 @@
       payload.meta = readMetadata(key, controls.panel);
       payload.tags = payload.meta.themes;
 
-      if (!window.NBJBAuth?.user?.id) {
+      // Re-read the authenticated session on click. A stale initial auth
+      // snapshot must not send an already signed-in member through login again.
+      let userId = window.NBJBAuth?.user?.id;
+      if (!userId && window.NBJBAuth?.refresh) {
         try {
-          // Never store an anonymous entry. Keep the draft in this tab with consent,
-          // then let the newly signed-in member review and save it deliberately.
+          const snapshot = await window.NBJBAuth.refresh();
+          userId = snapshot?.user?.id || '';
+        } catch (_) {
+          // No confirmed session; continue with the explicit sign-in handoff.
+        }
+      }
+      if (!userId) {
+        try {
+          // Never store under the anonymous key. Keep the explicitly consented
+          // draft only in this tab, then finish saving after sign-in.
           sessionStorage.setItem(PENDING_KEY, JSON.stringify({
             createdAt: Date.now(),
             path: location.pathname.split('/').pop(),
@@ -393,11 +444,15 @@
       }
 
       const result = service.recordToolEntry(config.tool, payload);
-      if (result.ok) {
+      const verified = result.ok && result.entry?.id &&
+        service.listEntries(config.tool).some((entry) => entry.id === result.entry.id);
+      if (verified) {
         controls.consent.checked = false;
         clearMetadata(key, controls.panel);
+        controls.status.textContent = config.tool + ' saved to My Work. Select Open My Work to verify it.';
+      } else {
+        controls.status.textContent = 'Unable to verify this save on this device. Copy your notes and try again.';
       }
-      flash(controls.status, result.ok ? `${config.tool} saved to My Work on this device.` : 'Your browser blocked local saved-work storage.');
     });
   });
 })();

@@ -12,9 +12,9 @@
     ['work', 'member-work.html', 'My Work'],
     ['progress', 'member-progress.html', 'Progress'],
     ['library', 'member-library.html', 'Library'],
-    ['watch', 'member-media.html', 'Watch'],
-    ['store', 'member-store.html', 'Store'],
-    ['community', 'member-community.html', 'Circle'],
+    ['watch', 'member-media.html', 'Watch · Soon'],
+    ['store', 'member-store.html', 'Membership'],
+    ['community', 'member-community.html', 'Circle · Soon'],
     ['profile', 'member-profile.html', 'Profile'],
     ['settings', 'member-settings.html', 'Settings']
   ];
@@ -48,6 +48,29 @@
       exit.href = 'index.html';
       exit.textContent = 'Exit to site';
       nav.appendChild(exit);
+
+      // Exit to site is not a logout. Keep account sign-out explicit and
+      // reachable from every signed-in member screen, including mobile.
+      const signOut = document.createElement('button');
+      signOut.type = 'button';
+      signOut.className = 'member-sign-out';
+      signOut.textContent = 'Sign Out';
+      signOut.setAttribute('aria-label', 'Sign out of Flamewalker');
+      signOut.addEventListener('click', async () => {
+        signOut.disabled = true;
+        signOut.textContent = 'Signing out…';
+        try {
+          if (typeof window.NBJBAuth?.signOut !== 'function') throw new Error('Account sign-out unavailable.');
+          const result = await window.NBJBAuth.signOut();
+          if (result?.error) throw result.error;
+          window.location.replace('member-auth.html');
+        } catch (error) {
+          signOut.disabled = false;
+          signOut.textContent = 'Sign Out';
+          status('Could not sign out. Please try again or open Account Access.');
+        }
+      });
+      nav.appendChild(signOut);
     });
   }
 

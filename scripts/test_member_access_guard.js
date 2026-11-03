@@ -157,3 +157,21 @@ test('successful logout clears the in-memory member identity', () => {
   assert.match(code, /const result = await client.auth.signOut\(\)/);
   assert.match(code, /if \(!result.error\) \{[\s\S]*currentUser = null;[\s\S]*emit\(\)/);
 });
+
+test('early-release navigation has explicit sign out and honest planned-feature labels', () => {
+  const script = read('js/member-platform.js');
+  assert.match(script, /signOut\.textContent = 'Sign Out'/);
+  assert.match(script, /window\.NBJBAuth\.signOut\(\)/);
+  assert.match(script, /window\.location\.replace\('member-auth.html'\)/);
+  assert.match(script, /'Circle · Soon'/);
+  assert.match(script, /'Watch · Soon'/);
+  const style = read('css/members.css');
+  assert.match(style, /\.member-subnav button\.member-sign-out/);
+  const library = read('member-library.html');
+  assert.match(library, /Video Lessons · Coming Soon/);
+  assert.match(library, /href="member-tools.html">Open the Toolbox/);
+  assert.doesNotMatch(library, /href="member-media.html">View paid video layer/);
+  const dashboard = read('members.html');
+  assert.match(dashboard, /Flamewalker Free Early Access Feedback/);
+  assert.match(dashboard, /Please do not send personal journal entries/);
+});

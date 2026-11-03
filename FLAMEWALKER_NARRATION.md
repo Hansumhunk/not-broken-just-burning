@@ -123,3 +123,11 @@ A replacement-only server path requires the private queue's `replace_existing=tr
 | `father-wound/section-3.mp3` | 1,279,791 | Ray voice |
 
 These are all private MPEG audio and the premium member audio endpoint still enforces authentication and paid/editorial-review eligibility. The archives are outside the user-visible `section-N.mp3` namespace. This was **not** an authorization to replace other sections or initiate batch generation, and the lesson remains unpublished in editorial review. The renderer may temporarily retain CDN or browser caches of the previous section 1/2 for up to the existing cache lifetime.
+
+## Batch continuation attempt — November 3, 2026 UTC
+
+- Founder explicitly approved generating the remaining 17 pages with existing Ray/Orca voice.
+- **Page 4** (`PART 2 — APPROVAL`) generated using connected HeyGen voice `Ray` (`engine=heygen_voice`, provider returned `orca`), 36.70 seconds, request ID `59ca1571fc5a4fe2b66e029d850c307c`. Private importer queued and successfully stored `father-wound/section-4.mp3`: **1,174,465 bytes, MIME `audio/mpeg`**, verified in database Storage inventory.
+- Attempt to generate **page 5** (`PART 3 — FAILURE`) returned HeyGen **HTTP 402 `insufficient_credit`**: 27 seconds of free generation left; request needed 37 seconds; allowance renews next month. **No page-5 clip created, no page-5 queue job, no automatic retries**. Per connected speech-tool requirements, do not attempt more HeyGen generation after an error without new founder permission.
+- At present, **4/20 pages** exist in private Storage (`section-1.mp3` through `section-4.mp3`). The remaining **16** start at section 5. The two founder originals remain archived in `originals-before-ray-2026-11-03/`.
+- Do not claim automated speech generation is complete: the existing connected MCP voice-generator requires individually authorized calls, and the current account's quota blocks continued production. Do not switch narrator/providers or initiate paid upgrades without founder approval.

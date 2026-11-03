@@ -96,8 +96,11 @@ Deno.serve(async (request) => {
     }
     const raw = new Uint8Array(await provider.arrayBuffer());
     if (!validAudio(raw, isWav)) {
-      await update(job.attempts + 1 >= 20 ? "failed" : "pending", "provider_not_mp3_yet");
-      return response({ state: "provider_not_ready" }, 202);
+      const mime = (provider.headers.get("content-type") || "unknown").slice(0,48).replace(/[^a-zA-Z0-9/;.=+ -]/g, "");
+      const head = [...raw.slice(0, 12)].map((n) => n.toString(16).padStart(2, "0")).join("");
+      const reason = "provider_format_mismatch:" + mime + ":" + raw.length + ":" + head;
+      await update(job.attempts + 1 >= 20 ? "failed" : "pending", reason);
+      return response({ state: "provider_not_ready", mime, bytes: raw.length, header: head }, 202);
     }
     const { error: uploadError } = await admin.storage.from(bucket).upload(path, raw, {
       contentType: isWav ? "audio/wav" : "audio/mpeg", cacheControl: "3600", upsert: false

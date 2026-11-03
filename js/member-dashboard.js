@@ -4,12 +4,12 @@
   if (!service) return;
 
   const toolRoutes = Object.freeze({
-    'The Forge': 'forge.html',
-    'Flame Check-In': 'check-in.html',
-    'Pattern Map': 'pattern-map.html',
-    'Boundary Builder': 'resources.html#boundary-builder',
-    'One Stone': 'resources.html#one-stone',
-    'Six Sacred Questions': 'six-sacred-questions.html?worksheet=2#six-question-tool',
+    'The Forge': 'member-workshop.html#forge-tool',
+    'Flame Check-In': 'member-workshop.html#checkin-tool',
+    'Pattern Map': 'member-workshop.html#pattern-tool',
+    'Boundary Builder': 'member-workshop.html#boundary-builder',
+    'One Stone': 'member-workshop.html#one-stone',
+    'Six Sacred Questions': 'member-workshop.html#six-question-tool',
     'Start Here': 'member-start-here.html',
     'Lesson Reflection': 'member-work.html'
   });

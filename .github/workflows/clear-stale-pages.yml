@@ -1,0 +1,23 @@
+name: Clear stale NBJB Pages deployment
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/clear-stale-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+
+jobs:
+  cancel-stale:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel only the stuck November 3 Pages deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/pages/deployments/0c39443e30494a0875300bb6a2fa249c808710d3/cancel"

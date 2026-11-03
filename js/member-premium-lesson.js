@@ -314,6 +314,31 @@
     node.dataset.state = failed ? 'error' : 'ok';
   }
 
+  // The reader never auto-archives reflections. Saving to My Work requires
+  // a deliberate button click and writes only to this browser's member store.
+  function saveReflectionToWork(text, context, resultNode) {
+    const body = String(text || '').trim();
+    if (!body) { resultNode.textContent = 'Write a reflection before saving.'; return; }
+    const service = window.NBJBMemberService;
+    if (!service?.recordToolEntry) { resultNode.textContent = 'My Work is unavailable on this device.'; return; }
+    const clipped = body.slice(0, 2400);
+    const saved = service.recordToolEntry('Lesson Reflection', {
+      title: (lesson?.title || 'Flamewalker+') + ' · ' + context,
+      summary: clipped,
+      tags: ['Flamewalker+', 'Lesson reflection'],
+      data: { lessonSlug: slug, section: current + 1 }
+    });
+    resultNode.textContent = saved.ok
+      ? 'Saved to My Work on this device.' + (clipped.length < body.length ? ' Only the first 2,400 characters were saved; use Copy for the full answer.' : ' You can find it from the Hub.')
+      : 'This device could not save the reflection. Use Copy to keep it privately.';
+  }
+  function reflectionAnswers() {
+    return Array.from(el('premium-exercise-fields').querySelectorAll('label')).map(label => {
+      const response = label.querySelector('textarea')?.value.trim() || '';
+      return { prompt: label.firstChild?.textContent?.trim() || 'Reflection', response };
+    });
+  }
+
   el('premium-chapter-select')?.addEventListener('change', ev => go(Number(ev.currentTarget.value)));
   el('premium-prev')?.addEventListener('click', () => go(current - 1));
   el('premium-next')?.addEventListener('click', () => go(current + 1));
@@ -325,6 +350,10 @@
       await navigator.clipboard.writeText(text);
       el('premium-pause-status').textContent = 'Copied. Paste it somewhere you control if you want to keep it.';
     } catch (_) { el('premium-pause-status').textContent = 'Copy blocked. Select and copy the note manually.'; }
+  });
+  el('premium-pause-save')?.addEventListener('click', () => {
+    saveReflectionToWork(el('premium-pause-note').value, String(steps[current]?.title || 'Section reflection'),
+      el('premium-pause-status'));
   });
   speechControls.play?.addEventListener('click', playSpeech);
   speechControls.pause?.addEventListener('click', () => {
@@ -360,15 +389,18 @@
   document.addEventListener('visibilitychange', () => { if (document.hidden && speech) stopSpeech('Audio paused because you left the page.'); });
   window.addEventListener('pagehide', () => { saveNote(); if (speech) stopSpeech(); });
   el('premium-copy')?.addEventListener('click', async () => {
-    const lines = Array.from(el('premium-exercise-fields').querySelectorAll('label')).map(label => {
-      const answer = label.querySelector('textarea')?.value.trim() || '(not answered)';
-      return (label.firstChild?.textContent?.trim() || 'Reflection') + '\n' + answer;
-    });
-    if (!lines.length) return exerciseStatus('No prompts are available.', true);
+    const answers = reflectionAnswers();
+    if (!answers.length) return exerciseStatus('No prompts are available.', true);
     try {
-      await navigator.clipboard.writeText(lines.join('\n\n'));
+      await navigator.clipboard.writeText(answers.map(x => x.prompt + '\n' + (x.response || '(not answered)')).join('\n\n'));
       exerciseStatus('Copied. Nothing was uploaded. Paste your answers somewhere private to keep them.');
     } catch (_) { exerciseStatus('Copy blocked. You can manually select and copy your answers.', true); }
+  });
+  el('premium-save-work')?.addEventListener('click', () => {
+    const answers = reflectionAnswers().filter(x => x.response);
+    if (!answers.length) return exerciseStatus('Write at least one answer before saving.', true);
+    const text = answers.map(x => x.prompt + '\n' + x.response).join('\n\n');
+    saveReflectionToWork(text, 'Guided reflection', el('premium-exercise-status'));
   });
   el('premium-exercise-form')?.addEventListener('reset', () => exerciseStatus('Answers cleared. Nothing was uploaded.'));
   el('premium-complete')?.addEventListener('click', () => {

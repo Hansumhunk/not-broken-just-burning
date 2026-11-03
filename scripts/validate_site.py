@@ -323,6 +323,7 @@ def main() -> int:
             "supabase/functions/premium-audio-ingest/index.ts",
             "supabase/migrations/20261103043000_nbjb_private_audio_ingest_queue.sql",
             "supabase/migrations/20261103053000_heygen_private_wav_support.sql",
+            "supabase/migrations/20261103070000_audio_ingest_opt_in_replace_with_backup.sql",
             "supabase/operations/nbjb-private-audio-ingest-retry.sql",
             "supabase/functions/check-live-stripe-prices/index.ts",
             "supabase/migrations/20260918010500_phase_two_member_foundation.sql",

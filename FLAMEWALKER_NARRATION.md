@@ -4,7 +4,7 @@
 
 The premium lesson reader supports a reusable recorded audio file **per section**, with native browser audio playback and speed adjustment. The old browser text-to-speech voice is clearly labelled **Basic device read-aloud** as an optional accessibility fallback.
 
-**The full Opening section of The Father Wound has been generated, but not uploaded to private storage yet.** The three founding lessons remain in editorial review. Do not advertise professional narration as already available.
+**Two Father Wound recordings have been uploaded to private storage:** `father-wound/section-1.mp3` and `father-wound/section-2.mp3`. These are editorial test recordings, not a complete narrated lesson. All three founding lessons remain in editorial review. Do not advertise professional narration as already generally available.
 
 ## Voice direction
 
@@ -18,7 +18,7 @@ Full Opening section voiceover (download and upload the complete MP3):
 
 https://www.aidocmaker.com/g0/audio?name=bb6e694156f5427ab1cc9bd77d792d78
 
-The recording currently lives on the provider, not in NBJB's private audio bucket. AI Doc Maker's pricing says Starter/free voiceovers require attribution for commercial use and Standard/paid provides a commercial license without attribution. The site includes an attribution field when a recording plays; verify account terms and keep attribution until a different license is confirmed. Save an approved downloadable MP3 outside the provider; generated files may not be retained indefinitely.
+The linked AI Doc Maker copy also lives on the provider; the first two approved test MP3s are already stored privately in NBJB's audio bucket. AI Doc Maker's pricing says Starter/free voiceovers require attribution for commercial use and Standard/paid provides a commercial license without attribution. The site includes an attribution field when a recording plays; verify account terms and keep attribution until a different license is confirmed. Save an approved downloadable MP3 outside the provider; generated files may not be retained indefinitely.
 
 ## Preparing and publishing recordings
 
@@ -67,3 +67,79 @@ Generate each finalized chapter once and reuse it for authorized plays. Hosting 
 - Do not put transcription or private reflections inside audio manifests.
 - The device speech fallback uses the reader's local browser voice and does not need third-party voice generation.
 - Narration quality and rights require review before a paid launch.
+
+## Optional fully automatic generation (draft integration, no provider spending by default)
+
+The same private editorial studio now has a **Generate narration directly from your lesson** panel. It is designed to eliminate manually creating, downloading, renaming and uploading individual audio pages. Its backend source and UI must be reviewed, tested and deployed before this capability should be described as live.
+
+- The server uses the original `flamewalker_premium_lessons.content.blocks` to derive the exact reading-page boundaries that the site reader uses. It does **not** accept lesson text from the browser.
+- Page `N` becomes a new private `<slug>/section-N.mp3` after server-side access checks. Existing files are skipped and cannot be overwritten. The uploaded Father Wound pages 1 and 2 are not regenerated.
+- Calls to ElevenLabs are **disabled** until two server-side Supabase Edge Function secrets are configured: `ELEVENLABS_API_KEY` and `NBJB_ELEVENLABS_VOICE_ID`. Neither may appear in the website, source code or browser. The user must separately authorize any provider plan or API billing. This integration does **not** invoke AI Doc Maker and will not automatically match its voice.
+- Once configured, sign in as the exact editorial reviewer and choose the lesson. Start with a one-page test (default page 3). Listen to it in the premium reader and approve the narrator before extending the range to the entire lesson.
+- A visible estimate uses the published **ElevenLabs Multilingual v2 $0.10/1,000 characters** reference rate, not a binding quote. Your subscription, included credits and any taxes can change the effective cost. The operator explicitly acknowledges provider charges for each selected range. No paid generation runs without that action.
+- A selected range runs **sequentially**, keeps the browser tab open, never auto-retries a paid request, allows a stop after the current page, and reports a partial result. If an error occurs, verify storage before restarting because provider charges can be incurred before a Storage error.
+- The selected voice must be one the NBJB operator is licensed to use commercially. Free-tier AI Doc Maker files may retain attribution obligations; ElevenLabs rights are governed by that separate subscription. No conversion of free-tier audio licensing is implied.
+- Deploy the updated `premium-audio-admin` Edge Function **after** code review; a GitHub Pages deployment alone does not update Supabase server code.
+
+### Validation before publishing
+
+1. Check the editorial-only gate with a non-editor account, which must receive `editorial_access_required`.
+2. Check the no-key setup: automatic generation must stay disabled and produce no provider charges.
+3. Set up a licensed voice and API account only with explicit operator approval, generate **one** new page, listen for fidelity and compare its spoken text to page 3.
+4. Refresh the private storage inventory; confirm pages 1 and 2 are unchanged and page 3 appears exactly once. Confirm paid/anonymous users cannot generate.
+5. Deliberately request a duplicate page; ensure it is rejected without another paid synthesis request. Test stop, expired session, upload/provider errors, and a full range only after the first recording is accepted.
+
+## Integration test status — 2026-11-03 UTC
+
+- Page 3 of The Father Wound was submitted to the connected AI Doc Maker voice generator in the approved deep voice. The tool returned a **queued provider page**: `https://www.aidocmaker.com/g0/audio?name=d6ae36d088c94c8fa83c894690efd4d3`.
+- The private Supabase ingestion worker was created and tested with a one-time database queue token. External GET of that URL returns **HTTP 200 text/html (AI Voice Generator page), not MP3 bytes**. The job is recorded as failed/blocked, and **the five-minute pg_cron retry job has been unscheduled** to prevent unnecessary requests.
+- Existing `father-wound/section-1.mp3` and `section-2.mp3` remain unchanged. No third MP3 is in private Storage. The unpublished premium lesson remains unchanged.
+- HeyGen's connected speech-only tool was inspected as a potential direct-audio source. Its public speech catalog suggested Starfish, but the free workspace's actual generation call returned HTTP 400: **'This workspace requires Orca for public voices. Select Orca or choose another voice.'** No HeyGen voice clip was produced, and no alternate engine request was retried.
+- PR #104 remains a draft, not an approved one-click pipeline. The proposed ElevenLabs integration requires a separate approved voice and private provider key. Do not describe automated narration or automatic provider import as complete.
+- **Next approval gate:** get authorization for one HeyGen Orca engine generation of Father Wound page 3, using a catalog voice, or connect an appropriate licensed TTS API. Verify that the resulting file URL directly serves audio bytes to Supabase before producing a large batch. Do not re-enable the paused retry job for the AI Doc Maker HTML landing page.
+
+## Verified Orca voice-to-private-storage milestone (November 3, 2026 UTC)
+
+**Successful test:** A connected HeyGen speech-only synthesis call with voice `Ray` (`2eca0d3dd5ec4a1ea6efa6194b19eb78`) and `engine: heygen_voice` (returned as Orca) rendered Father Wound **reading page 3**, `PART 1 — NAME WHAT WAS ACTUALLY THERE`, as an approximately 40-second audio clip. The delivery URL ended in `.wav` but its actual bytes had MPEG audio framing and `audio/mpeg` response type. The importer now validates magic bytes before selecting extension.
+
+The private import worker was deployed (version 4), pulled the provider's bytes and uploaded them to `nbjb-premium-audio/father-wound/section-3.mp3`. Storage inventory independently verifies **1,279,791 bytes** with `audio/mpeg` MIME. The job row is `saved`, with no error. Existing `section-1.mp3` and `section-2.mp3` remain untouched and retain their original sizes.
+
+**What is proven:** working connected voice-generation → direct provider audio retrieval → private Supabase upload for one real lesson page, without founder downloads/renaming/uploads. The existing member reader signs `.mp3` under member entitlements and thus needs no WAV change for this recording.
+
+**Still editorial:** The new Ray/Orca voice may sound different from the founder's two AI Doc Maker recordings. Founder should listen to page 3 from the player and approve the voice before generating the remaining pages, especially because future syntheses consume provider quota. The lesson is still in editorial review and has not been published or billed. Batch voice generation is not yet proven. The AI Doc Maker HTML import job remains disabled, and the aborted periodic retry schedule remains unscheduled.
+
+## Founder-approved narrator consistency — verified replacement of pages 1–2
+
+The founder approved using HeyGen public voice **Ray** (voice ID `2eca0d3dd5ec4a1ea6efa6194b19eb78`) and Orca / `engine: heygen_voice` consistently across the Father Wound lesson. New speech synthesis was requested once for each of the first two exact page narrations. The provider returned recorded durations of **54.15 seconds** (page 1) and **20.79 seconds** (page 2).
+
+A replacement-only server path requires the private queue's `replace_existing=true`, a strict `father-wound` + sections 1–2 allowlist, and an exact size check against the two originals before touching them. Server copies both originals into the existing *private* bucket under `father-wound/originals-before-ray-2026-11-03/`, verifies both backups, updates the original production paths, and independently verifies the new file sizes. The queue records show sections 1 and 2 **saved**, on the first attempt each. Direct storage inventory independently verifies:
+
+| Private object | Verified bytes | State |
+|---|---:|---|
+| `father-wound/originals-before-ray-2026-11-03/section-1.mp3` | 848,640 | original retained |
+| `father-wound/originals-before-ray-2026-11-03/section-2.mp3` | 366,720 | original retained |
+| `father-wound/section-1.mp3` | 1,732,858 | Ray voice |
+| `father-wound/section-2.mp3` | 665,391 | Ray voice |
+| `father-wound/section-3.mp3` | 1,279,791 | Ray voice |
+
+These are all private MPEG audio and the premium member audio endpoint still enforces authentication and paid/editorial-review eligibility. The archives are outside the user-visible `section-N.mp3` namespace. This was **not** an authorization to replace other sections or initiate batch generation, and the lesson remains unpublished in editorial review. The renderer may temporarily retain CDN or browser caches of the previous section 1/2 for up to the existing cache lifetime.
+
+## Batch continuation attempt — November 3, 2026 UTC
+
+- Founder explicitly approved generating the remaining 17 pages with existing Ray/Orca voice.
+- **Page 4** (`PART 2 — APPROVAL`) generated using connected HeyGen voice `Ray` (`engine=heygen_voice`, provider returned `orca`), 36.70 seconds, request ID `59ca1571fc5a4fe2b66e029d850c307c`. Private importer queued and successfully stored `father-wound/section-4.mp3`: **1,174,465 bytes, MIME `audio/mpeg`**, verified in database Storage inventory.
+- Attempt to generate **page 5** (`PART 3 — FAILURE`) returned HeyGen **HTTP 402 `insufficient_credit`**: 27 seconds of free generation left; request needed 37 seconds; allowance renews next month. **No page-5 clip created, no page-5 queue job, no automatic retries**. Per connected speech-tool requirements, do not attempt more HeyGen generation after an error without new founder permission.
+- At present, **4/20 pages** exist in private Storage (`section-1.mp3` through `section-4.mp3`). The remaining **16** start at section 5. The two founder originals remain archived in `originals-before-ray-2026-11-03/`.
+- Do not claim automated speech generation is complete: the existing connected MCP voice-generator requires individually authorized calls, and the current account's quota blocks continued production. Do not switch narrator/providers or initiate paid upgrades without founder approval.
+
+## Creator-plan continuation — November 3, 2026 UTC
+
+- Verified HeyGen account has the **Creator** plan (498 premium credits initially, reset December 3, 2026); founder already approved Ray/Orca voice and completing the remaining Father Wound sections.
+- Generated each section exactly once using connected HeyGen speech tool `create_speech_without_player`, same public voice ID `2eca0d3dd5ec4a1ea6efa6194b19eb78`, engine `heygen_voice` (returned `orca`). Enqueued each returned delivery URL into protected `nbjb_audio_ingest_jobs` and invoked `premium-audio-ingest` worker. All verified saved in private Supabase and no previous production assets overwritten.
+- Sections **5–8** successfully imported (bytes respectively: 1,177,809; 1,482,083; 1,263,908; 1,327,438).
+- Sections **9–12** successfully imported (bytes: 1,477,067; 901,955; 1,989,485; 1,976,111).
+- Section **13** (`THE FATHER IMPRINT MAP · continued 3`) successfully imported (425,482 bytes).
+- Sections **1–13 of 20** now have recorded narration. Sections **14–20** do not yet have private MP3s; before generating them, check actual storage inventory to avoid duplicating work.
+- Section **14** (`THE SMALLER DOOR`) generation invocation was **blocked by the connected runtime safety checks**, with no returned media URL/identifier. We stopped without retrying or generating sections 15–20. The connected HeyGen speech contract requires renewed user authorization before generating after an error/timeout. Founder-facing explanation requested permission to continue; **do not treat section 14 as synthesized or uploaded**.
+- Rechecked Creator allowance: **478 premium credits remaining**; this is not a quota issue.
+- The content remains in editorial review; do not publish automatically. Existing two original deep-voice recordings are archived privately in `father-wound/originals-before-ray-2026-11-03/`.

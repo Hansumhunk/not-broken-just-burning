@@ -42,6 +42,7 @@
     const requestId = ++audioRequestId;
     stopRecorded();
     recordedAudio.hidden = true;
+    el('premium-audio-credit').hidden = true;
     if (recordedSource) {
       recordedAudio.removeAttribute('src');
       recordedAudio.load();
@@ -68,6 +69,7 @@
       signedExpiresAt = Date.now() + Math.min(Number(data.expires_in) || 600, 600) * 1000;
       recordedAudio.load();
       recordedAudio.hidden = false;
+      el('premium-audio-credit').hidden = false;
       recordedAudio.playbackRate = Number(recordedSpeed?.value) || 1;
       recordedStatus.textContent = 'Natural recorded narration is ready. Press Play to listen at your own pace.';
     } catch (_) {

@@ -12,6 +12,68 @@
   const main = el('premium-lesson-content');
   const notice = el('premium-lesson-status-panel');
   const audioStatus = el('premium-audio-status');
+  const recordedAudio = el('premium-recorded-audio');
+  const recordedStatus = el('premium-recorded-status');
+  const recordedSpeed = el('premium-recorded-speed');
+  let recordedSource = '';
+  // Narration manifests must be delivered through the already-authenticated
+  // lesson API. Never put premium transcripts or private file locations here.
+  // Expected shape: content.audio_tracks = { "1": { "url": "https://..." } }.
+  // Section indexes are 1-based and align with the chapter selector.
+  function authorizedAudioUrl(value) {
+    const candidate = typeof value === 'string' ? value : value?.url;
+    if (typeof candidate !== 'string' || candidate.length > 4096) return '';
+    try {
+      const u = new URL(candidate, location.origin);
+      if (u.protocol !== 'https:') return '';
+      // Require same-origin or signed Supabase Storage. Third-party domains
+      // must never receive the user's private lesson-reading requests.
+      if (u.origin !== location.origin &&
+        !(u.hostname === 'plhbvtbvtxfzulsaxuim.supabase.co' &&
+          u.pathname.startsWith('/storage/v1/object/sign/'))) return '';
+      return u.href;
+    } catch (_) { return ''; }
+  }
+  function stopRecorded() {
+    if (!recordedAudio) return;
+    recordedAudio.pause();
+    recordedAudio.currentTime = 0;
+  }
+  function syncRecordedAudio() {
+    stopRecorded();
+    const tracks = lesson?.content?.audio_tracks;
+    // No media should appear unless a secured recording was explicitly
+    // attached to this exact authored section.
+    const source = tracks && typeof tracks === 'object'
+      ? authorizedAudioUrl(tracks[String(current + 1)]) : '';
+    if (source) {
+      if (recordedSource !== source) {
+        recordedAudio.src = source;
+        recordedSource = source;
+        recordedAudio.load();
+      }
+      recordedAudio.hidden = false;
+      recordedAudio.playbackRate = Number(recordedSpeed?.value) || 1;
+      recordedStatus.textContent = 'Recorded narration is available. Use Play or Pause to listen at your pace.';
+    } else {
+      recordedAudio.hidden = true;
+      if (recordedSource) {
+        recordedAudio.removeAttribute('src');
+        recordedAudio.load();
+        recordedSource = '';
+      }
+      recordedStatus.textContent = 'Natural narration for this section is being prepared. You can read it now, or expand Basic device read-aloud if you prefer.';
+    }
+  }
+  recordedSpeed?.addEventListener('change', () => {
+    recordedAudio.playbackRate = Number(recordedSpeed.value) || 1;
+  });
+  recordedAudio?.addEventListener('error', () => {
+    recordedStatus.textContent = 'The recording could not load. Try refreshing this lesson to renew its secure audio link.';
+  });
+  recordedAudio?.addEventListener('ended', () => {
+    recordedStatus.textContent = 'Section finished. Choose Next section when you are ready.';
+  });
   const speech = ('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) ? window.speechSynthesis : null;
   const speechControls = { play: el('premium-speak'), pause: el('premium-pause'), stop: el('premium-stop') };
   const notes = new Map(); // Short-term memory only. Never automatically store or upload written answers.
@@ -180,6 +242,7 @@
   }
   function playSpeech() {
     if (!speech || !steps.length) return;
+    stopRecorded();
     stopSpeech();
     queue = speechChunks(sectionSpeechText());
     if (!queue.length) { audioStatus.textContent = 'No readable text in this section.'; return; }
@@ -207,7 +270,8 @@
   }
   function render({ focus = false } = {}) {
     if (!steps.length) return;
-    stopSpeech('Press Listen to hear this section.');
+    stopSpeech('Basic device read-aloud is ready if you choose it.');
+    syncRecordedAudio();
     const step = steps[current];
     const final = Boolean(step.exercise);
     el('premium-current-step').hidden = final;
@@ -305,8 +369,8 @@
       : Number.isInteger(stored) && stored >= 0 && stored < steps.length ? stored : 0;
     render();
     audioStatus.textContent = speech
-      ? 'Choose Listen to hear this section in your browser’s voice. Voice quality depends on your device.'
-      : 'This browser does not support read aloud. You can still read every section.';
+      ? 'Basic device read-aloud is optional. Its voice quality varies by browser and device.'
+      : 'Your browser does not support basic device read-aloud. Reading remains available.';
   }
   function exerciseStatus(text, failed = false) {
     const node = el('premium-exercise-status');
@@ -387,7 +451,7 @@
   });
   applyFont();
   document.addEventListener('visibilitychange', () => { if (document.hidden && speech) stopSpeech('Audio paused because you left the page.'); });
-  window.addEventListener('pagehide', () => { saveNote(); if (speech) stopSpeech(); });
+  window.addEventListener('pagehide', () => { saveNote(); stopRecorded(); if (speech) stopSpeech(); });
   el('premium-copy')?.addEventListener('click', async () => {
     const answers = reflectionAnswers();
     if (!answers.length) return exerciseStatus('No prompts are available.', true);

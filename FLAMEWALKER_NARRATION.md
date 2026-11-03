@@ -107,3 +107,19 @@ The private import worker was deployed (version 4), pulled the provider's bytes 
 **What is proven:** working connected voice-generation → direct provider audio retrieval → private Supabase upload for one real lesson page, without founder downloads/renaming/uploads. The existing member reader signs `.mp3` under member entitlements and thus needs no WAV change for this recording.
 
 **Still editorial:** The new Ray/Orca voice may sound different from the founder's two AI Doc Maker recordings. Founder should listen to page 3 from the player and approve the voice before generating the remaining pages, especially because future syntheses consume provider quota. The lesson is still in editorial review and has not been published or billed. Batch voice generation is not yet proven. The AI Doc Maker HTML import job remains disabled, and the aborted periodic retry schedule remains unscheduled.
+
+## Founder-approved narrator consistency — verified replacement of pages 1–2
+
+The founder approved using HeyGen public voice **Ray** (voice ID `2eca0d3dd5ec4a1ea6efa6194b19eb78`) and Orca / `engine: heygen_voice` consistently across the Father Wound lesson. New speech synthesis was requested once for each of the first two exact page narrations. The provider returned recorded durations of **54.15 seconds** (page 1) and **20.79 seconds** (page 2).
+
+A replacement-only server path requires the private queue's `replace_existing=true`, a strict `father-wound` + sections 1–2 allowlist, and an exact size check against the two originals before touching them. Server copies both originals into the existing *private* bucket under `father-wound/originals-before-ray-2026-11-03/`, verifies both backups, updates the original production paths, and independently verifies the new file sizes. The queue records show sections 1 and 2 **saved**, on the first attempt each. Direct storage inventory independently verifies:
+
+| Private object | Verified bytes | State |
+|---|---:|---|
+| `father-wound/originals-before-ray-2026-11-03/section-1.mp3` | 848,640 | original retained |
+| `father-wound/originals-before-ray-2026-11-03/section-2.mp3` | 366,720 | original retained |
+| `father-wound/section-1.mp3` | 1,732,858 | Ray voice |
+| `father-wound/section-2.mp3` | 665,391 | Ray voice |
+| `father-wound/section-3.mp3` | 1,279,791 | Ray voice |
+
+These are all private MPEG audio and the premium member audio endpoint still enforces authentication and paid/editorial-review eligibility. The archives are outside the user-visible `section-N.mp3` namespace. This was **not** an authorization to replace other sections or initiate batch generation, and the lesson remains unpublished in editorial review. The renderer may temporarily retain CDN or browser caches of the previous section 1/2 for up to the existing cache lifetime.

@@ -404,3 +404,9 @@
   .member-lesson-side > :first-child { grid-column: auto; }
   .member-lesson-flow span { text-align: left; }
 }
+
+/* Public tool archive: keep the actual Save action visible before optional metadata. */
+.member-history-extra-context { margin-top: 18px; }
+.member-history-extra-context > summary { color: var(--ember-pale); font-weight: 700; cursor: pointer; padding: 9px 0; }
+.member-history-session-note, .member-history-setup-note, .member-history-preview-note { margin: 12px 0; font-size: .91rem; color: var(--muted); }
+.member-history-restore-note { padding: 12px 14px; border: 1px solid var(--line-hot); border-radius: 12px; margin: 14px 0; }

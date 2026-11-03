@@ -4,7 +4,7 @@
 
 The premium lesson reader supports a reusable recorded audio file **per section**, with native browser audio playback and speed adjustment. The old browser text-to-speech voice is clearly labelled **Basic device read-aloud** as an optional accessibility fallback.
 
-**The full Opening section of The Father Wound has been generated, but not uploaded to private storage yet.** The three founding lessons remain in editorial review. Do not advertise professional narration as already available.
+**Two Father Wound recordings have been uploaded to private storage:** `father-wound/section-1.mp3` and `father-wound/section-2.mp3`. These are editorial test recordings, not a complete narrated lesson. All three founding lessons remain in editorial review. Do not advertise professional narration as already generally available.
 
 ## Voice direction
 
@@ -18,7 +18,7 @@ Full Opening section voiceover (download and upload the complete MP3):
 
 https://www.aidocmaker.com/g0/audio?name=bb6e694156f5427ab1cc9bd77d792d78
 
-The recording currently lives on the provider, not in NBJB's private audio bucket. AI Doc Maker's pricing says Starter/free voiceovers require attribution for commercial use and Standard/paid provides a commercial license without attribution. The site includes an attribution field when a recording plays; verify account terms and keep attribution until a different license is confirmed. Save an approved downloadable MP3 outside the provider; generated files may not be retained indefinitely.
+The linked AI Doc Maker copy also lives on the provider; the first two approved test MP3s are already stored privately in NBJB's audio bucket. AI Doc Maker's pricing says Starter/free voiceovers require attribution for commercial use and Standard/paid provides a commercial license without attribution. The site includes an attribution field when a recording plays; verify account terms and keep attribution until a different license is confirmed. Save an approved downloadable MP3 outside the provider; generated files may not be retained indefinitely.
 
 ## Preparing and publishing recordings
 
@@ -67,3 +67,24 @@ Generate each finalized chapter once and reuse it for authorized plays. Hosting 
 - Do not put transcription or private reflections inside audio manifests.
 - The device speech fallback uses the reader's local browser voice and does not need third-party voice generation.
 - Narration quality and rights require review before a paid launch.
+
+## Optional fully automatic generation (draft integration, no provider spending by default)
+
+The same private editorial studio now has a **Generate narration directly from your lesson** panel. It is designed to eliminate manually creating, downloading, renaming and uploading individual audio pages. Its backend source and UI must be reviewed, tested and deployed before this capability should be described as live.
+
+- The server uses the original `flamewalker_premium_lessons.content.blocks` to derive the exact reading-page boundaries that the site reader uses. It does **not** accept lesson text from the browser.
+- Page `N` becomes a new private `<slug>/section-N.mp3` after server-side access checks. Existing files are skipped and cannot be overwritten. The uploaded Father Wound pages 1 and 2 are not regenerated.
+- Calls to ElevenLabs are **disabled** until two server-side Supabase Edge Function secrets are configured: `ELEVENLABS_API_KEY` and `NBJB_ELEVENLABS_VOICE_ID`. Neither may appear in the website, source code or browser. The user must separately authorize any provider plan or API billing. This integration does **not** invoke AI Doc Maker and will not automatically match its voice.
+- Once configured, sign in as the exact editorial reviewer and choose the lesson. Start with a one-page test (default page 3). Listen to it in the premium reader and approve the narrator before extending the range to the entire lesson.
+- A visible estimate uses the published **ElevenLabs Multilingual v2 $0.10/1,000 characters** reference rate, not a binding quote. Your subscription, included credits and any taxes can change the effective cost. The operator explicitly acknowledges provider charges for each selected range. No paid generation runs without that action.
+- A selected range runs **sequentially**, keeps the browser tab open, never auto-retries a paid request, allows a stop after the current page, and reports a partial result. If an error occurs, verify storage before restarting because provider charges can be incurred before a Storage error.
+- The selected voice must be one the NBJB operator is licensed to use commercially. Free-tier AI Doc Maker files may retain attribution obligations; ElevenLabs rights are governed by that separate subscription. No conversion of free-tier audio licensing is implied.
+- Deploy the updated `premium-audio-admin` Edge Function **after** code review; a GitHub Pages deployment alone does not update Supabase server code.
+
+### Validation before publishing
+
+1. Check the editorial-only gate with a non-editor account, which must receive `editorial_access_required`.
+2. Check the no-key setup: automatic generation must stay disabled and produce no provider charges.
+3. Set up a licensed voice and API account only with explicit operator approval, generate **one** new page, listen for fidelity and compare its spoken text to page 3.
+4. Refresh the private storage inventory; confirm pages 1 and 2 are unchanged and page 3 appears exactly once. Confirm paid/anonymous users cannot generate.
+5. Deliberately request a duplicate page; ensure it is rejected without another paid synthesis request. Test stop, expired session, upload/provider errors, and a full range only after the first recording is accepted.

@@ -16,18 +16,17 @@
   const recordedStatus = el('premium-recorded-status');
   const recordedSpeed = el('premium-recorded-speed');
   let recordedSource = '';
-  // Narration manifests must be delivered through the already-authenticated
-  // lesson API. Never put premium transcripts or private file locations here.
-  // Expected shape: content.audio_tracks = { "1": { "url": "https://..." } }.
-  // Section indexes are 1-based and align with the chapter selector.
+  let audioRequestId = 0;
+  let signedExpiresAt = 0;
+  // Every recording is requested from the authenticated lesson API at the
+  // moment this chapter is shown. The server checks membership before signing
+  // a short-lived URL for our private Supabase Storage bucket.
   function authorizedAudioUrl(value) {
     const candidate = typeof value === 'string' ? value : value?.url;
     if (typeof candidate !== 'string' || candidate.length > 4096) return '';
     try {
       const u = new URL(candidate, location.origin);
       if (u.protocol !== 'https:') return '';
-      // Require same-origin or signed Supabase Storage. Third-party domains
-      // must never receive the user's private lesson-reading requests.
       if (u.origin !== location.origin &&
         !(u.hostname === 'plhbvtbvtxfzulsaxuim.supabase.co' &&
           u.pathname.startsWith('/storage/v1/object/sign/'))) return '';
@@ -39,37 +38,55 @@
     recordedAudio.pause();
     recordedAudio.currentTime = 0;
   }
-  function syncRecordedAudio() {
+  async function syncRecordedAudio() {
+    const requestId = ++audioRequestId;
     stopRecorded();
-    const tracks = lesson?.content?.audio_tracks;
-    // No media should appear unless a secured recording was explicitly
-    // attached to this exact authored section.
-    const source = tracks && typeof tracks === 'object'
-      ? authorizedAudioUrl(tracks[String(current + 1)]) : '';
-    if (source) {
-      if (recordedSource !== source) {
-        recordedAudio.src = source;
-        recordedSource = source;
-        recordedAudio.load();
+    recordedAudio.hidden = true;
+    if (recordedSource) {
+      recordedAudio.removeAttribute('src');
+      recordedAudio.load();
+      recordedSource = '';
+      signedExpiresAt = 0;
+    }
+    if (!lesson || !auth?.client) {
+      recordedStatus.textContent = 'Recording unavailable right now. Reading remains available.';
+      return;
+    }
+    recordedStatus.textContent = 'Checking for a finished recording of this section…';
+    try {
+      const { data, error } = await auth.client.functions.invoke('read-flamewalker-lesson', {
+        body: { action: 'audio', slug, section: current + 1 }
+      });
+      if (requestId !== audioRequestId) return; // Member changed chapters while fetching.
+      const source = !error && data?.available ? authorizedAudioUrl(data.url) : '';
+      if (!source) {
+        recordedStatus.textContent = 'Natural narration for this section is being prepared. You can read it now, or expand Basic device read-aloud if you prefer.';
+        return;
       }
+      recordedAudio.src = source;
+      recordedSource = source;
+      signedExpiresAt = Date.now() + Math.min(Number(data.expires_in) || 600, 600) * 1000;
+      recordedAudio.load();
       recordedAudio.hidden = false;
       recordedAudio.playbackRate = Number(recordedSpeed?.value) || 1;
-      recordedStatus.textContent = 'Recorded narration is available. Use Play or Pause to listen at your pace.';
-    } else {
-      recordedAudio.hidden = true;
-      if (recordedSource) {
-        recordedAudio.removeAttribute('src');
-        recordedAudio.load();
-        recordedSource = '';
-      }
-      recordedStatus.textContent = 'Natural narration for this section is being prepared. You can read it now, or expand Basic device read-aloud if you prefer.';
+      recordedStatus.textContent = 'Natural recorded narration is ready. Press Play to listen at your own pace.';
+    } catch (_) {
+      if (requestId === audioRequestId)
+        recordedStatus.textContent = 'Could not check the recording. You can continue reading this section.';
     }
   }
   recordedSpeed?.addEventListener('change', () => {
     recordedAudio.playbackRate = Number(recordedSpeed.value) || 1;
   });
+  recordedAudio?.addEventListener('play', () => {
+    if (signedExpiresAt && Date.now() > signedExpiresAt - 15000) {
+      recordedAudio.pause();
+      recordedStatus.textContent = 'Refreshing the secure audio link. Use Play again after it appears.';
+      syncRecordedAudio();
+    }
+  });
   recordedAudio?.addEventListener('error', () => {
-    recordedStatus.textContent = 'The recording could not load. Try refreshing this lesson to renew its secure audio link.';
+    recordedStatus.textContent = 'The recording could not load. Try reselecting this section to renew its secure link.';
   });
   recordedAudio?.addEventListener('ended', () => {
     recordedStatus.textContent = 'Section finished. Choose Next section when you are ready.';

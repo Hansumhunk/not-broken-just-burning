@@ -174,6 +174,12 @@
   // Use the author's actual chapter headings, never arbitrary page-number slices.
   const major = /^(?:OPENING|LESSON PURPOSE|PART \d+\b|THE (?:FATHER IMPRINT MAP|MATERNAL IMPRINT MAP|SILENCE INVENTORY|SMALLER DOOR)|NEXT HONEST ACTION|THE NEXT HONEST ACTION|OPTIONAL SPIRITUAL LENS|INTEGRATION|FINAL REFLECTION|PRIVACY NOTE|PROFESSIONAL(?:\s|\/|$))/i;
   function sectionize(blocks) {
+    // The Mother Wound includes short reflective subheadings. Give those
+    // blocks more breathing room before a new page is started, so readers
+    // do not land on near-empty continuation screens. Father Wound's section
+    // indices are fixed because its recorded narration already uses them.
+    const minSplitLength = slug === 'mother-wound' ? 1200 : 900;
+    const blockLimit = slug === 'mother-wound' ? 22 : 11;
     const output = [];
     let name = 'Opening';
     let part = [];
@@ -195,7 +201,7 @@
         continue;
       }
       // Keep roughly 1–3 minutes of prose per view. Break at an existing text block.
-      if (part.length && length > 900 && (length + text.length > 1800 || part.length >= 11)) flush();
+      if (part.length && length > minSplitLength && (length + text.length > 1800 || part.length >= blockLimit)) flush();
       part.push({ kind, text });
       length += text.length;
     }

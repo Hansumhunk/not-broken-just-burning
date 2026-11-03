@@ -88,3 +88,12 @@ The same private editorial studio now has a **Generate narration directly from y
 3. Set up a licensed voice and API account only with explicit operator approval, generate **one** new page, listen for fidelity and compare its spoken text to page 3.
 4. Refresh the private storage inventory; confirm pages 1 and 2 are unchanged and page 3 appears exactly once. Confirm paid/anonymous users cannot generate.
 5. Deliberately request a duplicate page; ensure it is rejected without another paid synthesis request. Test stop, expired session, upload/provider errors, and a full range only after the first recording is accepted.
+
+## Integration test status — 2026-11-03 UTC
+
+- Page 3 of The Father Wound was submitted to the connected AI Doc Maker voice generator in the approved deep voice. The tool returned a **queued provider page**: `https://www.aidocmaker.com/g0/audio?name=d6ae36d088c94c8fa83c894690efd4d3`.
+- The private Supabase ingestion worker was created and tested with a one-time database queue token. External GET of that URL returns **HTTP 200 text/html (AI Voice Generator page), not MP3 bytes**. The job is recorded as failed/blocked, and **the five-minute pg_cron retry job has been unscheduled** to prevent unnecessary requests.
+- Existing `father-wound/section-1.mp3` and `section-2.mp3` remain unchanged. No third MP3 is in private Storage. The unpublished premium lesson remains unchanged.
+- HeyGen's connected speech-only tool was inspected as a potential direct-audio source. Its public speech catalog suggested Starfish, but the free workspace's actual generation call returned HTTP 400: **'This workspace requires Orca for public voices. Select Orca or choose another voice.'** No HeyGen voice clip was produced, and no alternate engine request was retried.
+- PR #104 remains a draft, not an approved one-click pipeline. The proposed ElevenLabs integration requires a separate approved voice and private provider key. Do not describe automated narration or automatic provider import as complete.
+- **Next approval gate:** get authorization for one HeyGen Orca engine generation of Father Wound page 3, using a catalog voice, or connect an appropriate licensed TTS API. Verify that the resulting file URL directly serves audio bytes to Supabase before producing a large batch. Do not re-enable the paused retry job for the AI Doc Maker HTML landing page.

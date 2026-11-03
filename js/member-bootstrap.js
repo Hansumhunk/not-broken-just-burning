@@ -39,7 +39,10 @@
       }
     }
 
+    // Keep lesson navigation discoverable throughout the signed-in Hub.
+    await loadScript("js/learning-continuity.js");
     await loadScript("js/member-platform.js");
+    window.NBJBLearningContinuity?.render?.();
 
     const page = document.body.dataset.memberPage || "";
     for (const src of pageScripts[page] || []) {

@@ -1,0 +1,75 @@
+/* Small, always-findable return route, rather than another oversized dashboard card. */
+.member-shell .learning-return-band {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+  gap: 8px 18px;
+  border-top: 1px solid var(--line);
+  padding: 10px 3px 0;
+}
+.learning-return-eyebrow {
+  flex: 0 0 auto;
+  color: var(--ember-bright, #ff934e);
+  font-size: .7rem;
+  font-weight: 850;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.learning-return-link {
+  flex: 1 1 250px;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 10px;
+  padding: 4px 0;
+  color: var(--text, #fff);
+  text-decoration: none;
+  font-size: .84rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.learning-return-link strong { flex: 0 1 auto; font-size: .89rem; }
+.learning-return-link > span:not(.learning-return-arrow) {
+  color: var(--muted);
+  font-size: .79rem;
+  min-width: 0;
+}
+.learning-return-link:hover strong,
+.learning-return-link:focus-visible strong { color: var(--ember-bright, #ff934e); text-decoration: underline; }
+.learning-return-arrow { margin-left: auto; color: var(--ember-bright, #ff934e); font-size: 1.15rem; }
+.premium-practice-bridge {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: center;
+  margin-top: 15px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255,122,45,.22);
+  border-radius: 12px;
+  background: rgba(255,122,45,.04);
+}
+.premium-practice-bridge p { flex: 1 1 100%; margin: 0; color: var(--muted); font-size: .86rem; }
+.premium-practice-bridge a {
+  color: var(--text);
+  text-decoration: none;
+  border: 1px solid var(--line);
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: .83rem;
+  font-weight: 750;
+  background: rgba(255,255,255,.03);
+}
+.premium-practice-bridge a:hover,.premium-practice-bridge a:focus-visible {
+  color: var(--ember-bright, #ff934e);
+  border-color: var(--ember-bright, #ff934e);
+}
+@media (max-width: 720px) {
+  .member-shell .learning-return-band { gap: 3px; align-items: stretch; }
+  .learning-return-eyebrow { flex: 1 1 100%; }
+  .learning-return-link { flex-basis: 100%; align-items: flex-start; flex-wrap: wrap; }
+  .learning-return-link strong { flex: 1 1 100%; }
+  .learning-return-link > span:not(.learning-return-arrow) { flex: 1 1 80%; }
+  .learning-return-arrow { align-self: center; }
+}

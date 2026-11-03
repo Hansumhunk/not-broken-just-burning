@@ -10,7 +10,8 @@
     'Boundary Builder': 'resources.html#boundary-builder',
     'One Stone': 'resources.html#one-stone',
     'Six Sacred Questions': 'six-sacred-questions.html?worksheet=2#six-question-tool',
-    'Start Here': 'member-start-here.html'
+    'Start Here': 'member-start-here.html',
+    'Lesson Reflection': 'member-work.html'
   });
 
   const pathRoutes = Object.freeze({

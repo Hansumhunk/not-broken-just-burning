@@ -240,6 +240,21 @@
     el('premium-save-status').textContent = saved
       ? 'Reading position saved on this device. Your reflection answers are not saved or uploaded.'
       : 'Reading position cannot be saved in this browser. Reflection answers are not uploaded.';
+    // Keep one lightweight return-to-lesson bookmark visible across the Hub.
+    // This stores only the lesson name and chapter index, not reflection text.
+    window.NBJBLearningContinuity?.record?.({
+      slug,
+      title: String(lesson?.title || 'Flamewalker+ lesson').slice(0, 140),
+      section: current + 1,
+      total: count,
+      sectionTitle: String(final ? 'Guided reflection' : label(step)).slice(0, 160)
+    });
+    // Keep the address consistent with the visible section, so browser
+    // bookmarks and links from the Hub return to exactly this part.
+    const currentUrl = new URL(location.href);
+    currentUrl.searchParams.set('lesson', slug);
+    currentUrl.searchParams.set('section', String(current + 1));
+    if (currentUrl.href !== location.href) history.replaceState(history.state, '', currentUrl.href);
     if (focus) {
       const target = final ? el('premium-exercise-title') : el('premium-step-title');
       target.setAttribute('tabindex', '-1');
@@ -280,7 +295,14 @@
       : 'Published material · Available only with server-authorized Flamewalker+ access.';
     buildSelector();
     const stored = Number(storageRead(positionKey));
-    current = Number.isInteger(stored) && stored >= 0 && stored < steps.length ? stored : 0;
+    const requestedSection = new URLSearchParams(location.search).get('section');
+    const direct = requestedSection && /^[1-9][0-9]{0,2}$/.test(requestedSection)
+      ? Number(requestedSection) - 1 : null;
+    // A return link can name a section directly. The lesson body is still
+    // fetched through server-side membership authorization first.
+    current = direct !== null && direct >= 0 && direct < steps.length
+      ? direct
+      : Number.isInteger(stored) && stored >= 0 && stored < steps.length ? stored : 0;
     render();
     audioStatus.textContent = speech
       ? 'Choose Listen to hear this section in your browser’s voice. Voice quality depends on your device.'
@@ -290,6 +312,31 @@
     const node = el('premium-exercise-status');
     node.textContent = text;
     node.dataset.state = failed ? 'error' : 'ok';
+  }
+
+  // The reader never auto-archives reflections. Saving to My Work requires
+  // a deliberate button click and writes only to this browser's member store.
+  function saveReflectionToWork(text, context, resultNode) {
+    const body = String(text || '').trim();
+    if (!body) { resultNode.textContent = 'Write a reflection before saving.'; return; }
+    const service = window.NBJBMemberService;
+    if (!service?.recordToolEntry) { resultNode.textContent = 'My Work is unavailable on this device.'; return; }
+    const clipped = body.slice(0, 2400);
+    const saved = service.recordToolEntry('Lesson Reflection', {
+      title: (lesson?.title || 'Flamewalker+') + ' · ' + context,
+      summary: clipped,
+      tags: ['Flamewalker+', 'Lesson reflection'],
+      data: { lessonSlug: slug, section: current + 1 }
+    });
+    resultNode.textContent = saved.ok
+      ? 'Saved to My Work on this device.' + (clipped.length < body.length ? ' Only the first 2,400 characters were saved; use Copy for the full answer.' : ' You can find it from the Hub.')
+      : 'This device could not save the reflection. Use Copy to keep it privately.';
+  }
+  function reflectionAnswers() {
+    return Array.from(el('premium-exercise-fields').querySelectorAll('label')).map(label => {
+      const response = label.querySelector('textarea')?.value.trim() || '';
+      return { prompt: label.firstChild?.textContent?.trim() || 'Reflection', response };
+    });
   }
 
   el('premium-chapter-select')?.addEventListener('change', ev => go(Number(ev.currentTarget.value)));
@@ -303,6 +350,10 @@
       await navigator.clipboard.writeText(text);
       el('premium-pause-status').textContent = 'Copied. Paste it somewhere you control if you want to keep it.';
     } catch (_) { el('premium-pause-status').textContent = 'Copy blocked. Select and copy the note manually.'; }
+  });
+  el('premium-pause-save')?.addEventListener('click', () => {
+    saveReflectionToWork(el('premium-pause-note').value, String(steps[current]?.title || 'Section reflection'),
+      el('premium-pause-status'));
   });
   speechControls.play?.addEventListener('click', playSpeech);
   speechControls.pause?.addEventListener('click', () => {
@@ -338,15 +389,18 @@
   document.addEventListener('visibilitychange', () => { if (document.hidden && speech) stopSpeech('Audio paused because you left the page.'); });
   window.addEventListener('pagehide', () => { saveNote(); if (speech) stopSpeech(); });
   el('premium-copy')?.addEventListener('click', async () => {
-    const lines = Array.from(el('premium-exercise-fields').querySelectorAll('label')).map(label => {
-      const answer = label.querySelector('textarea')?.value.trim() || '(not answered)';
-      return (label.firstChild?.textContent?.trim() || 'Reflection') + '\n' + answer;
-    });
-    if (!lines.length) return exerciseStatus('No prompts are available.', true);
+    const answers = reflectionAnswers();
+    if (!answers.length) return exerciseStatus('No prompts are available.', true);
     try {
-      await navigator.clipboard.writeText(lines.join('\n\n'));
+      await navigator.clipboard.writeText(answers.map(x => x.prompt + '\n' + (x.response || '(not answered)')).join('\n\n'));
       exerciseStatus('Copied. Nothing was uploaded. Paste your answers somewhere private to keep them.');
     } catch (_) { exerciseStatus('Copy blocked. You can manually select and copy your answers.', true); }
+  });
+  el('premium-save-work')?.addEventListener('click', () => {
+    const answers = reflectionAnswers().filter(x => x.response);
+    if (!answers.length) return exerciseStatus('Write at least one answer before saving.', true);
+    const text = answers.map(x => x.prompt + '\n' + x.response).join('\n\n');
+    saveReflectionToWork(text, 'Guided reflection', el('premium-exercise-status'));
   });
   el('premium-exercise-form')?.addEventListener('reset', () => exerciseStatus('Answers cleared. Nothing was uploaded.'));
   el('premium-complete')?.addEventListener('click', () => {

@@ -317,6 +317,7 @@ def main() -> int:
             "js/nbjb-auth.js",
             "js/nbjb-config.js",
             "js/tool-member-history.js",
+            "js/tool-member-bootstrap.js",
             "FLAMEWALKER_ACCESS.md",
             "supabase/functions/read-flamewalker-lesson/index.ts",
             "supabase/functions/premium-audio-admin/index.ts",
@@ -355,6 +356,23 @@ def main() -> int:
                 "main production target contains unapproved member/backend artifacts: "
                 + ", ".join(unexpected)
             )
+
+        # Public reflection tools must actually wire their explicit member-save module.
+        # Keep the tools usable by guests while retaining user-scoped storage.
+        public_tool_files = (
+            "forge.html", "check-in.html", "pattern-map.html",
+            "resources.html", "six-sacred-questions.html"
+        )
+        for tool_path in public_tool_files:
+            tool_text = (ROOT / tool_path).read_text(encoding="utf-8")
+            if 'js/nbjb-auth.js' not in tool_text or 'js/tool-member-bootstrap.js' not in tool_text:
+                errors.append(f"{tool_path}: public tool member-save wiring is missing.")
+        tool_bootstrap_text = (ROOT / "js" / "tool-member-bootstrap.js").read_text(encoding="utf-8")
+        if "auth.ready" not in tool_bootstrap_text or "tool-member-history.js" not in tool_bootstrap_text:
+            errors.append("js/tool-member-bootstrap.js: wait for auth before loading local member save.")
+        save_module = (ROOT / "js" / "tool-member-history.js").read_text(encoding="utf-8")
+        if "NBJBAuth?.user?.id" not in save_module or "recordToolEntry" not in save_module:
+            errors.append("js/tool-member-history.js: authenticated explicit-save control is incomplete.")
 
         # The unlisted editorial preview is approved, but unpublished lesson
         # bodies must only be returned from the authenticated server to the

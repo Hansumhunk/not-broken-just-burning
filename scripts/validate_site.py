@@ -399,6 +399,23 @@ def main() -> int:
         if "NBJBAuth?.user?.id" not in save_module or "recordToolEntry" not in save_module:
             errors.append("js/tool-member-history.js: explicit authenticated save control is incomplete.")
 
+        # No authenticated page may paint member content until current auth resolves.
+        # This includes browser back/forward cache restoration after logout.
+        guarded_pages = sorted(
+            [path for path in ROOT.glob("member*.html") if path.name != "member-auth.html"]
+            + [ROOT / "members.html"]
+        )
+        for path in guarded_pages:
+            content = path.read_text(encoding="utf-8")
+            if 'id="nbjb-member-access-gate"' not in content or 'data-member-access="granted"' not in content:
+                errors.append(f"{path.name}: missing fail-closed pre-auth member page gate.")
+            if 'src="js/member-bootstrap.js"' not in content:
+                errors.append(f"{path.name}: member access bootstrap is missing.")
+        bootstrap_text = (ROOT / "js" / "member-bootstrap.js").read_text(encoding="utf-8")
+        for required in ('"pagehide"', '"pageshow"', 'hideMemberPage()', 'verifiedUser()', 'memberAccess = "granted"'):
+            if required not in bootstrap_text:
+                errors.append("js/member-bootstrap.js: missing session or back-cache guard " + required)
+
         # The unlisted editorial preview is approved, but unpublished lesson
         # bodies must only be returned from the authenticated server to the
         # nominated QA user. This is not a public paid-membership launch.

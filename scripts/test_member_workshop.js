@@ -23,7 +23,7 @@ test('member workshop has all six real forms and no direct guest archive', () =>
   const bootstrap = read('js/member-bootstrap.js');
   assert.match(bootstrap, /if \(!user\)/);
   assert.ok(bootstrap.includes('workshop: ["js/tool-member-history.js", "js/member-workshop.js"]'));
-  assert.ok(bootstrap.indexOf('await loadScript("js/member-service.js")') < bootstrap.indexOf('const page = document.body.dataset.memberPage'));
+  assert.ok(bootstrap.indexOf('await loadScript("js/member-service.js")') < bootstrap.indexOf('const page = body.dataset.memberPage'));
 });
 
 test('public pages contain no working inputs or member archive bootstrap', () => {
@@ -151,6 +151,7 @@ function simulateMemberBootstrap({ initialUser = null, restoredUser = null, refr
     hash: '#forge-tool',
     replace(url) { redirects.push(url); }
   };
+  window.addEventListener = () => {};
   vm.runInNewContext(read('js/member-bootstrap.js'), { window, document, location, console });
   return { loaded, redirects, refreshCalls: () => refreshCalls };
 }
@@ -169,10 +170,10 @@ test('member bootstrap rechecks local session before redirecting an existing mem
   assert.ok(env.loaded.includes('js/member-workshop.js'));
 });
 
-test('member bootstrap keeps signed-in users without any unnecessary refresh or redirect', async () => {
+test('member bootstrap explicitly verifies an existing signed-in session', async () => {
   const env = simulateMemberBootstrap({ initialUser: 'present-member' });
   await settleBootstrap();
-  assert.equal(env.refreshCalls(), 0);
+  assert.equal(env.refreshCalls(), 1);
   assert.deepEqual(env.redirects, []);
 });
 

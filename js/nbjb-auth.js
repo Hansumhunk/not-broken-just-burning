@@ -40,7 +40,16 @@
     return client.auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/member-auth.html?mode=recovery' });
   }
   async function updatePassword(password) { return client.auth.updateUser({ password }); }
-  async function signOut() { return client.auth.signOut(); }
+  async function signOut() {
+    const result = await client.auth.signOut();
+    if (!result.error) {
+      // Clear the in-memory identity immediately as well as the Supabase session.
+      currentSession = null;
+      currentUser = null;
+      emit();
+    }
+    return result;
+  }
   function onChange(fn) { listeners.add(fn); fn({ user: currentUser, session: currentSession }); return () => listeners.delete(fn); }
   client.auth.onAuthStateChange((_event, session) => { currentSession = session || null; currentUser = session?.user || null; emit(); markReady(); });
   window.NBJBAuth = { client, ready, refresh, signUp, signIn, sendMagicLink, sendRecovery, updatePassword, signOut, onChange, get user(){return currentUser;}, get session(){return currentSession;} };

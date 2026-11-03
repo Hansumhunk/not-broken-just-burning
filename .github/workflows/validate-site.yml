@@ -23,6 +23,7 @@ on:
       - 'scripts/validate_site.py'
       - 'scripts/test_member_save_flow.js'
       - 'scripts/test_member_workshop.js'
+      - 'scripts/test_member_access_guard.js'
       - 'scripts/validate_supabase_runtime.py'
       - '.github/workflows/validate-site.yml'
       - '.github/workflows/clear-stale-pages.yml'
@@ -40,6 +41,7 @@ on:
       - 'scripts/validate_site.py'
       - 'scripts/test_member_save_flow.js'
       - 'scripts/test_member_workshop.js'
+      - 'scripts/test_member_access_guard.js'
       - 'scripts/validate_supabase_runtime.py'
       - '.github/workflows/validate-site.yml'
       - '.github/workflows/clear-stale-pages.yml'
@@ -63,6 +65,8 @@ jobs:
         run: node --test scripts/test_member_save_flow.js
       - name: Verify signed-in Toolbox routing and visibility
         run: node --test scripts/test_member_workshop.js
+      - name: Test signed-out member access and browser Back prevention
+        run: node --test scripts/test_member_access_guard.js
       - name: Smoke-test live Flamewalker Supabase Auth
         if: ${{ github.base_ref == 'main' || github.ref_name == 'main' || startsWith(github.ref_name, 'release/') }}
         run: python scripts/validate_supabase_runtime.py

@@ -23,45 +23,99 @@
 <nav class="site-nav" id="site-nav" aria-label="Primary navigation"><a href="path.html">The Path</a><a href="forge.html">The Forge</a><a href="fire.html">The Fire</a><a href="movement.html">The Movement</a><a href="resources.html">Resources</a><a class="nav-join" href="join.html">Join</a></nav>
 </header>
 <main id="main-content">
-<section class="page-hero section-shell member-page-head reveal">
-<p class="eyebrow">Internal editorial preview · Flamewalker+ · Module 1</p>
-<h1>The Wounded Boy.<br><span>Inherited Manhood.</span></h1>
-<p class="hero-lead">Explore the rules you learned before you could choose them. Keep what strengthens you, reforge what needs a better form, and retire what no longer deserves authority. This written track will expand as new lessons are reviewed and released.</p>
+<section class="section-shell premium-compact-hero">
+  <p class="eyebrow">Flamewalker+ · The Wounded Boy · Guided Learning</p>
+  <h1>Learn a little. <span>Practice what matters.</span></h1>
+  <p>One chapter at a time. Read it, listen to it, or return to it later. You decide the pace.</p>
 </section>
 <section class="member-shell" aria-label="Member platform navigation">
-<div class="member-shell-copy"><strong>Flamewalker Hub</strong><span>Current access: <strong data-member-tier-label>Flamewalker</strong></span></div>
-<nav class="member-subnav"><a data-member-nav="dashboard" href="members.html">Dashboard</a><a data-member-nav="path" href="member-path.html">My Path</a><a data-member-nav="tools" href="member-tools.html">Tools</a><a class="active" data-member-nav="library" href="member-library.html">Library</a><a data-member-nav="profile" href="member-profile.html">Profile</a><a data-member-nav="settings" href="member-settings.html">Settings</a><a class="member-exit" href="index.html">Exit to site</a></nav>
+ <div class="member-shell-copy"><strong>Flamewalker Hub</strong><span>Current access: <strong data-member-tier-label>Flamewalker</strong></span></div>
+ <nav class="member-subnav"><a data-member-nav="dashboard" href="members.html">Dashboard</a><a data-member-nav="path" href="member-path.html">My Path</a><a data-member-nav="tools" href="member-tools.html">Tools</a><a class="active" data-member-nav="library" href="member-library.html">Library</a><a data-member-nav="profile" href="member-profile.html">Profile</a><a data-member-nav="settings" href="member-settings.html">Settings</a><a class="member-exit" href="index.html">Exit to site</a></nav>
 </section>
-<section class="section-shell member-panel premium-track-intro">
-<p class="eyebrow">Editorial review · Not yet published</p>
-<h2>A real lesson. One useful action.</h2>
-<p>The lesson library is built in release batches, not advertised as a finished course. These drafts can be read only by the nominated internal test account until the founder approves publication. Other members receive only approved, published content. Video companions will be identified separately when they actually exist.</p>
-<ol class="premium-track-nav" aria-label="Lesson selection">
-<li><a href="member-premium-lesson.html?lesson=father-wound" data-premium-lesson-link="father-wound"><span>01</span> The Father Wound <small data-premium-progress="father-wound"></small></a></li>
-<li><a href="member-premium-lesson.html?lesson=mother-wound" data-premium-lesson-link="mother-wound"><span>02</span> The Mother Wound <small data-premium-progress="mother-wound"></small></a></li>
-<li><a href="member-premium-lesson.html?lesson=learned-silence" data-premium-lesson-link="learned-silence"><span>03</span> The Boy Who Learned to Stay Quiet <small data-premium-progress="learned-silence"></small></a></li>
-</ol>
+<section class="section-shell premium-learning-shell" aria-label="Flamewalker+ guided lesson player">
+ <div class="premium-learning-meta">
+  <details class="premium-choose-lesson">
+   <summary>Change lesson <span aria-hidden="true">⌄</span></summary>
+   <ol class="premium-track-nav" aria-label="Lesson selection">
+    <li><a href="member-premium-lesson.html?lesson=father-wound" data-premium-lesson-link="father-wound"><span>01</span> The Father Wound <small data-premium-progress="father-wound"></small></a></li>
+    <li><a href="member-premium-lesson.html?lesson=mother-wound" data-premium-lesson-link="mother-wound"><span>02</span> The Mother Wound <small data-premium-progress="mother-wound"></small></a></li>
+    <li><a href="member-premium-lesson.html?lesson=learned-silence" data-premium-lesson-link="learned-silence"><span>03</span> The Boy Who Learned to Stay Quiet <small data-premium-progress="learned-silence"></small></a></li>
+   </ol>
+  </details>
+  <p class="premium-editorial-note">Editorial preview: unpublished lessons are available only to the approved reviewer. Paid members see published content.</p>
+ </div>
+ <div class="premium-reader-panel">
+  <div id="premium-lesson-status-panel" class="premium-access-notice" role="status" aria-live="polite">
+   <p class="eyebrow">Member access</p>
+   <h2 id="premium-lesson-title">Checking lesson access…</h2>
+   <p id="premium-lesson-status">A signed-in account and server-verified access are required.</p>
+   <a class="button button-ghost" href="member-store.html">Membership options</a>
+  </div>
+  <article id="premium-lesson-content" class="premium-reader" hidden>
+   <header class="premium-reader-header">
+    <p id="premium-lesson-sequence" class="eyebrow"></p>
+    <h2 id="premium-reader-heading">Your lesson</h2>
+    <p id="premium-reader-intro" class="premium-reader-summary"></p>
+   </header>
+   <div class="premium-reader-progress">
+    <div class="premium-reader-progress-copy">
+      <strong id="premium-step-count">Part 1</strong>
+      <span id="premium-estimate">A few minutes</span>
+    </div>
+    <div id="premium-progressbar" class="premium-progressbar" role="progressbar" aria-label="Reading position" aria-valuemin="1" aria-valuemax="1" aria-valuenow="1"><span id="premium-progress-fill"></span></div>
+    <p class="premium-save-status" id="premium-save-status">Your reading position is saved on this device. Reflection answers are not.</p>
+   </div>
+   <div class="premium-player-toolbar" aria-label="Reading and listening options">
+     <label class="premium-jump-label" for="premium-chapter-select">Go to part
+       <select id="premium-chapter-select" aria-label="Jump to lesson section"></select>
+     </label>
+     <div class="premium-voice-tools" aria-label="Read aloud controls">
+       <button type="button" class="premium-control" id="premium-speak" aria-label="Listen to this part">▶ Listen</button>
+       <button type="button" class="premium-control" id="premium-pause" disabled>Pause</button>
+       <button type="button" class="premium-control" id="premium-stop" disabled>Stop</button>
+       <label for="premium-speed">Speed <select id="premium-speed"><option value="0.85">0.85×</option><option value="1" selected>1×</option><option value="1.15">1.15×</option><option value="1.3">1.3×</option></select></label>
+     </div>
+     <div class="premium-text-tools" aria-label="Text size controls">
+       <span>Text</span>
+       <button type="button" class="premium-control" id="premium-font-less" aria-label="Decrease text size">A−</button>
+       <button type="button" class="premium-control" id="premium-font-more" aria-label="Increase text size">A+</button>
+     </div>
+   </div>
+   <p id="premium-audio-status" class="premium-audio-status" role="status" aria-live="polite">Listen uses a voice available in your browser or device. Playback stays under your control.</p>
+   <section class="premium-current-step" id="premium-current-step" aria-labelledby="premium-step-title" tabindex="-1">
+    <p id="premium-step-kicker" class="eyebrow">Your current section</p>
+    <h2 id="premium-step-title">Loading section…</h2>
+    <div class="premium-lesson-body" id="premium-reader-body"></div>
+    <details class="premium-pause-reflection" id="premium-pause-reflection">
+     <summary>Pause and reflect <small>Optional · one thought is enough</small></summary>
+     <label for="premium-pause-note">What stood out, or what would you do differently after reading this part?</label>
+     <textarea id="premium-pause-note" rows="3" maxlength="2500" autocomplete="off" placeholder="A sentence is enough. Nothing is uploaded."></textarea>
+     <div class="premium-pause-actions"><button type="button" class="button button-ghost" id="premium-pause-copy">Copy this note</button><span id="premium-pause-status" role="status" aria-live="polite"></span></div>
+    </details>
+   </section>
+   <section class="premium-final-reflection" id="premium-exercise" hidden aria-labelledby="premium-exercise-title">
+     <p class="eyebrow">Guided reflection · Optional</p>
+     <h2 id="premium-exercise-title">Apply the lesson</h2>
+     <p class="premium-privacy-copy"><strong>Your privacy:</strong> These answers are not uploaded or automatically saved. They stay in memory while this page is open. Copy them before closing if you want to keep them.</p>
+     <form id="premium-exercise-form" class="premium-exercise-form">
+       <div id="premium-exercise-fields"></div>
+       <div class="premium-reflection-actions">
+         <button class="button button-ghost" type="button" id="premium-copy">Copy My Answers</button>
+         <button class="button button-ghost" type="reset">Clear Answers</button>
+         <button class="button button-primary" type="button" id="premium-complete">Mark Lesson Practiced</button>
+       </div>
+       <p id="premium-exercise-status" role="status" aria-live="polite"></p>
+     </form>
+   </section>
+   <nav class="premium-step-nav" aria-label="Section navigation">
+     <button type="button" class="button button-ghost" id="premium-prev" disabled>← Previous</button>
+     <span id="premium-step-position" aria-live="polite"></span>
+     <button type="button" class="button button-primary" id="premium-next">Next section →</button>
+   </nav>
+   <p class="premium-reader-safety">There is no deadline. Take breaks, return later, or stop. These are self-guided educational lessons, not therapy or clinical treatment. <a href="support.html">Support &amp; Safety</a></p>
+  </article>
+ </div>
 </section>
-<section class="section-shell premium-lesson-layout">
-<div>
-<article class="member-panel premium-lesson-status" aria-live="polite"><p class="eyebrow">Member access</p><h2 id="premium-lesson-title">Checking lesson access…</h2><p id="premium-lesson-status" role="status">A valid signed-in session and a server-verified entitlement are required to read premium lessons.</p><a class="button button-ghost" href="member-store.html">Review Membership</a></article>
-<article class="member-panel" id="premium-lesson-content" hidden>
-<p class="eyebrow" id="premium-lesson-sequence"></p><h2 id="premium-reader-heading"></h2><p id="premium-reader-intro"></p><div class="premium-lesson-body" id="premium-reader-body"></div>
-</article>
-<article class="member-panel" id="premium-exercise" hidden>
-<p class="eyebrow">Reflection · Optional</p><h2 id="premium-exercise-title"></h2>
-<div class="member-privacy-note"><strong>Privacy:</strong> Exercise answers stay in these fields until you clear them or leave the page. They are not uploaded or automatically saved. Do not enter sensitive material on a shared device.</div>
-<form id="premium-exercise-form" class="premium-exercise-form">
-<div id="premium-exercise-fields"></div>
-<div class="member-actions"><button class="button button-ghost" type="button" id="premium-copy">Copy My Answers</button><button class="button button-ghost" type="reset">Clear Answers</button><button class="button button-primary" type="button" id="premium-complete">Mark Lesson Practiced</button></div>
-<p id="premium-exercise-status" class="member-status-line" role="status" aria-live="polite"></p>
-</form></article>
-</div>
-<aside class="premium-lesson-aside">
-<article class="member-dashboard-card"><p class="eyebrow">One practice at a time</p><h3>Keep. Reforge. Retire.</h3><p>The point is not to blame your childhood forever. It is to decide which inherited rules you choose to carry as an adult.</p></article>
-<article class="member-dashboard-card"><p class="eyebrow">A smaller door</p><h3>You can stop after one sentence.</h3><p>If a full exercise is too much today, step away. You do not owe the platform a personal confession or a dramatic confrontation.</p></article>
-<article class="member-dashboard-card"><p class="eyebrow">Scope and safety</p><h3>Self-guided education.</h3><p>These lessons do not provide therapy, diagnosis, legal advice, or crisis response. Use professional or emergency help where appropriate.</p><a class="text-link" href="support.html">Support &amp; Safety →</a></article>
-</aside></section>
 </main>
 <footer class="site-footer section-shell"><div><strong>NOT BROKEN JUST BURNING</strong><p>Keep the steel. Drop the rust.</p></div><div class="footer-meta"><p>Flamewalker+ developing written-learning track.</p><p class="footer-links"><a href="privacy.html">Privacy &amp; Data Use</a> · <a href="contact.html">Contact</a></p></div></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>

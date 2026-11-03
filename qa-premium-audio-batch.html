@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="description" content="Private NBJB editorial batch narration uploader.">
+<meta name="theme-color" content="#09090b">
+<title>Batch Narration Studio | NBJB Editorial</title>
+<link rel="canonical" href="https://notbrokenjustburning.com/qa-premium-audio-batch.html">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/brand.css">
+<link rel="stylesheet" href="css/experience.css">
+<style>
+.studio{max-width:1100px;margin:2.8rem auto 6rem;padding:0 1rem}
+.studio h1{font-size:clamp(2rem,5vw,3.2rem);line-height:1.15}
+.studio h1 span{color:var(--ember-bright,#ff894a)}
+.studio p{line-height:1.6}
+.studio-panel{padding:clamp(1rem,3vw,2rem);border:1px solid rgba(255,122,45,.22);border-radius:18px;background:rgba(16,16,19,.94);margin:1rem 0}
+.studio-note{color:var(--muted,#bbb);font-size:.89rem}
+.studio-stat{color:#ffb486;font-weight:750}
+.studio-grid{display:grid;gap:14px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.studio-field{display:grid;gap:7px;min-width:0;font-weight:750;font-size:.9rem}
+.studio-field select,.studio-field input[type="number"],.studio-field input[type="file"]{width:100%;min-height:46px;padding:10px 12px;background:#121215;border:1px solid rgba(255,255,255,.22);border-radius:10px;color:#fff;font:inherit;box-sizing:border-box}
+.studio-field input[type="file"]{padding:14px}
+.studio button{cursor:pointer}
+.studio button:disabled{cursor:not-allowed;opacity:.4}
+.studio-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:16px 0}
+.studio-status{padding:12px 14px;background:rgba(255,122,45,.08);border-left:3px solid #ff853f;border-radius:8px;margin:12px 0;line-height:1.6}
+.studio-status[data-error="true"]{border-left-color:#ef7777}
+.studio-confirm{display:flex;align-items:start;gap:12px;max-width:80ch;line-height:1.5;margin:16px 0}
+.studio-confirm input{min-width:20px;min-height:20px;accent-color:#ff853f;margin-top:2px}
+.studio-table-wrapper{overflow:auto;border:1px solid rgba(255,255,255,.13);border-radius:14px}
+.studio-table{width:100%;border-collapse:collapse;font-size:.9rem}
+.studio-table th,.studio-table td{border-bottom:1px solid rgba(255,255,255,.10);padding:14px 12px;text-align:left;vertical-align:top;line-height:1.5}
+.studio-table th{color:var(--muted);font-size:.8rem}
+.studio-table tbody tr:last-child td{border-bottom:none}
+.studio-table audio{display:block;width:min(290px,80vw);margin-top:10px}
+.studio-table select{font-size:.85rem;color:#fff;background:#151518;border:1px solid rgba(255,255,255,.25);padding:9px;border-radius:9px;min-width:185px;max-width:350px}
+.studio-table strong{display:block;max-width:28ch;overflow-wrap:anywhere}
+.studio-table small{display:block;color:var(--muted);margin-top:4px;max-width:36ch}
+.studio-pill{font-size:.78rem;border:1px solid rgba(255,255,255,.2);padding:4px 7px;border-radius:8px;display:inline-block}
+.studio-pill.ok{color:#a6e8b3;border-color:rgba(111,224,144,.5)}
+.studio-pill.warning{color:#ffbf87;border-color:rgba(255,133,54,.5)}
+.studio-danger{color:#ffabab}
+.studio-hidden,[hidden]{display:none!important}
+.studio-inventory{display:flex;gap:8px;flex-wrap:wrap;padding:0;list-style:none}
+.studio-inventory li{padding:7px 10px;border:1px solid rgba(111,224,144,.38);background:rgba(111,224,144,.06);border-radius:8px;font-size:.84rem}
+.studio-sequence{color:#ffae79}
+.studio-progress{width:100%;height:10px;accent-color:#f88339}
+.studio-steps{padding-left:1.4rem;line-height:1.75}
+@media(max-width:760px){.studio-grid{grid-template-columns:1fr}.studio-table th,.studio-table td{padding:10px 8px}.studio-table audio{width:210px}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<div class="ember-field" aria-hidden="true"></div>
+<header class="site-header"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span><span class="brand-name">Not Broken <span>Just Burning</span></span></a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation"><span></span><span></span><span></span></button><nav class="site-nav" id="site-nav" aria-label="Primary navigation"><a href="members.html">Member Hub</a><a href="member-library.html">Library</a><a href="index.html">Exit to site</a></nav></header>
+<main id="main-content" class="studio">
+<section class="studio-panel">
+<p class="eyebrow">Private Editorial Studio · Not Published</p>
+<h1>Batch audio.<br><span>One upload, many pages.</span></h1>
+<p>Select your downloaded MP3 files together, map them to the correct lesson pages, listen to short previews, and upload the verified group into private NBJB storage. No renaming, no jumping back and forth through Supabase folders.</p>
+<p class="studio-note"><strong>Access:</strong> Only the approved editorial reviewer may authorize uploads. File data is sent from your browser directly to private Supabase Storage. No changes to lesson publication or public billing.</p>
+</section>
+<section class="studio-panel" aria-label="Editorial account authorization">
+<h2>1. Editorial authorization</h2>
+<p id="studio-account">Checking your sign-in…</p>
+<p id="studio-auth-status" role="status" class="studio-status">Connecting to the private upload service…</p>
+<a href="member-auth.html?next=qa-premium-audio-batch.html" class="button button-ghost">Switch or sign in to your editorial account</a>
+</section>
+<section class="studio-panel" id="studio-workspace" hidden>
+<h2>2. Choose a lesson and your MP3 files</h2>
+<div class="studio-grid">
+ <label class="studio-field" for="studio-lesson">Lesson <select id="studio-lesson" aria-label="Choose lesson for batch"></select></label>
+ <label class="studio-field" for="studio-start">First page for automatic numbering <input id="studio-start" type="number" min="1" step="1" value="3"></label>
+ <label class="studio-field" for="studio-files">Select multiple MP3s <input type="file" id="studio-files" accept=".mp3,audio/mpeg" multiple></label>
+</div>
+<p class="studio-note">Choose audio files in their intended order. If the filenames are generic, use <strong>Assign consecutive pages</strong>, then review every row. You can change any page using its selector before uploading.</p>
+<div class="studio-actions">
+<button class="button button-ghost" type="button" id="studio-assign" disabled>Assign consecutive pages</button>
+<button class="button button-ghost" type="button" id="studio-refresh">Refresh uploaded pages</button>
+</div>
+<p id="studio-lesson-details" class="studio-note">Choose a lesson to load its original chapter titles and storage inventory.</p>
+<h3>Already uploaded</h3>
+<ul class="studio-inventory" id="studio-uploaded" aria-label="Current private recordings"><li>Checking…</li></ul>
+</section>
+<section class="studio-panel" id="studio-batch" hidden aria-label="Review and upload batch">
+<h2>3. Review the page-to-file mapping</h2>
+<p class="studio-note">Each preview plays the local MP3 selected from your computer. Compare it with the expected heading and first words. The tool refuses duplicate page numbers or uploads that would overwrite an existing recording.</p>
+<div class="studio-table-wrapper">
+<table class="studio-table">
+<thead><tr><th scope="col">Selected MP3 / listen</th><th scope="col">Destination page</th><th scope="col">Upload status</th></tr></thead>
+<tbody id="studio-rows"></tbody>
+</table>
+</div>
+<label class="studio-confirm"><input type="checkbox" id="studio-confirm"><span>I've checked the mapping between each selected MP3 and its intended page. I understand uploads won't overwrite existing recordings.</span></label>
+<div class="studio-actions">
+<button class="button button-primary" type="button" id="studio-upload" disabled>Upload verified batch</button>
+<a class="button button-ghost" href="member-premium-lesson.html?lesson=father-wound">Test narration in the lesson player</a>
+</div>
+<progress class="studio-progress" id="studio-progress" max="100" value="0" aria-label="Batch upload progress" hidden></progress>
+<p role="status" aria-live="polite" id="studio-upload-status" class="studio-status">Review your mappings before uploading.</p>
+</section>
+<section class="studio-panel">
+<h2>How this saves time</h2>
+<ol class="studio-steps">
+<li>Download several finished MP3s into one folder on your computer.</li>
+<li>Select those files together using <strong>Choose Files</strong>.</li>
+<li>Use <strong>Assign consecutive pages</strong> for a sequential batch, then spot-check the previews and titles.</li>
+<li>Click <strong>Upload verified batch</strong> once. The tool sends the files directly to our private bucket and reports the results.</li>
+</ol>
+<p class="studio-note">The narration provider currently gives us separate download links. This tool removes the repetitive renaming and uploading; it doesn't yet make AI Doc Maker export a ZIP of recordings. Professional audio rights and final editorial review are still required before public release.</p>
+</section>
+</main>
+<footer class="site-footer section-shell"><div><strong>NOT BROKEN JUST BURNING</strong><p>Private editorial administration only.</p></div><div class="footer-meta"><p><a href="privacy.html">Privacy &amp; Data Use</a></p></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
+<script src="js/nbjb-config.js"></script>
+<script src="js/nbjb-auth.js"></script>
+<script src="js/main.js"></script>
+<script src="js/qa-premium-audio-batch.js?v=1"></script>
+</body></html>

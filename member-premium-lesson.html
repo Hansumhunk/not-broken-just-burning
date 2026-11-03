@@ -90,17 +90,19 @@
      <summary>Pause and reflect <small>Optional · one thought is enough</small></summary>
      <label for="premium-pause-note">What stood out, or what would you do differently after reading this part?</label>
      <textarea id="premium-pause-note" rows="3" maxlength="2500" autocomplete="off" placeholder="A sentence is enough. Nothing is uploaded."></textarea>
-     <div class="premium-pause-actions"><button type="button" class="button button-ghost" id="premium-pause-copy">Copy this note</button><span id="premium-pause-status" role="status" aria-live="polite"></span></div>
+     <div class="premium-pause-actions"><button type="button" class="button button-ghost" id="premium-pause-copy">Copy this note</button>
+       <button type="button" class="button button-ghost" id="premium-pause-save">Save to My Work</button><span id="premium-pause-status" role="status" aria-live="polite"></span></div>
     </details>
    </section>
    <section class="premium-final-reflection" id="premium-exercise" hidden aria-labelledby="premium-exercise-title">
      <p class="eyebrow">Guided reflection · Optional</p>
      <h2 id="premium-exercise-title">Apply the lesson</h2>
-     <p class="premium-privacy-copy"><strong>Your privacy:</strong> These answers are not uploaded or automatically saved. They stay in memory while this page is open. Copy them before closing if you want to keep them.</p>
+     <p class="premium-privacy-copy"><strong>Your privacy:</strong> These answers are not uploaded or automatically saved. They stay in memory while this page is open. You can explicitly Save to My Work on this device, or copy them before leaving.</p>
      <form id="premium-exercise-form" class="premium-exercise-form">
        <div id="premium-exercise-fields"></div>
        <div class="premium-reflection-actions">
          <button class="button button-ghost" type="button" id="premium-copy">Copy My Answers</button>
+         <button class="button button-ghost" type="button" id="premium-save-work">Save to My Work</button>
          <button class="button button-ghost" type="reset">Clear Answers</button>
          <button class="button button-primary" type="button" id="premium-complete">Mark Lesson Practiced</button>
        </div>

@@ -2,6 +2,58 @@
   const service = window.NBJBMemberService;
   if (!service) return;
 
+  // A one-tab, explicitly requested draft handoff; never put private text in URLs.
+  const PENDING_KEY = 'nbjb.pending-tool-save.v1';
+  const fieldSelectors = {
+    forge: { thought: '#forge-thought', know: '[data-forge="know"]', assume: '[data-forge="assume"]', support: '[data-forge="support"]', challenge: '[data-forge="challenge"]', pattern: '[data-forge="pattern"]', compassion: '[data-forge="compassion"]', rewrite: '#forge-rewrite' },
+    checkin: Object.fromEntries(['body','emotion','thought','boundary','need','next'].map((name) => [name, '[data-checkin="' + name + '"]'])),
+    pattern: { event: '#pattern-event', before: '[data-pattern="before"]', after: '[data-pattern="after"]', repeat: '[data-pattern="repeat"]', changed: '[data-pattern="changed"]', evidence: '[data-pattern="evidence"]', inference: '[data-pattern="inference"]', summary: '#pattern-summary' },
+    boundary: { behavior: '#boundary-behavior', impact: '#boundary-impact', boundary: '#boundary-line', action: '#boundary-action' },
+    stone: { mountain: '#stone-mountain', now: '#stone-now', later: '#stone-later' },
+    sacred: Object.fromEntries(['who','what','when','where','why','how'].map((name) => [name, '[data-sacred="' + name + '"]']))
+  };
+
+  function restorePendingDraft(key, controls) {
+    if (!window.NBJBAuth?.user?.id) return;
+    try {
+      const raw = sessionStorage.getItem(PENDING_KEY);
+      if (!raw) return;
+      const pending = JSON.parse(raw);
+      if (!pending || !pending.createdAt || Date.now() - pending.createdAt > 30 * 60 * 1000) {
+        sessionStorage.removeItem(PENDING_KEY);
+        return;
+      }
+      if (pending.path !== location.pathname.split('/').pop() || pending.key !== key) return;
+      const fields = fieldSelectors[key] || {};
+      Object.entries(pending.payload?.data || {}).forEach(([name, value]) => {
+        const input = document.querySelector(fields[name]);
+        if (input && !input.value.trim()) input.value = String(value || '');
+      });
+      const meta = pending.payload?.meta || {};
+      controls.panel.querySelectorAll('[data-member-theme="' + key + '"]').forEach((input) => {
+        input.checked = Array.isArray(meta.themes) && meta.themes.includes(input.value);
+      });
+      const metadataSelectors = {
+        context: '[data-member-meta-context="' + key + '"]',
+        outcome: '[data-member-meta-outcome="' + key + '"]',
+        helped: '[data-member-meta-helped="' + key + '"]',
+        changed: '[data-member-meta-changed="' + key + '"]'
+      };
+      Object.entries(metadataSelectors).forEach(([name, selector]) => {
+        const control = controls.panel.querySelector(selector);
+        if (control) control.value = String(meta[name] || '');
+      });
+      sessionStorage.removeItem(PENDING_KEY);
+      const note = document.createElement('p');
+      note.className = 'member-history-restore-note';
+      note.setAttribute('role', 'status');
+      note.textContent = 'Your draft was restored after sign-in. Review it and select consent before Save to My Work. Nothing was saved automatically.';
+      controls.panel.insertBefore(note, controls.panel.querySelector('.member-history-meta'));
+    } catch (error) {
+      console.error('tool_draft_restore_failed', error);
+    }
+  }
+
   const themeOptions = [
     'Work', 'Relationships', 'Family', 'Parenting', 'Money', 'Identity',
     'Boundaries', 'Conflict', 'Grief', 'Wellbeing', 'Purpose', 'Trust'
@@ -253,7 +305,7 @@
     heading.textContent = config.heading;
 
     const description = document.createElement('p');
-    description.textContent = config.description;
+    description.textContent = config.description + (!window.NBJBAuth?.user?.id ? ' If you sign in now, your draft will be held only in this tab and restored for your approval afterward.' : '');
 
     const metadata = buildMetadataFields(key);
 
@@ -272,7 +324,7 @@
     button.type = 'button';
     button.className = 'button button-primary';
     button.dataset.memberWorkButton = key;
-    button.textContent = 'Save to My Work';
+    button.textContent = window.NBJBAuth?.user?.id ? 'Save to My Work' : 'Sign in to save this work';
     const workLink = document.createElement('a');
     workLink.className = 'button button-ghost';
     workLink.href = 'member-work.html';
@@ -292,6 +344,7 @@
   Object.entries(configs).forEach(([key, config]) => {
     const controls = buildPanel(key, config);
     if (!controls) return;
+    restorePendingDraft(key, controls);
 
     controls.panel.querySelectorAll(`[data-member-theme="${key}"]`).forEach((checkbox) => {
       checkbox.addEventListener('change', () => {
@@ -315,6 +368,23 @@
 
       payload.meta = readMetadata(key, controls.panel);
       payload.tags = payload.meta.themes;
+
+      if (!window.NBJBAuth?.user?.id) {
+        try {
+          // Never store an anonymous entry. Keep the draft in this tab with consent,
+          // then let the newly signed-in member review and save it deliberately.
+          sessionStorage.setItem(PENDING_KEY, JSON.stringify({
+            createdAt: Date.now(),
+            path: location.pathname.split('/').pop(),
+            key,
+            payload
+          }));
+          location.assign('member-auth.html?next=' + encodeURIComponent(location.pathname.split('/').pop() + config.root));
+        } catch (error) {
+          flash(controls.status, 'This browser could not preserve your draft for sign-in. Copy your notes before leaving this page.');
+        }
+        return;
+      }
 
       const recent = service.listEntries(config.tool)[0];
       const sameMeta = recent && JSON.stringify(recent.meta || {}) === JSON.stringify(payload.meta || {});

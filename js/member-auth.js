@@ -16,6 +16,13 @@
   function nextDestination(fallback='members.html'){
     const next = new URLSearchParams(location.search).get('next') || '';
     if (/^(?:members|member-[a-z0-9-]+)\.html(?:[?#].*)?$/i.test(next)) return next;
+    // Only explicit public-tool anchors may resume after sign-in.
+    const toolReturns = new Set([
+      'forge.html#forge-tool', 'check-in.html#checkin-tool',
+      'pattern-map.html#pattern-tool', 'resources.html#boundary-builder',
+      'resources.html#one-stone', 'six-sacred-questions.html#six-question-tool'
+    ]);
+    if (toolReturns.has(next)) return next;
     if (authFlowType() === 'signup') return 'member-onboarding.html';
     return fallback;
   }

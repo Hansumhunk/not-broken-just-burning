@@ -12,7 +12,7 @@ export default {
     const userId = ctx.userClaims?.id;
     if (!userId) return reply({ error: "unauthorized" }, 401);
 
-    let body: { slug?: unknown; action?: unknown };
+    let body: { slug?: unknown; action?: unknown; section?: unknown };
     try { body = await req.json(); }
     catch { return reply({ error: "invalid_json" }, 400); }
 
@@ -72,6 +72,25 @@ export default {
       return reply({ error: "content_unavailable" }, 503);
     }
     if (!lesson) return reply({ error: "lesson_not_available" }, 404);
+
+    // Optional recorded narration. Only sign a PRIVATE storage asset after the
+    // same entitlement and publication/editorial-review checks used for text.
+    // Never return a permanent public URL, storage admin credential, or audio
+    // location in unauthenticated HTML.
+    if (body?.action === "audio") {
+      const section = body.section;
+      if (typeof section !== "number" || !Number.isInteger(section) || section < 1 || section > 500) {
+        return reply({ error: "invalid_section" }, 400);
+      }
+      const objectPath = `${slug}/section-${section}.mp3`;
+      const { data: signed, error: signError } = await ctx.supabaseAdmin.storage
+        .from("nbjb-premium-audio")
+        .createSignedUrl(objectPath, 600);
+      // A chapter without a finished recording is normal while drafting.
+      // The client renders the text and optional device voice instead.
+      if (signError || !signed?.signedUrl) return reply({ available: false });
+      return reply({ available: true, url: signed.signedUrl, expires_in: 600 });
+    }
 
     return reply({ lesson });
   }),

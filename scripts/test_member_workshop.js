@@ -23,7 +23,7 @@ test('member workshop has all six real forms and no direct guest archive', () =>
   const bootstrap = read('js/member-bootstrap.js');
   assert.match(bootstrap, /if \(!user\)/);
   assert.ok(bootstrap.includes('workshop: ["js/tool-member-history.js", "js/member-workshop.js"]'));
-  assert.ok(bootstrap.indexOf('await loadScript("js/member-service.js")') < bootstrap.indexOf('const page = document.body.dataset.memberPage'));
+  assert.ok(bootstrap.indexOf('await loadScript("js/member-service.js")') < bootstrap.indexOf('const page = body.dataset.memberPage'));
 });
 
 test('public pages contain no working inputs or member archive bootstrap', () => {

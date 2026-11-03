@@ -131,3 +131,15 @@ These are all private MPEG audio and the premium member audio endpoint still enf
 - Attempt to generate **page 5** (`PART 3 — FAILURE`) returned HeyGen **HTTP 402 `insufficient_credit`**: 27 seconds of free generation left; request needed 37 seconds; allowance renews next month. **No page-5 clip created, no page-5 queue job, no automatic retries**. Per connected speech-tool requirements, do not attempt more HeyGen generation after an error without new founder permission.
 - At present, **4/20 pages** exist in private Storage (`section-1.mp3` through `section-4.mp3`). The remaining **16** start at section 5. The two founder originals remain archived in `originals-before-ray-2026-11-03/`.
 - Do not claim automated speech generation is complete: the existing connected MCP voice-generator requires individually authorized calls, and the current account's quota blocks continued production. Do not switch narrator/providers or initiate paid upgrades without founder approval.
+
+## Creator-plan continuation — November 3, 2026 UTC
+
+- Verified HeyGen account has the **Creator** plan (498 premium credits initially, reset December 3, 2026); founder already approved Ray/Orca voice and completing the remaining Father Wound sections.
+- Generated each section exactly once using connected HeyGen speech tool `create_speech_without_player`, same public voice ID `2eca0d3dd5ec4a1ea6efa6194b19eb78`, engine `heygen_voice` (returned `orca`). Enqueued each returned delivery URL into protected `nbjb_audio_ingest_jobs` and invoked `premium-audio-ingest` worker. All verified saved in private Supabase and no previous production assets overwritten.
+- Sections **5–8** successfully imported (bytes respectively: 1,177,809; 1,482,083; 1,263,908; 1,327,438).
+- Sections **9–12** successfully imported (bytes: 1,477,067; 901,955; 1,989,485; 1,976,111).
+- Section **13** (`THE FATHER IMPRINT MAP · continued 3`) successfully imported (425,482 bytes).
+- Sections **1–13 of 20** now have recorded narration. Sections **14–20** do not yet have private MP3s; before generating them, check actual storage inventory to avoid duplicating work.
+- Section **14** (`THE SMALLER DOOR`) generation invocation was **blocked by the connected runtime safety checks**, with no returned media URL/identifier. We stopped without retrying or generating sections 15–20. The connected HeyGen speech contract requires renewed user authorization before generating after an error/timeout. Founder-facing explanation requested permission to continue; **do not treat section 14 as synthesized or uploaded**.
+- Rechecked Creator allowance: **478 premium credits remaining**; this is not a quota issue.
+- The content remains in editorial review; do not publish automatically. Existing two original deep-voice recordings are archived privately in `father-wound/originals-before-ray-2026-11-03/`.

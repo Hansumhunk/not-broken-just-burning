@@ -4,26 +4,40 @@
 
 The premium lesson reader supports a reusable recorded audio file **per section**, with native browser audio playback and speed adjustment. The old browser text-to-speech voice is clearly labelled **Basic device read-aloud** as an optional accessibility fallback.
 
-**No full-length premium audio has been attached yet.** The three founding lessons remain in editorial review. Do not advertise professional narration as already available.
+**The full Opening section of The Father Wound has been generated, but not uploaded to private storage yet.** The three founding lessons remain in editorial review. Do not advertise professional narration as already available.
 
 ## Voice direction
 
 Warm, steady, grounded American male narrator. Conversational rather than theatrical, with natural pauses and clear articulation. No movie-trailer shouting, spiritual superiority, or artificial emotional manipulation.
 
-First voice-direction sample for *The Father Wound* opening:
+Voice-direction sample for *The Father Wound* opening:
 
 https://www.aidocmaker.com/g0/audio?name=5a1106cbc8244526a23ff3a85e4c440c
 
-The sample is hosted by the voice-generation provider and is **not yet a production-ready media asset**. Check commercial distribution rights before publishing and obtain a reusable audio file from the provider.
+Full Opening section voiceover (download and upload the complete MP3):
+
+https://www.aidocmaker.com/g0/audio?name=bb6e694156f5427ab1cc9bd77d792d78
+
+The recording currently lives on the provider, not in NBJB's private audio bucket. AI Doc Maker's pricing says Starter/free voiceovers require attribution for commercial use and Standard/paid provides a commercial license without attribution. The site includes an attribution field when a recording plays; verify account terms and keep attribution until a different license is confirmed. Save an approved downloadable MP3 outside the provider; generated files may not be retained indefinitely.
 
 ## Preparing and publishing recordings
 
 1. Review the lesson's authored text and chapter boundaries. The reading interface derives its chapter order using the `sectionize` function in `js/member-premium-lesson.js`.
-2. Generate **one finalized audio recording per chapter**; choose a consistent voice and pace and check pronunciations, emotional tone, and reading quality.
-3. Store the final assets in **private storage**, not in the public GitHub repository or the statically published HTML. Prefer private Supabase Storage with signed URLs. Avoid permanent publicly readable MP3 URLs for premium content.
-4. Extend the authenticated lesson-read endpoint to return short-lived **signed audio URLs** for authorized lesson readers. The browser expects the optional `lesson.content.audio_tracks` map, keyed by **1-based section index**, with the format `{ "1": { "url": "https://...signed..." } }`. The client allows same-origin URLs or signed Supabase Storage URLs only.
-5. Recheck membership and URL expiry when generating each authorized response. Confirm free accounts cannot obtain paid narration URLs, and recordings cannot be fetched without an authorized link.
-6. After founder approval, attach the approved recordings, test mobile playback, seeking, pause/resume, speed and connection interruptions. Publish only when ready.
+2. Generate **one finalized audio recording per chapter**. Keep narration human, clear and faithful to the educational text. Use the approved deep voice as a reference.
+3. Download the completed MP3 from the full audio link above. Rename it exactly `section-1.mp3`.
+4. In Supabase Storage for project `plhbvtbvtxfzulsaxuim`, open **private** bucket `nbjb-premium-audio`, create a folder named `father-wound`, and upload the file as `father-wound/section-1.mp3`. Bucket is private (no public URL) and allows MPEG audio. Do not upload to a public GitHub repository.
+5. The existing authenticated Edge Function `read-flamewalker-lesson` now supports a POST action `{ "action": "audio", "slug": "father-wound", "section": 1 }`. After validating the paid entitlement and lesson publication status (with editorial reviewer exception), it signs `father-wound/section-1.mp3` for 10 minutes and returns an ephemeral URL. Missing chapters return `{ "available": false }`.
+6. The chapter player requests that signed URL on entry to each section and reads through HTML5 audio controls; the old device voice remains an opt-in fallback. Reopening a section refreshes the link.
+7. Test using the nominated editorial test account first. The lessons remain unpublished; do not enable public sales until the course material and recording are approved.
+
+## Licensing
+
+Official references:
+- https://www.aidocmaker.com/pricing
+- https://www.aidocmaker.com/terms-of-service
+- https://www.aidocmaker.com/docs/subscription-faq
+
+Commercial voiceovers are advertised by AI Doc Maker. Attribution is required on the free tier; the paid Standard plan advertises commercial voiceovers without attribution. Confirm which subscription generated this file before finalizing the customer-facing credit. The website shows an attribution when a recording plays.
 
 ## Cost discipline
 

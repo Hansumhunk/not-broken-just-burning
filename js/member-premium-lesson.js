@@ -249,6 +249,12 @@
       total: count,
       sectionTitle: String(final ? 'Guided reflection' : label(step)).slice(0, 160)
     });
+    // Keep the address consistent with the visible section, so browser
+    // bookmarks and links from the Hub return to exactly this part.
+    const currentUrl = new URL(location.href);
+    currentUrl.searchParams.set('lesson', slug);
+    currentUrl.searchParams.set('section', String(current + 1));
+    if (currentUrl.href !== location.href) history.replaceState(history.state, '', currentUrl.href);
     if (focus) {
       const target = final ? el('premium-exercise-title') : el('premium-step-title');
       target.setAttribute('tabindex', '-1');

@@ -151,6 +151,7 @@ function simulateMemberBootstrap({ initialUser = null, restoredUser = null, refr
     hash: '#forge-tool',
     replace(url) { redirects.push(url); }
   };
+  window.addEventListener = () => {};
   vm.runInNewContext(read('js/member-bootstrap.js'), { window, document, location, console });
   return { loaded, redirects, refreshCalls: () => refreshCalls };
 }
@@ -169,10 +170,10 @@ test('member bootstrap rechecks local session before redirecting an existing mem
   assert.ok(env.loaded.includes('js/member-workshop.js'));
 });
 
-test('member bootstrap keeps signed-in users without any unnecessary refresh or redirect', async () => {
+test('member bootstrap explicitly verifies an existing signed-in session', async () => {
   const env = simulateMemberBootstrap({ initialUser: 'present-member' });
   await settleBootstrap();
-  assert.equal(env.refreshCalls(), 0);
+  assert.equal(env.refreshCalls(), 1);
   assert.deepEqual(env.redirects, []);
 });
 

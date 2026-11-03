@@ -20,4 +20,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          echo "Pages status BEFORE cancellation attempt:"
+          gh api "repos/${GITHUB_REPOSITORY}/pages/deployments/0c39443e30494a0875300bb6a2fa249c808710d3" --jq ".status" || true
           gh api -X POST "repos/${GITHUB_REPOSITORY}/pages/deployments/0c39443e30494a0875300bb6a2fa249c808710d3/cancel"
+          sleep 5
+          echo "Pages status AFTER cancellation attempt:"
+          gh api "repos/${GITHUB_REPOSITORY}/pages/deployments/0c39443e30494a0875300bb6a2fa249c808710d3" --jq ".status" || true

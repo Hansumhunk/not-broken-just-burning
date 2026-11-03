@@ -25,6 +25,7 @@ on:
       - 'scripts/test_member_workshop.js'
       - 'scripts/validate_supabase_runtime.py'
       - '.github/workflows/validate-site.yml'
+      - '.github/workflows/clear-stale-pages.yml'
   pull_request:
     paths:
       - '**.html'
@@ -41,6 +42,7 @@ on:
       - 'scripts/test_member_workshop.js'
       - 'scripts/validate_supabase_runtime.py'
       - '.github/workflows/validate-site.yml'
+      - '.github/workflows/clear-stale-pages.yml'
 
 permissions:
   contents: read

@@ -3,7 +3,9 @@ import { createClient } from "npm:@supabase/supabase-js@2.116.0";
 // one-time work credential stored in an RLS-isolated table. The requesting
 // party cannot choose arbitrary URLs or storage paths.
 const bucket = "nbjb-premium-audio";
-const urlPattern = /^https:\/\/www\.aidocmaker\.com\/g0\/audio\?name=[a-f0-9]{32}$/;
+const aidocPattern = /^https:\/\/www\.aidocmaker\.com\/g0\/audio\?name=[a-f0-9]{32}$/;
+const heygenPattern = /^https:\/\/resource2\.heygen\.ai\/text_to_speech\/[a-f0-9]{32}\/[a-f0-9]{32}\/id=[a-f0-9-]{36}\.wav$/;
+function validProvider(url: string) { return aidocPattern.test(url) || heygenPattern.test(url); }
 const idPattern = /^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i;
 const tokenPattern = /^[a-f0-9]{64}$/;
 
@@ -16,7 +18,11 @@ function safeCompare(a: string, b: string) {
   for (let i = 0; i < 64; i++) difference |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return difference === 0;
 }
-function mp3(bytes: Uint8Array) {
+function validAudio(bytes: Uint8Array, isWav: boolean) {
+  if (isWav) return bytes.length >= 1000 && bytes.length <= 25 * 1024 * 1024 &&
+    bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
+    bytes[8] === 0x57 && bytes[9] === 0x41 && bytes[10] === 0x56 && bytes[11] === 0x45;
+
   return bytes.length >= 1000 && bytes.length <= 25 * 1024 * 1024 &&
     ((bytes[0] === 0x49 && bytes[1] === 0x44 && bytes[2] === 0x33) ||
      (bytes[0] === 0xff && (bytes[1] & 0xe0) === 0xe0));
@@ -40,7 +46,7 @@ Deno.serve(async (request) => {
   if (error) return response({ error: "queue_unavailable" }, 503);
   if (!job || !safeCompare(args.token, job.job_token)) return response({ error: "unauthorized" }, 401);
   if (job.status !== "pending") return response({ state: job.status });
-  if (job.attempts >= 20 || !urlPattern.test(job.provider_url)) {
+  if (job.attempts >= 20 || !validProvider(job.provider_url)) {
     await admin.from("nbjb_audio_ingest_jobs").update({
       status: "failed", last_error: "invalid_provider_or_retry_limit", updated_at: new Date().toISOString()
     }).eq("id", job.id).eq("status", "pending");
@@ -57,16 +63,18 @@ Deno.serve(async (request) => {
       updated_at: new Date().toISOString()
     }).eq("id", job.id).eq("status", "processing");
   }
-  const path = job.slug + "/section-" + job.section + ".mp3";
+  const isWav = heygenPattern.test(job.provider_url);
+  const extension = isWav ? ".wav" : ".mp3";
+  const path = job.slug + "/section-" + job.section + extension;
   try {
     // Verify the target is missing; never replace founder-approved MP3s.
     const { data: existing, error: lookupError } = await admin.storage.from(bucket)
-      .list(job.slug, { limit: 150, search: "section-" + job.section + ".mp3" });
+      .list(job.slug, { limit: 150 });
     if (lookupError) {
       await update("pending", "storage_lookup_failed");
       return response({ error: "storage_unavailable" }, 503);
     }
-    if ((existing || []).some((item) => item.name === "section-" + job.section + ".mp3")) {
+    if ((existing || []).some((item) => item.name === "section-" + job.section + ".mp3" || item.name === "section-" + job.section + ".wav")) {
       await update("conflict", "existing_recording_protected");
       return response({ error: "recording_already_present" }, 409);
     }
@@ -87,19 +95,19 @@ Deno.serve(async (request) => {
       return response({ error: "audio_too_large" }, 413);
     }
     const raw = new Uint8Array(await provider.arrayBuffer());
-    if (!mp3(raw)) {
+    if (!validAudio(raw, isWav)) {
       await update(job.attempts + 1 >= 20 ? "failed" : "pending", "provider_not_mp3_yet");
       return response({ state: "provider_not_ready" }, 202);
     }
     const { error: uploadError } = await admin.storage.from(bucket).upload(path, raw, {
-      contentType: "audio/mpeg", cacheControl: "3600", upsert: false
+      contentType: isWav ? "audio/wav" : "audio/mpeg", cacheControl: "3600", upsert: false
     });
     if (uploadError) {
       await update("failed", "storage_upload_failed_check_target_before_retry");
       return response({ error: "storage_upload_failed" }, 503);
     }
     await update("saved", null, raw.length);
-    return response({ saved: true, lesson: job.slug, section: job.section, bytes: raw.length });
+    return response({ saved: true, lesson: job.slug, section: job.section, format: isWav ? "wav" : "mp3", bytes: raw.length });
   } catch {
     await update(job.attempts + 1 >= 20 ? "failed" : "pending", "provider_fetch_failed");
     return response({ state: "provider_not_ready" }, 202);

@@ -39,6 +39,23 @@ Official references:
 
 Commercial voiceovers are advertised by AI Doc Maker. Attribution is required on the free tier; the paid Standard plan advertises commercial voiceovers without attribution. Confirm which subscription generated this file before finalizing the customer-facing credit. The website shows an attribution when a recording plays.
 
+## Bulk recording installation (editorial-only)
+
+An internal batch uploader is now available at:
+
+**https://notbrokenjustburning.com/qa-premium-audio-batch.html**
+
+- Sign in with the existing designated editorial reviewer account; ordinary accounts cannot authorize uploads.
+- Choose **The Father Wound**, **The Mother Wound**, or **The Boy Who Learned to Stay Quiet**.
+- Download as many completed AI Doc Maker MP3s as desired into a local folder. The provider currently exposes individual output links; this feature does **not** automate bulk voice generation or provider downloads.
+- Select all the downloaded files together in the uploader. Filenames don't have to be renamed.
+- Use **Assign consecutive pages** starting at the appropriate reading page, then listen to the local audio samples and review each expected heading and opening text. Correct wrong mappings in the dropdowns.
+- Confirm the assignments, then choose **Upload verified batch**. The website requests short-lived, page-specific upload tokens from Supabase. The browser uploads up to three files at a time directly to the private `nbjb-premium-audio` bucket.
+- Existing recordings cannot be silently replaced. For a known incorrect recording, review and remove that one file using the Supabase Dashboard, then upload the replacement using the batch uploader.
+- Refresh the on-page inventory to verify results, then test the chapter player. All original draft lessons remain unpublished.
+
+The upload authorization endpoint is `supabase/functions/premium-audio-admin/index.ts`. Its server-side user-ID check compares the verified authenticated UID with the `NBJB_SANDBOX_TEST_USER_ID` secret. It returns the signed upload tokens only to that one approved editor, and never hands out the service role key. The page automatically derives its chapter numbering from the same original lesson blocks and section boundaries as the reader.
+
 ## Cost discipline
 
 Generate each finalized chapter once and reuse it for authorized plays. Hosting and bandwidth still cost money; monitor those costs. Do not generate personalized narration per button click without explicit user consent and a budget.

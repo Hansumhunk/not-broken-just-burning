@@ -319,6 +319,7 @@ def main() -> int:
             "js/tool-member-history.js",
             "FLAMEWALKER_ACCESS.md",
             "supabase/functions/read-flamewalker-lesson/index.ts",
+            "supabase/functions/premium-audio-admin/index.ts",
             "supabase/functions/check-live-stripe-prices/index.ts",
             "supabase/migrations/20260918010500_phase_two_member_foundation.sql",
             "supabase/migrations/20260921205000_tighten_entitlement_table_acl.sql",

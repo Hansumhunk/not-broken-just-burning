@@ -353,12 +353,16 @@
     workLink.className = 'button button-ghost';
     workLink.href = 'member-work.html';
     workLink.textContent = 'Open My Work';
+    const dashboardLink = document.createElement('a');
+    dashboardLink.className = 'button button-ghost';
+    dashboardLink.href = 'members.html';
+    dashboardLink.textContent = 'Return to Dashboard';
     const status = document.createElement('span');
     status.className = 'forge-status';
     status.dataset.memberWorkStatus = key;
     status.setAttribute('role', 'status');
     status.setAttribute('aria-live', 'polite');
-    actions.append(button, workLink, status);
+    actions.append(button, workLink, dashboardLink, status);
 
     const optional = document.createElement('details');
     optional.className = 'member-history-extra-context';

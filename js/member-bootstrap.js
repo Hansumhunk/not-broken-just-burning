@@ -22,7 +22,18 @@
   }
 
   async function start() {
-    const { user } = await auth.ready;
+    const initial = await auth.ready;
+    let user = initial?.user || auth.user || null;
+    // A restored Supabase session can resolve after the initial auth callback.
+    // Re-read the persisted session before redirecting an existing member to login.
+    if (!user && typeof auth.refresh === 'function') {
+      try {
+        const refreshed = await auth.refresh();
+        user = refreshed?.user || auth.user || null;
+      } catch (error) {
+        console.warn('member_session_restore_failed');
+      }
+    }
     if (!user) {
       const next = encodeURIComponent(location.pathname.split("/").pop() + location.search + location.hash);
       location.replace(`member-auth.html?next=${next}`);

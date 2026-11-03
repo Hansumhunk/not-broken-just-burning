@@ -105,3 +105,82 @@ test('signed-in member opens selected tool and switches without re-login', () =>
   assert.equal(forge.attrs['aria-pressed'], 'true');
   assert.equal(member.seen.at(-1), 'The Forge');
 });
+
+test('member top navigation keeps Forge and Dashboard inside the signed-in hub', () => {
+  const main = read('js/main.js');
+  assert.match(main, /const memberContext = Boolean\(document\.body\?\.dataset\?\.memberPage\)/);
+  assert.ok(main.includes("forge.href = 'member-workshop.html#forge-tool'"));
+  assert.ok(main.includes("join.href = 'members.html'"));
+  assert.ok(main.includes("join.textContent = 'Dashboard'"));
+  const archive = read('js/tool-member-history.js');
+  assert.ok(archive.includes("dashboardLink.href = 'members.html'"));
+  assert.ok(archive.includes("actions.append(button, workLink, dashboardLink, status)"));
+});
+
+function simulateMemberBootstrap({ initialUser = null, restoredUser = null, refreshThrows = false }) {
+  const loaded = [];
+  const redirects = [];
+  let refreshCalls = 0;
+  const auth = {
+    ready: Promise.resolve({ user: initialUser && { id: initialUser } }),
+    user: initialUser && { id: initialUser },
+    async refresh() {
+      refreshCalls++;
+      if (refreshThrows) throw new Error('Session unavailable');
+      if (restoredUser) this.user = { id: restoredUser };
+      return { user: this.user };
+    }
+  };
+  const window = {
+    NBJBAuth: auth,
+    NBJBLearningContinuity: { render() {} }
+  };
+  const document = {
+    body: {
+      dataset: { memberPage: 'workshop' },
+      appendChild(node) {
+        loaded.push(node.src);
+        queueMicrotask(() => node.onload());
+      }
+    },
+    createElement() { return { src: '', onload: null, onerror: null }; }
+  };
+  const location = {
+    pathname: '/member-workshop.html',
+    search: '',
+    hash: '#forge-tool',
+    replace(url) { redirects.push(url); }
+  };
+  vm.runInNewContext(read('js/member-bootstrap.js'), { window, document, location, console });
+  return { loaded, redirects, refreshCalls: () => refreshCalls };
+}
+
+async function settleBootstrap() {
+  await new Promise(resolve => setTimeout(resolve, 30));
+}
+
+test('member bootstrap rechecks local session before redirecting an existing member', async () => {
+  const env = simulateMemberBootstrap({ restoredUser: 'restored-member' });
+  await settleBootstrap();
+  assert.equal(env.refreshCalls(), 1);
+  assert.deepEqual(env.redirects, []);
+  assert.ok(env.loaded.includes('js/member-service.js'));
+  assert.ok(env.loaded.includes('js/tool-member-history.js'));
+  assert.ok(env.loaded.includes('js/member-workshop.js'));
+});
+
+test('member bootstrap keeps signed-in users without any unnecessary refresh or redirect', async () => {
+  const env = simulateMemberBootstrap({ initialUser: 'present-member' });
+  await settleBootstrap();
+  assert.equal(env.refreshCalls(), 0);
+  assert.deepEqual(env.redirects, []);
+});
+
+test('member bootstrap redirects only after persisted session check confirms no user', async () => {
+  const env = simulateMemberBootstrap({});
+  await settleBootstrap();
+  assert.equal(env.refreshCalls(), 1);
+  assert.equal(env.redirects.length, 1);
+  assert.match(env.redirects[0], /^member-auth.html\?next=member-workshop.html%23forge-tool$/);
+  assert.equal(env.loaded.length, 0);
+});

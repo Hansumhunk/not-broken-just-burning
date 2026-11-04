@@ -1,4 +1,23 @@
-# Current founding release inventory — November 4, 2026
+# Flamewalker+ founding library — November 4, 2026
+
+**CURRENT: 35 protected editorial-review drafts in 6 tracks. ZERO published. Paid checkout CLOSED. Founding content scope is frozen pending editorial approval.**
+
+| Track | Slug | Draft lessons |
+|---|---|---:|
+| The Wounded Boy and Inherited Manhood | `wounded-boy` | 7 |
+| The Placeholder Wound | `placeholder-wound` | 8 |
+| When the Safe Room Becomes the Courtroom | `safe-room-courtroom` | 5 |
+| Steadiness & Emotional Command | `steadiness-command` | 5 |
+| Rebuilding a Life That Holds | `life-rebuilt` | 5 |
+| The Five Sacred Laws of Survival | `sacred-laws` | 5 |
+
+**Track 6 source provenance:** An original April 2025 NBJB five-law guide (`1ssWEGocp3muXCWyCVDT_NOyxZiWP7-sNWgRlYuXjnZ8`) preserves all five laws. The second-edition reconstruction master (`1ZIfeBFFIygpDGCBTBME-QQh3l4psDSARm1jza0uJM9w`) specifies modern guiding distinctions and corresponding exercises. The separate, later expanded legacy book manuscript contains only two numbered laws and has structural defects; it is NOT a finished book. The five new lesson drafts were written as modern educational companions; they contain a scenario, eight optional reflection prompts, a next action, and smaller-door practice each. Google Drive sources remain unchanged.
+
+**Editorial decision:** Do not add further founding lessons or tracks. Begin `FOUNDING_35_EDITORIAL_GATE.md` review. Require founder content approval, source accuracy, exercise usability, safety review and reader tests before publishing. No private manuscript text has been added to the public site; pricing and Stripe checkout remain unchanged.
+
+## Historical project milestones
+
+# Prior 30-lesson inventory — November 4, 2026
 
 **CURRENT STATUS: 30 protected editorial-review lesson drafts in FIVE tracks; ZERO published; paid checkout CLOSED.**
 

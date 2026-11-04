@@ -138,14 +138,21 @@ test('draft editorial review queue stays inside server-authorized reader and use
   assert.match(js, /This is not a publication approval tally/);
 });
 
-test('unfinished recorded narration is not advertised; device voice can read every section', () => {
+test('Read to Me is temporarily disabled without removing the preserved voice implementation', () => {
   const js = read('js/member-premium-lesson.js');
   const html = read('member-premium-lesson.html');
   const css = read('css/member-premium-lesson.css');
   assert.doesNotMatch(html, /id="premium-recorded-audio"|id="premium-narration-player"|Natural narration/);
   assert.doesNotMatch(js, /syncRecordedAudio\(|stopRecorded\(|recordedAudio|recordedStatus/);
   assert.doesNotMatch(css, /Recorded, reusable audio is primary/);
-  assert.match(html, /id="premium-browser-voice" open/);
+  assert.match(html, /id="premium-voice-unavailable"/);
+  assert.match(html, /id="premium-browser-voice" hidden/);
+  assert.doesNotMatch(html, /id="premium-browser-voice" open/);
+  assert.match(html, /id="premium-speak" disabled/);
+  assert.match(html, /id="premium-speak-section" disabled/);
+  assert.match(js, /const READ_TO_ME_ENABLED = false;/);
+  assert.match(js, /const speech = READ_TO_ME_ENABLED &&/);
+  assert.match(js, /if \(!READ_TO_ME_ENABLED \|\| !speech \|\| !steps\.length\) return;/);
   assert.match(html, /id="premium-speak"/);
   assert.match(html, /id="premium-speak-section"/);
   assert.match(html, /continues through every section/);
@@ -185,6 +192,7 @@ test('device read-aloud advances through every section and optional exercise in 
   const audioStatus = { textContent: '' };
   const context = {
     speech, speechControls, audioStatus,
+    READ_TO_ME_ENABLED: true, // Exercise dormant code without exposing it in production.
     SpeechSynthesisUtterance: class {
       constructor(text) { this.text = text; }
     },
@@ -238,6 +246,15 @@ test('device read-aloud advances through every section and optional exercise in 
   drain();
   assert.equal(context.current, 0, 'stop cancels pending auto-advance');
   assert.equal(spoken.length, beforeStop, 'stale speech callbacks are ignored');
+
+  // Even with a speech engine available, the production-off flag prevents playback.
+  context.READ_TO_ME_ENABLED = false;
+  context.current = 0;
+  spoken.length = 0;
+  context.playSpeech('all');
+  drain();
+  assert.equal(spoken.length, 0, 'disabled Read to Me must never speak');
+  assert.equal(context.current, 0, 'disabled Read to Me must not change the reader position');
 });
 
 test('AI Doc Maker recordings cannot be served by the premium lesson API', () => {

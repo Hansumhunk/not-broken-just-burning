@@ -15,95 +15,19 @@
   const main = el('premium-lesson-content');
   const notice = el('premium-lesson-status-panel');
   const audioStatus = el('premium-audio-status');
-  const recordedAudio = el('premium-recorded-audio');
-  const recordedStatus = el('premium-recorded-status');
-  const recordedSpeed = el('premium-recorded-speed');
-  let recordedSource = '';
-  let audioRequestId = 0;
-  let signedExpiresAt = 0;
-  // Every recording is requested from the authenticated lesson API at the
-  // moment this chapter is shown. The server checks membership before signing
-  // a short-lived URL for our private Supabase Storage bucket.
-  function authorizedAudioUrl(value) {
-    const candidate = typeof value === 'string' ? value : value?.url;
-    if (typeof candidate !== 'string' || candidate.length > 4096) return '';
-    try {
-      const u = new URL(candidate, location.origin);
-      if (u.protocol !== 'https:') return '';
-      if (u.origin !== location.origin &&
-        !(u.hostname === 'plhbvtbvtxfzulsaxuim.supabase.co' &&
-          u.pathname.startsWith('/storage/v1/object/sign/'))) return '';
-      return u.href;
-    } catch (_) { return ''; }
-  }
-  function stopRecorded() {
-    if (!recordedAudio) return;
-    recordedAudio.pause();
-    recordedAudio.currentTime = 0;
-  }
-  async function syncRecordedAudio() {
-    const requestId = ++audioRequestId;
-    stopRecorded();
-    recordedAudio.hidden = true;
-    el('premium-audio-credit').hidden = true;
-    if (recordedSource) {
-      recordedAudio.removeAttribute('src');
-      recordedAudio.load();
-      recordedSource = '';
-      signedExpiresAt = 0;
-    }
-    if (!lesson || !auth?.client) {
-      recordedStatus.textContent = 'Recording unavailable right now. Reading remains available.';
-      return;
-    }
-    recordedStatus.textContent = 'Checking for a finished recording of this section…';
-    try {
-      const { data, error } = await auth.client.functions.invoke('read-flamewalker-lesson', {
-        body: { action: 'audio', slug, section: current + 1 }
-      });
-      if (requestId !== audioRequestId) return; // Member changed chapters while fetching.
-      const source = !error && data?.available ? authorizedAudioUrl(data.url) : '';
-      if (!source) {
-        recordedStatus.textContent = 'Natural narration for this section is being prepared. You can read it now, or expand Basic device read-aloud if you prefer.';
-        return;
-      }
-      recordedAudio.src = source;
-      recordedSource = source;
-      signedExpiresAt = Date.now() + Math.min(Number(data.expires_in) || 600, 600) * 1000;
-      recordedAudio.load();
-      recordedAudio.hidden = false;
-      el('premium-audio-credit').hidden = false;
-      recordedAudio.playbackRate = Number(recordedSpeed?.value) || 1;
-      recordedStatus.textContent = 'Natural recorded narration is ready. Press Play to listen at your own pace.';
-    } catch (_) {
-      if (requestId === audioRequestId)
-        recordedStatus.textContent = 'Could not check the recording. You can continue reading this section.';
-    }
-  }
-  recordedSpeed?.addEventListener('change', () => {
-    recordedAudio.playbackRate = Number(recordedSpeed.value) || 1;
-  });
-  recordedAudio?.addEventListener('play', () => {
-    if (signedExpiresAt && Date.now() > signedExpiresAt - 15000) {
-      recordedAudio.pause();
-      recordedStatus.textContent = 'Refreshing the secure audio link. Use Play again after it appears.';
-      syncRecordedAudio();
-    }
-  });
-  recordedAudio?.addEventListener('error', () => {
-    recordedStatus.textContent = 'The recording could not load. Try reselecting this section to renew its secure link.';
-  });
-  recordedAudio?.addEventListener('ended', () => {
-    recordedStatus.textContent = 'Section finished. Choose Next section when you are ready.';
-  });
+  // Professional recordings are intentionally hidden until all sections of a
+  // lesson have approved audio. Existing private media assets are preserved.
+  // Browser speech is clearly labeled as device-generated, never premium audio.
   const speech = ('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) ? window.speechSynthesis : null;
-  const speechControls = { play: el('premium-speak'), pause: el('premium-pause'), stop: el('premium-stop') };
+  const speechControls = { play: el('premium-speak'), section: el('premium-speak-section'), pause: el('premium-pause'), stop: el('premium-stop') };
   const notes = new Map(); // Short-term memory only. Never automatically store or upload written answers.
   let steps = [];
   let current = 0;
   let lesson = null;
   let reviewCatalog = [];
   let reading = false;
+  let speechMode = 'all';
+  let activeUtterance = null; // Keep current speech object alive until its completion callback.
   let queue = [];
   let run = 0;
   let fontSize = 1.04;
@@ -245,8 +169,10 @@
     run++;
     queue = [];
     reading = false;
+    activeUtterance = null;
     if (speech) speech.cancel();
     speechControls.play.disabled = !speech;
+    speechControls.section.disabled = !speech;
     speechControls.pause.disabled = true;
     speechControls.pause.textContent = 'Pause';
     speechControls.stop.disabled = true;
@@ -272,27 +198,55 @@
       ? [lesson?.content?.exercise?.title || 'Guided reflection', ...(lesson?.content?.exercise?.prompts || [])].join('. ')
       : [label(step), ...step.blocks.map(b => b.text)].join('. ');
   }
+  function finishSpokenSection(token) {
+    if (token !== run || !reading) return;
+    if (speechMode === 'all' && current < steps.length - 1) {
+      // This is an intentional audio advance, unlike a manual chapter change.
+      // The regular reader rendering keeps bookmarks, progress and controls
+      // synchronized before the next short utterance begins.
+      go(current + 1);
+      playSpeech('all');
+      return;
+    }
+    stopSpeech(speechMode === 'all'
+      ? 'Finished reading this lesson, including the guided reflection prompts.'
+      : 'Section finished. Use Read from here to continue with the rest of the lesson.');
+  }
   function speakChunk(token) {
     if (!speech || token !== run || !reading) return;
     const text = queue.shift();
-    if (!text) { stopSpeech('Section finished. Choose Next section when you are ready.'); return; }
+    if (!text) { finishSpokenSection(token); return; }
     const utterance = new SpeechSynthesisUtterance(text);
+    activeUtterance = utterance;
     utterance.lang = 'en-US';
     utterance.rate = Number(el('premium-speed').value) || 1;
-    utterance.onend = () => { if (token === run) speakChunk(token); };
-    utterance.onerror = () => { if (token === run) stopSpeech('Audio playback stopped. Try Listen again, or continue reading.'); };
-    speech.speak(utterance);
+    // Browsers can drop an utterance if the object is collected, or fail when
+    // the next utterance is enqueued synchronously in the previous onend event.
+    utterance.onend = () => {
+      if (token !== run) return;
+      activeUtterance = null;
+      window.setTimeout(() => speakChunk(token), 20);
+    };
+    utterance.onerror = () => {
+      if (token !== run) return; // Ignore expected interruption by Stop / Next.
+      activeUtterance = null;
+      stopSpeech('Device read-aloud stopped. Use Read from here to restart this section.');
+    };
+    try { speech.speak(utterance); }
+    catch (_) { stopSpeech('This browser could not continue reading aloud. Text remains available.'); }
   }
-  function playSpeech() {
+  function playSpeech(mode = 'all') {
     if (!speech || !steps.length) return;
-    stopRecorded();
     stopSpeech();
+    speechMode = mode === 'section' ? 'section' : 'all';
     queue = speechChunks(sectionSpeechText());
     if (!queue.length) { audioStatus.textContent = 'No readable text in this section.'; return; }
     reading = true;
     speechControls.pause.disabled = false;
     speechControls.stop.disabled = false;
-    audioStatus.textContent = 'Listening to this section. You can pause, stop, or move to another part.';
+    audioStatus.textContent = speechMode === 'all'
+      ? 'Reading from this section through the end of the lesson. Pause or Stop at any time. Voice quality depends on your device.'
+      : 'Reading this section only. Pause or Stop at any time.';
     speakChunk(run);
   }
   function buildExercise() {
@@ -313,8 +267,7 @@
   }
   function render({ focus = false } = {}) {
     if (!steps.length) return;
-    stopSpeech('Basic device read-aloud is ready if you choose it.');
-    syncRecordedAudio();
+    stopSpeech('Read from here to listen to the rest of the lesson using your device voice.');
     const step = steps[current];
     const final = Boolean(step.exercise);
     el('premium-current-step').hidden = final;
@@ -426,8 +379,8 @@
       : Number.isInteger(stored) && stored >= 0 && stored < steps.length ? stored : 0;
     render();
     audioStatus.textContent = speech
-      ? 'Basic device read-aloud is optional. Its voice quality varies by browser and device.'
-      : 'Your browser does not support basic device read-aloud. Reading remains available.';
+      ? 'Read from here to listen across every remaining section, including the final reflection prompts. Device voice quality varies.'
+      : 'This browser does not support device read-aloud. All lesson text remains available.';
   }
   const editorialItems = ['tone', 'boundaries', 'exercises', 'accuracy', 'proofreading'];
   function editorialChecks() {
@@ -579,7 +532,8 @@
     saveReflectionToWork(el('premium-pause-note').value, String(steps[current]?.title || 'Section reflection'),
       el('premium-pause-status'));
   });
-  speechControls.play?.addEventListener('click', playSpeech);
+  speechControls.play?.addEventListener('click', () => playSpeech('all'));
+  speechControls.section?.addEventListener('click', () => playSpeech('section'));
   speechControls.pause?.addEventListener('click', () => {
     if (!speech || !reading) return;
     if (speech.paused) {
@@ -594,7 +548,7 @@
   });
   speechControls.stop?.addEventListener('click', () => stopSpeech());
   el('premium-speed')?.addEventListener('change', () => {
-    if (reading) playSpeech(); // Restart current section at selected speed.
+    if (reading) playSpeech(speechMode); // Restart current section at selected speed.
   });
   try {
     const stored = Number(storageRead(fontKey));
@@ -610,8 +564,9 @@
     applyFont(); storageWrite(fontKey, String(fontSize));
   });
   applyFont();
-  document.addEventListener('visibilitychange', () => { if (document.hidden && speech) stopSpeech('Audio paused because you left the page.'); });
-  window.addEventListener('pagehide', () => { saveNote(); stopRecorded(); if (speech) stopSpeech(); });
+  // Switching tabs should not intentionally cancel ongoing speech. Mobile
+  // browsers may still suspend device speech when backgrounded or locked.
+  window.addEventListener('pagehide', () => { saveNote(); if (speech) stopSpeech(); });
   el('premium-copy')?.addEventListener('click', async () => {
     const answers = reflectionAnswers();
     if (!answers.length) return exerciseStatus('No prompts are available.', true);

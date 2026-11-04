@@ -125,3 +125,105 @@ test('draft editorial review queue stays inside server-authorized reader and use
   assert.match(js, /saved.revision === String\(lesson\?\.updated_at \|\| ''\)/);
   assert.match(js, /This is not a publication approval tally/);
 });
+
+test('unfinished recorded narration is not advertised; device voice can read every section', () => {
+  const js = read('js/member-premium-lesson.js');
+  const html = read('member-premium-lesson.html');
+  const css = read('css/member-premium-lesson.css');
+  assert.doesNotMatch(html, /id="premium-recorded-audio"|id="premium-narration-player"|Natural narration/);
+  assert.doesNotMatch(js, /syncRecordedAudio\(|stopRecorded\(|recordedAudio|recordedStatus/);
+  assert.doesNotMatch(css, /Recorded, reusable audio is primary/);
+  assert.match(html, /id="premium-browser-voice" open/);
+  assert.match(html, /id="premium-speak"/);
+  assert.match(html, /id="premium-speak-section"/);
+  assert.match(html, /continues through every section/);
+  assert.match(js, /function finishSpokenSection\(token\)/);
+  assert.match(js, /speechMode === 'all' && current < steps.length - 1/);
+  assert.match(js, /go\(current \+ 1\);\s*playSpeech\('all'\);/);
+  assert.match(js, /activeUtterance = utterance/);
+  assert.match(js, /window\.setTimeout\(\(\) => speakChunk\(token\), 20\)/);
+  assert.match(js, /playSpeech\('section'\)/);
+  assert.match(js, /playSpeech\(speechMode\)/);
+  assert.doesNotMatch(js, /visibilitychange.*stopSpeech\(/);
+});
+
+test('device read-aloud advances through every section and optional exercise in a simulated speech engine', () => {
+  const vm = require('node:vm');
+  const source = read('js/member-premium-lesson.js');
+  const first = source.indexOf('  function stopSpeech(');
+  const last = source.indexOf('  function buildExercise()', first);
+  assert.ok(first > 0 && last > first, 'speech functions must be discoverable');
+  const speechCode = source.slice(first, last);
+  const scheduled = [];
+  const spoken = [];
+  const speech = {
+    paused: false,
+    cancel() {},
+    speak(utterance) {
+      spoken.push(utterance.text);
+      scheduled.push(() => utterance.onend());
+    }
+  };
+  const speechControls = {
+    play: { disabled: false },
+    section: { disabled: false },
+    pause: { disabled: true, textContent: 'Pause' },
+    stop: { disabled: true }
+  };
+  const audioStatus = { textContent: '' };
+  const context = {
+    speech, speechControls, audioStatus,
+    SpeechSynthesisUtterance: class {
+      constructor(text) { this.text = text; }
+    },
+    window: { setTimeout(fn) { scheduled.push(fn); } },
+    el() { return { value: '1' }; },
+    label(step) { return step.title; },
+    lesson: { content: { exercise: { title: 'Reflection', prompts: ['One prompt', 'Two prompts'] } } },
+    steps: [
+      { title: 'Opening', blocks: [{ text: 'First section for speech playback.' }] },
+      { title: 'Next', blocks: [{ text: 'Second section for speech playback.' }] },
+      { title: 'Guided reflection', exercise: true, blocks: [] }
+    ],
+    current: 0,
+    run: 0,
+    queue: [],
+    reading: false,
+    speechMode: 'all',
+    activeUtterance: null
+  };
+  context.go = next => { context.current = next; context.stopSpeech('Ready for next section'); };
+  vm.runInNewContext(speechCode, context);
+
+  function drain() {
+    let processed = 0;
+    while (scheduled.length) {
+      if (++processed > 100) assert.fail('speech callbacks did not settle');
+      scheduled.shift()();
+    }
+  }
+  context.playSpeech('all');
+  drain();
+  assert.equal(context.current, 2, 'full lesson voice reaches final guided reflection');
+  assert.ok(spoken.some(chunk => chunk.includes('First section')), 'reads opening');
+  assert.ok(spoken.some(chunk => chunk.includes('Second section')), 'reads next section');
+  assert.ok(spoken.some(chunk => chunk.includes('One prompt')), 'reads final exercise prompts');
+  assert.match(audioStatus.textContent, /Finished reading this lesson/);
+  assert.equal(context.reading, false);
+
+  context.current = 0;
+  spoken.length = 0;
+  context.playSpeech('section');
+  drain();
+  assert.equal(context.current, 0, 'section-only mode must not advance');
+  assert.ok(spoken.every(chunk => !chunk.includes('Second section')));
+  assert.match(audioStatus.textContent, /Section finished/);
+
+  context.current = 0;
+  context.playSpeech('all');
+  const beforeStop = spoken.length;
+  context.stopSpeech('Stopped');
+  drain();
+  assert.equal(context.current, 0, 'stop cancels pending auto-advance');
+  assert.equal(spoken.length, beforeStop, 'stale speech callbacks are ignored');
+});

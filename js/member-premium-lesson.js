@@ -102,6 +102,7 @@
   let steps = [];
   let current = 0;
   let lesson = null;
+  let reviewCatalog = [];
   let reading = false;
   let queue = [];
   let run = 0;
@@ -140,6 +141,8 @@
         .sort((a, b) => tracks.indexOf(a.track_slug) - tracks.indexOf(b.track_slug) ||
           Number(a.lesson_number) - Number(b.lesson_number));
       if (!items.length) return;
+      reviewCatalog = items;
+      renderReviewQueue();
       const nav = document.querySelector('.premium-track-nav');
       if (!nav) return;
       nav.replaceChildren();
@@ -393,6 +396,9 @@
     }
     const blocks = Array.isArray(lesson.content?.blocks) ? lesson.content.blocks : [];
     steps = [...sectionize(blocks), { title: 'Guided reflection', exercise: true, blocks: [] }];
+    const promptLabel = el('premium-editorial-prompt-label');
+    const promptCount = Array.isArray(lesson.content?.exercise?.prompts) ? lesson.content.exercise.prompts.length : 0;
+    if (promptLabel) promptLabel.textContent = promptCount + (promptCount === 1 ? ' reflection prompt' : ' reflection prompts');
     if (steps.length < 2) { noticeState('Lesson unavailable', 'No content sections were found.'); return; }
     notice.hidden = true;
     main.hidden = false;
@@ -445,6 +451,49 @@
     const count = editorialChecks().length;
     el('premium-editorial-count').textContent = count + ' of ' + editorialItems.length + ' review areas checked';
   }
+  function renderReviewQueue() {
+    const list = el('premium-review-queue-list');
+    const status = el('premium-review-queue-status');
+    if (!list || !status || lesson?.status !== 'editorial_review' || el('premium-editorial-review')?.hidden) return;
+    list.replaceChildren();
+    let previousTrack = '';
+    let count = 0;
+    const drafts = reviewCatalog.filter(item => item.status === 'editorial_review');
+    for (const item of drafts) {
+      if (item.track_slug !== previousTrack) {
+        previousTrack = item.track_slug;
+        const trackHeader = document.createElement('li');
+        trackHeader.className = 'premium-review-track';
+        trackHeader.textContent = previousTrack === 'wounded-boy' ? 'Track 1 · The Wounded Boy' : 'Track 2 · The Placeholder Wound';
+        list.append(trackHeader);
+      }
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = 'member-premium-lesson.html?lesson=' + encodeURIComponent(item.slug);
+      a.textContent = String(item.lesson_number).padStart(2, '0') + ' · ' + String(item.title || 'Lesson');
+      if (item.slug === slug) a.setAttribute('aria-current', 'page');
+      const meta = document.createElement('small');
+      const key = userId ? 'nbjb.plus.editorial-review.v1.' + userId + '.' + item.slug : null;
+      let saved = null;
+      try { saved = JSON.parse(storageRead(key) || 'null'); } catch (_) { /* malformed optional local record */ }
+      if (saved && Array.isArray(saved.checks)) {
+        const isCurrentRevision = item.slug !== slug || saved.revision === String(lesson?.updated_at || '');
+        if (isCurrentRevision) {
+          count++;
+          const checked = editorialItems.filter(v => saved.checks.includes(v)).length;
+          meta.textContent = item.slug === slug
+            ? checked + ' of 5 areas noted · Not approved'
+            : checked + ' of 5 areas noted · Verify revision on open';
+        } else {
+          meta.textContent = 'Draft changed · Review again';
+        }
+      } else meta.textContent = 'No review notes saved';
+      li.append(a, meta);
+      list.append(li);
+    }
+    status.textContent = count + ' of ' + drafts.length + ' drafts have local checklist notes. This is not a publication approval tally.';
+  }
+
   function editorialSummary() {
     return [
       'Flamewalker+ editorial review — NOT publication approval',
@@ -471,6 +520,7 @@
       ? 'Review notes saved on this device only. This does not approve or publish the lesson.'
       : 'Could not save your review notes in this browser. Use Copy Review Summary instead.';
     updateEditorialCount();
+    renderReviewQueue();
   });
   el('premium-editorial-copy')?.addEventListener('click', async () => {
     if (lesson?.status !== 'editorial_review') return;

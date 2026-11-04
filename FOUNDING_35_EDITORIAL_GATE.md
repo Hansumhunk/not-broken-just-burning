@@ -42,7 +42,8 @@ These checks verify structure, **not** whether the writing is accurate, useful, 
 
 ### Pass 1 — Fix known worksheet and formatting problems
 - **Completed November 4:** Read the original `allowed-to-need` Google Doc. Its six `Needs Permission Map` entries were worksheet column headings, not reflection questions. Replaced those six labels with six source-faithful questions in the protected manuscript; kept the lesson in `editorial_review`. The `updated_at` revision changed, so prior local editorial review notes must be revalidated.
-- Check ten unusually short paragraphs in `allowed-to-need`, `inherited-vs-chosen-manhood` and `learned-silence`. These may be stylistic joiners or extraction artifacts. Fix only if the actual reading experience suffers.
+- **Source inspection completed (read-only, November 4):** A targeted SQL check found 15 standalone `and`/`and:`/`or:`/`Or:` connectors across `allowed-to-need`, `bullying-shame-early-armor`, `inherited-vs-chosen-manhood`, and `learned-silence`. Neighboring blocks show deliberate rhetorical comparisons and transitions, not missing manuscripts. Source text remains unchanged. A draft reader-only spacing treatment reduces excessive vertical gaps; confirm the appearance on mobile and desktop in the authorized reader before merging.
+- Keep other short labels and emphatic one-word lists unchanged unless hands-on reading reveals a problem. Retest device narration and section boundaries after any layout change.
 - Recheck exercise count and prompts after each repair; old saved review checkmarks must be revalidated when the manuscript revision changes.
 
 ### Pass 2 — Source and safety review

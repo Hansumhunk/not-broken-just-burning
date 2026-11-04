@@ -98,3 +98,9 @@ Each private lesson is `content.version = 2` with `status = editorial_review`; e
 
 **Review criteria before founding approval:** full-text rendering and page grouping in the authenticated reviewer; presence of every exercise prompt; useful reading time and mobile legibility; claims not framed as diagnoses or mind-reading; no source-private relationship facts or identifiable persons; clear professional and safety boundaries; consistency across both tracks. Editorial approval and a genuine free-versus-paid access test remain pending.
 
+
+## Private editorial workflow and structural audit (Nov 4, 2026)
+
+The server-authorized reader now offers a ten-lesson review queue grouped by track, with links to the drafts. It shows device-local saved checklist notes **as work in progress, never publication approvals**. Prior notes for other lessons require opening each server-authorized draft to verify its current revision; the current draft is compared against `updated_at`. The checklist uses each lesson's real exercise prompt count (5–8).
+
+Read-only database audit: ten drafts, zero published; none have empty content blocks or empty exercise prompts. Every lesson includes an exercise title, 5–8 prompts, a Next Honest Action and Smaller Door. These checks do **not** establish editorial, clinical, or factual approval. Founder manuscript review and real-browser free-versus-paid account checks remain pending. No private lesson prose has been committed to public GitHub.

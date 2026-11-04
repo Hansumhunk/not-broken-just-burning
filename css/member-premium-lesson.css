@@ -146,3 +146,12 @@
   margin-top:10px;
   padding-top:17px;
 }
+
+.premium-review-queue{margin:26px 0 0;padding:20px 0 0;border-top:1px solid var(--line)}
+.premium-review-queue h3{font-size:1.05rem;margin:0 0 10px}
+.premium-review-queue ol{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
+.premium-review-queue li:not(.premium-review-track){display:grid;gap:4px;padding:12px;border:1px solid var(--line);border-radius:9px}
+.premium-review-queue a{color:var(--text);text-decoration:none;font-weight:700;overflow-wrap:anywhere}
+.premium-review-queue a[aria-current="page"],.premium-review-queue a:hover,.premium-review-queue a:focus-visible{color:var(--ember-bright)}
+.premium-review-queue small{color:var(--muted);line-height:1.5}
+.premium-review-queue li.premium-review-track{font-weight:800;font-size:.82rem;color:var(--ember-bright);padding-top:10px}

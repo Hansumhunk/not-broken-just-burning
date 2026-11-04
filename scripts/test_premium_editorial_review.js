@@ -110,3 +110,18 @@ test('Track 2 copy describes expanded exercises accurately without suggesting pu
   assert.match(release, /status = editorial_review/);
   assert.match(release, /no Stripe checkout was enabled/);
 });
+
+test('draft editorial review queue stays inside server-authorized reader and uses true prompt counts', () => {
+  const html = read('member-premium-lesson.html');
+  const js = read('js/member-premium-lesson.js');
+  assert.match(html, /id="premium-editorial-review"[^>]*hidden/);
+  assert.match(html, /id="premium-review-queue-list"/);
+  assert.match(html, /id="premium-editorial-prompt-label"/);
+  assert.doesNotMatch(html, /Five reflection prompts are useful/);
+  assert.match(js, /function renderReviewQueue\(\)/);
+  assert.match(js, /lesson\?\.status !== 'editorial_review'/);
+  assert.match(js, /reviewCatalog = items/);
+  assert.match(js, /promptCount = Array.isArray\(lesson.content\?\.exercise\?\.prompts\)/);
+  assert.match(js, /saved.revision === String\(lesson\?\.updated_at \|\| ''\)/);
+  assert.match(js, /This is not a publication approval tally/);
+});

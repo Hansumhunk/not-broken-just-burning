@@ -59,7 +59,7 @@
     try {
       const { data, error } = await auth.client.functions.invoke('read-flamewalker-lesson', { body: { action: 'catalog' } });
       if (error || !Array.isArray(data?.lessons)) return;
-      const tracks = ['wounded-boy', 'placeholder-wound', 'safe-room-courtroom'];
+      const tracks = ['wounded-boy', 'placeholder-wound', 'safe-room-courtroom', 'steadiness-command', 'life-rebuilt'];
       const items = data.lessons.filter(item => item && tracks.includes(item.track_slug) && typeof item.slug === 'string' &&
         /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.slug) && item.slug.length <= 100)
         .sort((a, b) => tracks.indexOf(a.track_slug) - tracks.indexOf(b.track_slug) ||
@@ -79,7 +79,11 @@
             ? 'Track 1 · The Wounded Boy and Inherited Manhood'
             : item.track_slug === 'placeholder-wound'
               ? 'Track 2 · The Placeholder Wound'
-              : 'Track 3 · When the Safe Room Becomes the Courtroom';
+              : item.track_slug === 'safe-room-courtroom'
+                ? 'Track 3 · When the Safe Room Becomes the Courtroom'
+                : item.track_slug === 'steadiness-command'
+                  ? 'Track 4 · Steadiness & Emotional Command'
+                  : 'Track 5 · Rebuilding a Life That Holds';
           nav.append(group);
           priorTrack = item.track_slug;
         }
@@ -357,11 +361,15 @@
     if (steps.length < 2) { noticeState('Lesson unavailable', 'No content sections were found.'); return; }
     notice.hidden = true;
     main.hidden = false;
-    const trackLabel = lesson.track_slug === 'placeholder-wound'
-      ? 'Track 2 · The Placeholder Wound'
-      : lesson.track_slug === 'safe-room-courtroom'
-        ? 'Track 3 · When the Safe Room Becomes the Courtroom'
-        : 'Track 1 · The Wounded Boy and Inherited Manhood';
+    const trackLabel = lesson.track_slug === 'wounded-boy'
+      ? 'Track 1 · The Wounded Boy and Inherited Manhood'
+      : lesson.track_slug === 'placeholder-wound'
+        ? 'Track 2 · The Placeholder Wound'
+        : lesson.track_slug === 'safe-room-courtroom'
+          ? 'Track 3 · When the Safe Room Becomes the Courtroom'
+          : lesson.track_slug === 'steadiness-command'
+            ? 'Track 4 · Steadiness & Emotional Command'
+            : 'Track 5 · Rebuilding a Life That Holds';
     el('premium-lesson-sequence').textContent = trackLabel + ' · Lesson ' +
       String(lesson.lesson_number).padStart(2, '0') +
       (lesson.status === 'editorial_review' ? ' · Private editorial preview' : ' · Published');
@@ -423,7 +431,9 @@
         trackHeader.className = 'premium-review-track';
         trackHeader.textContent = previousTrack === 'wounded-boy' ? 'Track 1 · The Wounded Boy'
           : previousTrack === 'placeholder-wound' ? 'Track 2 · The Placeholder Wound'
-          : 'Track 3 · When the Safe Room Becomes the Courtroom';
+          : previousTrack === 'safe-room-courtroom' ? 'Track 3 · When the Safe Room Becomes the Courtroom'
+          : previousTrack === 'steadiness-command' ? 'Track 4 · Steadiness & Emotional Command'
+          : 'Track 5 · Rebuilding a Life That Holds';
         list.append(trackHeader);
       }
       const li = document.createElement('li');

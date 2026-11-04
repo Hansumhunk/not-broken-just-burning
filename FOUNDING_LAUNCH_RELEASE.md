@@ -1,17 +1,23 @@
 # Flamewalker+ founding release: exactly what is offered
 
 **Status:** Launch preparation, not live subscription sales.  
-**Updated:** November 2, 2026
+**Updated:** November 4, 2026
 
 ## Release promise
 A single, evolving digital educational membership. At purchase, the subscriber receives the standard digital lessons and exercises **actually published and listed on the offer page**. Newly released standard digital material becomes available to active subscribers as it is published. There is **no guaranteed future content volume, frequency, video library, private coaching, community access, or deadline**.
 
-Planned initial written track, *all still in editorial review*:
+Planned initial written track, *all seven still in editorial review*:
 1. **The Father Wound** — inherited rules about manhood; Father Imprint Map (five prompts).
 2. **The Mother Wound** — early rules around closeness, approval and emotional responsibility; Maternal Imprint Map (five prompts).
 3. **The Boy Who Learned to Stay Quiet** — practicing grounded expression instead of habitual silence; Silence Inventory (five prompts).
+4. **Bullying, Shame, and the Early Armor** — imposed/internalized shame and protective habits; Armor Audit (five prompts).
+5. **What Strength Looked Like in Your House** — inherited definitions of strength; Strength Model Audit (six prompts).
+6. **What You Learned You Were Allowed to Need** — needs, help and requests; Needs Permission Map (six prompts).
+7. **Inherited Manhood vs. Chosen Manhood** — choice, integration and action; One-Page Chosen Manhood Code (six prompts).
 
-All three are currently in Supabase `flamewalker_premium_lessons` with `status = editorial_review`. Do not claim they are available or change their status until the founder signs off and the protected reader has been published.
+**Database verification, November 4, 2026:** All seven are present in Supabase `flamewalker_premium_lessons`, `track_slug = wounded-boy`, `status = editorial_review`. Lessons 4–7 were transcribed from the existing complete Google Drive lesson drafts into the *private database only*, preserving the lesson's substantive educational paragraphs, source worksheets, Next Honest Action and safety note. Internal source basis, proposed video concepts and book-chapter development notes were deliberately excluded from paid-reader text. No source manuscript bodies were added to public GitHub or HTML.
+
+**Do not claim any of the seven are published or included in a purchasable product until the founder signs off, status is deliberately changed to `published`, paid reader entitlements are verified, and live billing is approved.**
 
 **Planned recurring prices:** $14.99/month or $149/year in USD, plus tax where applicable. Cancellation should prevent future renewal and preserve paid access through the paid-through date. Founding subscription policies are in draft PR #89.
 
@@ -25,7 +31,7 @@ All three are currently in Supabase `flamewalker_premium_lessons` with `status =
 - Dedicated QA page `qa-stripe-sandbox.html`; billing functions accept sandbox secrets only and authorize only `NBJB_SANDBOX_TEST_USER_ID`.
 
 ### Still required before real customer charges
-- Founder approves the three lesson manuscripts and their exercises; publish `status=published` and verify each is only returned to active paid members.
+- Founder approves the seven lesson manuscripts and their exercises; publish `status=published` and verify each is only returned to active paid members.
 - Founder approves Terms, refund/cancellation approach and legal operator identity. Remove editorial-draft banners, set effective date, publish policy pages and connect to Stripe Checkout.
 - Verify Stripe **live** account activation, settle tax setup, create live product and two live recurring prices, configure Customer Portal and **live webhook signing secret**.
 - Implement live billing as a deliberately separate server-side path. **Do not replace the existing production Supabase `STRIPE_SECRET_KEY` with an `sk_live_` key**: current functions are explicitly test-only and the shared project serves real free members.
@@ -53,5 +59,9 @@ Reviewer access depends on the server-side `NBJB_SANDBOX_TEST_USER_ID` secret. N
 - `member-premium-lesson.html?lesson=father-wound`
 - `member-premium-lesson.html?lesson=mother-wound`
 - `member-premium-lesson.html?lesson=learned-silence`
+- `member-premium-lesson.html?lesson=bullying-shame-early-armor`
+- `member-premium-lesson.html?lesson=what-strength-looked-like`
+- `member-premium-lesson.html?lesson=allowed-to-need`
+- `member-premium-lesson.html?lesson=inherited-vs-chosen-manhood`
 
 **Remaining acceptance:** Founder reads each draft and marks requested edits; verify a normal Free account sees no lesson body; approve manuscripts explicitly; publish only approved lessons; test live paid content delivery before enabling live checkout. Sandbox billing and currently disabled public checkout are unaffected.

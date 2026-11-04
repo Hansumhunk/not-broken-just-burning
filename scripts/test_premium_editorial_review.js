@@ -49,3 +49,29 @@ test('the reviewer checklist stores no manuscript content and can never grant en
   assert.doesNotMatch(snippet, /membership_entitlements|auth\.updateUser|\.update\(/);
   assert.match(snippet, /This does not approve or publish the lesson/);
 });
+
+test('the private reader exposes all seven canonical founding lesson slugs in sequence', () => {
+  const html = read('member-premium-lesson.html');
+  const slugs = [
+    'father-wound', 'mother-wound', 'learned-silence',
+    'bullying-shame-early-armor', 'what-strength-looked-like',
+    'allowed-to-need', 'inherited-vs-chosen-manhood'
+  ];
+  const links = Array.from(html.matchAll(/data-premium-lesson-link="([^"]+)"/g)).map(match => match[1]);
+  assert.deepEqual(links, slugs);
+  assert.match(html, /Editorial preview: unpublished lessons are available only to the approved reviewer/);
+});
+
+test('membership and library descriptions accurately state seven drafts, no checkout', () => {
+  const store = read('member-store.html');
+  const library = read('member-library.html');
+  const doc = read('FOUNDING_LAUNCH_RELEASE.md');
+  assert.match(store, /Planned founding library: seven written self-guided lessons/);
+  assert.match(store, /All seven are currently unpublished editorial drafts/);
+  assert.match(store, /Planned: not for sale yet/);
+  assert.match(library, /Seven-Lesson Track · Coming Soon/);
+  assert.match(library, /checkout remains closed/);
+  assert.match(doc, /All seven are present in Supabase/);
+  assert.match(doc, /status = editorial_review/);
+  assert.match(doc, /No source manuscript bodies were added to public GitHub/);
+});

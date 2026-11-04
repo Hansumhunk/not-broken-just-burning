@@ -15,10 +15,11 @@
   const main = el('premium-lesson-content');
   const notice = el('premium-lesson-status-panel');
   const audioStatus = el('premium-audio-status');
-  // Professional recordings are intentionally hidden until all sections of a
-  // lesson have approved audio. Existing private media assets are preserved.
-  // Browser speech is clearly labeled as device-generated, never premium audio.
-  const speech = ('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) ? window.speechSynthesis : null;
+  // The entire Read to Me experience (full lesson and section-only) is paused.
+  // Preserve the narration implementation for later repair, but never acquire
+  // a browser voice or start playback while this feature flag is off.
+  const READ_TO_ME_ENABLED = false;
+  const speech = READ_TO_ME_ENABLED && ('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) ? window.speechSynthesis : null;
   const speechControls = { play: el('premium-speak'), section: el('premium-speak-section'), pause: el('premium-pause'), stop: el('premium-stop') };
   const notes = new Map(); // Short-term memory only. Never automatically store or upload written answers.
   let steps = [];
@@ -179,12 +180,14 @@
     reading = false;
     activeUtterance = null;
     if (speech) speech.cancel();
-    speechControls.play.disabled = !speech;
-    speechControls.section.disabled = !speech;
+    speechControls.play.disabled = !READ_TO_ME_ENABLED || !speech;
+    speechControls.section.disabled = !READ_TO_ME_ENABLED || !speech;
     speechControls.pause.disabled = true;
     speechControls.pause.textContent = 'Pause';
     speechControls.stop.disabled = true;
-    audioStatus.textContent = speech ? message : 'Read aloud is not supported by this browser. Reading remains available.';
+    audioStatus.textContent = !READ_TO_ME_ENABLED
+      ? 'Read to Me is temporarily unavailable. The written lesson is still available.'
+      : speech ? message : 'Read aloud is not supported by this browser. Reading remains available.';
   }
   function speechChunks(text) {
     const words = text.replace(/\s+/g, ' ').trim().split(' ').filter(Boolean);
@@ -244,7 +247,7 @@
     catch (_) { stopSpeech('This browser could not continue reading aloud. Text remains available.'); }
   }
   function playSpeech(mode = 'all') {
-    if (!speech || !steps.length) return;
+    if (!READ_TO_ME_ENABLED || !speech || !steps.length) return;
     stopSpeech();
     speechMode = mode === 'section' ? 'section' : 'all';
     queue = speechChunks(sectionSpeechText());
@@ -394,9 +397,11 @@
       ? direct
       : Number.isInteger(stored) && stored >= 0 && stored < steps.length ? stored : 0;
     render();
-    audioStatus.textContent = speech
-      ? 'Read from here to listen across every remaining section, including the final reflection prompts. Device voice quality varies.'
-      : 'This browser does not support device read-aloud. All lesson text remains available.';
+    audioStatus.textContent = !READ_TO_ME_ENABLED
+      ? 'Read to Me is temporarily unavailable. Written lessons and guided exercises remain available.'
+      : speech
+        ? 'Read from here to listen across every remaining section, including the final reflection prompts. Device voice quality varies.'
+        : 'This browser does not support device read-aloud. All lesson text remains available.';
   }
   const editorialItems = ['tone', 'boundaries', 'exercises', 'accuracy', 'proofreading'];
   function editorialChecks() {

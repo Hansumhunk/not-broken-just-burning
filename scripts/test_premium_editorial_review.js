@@ -85,14 +85,28 @@ test('membership and library descriptions promise ten draft lessons, not live pa
   assert.match(doc, /No source manuscript bodies were added to public GitHub/);
 });
 
-test('short-form relationship lessons preserve the distinction from the seven substantial manuscripts', () => {
+test('expanded relationship modules deliver additional guided value without gating original public education', () => {
   const store = read('member-store.html');
   const library = read('member-library.html');
   const release = read('FOUNDING_LAUNCH_RELEASE.md');
-  assert.match(store, /seven full-length Masculine Restoration lessons and three shorter relationship lessons/);
+  assert.match(store, /seven full-length Masculine Restoration lessons and three expanded relationship modules/);
   assert.match(store, /source series was originally written for public education/);
   assert.match(library, /source lessons were designed for public education/);
-  assert.match(release, /7 long-form \+ 3 shorter = 10 lessons/);
+  assert.match(release, /7 original full-length \+ 3 newly expanded = 10 substantial guided lessons/);
   assert.match(release, /All ten currently remain/);
   assert.doesNotMatch(release, /any of the seven are published/);
+});
+
+test('Track 2 copy describes expanded exercises accurately without suggesting publication', () => {
+  const store = read('member-store.html');
+  const library = read('member-library.html');
+  const release = read('FOUNDING_LAUNCH_RELEASE.md');
+  assert.match(store, /each with scenarios and a seven- or eight-prompt guided exercise/);
+  assert.match(store, /Original shorter educational articles can remain free|original short articles were designed for free education/i);
+  assert.match(library, /seven- or eight-question reflection exercises/);
+  assert.match(library, /Four-Lens Reciprocity Map/);
+  assert.match(library, /Six-Column Decision Review/);
+  assert.match(release, /content.version = 2/);
+  assert.match(release, /status = editorial_review/);
+  assert.match(release, /no Stripe checkout was enabled/);
 });

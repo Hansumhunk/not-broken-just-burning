@@ -17,13 +17,13 @@ Planned founding written library, *ten lessons across two distinct tracks, all i
 6. **What You Learned You Were Allowed to Need** — needs, help and requests; Needs Permission Map (six prompts).
 7. **Inherited Manhood vs. Chosen Manhood** — choice, integration and action; One-Page Chosen Manhood Code (six prompts).
 
-**Track 2 — The Placeholder Wound (three concise guided drafts, with five more public-education drafts in reserve)**
+**Track 2 — The Placeholder Wound (three expanded guided modules, with five more public-education drafts in reserve)**
 
-1. **Being Needed Is Not Being Chosen** — The Placeholder Audit (three prompts).
-2. **The Love Bargain** — The Bargain Check (three prompts).
-3. **Red Flags and Responsibility** — The Decision Review (three prompts).
+1. **Being Needed Is Not Being Chosen** — Four-Lens Reciprocity Map / expanded Placeholder Audit (**seven prompts**).
+2. **The Love Bargain** — Bargain-to-Choice Worksheet / expanded Bargain Check (**eight prompts**).
+3. **Red Flags and Responsibility** — Six-Column Reality Map / expanded Decision Review (**eight prompts**).
 
-Their complete source drafts were written for a potential public educational series. This proposed paid reader experience uses the short lessons with guided private reflection, not a claim of exclusive ownership of their educational prose. The two tracks have separate lesson numbering; the founding library totals **7 long-form + 3 shorter = 10 lessons**.
+Their complete source drafts were written for a potential public educational series. This proposed paid reader experience uses substantially expanded guided modules with their own scenarios, deeper teaching, tools, Smaller Door exercises, and Next Honest Actions. This is not a claim of exclusive ownership of their original educational prose. The two tracks have separate lesson numbering; the founding library totals **7 original full-length + 3 newly expanded = 10 substantial guided lessons**.
 
 **Database verification, November 4, 2026:** All seven are present in Supabase `flamewalker_premium_lessons`, `track_slug = wounded-boy`, `status = editorial_review`. Lessons 4–7 were transcribed from the existing complete Google Drive lesson drafts into the *private database only*, preserving the lesson's substantive educational paragraphs, source worksheets, Next Honest Action and safety note. Internal source basis, proposed video concepts and book-chapter development notes were deliberately excluded from paid-reader text. No source manuscript bodies were added to public GitHub or HTML.
 
@@ -80,3 +80,21 @@ Reviewer access depends on the server-side `NBJB_SANDBOX_TEST_USER_ID` secret. N
 - `member-premium-lesson.html?lesson=red-flags-and-responsibility`
 
 **Remaining acceptance:** Founder reads each draft and marks requested edits; verify a normal Free account sees no lesson body; approve manuscripts explicitly; publish only approved lessons; test live paid content delivery before enabling live checkout. Sandbox billing and currently disabled public checkout are unaffected.
+
+
+## Track 2 deepening — editorial revisions
+
+**Scope:** The three existing protected rows in `track_slug=placeholder-wound` were expanded *in Supabase only*, preserving the original Google Drive short-form educational drafts and the private reader's entitlement control.
+
+| Track 2 lesson | New private text | Teaching blocks | Guided prompts | Deepening |
+| --- | --- | ---: | ---: | --- |
+| Being Needed Is Not Being Chosen | approximately 18,000 characters | 67 | 7 | Contribution vs consideration; the over-functioning loop; four reciprocity lenses; three non-diagnostic scenarios; boundary conversation and smaller step |
+| The Love Bargain | approximately 18,500 characters | 70 | 8 | Explicit agreements vs invisible hopes; sacrifices and family commitments; real-life scenarios; bargain-to-choice worksheet; seven-day action |
+| Red Flags and Responsibility | approximately 18,500 characters | 70 | 8 | Facts/feelings/interpretations/patterns/unknowns; hindsight discipline; four scenarios; traffic-light decisions; six-column reality map |
+
+Each private lesson is `content.version = 2` with `status = editorial_review`; editorial checklist notes are revision-aware. No content is marked `published`, no Stripe checkout was enabled, and no source manuscript bodies were placed in public HTML or GitHub.
+
+**Member value:** Paid guided learning now differs meaningfully from the proposed free articles: more nuance, scenario teaching, structured reflection, multiple perspectives, practice prompts, and an actionable integration framework. The original eight-part public educational series remains free to be published separately if approved.
+
+**Review criteria before founding approval:** full-text rendering and page grouping in the authenticated reviewer; presence of every exercise prompt; useful reading time and mobile legibility; claims not framed as diagnoses or mind-reading; no source-private relationship facts or identifiable persons; clear professional and safety boundaries; consistency across both tracks. Editorial approval and a genuine free-versus-paid access test remain pending.
+

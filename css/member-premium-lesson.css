@@ -129,3 +129,20 @@
   background:#101014;color:var(--text);border:1px solid var(--line);border-radius:10px;font:inherit;line-height:1.5}
 .premium-editorial-review textarea:focus-visible,.premium-editorial-checklist input:focus-visible{outline:2px solid var(--ember-bright);outline-offset:2px}
 #premium-editorial-status,#premium-editorial-count{color:var(--muted)}
+
+/* Two distinct learning tracks share a private reader; their lesson numbers
+   restart within each track rather than suggesting a single ten-part course. */
+.premium-track-nav li.premium-track-heading{
+  padding:11px 10px 4px;
+  font-size:.78rem;
+  line-height:1.45;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.045em;
+  color:var(--ember-bright);
+}
+.premium-track-nav li.premium-track-heading:not(:first-child){
+  border-top:1px solid var(--line);
+  margin-top:10px;
+  padding-top:17px;
+}

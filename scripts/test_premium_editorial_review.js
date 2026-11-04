@@ -50,28 +50,49 @@ test('the reviewer checklist stores no manuscript content and can never grant en
   assert.match(snippet, /This does not approve or publish the lesson/);
 });
 
-test('the private reader exposes all seven canonical founding lesson slugs in sequence', () => {
+test('the private reader lists seven foundational and three relationship lessons in two distinct tracks', () => {
   const html = read('member-premium-lesson.html');
   const slugs = [
     'father-wound', 'mother-wound', 'learned-silence',
     'bullying-shame-early-armor', 'what-strength-looked-like',
-    'allowed-to-need', 'inherited-vs-chosen-manhood'
+    'allowed-to-need', 'inherited-vs-chosen-manhood',
+    'being-needed-vs-chosen', 'the-love-bargain', 'red-flags-and-responsibility'
   ];
   const links = Array.from(html.matchAll(/data-premium-lesson-link="([^"]+)"/g)).map(match => match[1]);
   assert.deepEqual(links, slugs);
+  assert.match(html, /Track 1 · The Wounded Boy and Inherited Manhood/);
+  assert.match(html, /Track 2 · The Placeholder Wound/);
   assert.match(html, /Editorial preview: unpublished lessons are available only to the approved reviewer/);
+  const js = read('js/member-premium-lesson.js');
+  assert.match(js, /const tracks = \['wounded-boy', 'placeholder-wound'\]/);
+  assert.match(js, /tracks\.indexOf\(a\.track_slug\)/);
+  assert.match(js, /group\.className = 'premium-track-heading'/);
+  assert.match(js, /Track 2 · The Placeholder Wound/);
 });
 
-test('membership and library descriptions accurately state seven drafts, no checkout', () => {
+test('membership and library descriptions promise ten draft lessons, not live paid access', () => {
   const store = read('member-store.html');
   const library = read('member-library.html');
   const doc = read('FOUNDING_LAUNCH_RELEASE.md');
-  assert.match(store, /Planned founding library: seven written self-guided lessons/);
-  assert.match(store, /All seven are currently unpublished editorial drafts/);
+  assert.match(store, /Planned founding library: ten written self-guided lessons/);
+  assert.match(store, /All ten are currently unpublished editorial drafts/);
   assert.match(store, /Planned: not for sale yet/);
   assert.match(library, /Seven-Lesson Track · Coming Soon/);
   assert.match(library, /checkout remains closed/);
+  assert.match(library, /Three Guided Lessons · Coming Soon/);
   assert.match(doc, /All seven are present in Supabase/);
   assert.match(doc, /status = editorial_review/);
   assert.match(doc, /No source manuscript bodies were added to public GitHub/);
+});
+
+test('short-form relationship lessons preserve the distinction from the seven substantial manuscripts', () => {
+  const store = read('member-store.html');
+  const library = read('member-library.html');
+  const release = read('FOUNDING_LAUNCH_RELEASE.md');
+  assert.match(store, /seven full-length Masculine Restoration lessons and three shorter relationship lessons/);
+  assert.match(store, /source series was originally written for public education/);
+  assert.match(library, /source lessons were designed for public education/);
+  assert.match(release, /7 long-form \+ 3 shorter = 10 lessons/);
+  assert.match(release, /All ten currently remain/);
+  assert.doesNotMatch(release, /any of the seven are published/);
 });

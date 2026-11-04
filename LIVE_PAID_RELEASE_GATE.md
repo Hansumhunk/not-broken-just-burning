@@ -10,6 +10,20 @@
 ## Proposed narrow launch, not an approval
 Start by editorially approving **seven** coherent Wounded Boy and Inherited Manhood lessons and their worksheets, rather than holding release for all thirty-five. This is a release-scoping proposal only: Rickey must approve the actual revision of every published lesson. Unapproved and source-sensitive lessons stay private in editorial review. The paid offer must clearly describe exactly what is available on purchase day.
 
+## Live Stripe account read-only verification — November 4, 2026
+
+The correct **live** merchant account is now connected alongside the sandbox. Verified directly in live mode:
+- Live **charges_enabled=true**, **payouts_enabled=true**, and **details_submitted=true**.
+- One active live **Flamewalker+** product.
+- Active recurring `flamewalker_plus_monthly` at **$14.99 USD monthly**, and `flamewalker_plus_annual` at **$149 USD yearly**. Both lookup keys, amounts and intervals match the server Checkout offers.
+- One enabled live webhook endpoint pointing to deployed Supabase `stripe-live-webhook`; enabled events include checkout completion, subscription creation/updates/deletion/pause/resume, invoice paid, and invoice payment failure.
+- Live Customer Portal has active default configuration with period-end cancellation, invoice history and payment-method updates.
+- Stripe Tax settings report **active**.
+- Stripe account requirements still list **one currently due business verification field**, although `disabled_reason` is null. Founder must review and satisfy this request in Stripe Dashboard; do not put personal identifying details in public GitHub.
+- **NOT verified yet:** Supabase live secrets authenticate correctly, signed live event delivery, real canary payment, automatic member entitlement, refund end-to-end, tax nexus/registrations or legal seller identity.
+
+**No live prices, billing settings, account data, or security secrets were mutated during this inspection.** Keep live checkout closed until remaining launch gates pass.
+
 ## Hard gates before taking money
 1. **Editorial:** Founder reads current manuscript revisions and exercises, verifies tone, attribution, safety and meaningful value. Explicitly approve selected manuscripts. Set only those approved rows to 'published'; preserve untouched drafts.
 2. **Real-browser QA:** Authenticated reviewer inspects desktop/mobile reader, worksheet copy/clear, lesson progress and device voice. Verify no reflection text is unexpectedly uploaded or persisted.

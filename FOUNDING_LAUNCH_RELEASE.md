@@ -104,3 +104,13 @@ Each private lesson is `content.version = 2` with `status = editorial_review`; e
 The server-authorized reader now offers a ten-lesson review queue grouped by track, with links to the drafts. It shows device-local saved checklist notes **as work in progress, never publication approvals**. Prior notes for other lessons require opening each server-authorized draft to verify its current revision; the current draft is compared against `updated_at`. The checklist uses each lesson's real exercise prompt count (5–8).
 
 Read-only database audit: ten drafts, zero published; none have empty content blocks or empty exercise prompts. Every lesson includes an exercise title, 5–8 prompts, a Next Honest Action and Smaller Door. These checks do **not** establish editorial, clinical, or factual approval. Founder manuscript review and real-browser free-versus-paid account checks remain pending. No private lesson prose has been committed to public GitHub.
+
+## Narration fix — November 4, 2026
+
+**Verified reason for the broken narration promise:** the private `nbjb-premium-audio` bucket has thirteen live `father-wound/section-N.mp3` clips, while the reader generates **twenty text sections** before the final exercise. The other nine lesson slugs have no published recording objects. The previous recorded player also finished after each individual section. A separate basic browser text-to-speech control likewise stopped at each section.
+
+**Launch decision:** remove the incomplete *recorded* narration UI entirely and keep its existing private audio objects for possible future production. No complete natural/studio-quality audio collection is being advertised or sold. Replace the old accessibility fallback with a clearly marked **device read-aloud** feature that starts at the current section and continues automatically through all remaining text sections and optional exercise prompts. Provide Pause, Stop, speed, and current-section-only controls. Speech is chunked, retains the active utterance against garbage collection, and uses a short asynchronous handoff to reduce browser playback races.
+
+This is a browser-generated voice, not professional narrated audio, and mobile browsers may suspend speech when the screen locks or the page is backgrounded. **Actual device-based end-to-end listening is still a separate user acceptance check**; JS unit/static validation does not establish universal cross-browser TTS reliability.
+
+The server authorization for signed private historical audio assets remains intact; no Supabase recordings were deleted, the premium lesson access rules are unchanged, and paid checkout stays closed.

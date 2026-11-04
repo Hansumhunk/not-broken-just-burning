@@ -125,3 +125,24 @@ test('draft editorial review queue stays inside server-authorized reader and use
   assert.match(js, /saved.revision === String\(lesson\?\.updated_at \|\| ''\)/);
   assert.match(js, /This is not a publication approval tally/);
 });
+
+test('unfinished recorded narration is not advertised; device voice can read every section', () => {
+  const js = read('js/member-premium-lesson.js');
+  const html = read('member-premium-lesson.html');
+  const css = read('css/member-premium-lesson.css');
+  assert.doesNotMatch(html, /id="premium-recorded-audio"|id="premium-narration-player"|Natural narration/);
+  assert.doesNotMatch(js, /syncRecordedAudio\(|stopRecorded\(|recordedAudio|recordedStatus/);
+  assert.doesNotMatch(css, /Recorded, reusable audio is primary/);
+  assert.match(html, /id="premium-browser-voice" open/);
+  assert.match(html, /id="premium-speak"/);
+  assert.match(html, /id="premium-speak-section"/);
+  assert.match(html, /continues through every section/);
+  assert.match(js, /function finishSpokenSection\(token\)/);
+  assert.match(js, /speechMode === 'all' && current < steps.length - 1/);
+  assert.match(js, /go\(current \+ 1\);\s*playSpeech\('all'\);/);
+  assert.match(js, /activeUtterance = utterance/);
+  assert.match(js, /window\.setTimeout\(\(\) => speakChunk\(token\), 20\)/);
+  assert.match(js, /playSpeech\('section'\)/);
+  assert.match(js, /playSpeech\(speechMode\)/);
+  assert.doesNotMatch(js, /visibilitychange.*stopSpeech\(/);
+});

@@ -83,33 +83,15 @@
 }
 @media(prefers-reduced-motion:reduce){.premium-progressbar span{transition:none}}
 
-/* Recorded, reusable audio is primary. Device synthetic speech is a visible,
-   clearly labelled accessibility fallback rather than the premium promise. */
-.premium-narration-player{
-  display:grid;gap:9px;margin:16px 0 0;padding:16px 18px;
-  border:1px solid rgba(255,122,45,.28);border-radius:14px;
-  background:rgba(255,122,45,.055);
-}
-.premium-audio-label{
-  color:var(--text);font-size:.9rem;font-weight:800;margin:0;
-}
-.premium-narration-player audio{display:block;width:100%;max-width:650px;min-height:50px}
-.premium-narration-player audio[hidden]{display:none}
-.premium-narration-player .premium-audio-status{margin:0}
-.premium-browser-voice{
-  border-bottom:1px solid var(--line);padding:12px 2px 15px;margin:0 0 4px;
-}
-.premium-browser-voice>summary{
-  cursor:pointer;font-weight:750;font-size:.85rem;color:var(--muted);line-height:1.6;
-}
-.premium-browser-voice>summary:hover,.premium-browser-voice>summary:focus-visible{
-  color:var(--ember-bright,#ff995a);
-}
-.premium-browser-voice>summary small{font-weight:400;font-size:.75rem}
-.premium-browser-voice .premium-voice-tools{padding:12px 0}
-.premium-browser-voice .premium-audio-status{margin-top:0}
-.premium-audio-speed{display:flex;align-items:center;gap:7px}
-@media(max-width:680px){.premium-browser-voice>summary small{display:block;margin-left:0}}
+/* A full-lesson device-voice option is shown instead of incomplete recordings. */
+.premium-browser-voice{border:1px solid rgba(255,122,45,.28);background:rgba(255,122,45,.045);border-radius:13px;padding:16px 18px;margin:16px 0 4px}
+.premium-browser-voice>summary{cursor:pointer;font-weight:750;font-size:.94rem;color:var(--text);line-height:1.6}
+.premium-browser-voice>summary:hover,.premium-browser-voice>summary:focus-visible{color:var(--ember-bright,#ff995a)}
+.premium-browser-voice>summary small{font-weight:400;font-size:.79rem;color:var(--muted)}
+.premium-browser-voice .premium-voice-tools{padding:14px 0;display:flex;flex-wrap:wrap;align-items:center;gap:9px}
+.premium-browser-voice .premium-audio-status{margin:0}
+.premium-audio-explainer{font-size:.87rem;color:var(--muted);line-height:1.6;margin:12px 0 0;max-width:80ch}
+@media(max-width:680px){.premium-browser-voice>summary small{display:block;margin-left:0}.premium-browser-voice .premium-control{flex:1 1 auto}}
 
 /* Founder-only manuscript review controls are displayed only after a
    server-authorized editorial_review lesson body was returned. */

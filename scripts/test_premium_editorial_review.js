@@ -90,7 +90,7 @@ test('expanded relationship modules deliver additional guided value without gati
   const library = read('member-library.html');
   const release = read('FOUNDING_LAUNCH_RELEASE.md');
   assert.match(store, /seven full-length Masculine Restoration lessons and three expanded relationship modules/);
-  assert.match(store, /source series was originally written for public education/);
+  assert.match(store, /original short articles were designed for free education/);
   assert.match(library, /source lessons were designed for public education/);
   assert.match(release, /7 original full-length \+ 3 newly expanded = 10 substantial guided lessons/);
   assert.match(release, /All ten currently remain/);

@@ -56,7 +56,7 @@ test('thirty-five planned lessons are honestly presented in six distinct tracks'
   assert.deepEqual(cards.filter(v=>v==="safe-room-courtroom").length,5);
   assert.equal(cards.filter(v=>v==="steadiness-command").length,5);
   assert.equal(cards.filter(v=>v==="life-rebuilt").length,5);
-  assert.equal(cards.filter(v==="sacred-laws").length,5);
+  assert.equal(cards.filter(v=>v==="sacred-laws").length,5);
   assert.equal(cards.length,35);
   assert.match(html, /Thirty-five manuscripts prepared across six tracks/);
   assert.match(html, /Research references and clinical\/legal boundaries still require editorial verification/);

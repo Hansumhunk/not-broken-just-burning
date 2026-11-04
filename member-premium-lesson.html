@@ -134,6 +134,27 @@
      <span id="premium-step-position" aria-live="polite"></span>
      <button type="button" class="button button-primary" id="premium-next">Next section →</button>
    </nav>
+   <section id="premium-editorial-review" class="premium-editorial-review" aria-labelledby="premium-editorial-heading" hidden>
+     <p class="eyebrow">Private editorial review · Internal only</p>
+     <h2 id="premium-editorial-heading">Review this manuscript before publication.</h2>
+     <p>These notes are a personal editorial checklist for the authorized reviewer, not a public member feature. Checking every box <strong>does not approve, unlock, charge for, or publish</strong> the lesson. Publication requires a separate explicit decision.</p>
+     <fieldset class="premium-editorial-checklist">
+       <legend>Editorial review areas</legend>
+       <label><input type="checkbox" id="premium-review-tone" data-premium-review-check> Language fits NBJB: direct, grounded, men-first without blame or gender warfare</label>
+       <label><input type="checkbox" id="premium-review-boundaries" data-premium-review-check> Clear trauma-informed, crisis, medical and legal boundaries</label>
+       <label><input type="checkbox" id="premium-review-exercises" data-premium-review-check> Five reflection prompts are useful, voluntary and non-coercive</label>
+       <label><input type="checkbox" id="premium-review-accuracy" data-premium-review-check> Claims and examples have been checked for accuracy and clarity</label>
+       <label><input type="checkbox" id="premium-review-proofreading" data-premium-review-check> Proofreading, section flow and mobile reading experience checked</label>
+     </fieldset>
+     <p id="premium-editorial-count">0 of 5 review areas checked</p>
+     <label class="premium-editorial-label" for="premium-editorial-notes">Suggested edits or publication considerations</label>
+     <textarea id="premium-editorial-notes" rows="5" maxlength="4000" autocomplete="off" placeholder="Write what you want changed, clarified, shortened, or preserved."></textarea>
+     <div class="premium-reflection-actions">
+       <button class="button button-primary" id="premium-editorial-save" type="button">Save Review Notes on This Device</button>
+       <button class="button button-ghost" id="premium-editorial-copy" type="button">Copy Review Summary</button>
+     </div>
+     <p id="premium-editorial-status" role="status" aria-live="polite">Notes are not automatically saved, uploaded, or published.</p>
+   </section>
    <p class="premium-reader-safety">There is no deadline. Take breaks, return later, or stop. These are self-guided educational lessons, not therapy or clinical treatment. <a href="support.html">Support &amp; Safety</a></p>
   </article>
  </div>

@@ -314,3 +314,15 @@ test('live subscription UI is prepared but closed until explicit final launch ap
   assert.match(validator, /"js\/member-billing\.js"/);
   assert.doesNotMatch(js, /sk_live_|rk_live_|STRIPE_LIVE_SECRET_KEY/);
 });
+
+test('deployed live checkout source requires a real published library before Stripe customer creation', () => {
+  const source = read('launch-backend-staging/create-live-checkout-session/index.ts');
+  assert.match(source, /NBJB_LIVE_BILLING_MODE/);
+  assert.match(source, /flamewalker_premium_lessons/);
+  assert.match(source, /count: "exact", head: true/);
+  assert.match(source, /\.eq\("status", "published"\)/);
+  assert.match(source, /publishedLessons < 7/);
+  assert.match(source, /premium_library_not_ready/);
+  assert.ok(source.indexOf('publishedLessons < 7') < source.indexOf('stripe.customers.create('),
+    'content availability must be checked before customer creation');
+});

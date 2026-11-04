@@ -1,90 +1,60 @@
-# Flamewalker Free — Controlled Beta Launch Plan
+# Flamewalker Free — Open Early Access Launch Plan
 
-**Prepared:** November 3, 2026  
-**Scope:** NBJB public education and **free** Flamewalker membership only. This document is an operational test plan, not approval to launch paid subscriptions, community rooms, AI-assisted analysis, or protected programs.
+**Decision:** November 3, 2026 — the founder chose to **skip formal Waves 0, 1, and 2**. There are no mandatory tester cohorts, invitation quotas, or staged beta approvals for Flamewalker Free.
 
-## What is usable now
+**Scope:** The public NBJB educational site and existing **free** Flamewalker membership. Open early access is a practical way to learn from voluntary users; it is **not** approval to open paid subscriptions, live community areas, protected courses, or AI-assisted analysis.
 
-- Public NBJB lessons, articles, Path overview, founder and safety information.
-- Free account with Supabase sign-in, email verification and password-recovery flows **implemented**. Password recovery and fresh-account email delivery still require hands-on release testing.
-- Authenticated Dashboard, focus selection, Next Honest Action, member profile and device-local preferences.
-- Six working reflection tools inside `member-workshop.html`, with explicit Save to My Work.
-- Searchable, editable My Work and Progress history on the **same browser/device and same signed-in account**.
-- Start Here written orientation lesson, Free Library entry point, and account settings including local-data removal.
+## What is available now
 
-## Not available — do not present as working
+- Public NBJB articles, lessons, Path overview, founder information and safety resources.
+- Free Supabase-backed account sign-in and authenticated member navigation.
+- Dashboard, Path focus, Next Honest Action, member profile and settings.
+- All six working reflection exercises in `member-workshop.html`.
+- Explicit **Save to My Work** and Progress history on the **same device/browser and account**.
+- Start Here written orientation lesson and the Free Library.
+- Sign Out through the member navigation; feedback through the existing contact email.
 
-- Flamewalker+ subscriptions and live payments: **Coming Soon**, not for sale.
-- Foundation videos, expanded exercise collections, premium lessons, purchased programs, live community, workshops and coaching: **Coming Soon** or **Editorial Preview**, as appropriate.
-- Cross-device reflection sync: **not implemented**. Account credentials work across devices, but saved writing does not automatically follow.
-- Full self-service account deletion: not implemented; use the contact route for requests.
-- The browser local storage backing My Work is not encrypted or a substitute for protecting access to a shared device. Do not promise end-to-end encryption.
+## What is not available yet
 
-## Beta audience
+- **Flamewalker+ paid subscription** is not for sale. The planned courses, premium lessons and billing release remain separate from the Free launch.
+- Videos, expanded exercises, purchased programs, community rooms, workshops, and live coaching are **Coming Soon** or **Editorial Preview**, not current benefits.
+- Private reflections are stored in browser local storage, **not encrypted or cross-device synced**. Account credentials can work across devices, but saved writing does not automatically follow.
+- Full self-service account deletion is not implemented; users may request help through the public contact route.
 
-Invite **5–10 consenting adults** from different contexts (at least two primarily mobile users and at least two desktop users). Men-first; other adults welcome. Do not require a participant to disclose trauma, personal history, treatment, or legal matters. All testing can use fictional or harmless sample entries.
+## Open access and feedback
 
-The primary question is not whether a user likes a logo; it is **whether they can understand what Flamewalker is, complete one useful exercise, and return to their work without needing the founder's guidance**.
+Invite anyone who wants to try Flamewalker Free through the normal public **Join** route; no required number or sequence of testers. **Men-first, other adults welcome.** Do not demand personal histories, therapy disclosures, testimonials or journal entries as a condition of joining.
 
-## Tester pathway (15–25 minutes, self-paced)
+The Dashboard's early-access feedback link and the Website Feedback contact route allow voluntary reports. Ask only for the affected page, browser/device, steps to reproduce, expected versus actual behavior and severity. Do not request passwords, authentication links or tokens, private reflections, journals, medical information, or sensitive legal details. The support inbox is not a crisis service.
 
-1. Begin at `https://notbrokenjustburning.com/`, find **Join**, and locate **Flamewalker Free** without being told where to click.
-2. Create or use a test account. For fresh signup, confirm the email and first-run onboarding. **Do not share login credentials.**
-3. From the Dashboard, find and complete **Start Here** (written lesson).
-4. Choose a current Path focus and name one **Next Honest Action**.
-5. Open **Toolbox → The Forge**; use fictional test input. Explicitly opt in to **Save to My Work**.
-6. Go to **My Work**; find, edit/review if applicable, refresh and confirm the saved entry remains.
-7. Open **Progress**; verify the activity summary and browser refresh.
-8. Use **Sign Out** in the member navigation; attempt a direct My Work URL while signed out; try the browser Back button. Confirm no saved work is rendered.
-9. Sign back in on the **same device/browser/origin**; confirm the test entry remains.
-10. Visit **Watch**, **Circle**, **Membership**, and **Library**. Clearly identify what is available now vs Coming Soon.
-11. On a separate device, confirm that device-local entries **do not** automatically sync; this is expected, not a bug.
-12. Optional: check **Forgot password** recovery with a test account and report whether the email and recovery link work. Never share reset links or tokens.
+Prioritize reports as **Blocker** (sign-in, privacy, or saved-work loss), **Major** (core flow failure or strong confusion), or **Polish** (wording and appearance).
 
-## Capture feedback without collecting sensitive stories
+## Technical follow-ups — important, but no formal waves
 
-Tester can send issues via the **Send Website Feedback** link on the Dashboard or the official **Website Feedback** contact route. Include only:
-- Page / feature tested; phone or desktop, browser type.
-- Expected result and actual result; simple steps to reproduce.
-- Severity: **Blocker** (can't sign in, save, or keep content private), **Major** (core flow fails or confusing), or **Polish** (style, copy, spacing).
-- Whether the issue can be repeated, and whether a refresh changed the outcome.
+Already tested:
+- [x] Founder desktop and mobile walkthrough: sign in, navigate Dashboard and Toolbox, use Forge, save to My Work, see Progress and return without unwanted login.
+- [x] Founder sign-out → open My Work while signed out → redirect to Account Access → sign back in and reopen same-device saved entry.
+- [x] Latest recorded production GitHub Pages deploy and automated validation for site, save flow, auth guard and Supabase Auth runtime (November 3, 2026).
 
-Do **not** request passwords, private reflections, medical information, screenshots containing personal data, or uploaded journals. Collect no therapy testimonials as the price of entry.
+Still unverified in a real browser:
+- [ ] **Back button after signing out:** stale My Work content must not reappear.
+- [ ] **New-account confirmation email** with a dedicated test account.
+- [ ] **Forgot Password** email and full reset/sign-in flow.
+- [ ] Newly added **Sign Out** in member navigation and **Send Website Feedback** link in production.
+- [ ] Owner confirms the feedback inbox is monitored during public early access.
 
-## Release gate and stop rules
-
-**Go for a small public invitation** only after:
-- [x] Founder desktop test of login → Forge → My Work → Progress and persistence on same device.
-- [x] Founder mobile test of the same core flow.
-- [x] Founder sign-out → direct My Work URL redirects to account access, and re-login restores saved work.
-- [x] Automated site, save-flow, account-guard and auth smoke checks passing at last verified deploy (2026-11-03).
-- [ ] **Real-browser Back-button test after logout** (a previously displayed My Work page must not reveal content).
-- [ ] **Fresh-account email confirmation and password recovery** completed with controlled test inbox.
-- [ ] At least two **uncoached** first-time testers complete sign-in → Start Here → save/reopen without a blocker.
-- [ ] Confirm feedback email `notbrokenjustburning@gmail.com` is actively monitored during beta.
-- [ ] Recheck critical paths after latest GitHub Pages deploy, including sign-out member-nav change.
-
-**Stop invitations** if any tester can view another member's saved reflections through normal UI, signed-out saved work is exposed, account verification is unreliable, or saved work disappears during ordinary same-device use. Fix and retest before resuming.
-
-## Beta rollout
-
-- **Wave 0 (founder):** Finish above remaining account/security checks. Record results here or in a linked GitHub issue.
-- **Wave 1 (3 users):** Two different devices/browsers, one novice to NBJB. Fix blockers first.
-- **Wave 2 (remaining 2–7 users):** Invite only after Wave 1 blockers are closed. Review aggregate findings, not people's personal narratives.
-- **Review:** Track completion rate, most confusing screen, failed action, and one change most likely to make the next action easier. Avoid inventing analytics or collecting user content without permission.
+These are follow-up checks, **not** reasons to resurrect a three-wave rollout. However, if anyone can see another account's work via normal UI, signed-out private reflections are exposed, verification/recovery consistently fails, or saved entries are lost under normal same-browser use, **stop promotion, repair, and retest immediately**.
 
 ## Operator checklist
 
-- [ ] Verify public homepage, Join, Contact, Support & Safety, Terms, and Privacy all open from the production domain with valid HTTPS.
-- [ ] Check the browser's current deployed build (not merely a merged PR).
-- [ ] Confirm no live payment/checkout links or misleading premium availability language.
-- [ ] Confirm **Coming Soon** labels remain visible for unfinished videos, community, paid courses, and separately purchased programs.
-- [ ] Confirm a newcomer can identify **Flamewalker Free**, the **Start Here** lesson, all six working tools, and what is device-local.
-- [ ] Check mobile navigation, text sizing, tap targets, and sign-out.
-- [ ] Validate feedback routing and response workflow; do not promise constant monitoring.
+- [ ] Confirm the live homepage, Join, Contact, Support & Safety, Terms, Privacy and member login routes work over HTTPS.
+- [ ] Ensure public language accurately distinguishes **Flamewalker Free, available now** from **Flamewalker+, Coming Soon**.
+- [ ] Avoid any live payment CTA, claims of completed video courses, or promises of secure cloud reflection synchronization.
+- [ ] Keep working Reflection Toolbox and Start Here routes easy to find.
+- [ ] Use voluntary user feedback to improve navigation and learning value; avoid invented engagement metrics.
 
-## Separate later-phase decision
+## Paid launch is separately gated
 
-Paid subscriptions are **not** included in this beta. Before any Flamewalker+ launch, reconcile the founding-release documentation's proposed **7-day** first-purchase refund window with the currently published draft policy describing **14 days**, obtain founder approval for final operator details, publish only approved manuscripts, and complete live billing/cancellation QA. Do not silently choose or advertise either refund term as a finalized offer.
+Before any Flamewalker+ charge, approve published lessons and exercises, operator identity, terms, cancellation/refunds, payment setup and live entitlement isolation. The founding draft proposes a 7-day refund window while published draft copy refers to 14 days; reconcile that discrepancy with founder approval rather than silently selecting either.
 
-**Release decision:** Controlled free-beta preparation in progress; no claim of paid launch or completed independent user validation.
+**Release state:** Flamewalker Free is publicly accessible and may be presented as **Open Early Access**. No staged test waves. Outstanding checks are identified above, and **paid access remains disabled**.

@@ -1,6 +1,6 @@
 # Flamewalker+ — founding 7 founder review queue
 
-**Status November 4, 2026: Lesson 1 founder-accepted; Lessons 2–7 batch-audited and recommended for one founder decision; zero published. This queue is NOT a publication authorization.** The source manuscripts remain in the private database; this public GitHub checklist contains only non-sensitive titles, links and editorial criteria.
+**Status November 4, 2026: Founder explicitly approved all seven current founding-track manuscripts for publication. All seven are now `published` in Supabase; the other 28 remain `editorial_review`. This is NOT authorization to open public Stripe checkout.** The source manuscripts remain in the private database; this public GitHub checklist contains only non-sensitive titles, links and editorial criteria.
 
 ## Open each private lesson while logged in as the designated editorial reviewer
 
@@ -19,8 +19,8 @@
 
 - **The Father Wound** (`father-wound`): founder replied **“okay, this all looks good”** after the Lesson 1 review handoff. Treat this as **content acceptance of the current revision**, not permission to activate public sales or publish the entire track.
 - Accepted Supabase manuscript revision: `updated_at = 2026-11-04 22:52:28.328069+00`; 149 reading blocks, five guided prompts. Any further manuscript change requires renewed editorial acceptance.
-- **Still outstanding:** real desktop/mobile reader check, premium content access verification, and final release acceptance. Database status stays `editorial_review` until those are complete.
-- **Next founder review:** Lesson 2, *The Mother Wound* (`mother-wound`), current revision `updated_at = 2026-11-04 22:52:29.580414+00`; 205 reading blocks and five guided prompts.
+- **Still outstanding:** actual desktop/mobile reader acceptance, free/paid member access testing, controlled live Stripe canary, signed webhook and cancel/reconcile tests. The publication instruction has been completed, but sales are locked.
+- **Batch approval:** Founder later explicitly approved all current seven manuscripts in one message after the six-lesson batch review, including Lesson 2, *The Mother Wound*, current content revision `updated_at = 2026-11-04 22:52:29.580414+00`.
 ## Approve the actual current revision, not an old draft
 
 For each lesson, read the body and the entire guided exercise in the authenticated reader, verify correct section navigation and local-only reflection saving, inspect a phone and desktop layout, check an optional device voice read-aloud session, and record factual/cultural/trauma-informed edits before signing off. Check that a free account cannot retrieve the manuscript. The checklist stored on the device is not founder approval and cannot change publication status.
@@ -33,7 +33,7 @@ Founder signoff decision for each lesson: **APPROVE CURRENT REVISION** / **REVIS
 - Lesson 1–3: removed exactly three internal future-implementation paragraphs per draft from the customer-facing reader body; upgraded their guided questions, next action and smaller-door practice from generic field content to source-faithful material. Their `updated_at` revision timestamps changed.
 - Lesson 5: Strength Model Audit now uses seven practical questions, matching its seven-step source exercise. Lesson 7: six source-faithful guided code prompts replace six labels. Lesson 6: earlier source-based Needs Permission Map repair retained.
 - Source and safety checks: no empty exercises or reader blocks in the proposed launch track. A targeted language scan found no deterministic neuroscience or clinical diagnostic teaching claims in its checked terms, but this cannot replace full factual, originality or safety review.
-- Deployed Supabase function **create-live-checkout-session v6** now checks a server-side count of at least **seven rows with status=published**, in addition to the independent `NBJB_LIVE_BILLING_MODE` launch switch. With **zero published** now, checkout remains unavailable even if a browser attempts to call it. Deployed source copied to `launch-backend-staging/` in this launch PR for inspection.
+- Supabase **create-live-checkout-session v7** requires at least **seven published rows**, plus the existing `NBJB_LIVE_BILLING_MODE` gate, and now has an independent hard public-sales lock `PUBLIC_LIVE_CHECKOUT_ENABLED=false`. Canary remains restricted to a nominated user. All seven are published, but public checkout is still closed. Deployed source copied to `launch-backend-staging/` in this launch PR for inspection.
 - The reader-only connector styling fix remains unmerged in PR #128 until real-browser visual QA. The staging checkout UI and policy links remain a draft in PR #129. Neither PR has opened public checkout.
 
 ## Batch review result and single founder decision
@@ -47,6 +47,6 @@ The assistant completed one combined structure, exercise, safety-language and di
 
 ### One consolidated approval instead of six rounds
 
-When ready, Rickey can explicitly accept **all six remaining current revisions together**, or send one list of edits/holds. The requested scope is only Track 1 (seven lesson manuscripts); it is **not** an instruction to publish the other 28 drafts or activate Stripe. Confirm the approved revision timestamps before changing statuses. If fewer than seven are approved, keep checkout closed.
+**Completed:** The founder explicitly accepted all seven current Track 1 lesson revisions and instructed publication of those seven only. An atomic guarded SQL operation changed exactly those seven from `editorial_review` to `published`. Follow-up readback showed precisely **7 published / 28 editorial / 0 other tracks published**, with all approved content revision timestamps unchanged. No payment switch was activated.
 
 **Deployment gates remain independent:** reviewer phone/desktop QA, real Free-vs-Paid access test, Stripe live canary with real authorized payment and successful webhook, Customer Portal/cancellation check, accurate day-one storefront copy, and the final deliberate public billing switch. Approval of manuscript content does not by itself charge anyone.

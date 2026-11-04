@@ -102,10 +102,16 @@
         return;
       }
       available.textContent = ready.length + ' published guided lessons currently included. Additional lessons may be released after editorial approval.';
-      purchase.hidden = false;
       const params = new URLSearchParams(window.location.search);
-      message(params.get('checkout') === 'success'
-        ? 'Stripe returned you to NBJB. Paid access is not confirmed until your server entitlement updates; refresh the page to check.'
+      // A successful redirect does not prove webhook fulfillment. Prevent a
+      // second purchase while payment/entitlement reconciliation is pending.
+      if (params.get('checkout') === 'success') {
+        message('Stripe returned you to NBJB. We are checking your paid access. Refresh the page to check your entitlement; do not purchase again.', false);
+        return;
+      }
+      purchase.hidden = false;
+      message(params.get('checkout') === 'cancelled'
+        ? 'You left Checkout without completing a subscription. No access change is assumed.'
         : 'Choose a recurring membership below. The next screen is secure Stripe Checkout.');
     } catch (_) {
       message('The published lesson catalog cannot be verified. Checkout is unavailable for now.', true);

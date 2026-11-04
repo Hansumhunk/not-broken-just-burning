@@ -50,7 +50,7 @@ test('the reviewer checklist stores no manuscript content and can never grant en
   assert.match(snippet, /This does not approve or publish the lesson/);
 });
 
-test('the private reader lists thirty lessons in five distinct tracks', () => {
+test('the private reader lists thirty-five lessons in six distinct tracks', () => {
   const html = read('member-premium-lesson.html');
   const slugs = [
     'father-wound', 'mother-wound', 'learned-silence',
@@ -64,7 +64,9 @@ test('the private reader lists thirty lessons in five distinct tracks', () => {
     'body-as-ally', 'name-the-emotion-choose-action', 'the-space-between-trigger-and-response',
     'boundaries-without-cruelty', 'discipline-without-self-punishment',
     'provision-without-proving-worth', 'fatherhood-what-children-watch',
-    'brotherhood-without-dependency', 'lead-yourself-first', 'the-integrated-man-thirty-day-map'
+    'brotherhood-without-dependency', 'lead-yourself-first', 'the-integrated-man-thirty-day-map',
+    'sacred-law-emotional-boundaries', 'sacred-law-pattern-recognition',
+    'sacred-law-self-worth', 'sacred-law-strategic-retreat', 'sacred-law-authentic-voice'
   ];
   const links = Array.from(html.matchAll(/data-premium-lesson-link="([^"]+)"/g)).map(match => match[1]);
   assert.deepEqual(links, slugs);
@@ -73,18 +75,18 @@ test('the private reader lists thirty lessons in five distinct tracks', () => {
   assert.match(html, /Track 3 · When the Safe Room Becomes the Courtroom/);
   assert.match(html, /Editorial preview: unpublished lessons are available only to the approved reviewer/);
   const js = read('js/member-premium-lesson.js');
-  assert.match(js, /const tracks = \['wounded-boy', 'placeholder-wound', 'safe-room-courtroom', 'steadiness-command', 'life-rebuilt'\]/);
+  assert.match(js, /const tracks = \['wounded-boy', 'placeholder-wound', 'safe-room-courtroom', 'steadiness-command', 'life-rebuilt', 'sacred-laws'\]/);
   assert.match(js, /tracks\.indexOf\(a\.track_slug\)/);
   assert.match(js, /group\.className = 'premium-track-heading'/);
   assert.match(js, /Track 2 · The Placeholder Wound/);
 });
 
-test('membership and library descriptions promise thirty drafts, not live paid access', () => {
+test('membership and library descriptions promise thirty-five drafts, not live paid access', () => {
   const store = read('member-store.html');
   const library = read('member-library.html');
   const doc = read('FOUNDING_LAUNCH_RELEASE.md');
-  assert.match(store, /Planned founding library: thirty guided lesson drafts/);
-  assert.match(store, /All thirty are currently unpublished editorial drafts/);
+  assert.match(store, /Planned founding library: thirty-five self-guided lesson drafts/);
+  assert.match(store, /All thirty-five are currently unpublished editorial drafts/);
   assert.match(store, /Planned: not for sale yet/);
   assert.match(library, /Seven-Lesson Track · Coming Soon/);
   assert.match(library, /checkout remains closed/);
@@ -99,7 +101,7 @@ test('expanded relationship modules deliver additional guided value without gati
   const store = read('member-store.html');
   const library = read('member-library.html');
   const release = read('FOUNDING_LAUNCH_RELEASE.md');
-  assert.match(store, /seven on inherited manhood, eight on relationships, five on credibility and professional trust, five on emotional command, and five on rebuilding life/);
+  assert.match(store, /seven on inherited manhood, eight on relationships, five on professional trust and credibility, five on emotional command, five on rebuilding life, and five on the Sacred Laws of Survival/);
   assert.match(store, /original shorter public educational articles remain available for future free use/i);
   assert.match(library, /Original shorter educational articles can remain free/);
   assert.match(release, /7 original full-length \+ 3 newly expanded = 10 substantial guided lessons/);
@@ -249,12 +251,12 @@ test('AI Doc Maker recordings cannot be served by the premium lesson API', () =>
   assert.match(html, /id="premium-speak"/);
 });
 
-test('every protected founding lesson link is unique across five tracks', () => {
+test('every protected founding lesson link is unique across six tracks', () => {
   const html = read('member-premium-lesson.html');
   const links = [...html.matchAll(/data-premium-lesson-link="([^"]+)"/g)].map(m => m[1]);
-  assert.equal(links.length, 30);
-  assert.equal(new Set(links).size, 30);
-  assert.match(html, /Review the thirty founding lessons/);
+  assert.equal(links.length, 35);
+  assert.equal(new Set(links).size, 35);
+  assert.match(html, /Review the thirty-five founding lessons/);
   const script = read('js/member-premium-lesson.js');
   assert.match(script, /'safe-room-courtroom'/);
   assert.match(script, /Track 3 · When the Safe Room Becomes the Courtroom/);
@@ -269,5 +271,18 @@ test('new practical tracks appear in private reader and editorial queue without 
   assert.match(js, /Track 4 · Steadiness & Emotional Command/);
   assert.match(js, /Track 5 · Rebuilding a Life That Holds/);
   assert.match(html, /Thirty-lesson editorial review queue/);
-  assert.match(read('member-store.html'), /All thirty are currently unpublished editorial drafts/);
+  assert.match(read('member-store.html'), /All thirty-five are currently unpublished editorial drafts/);
+});
+
+test('the recovered Sacred Laws remain private, correctly ordered, and awaiting founder approval', () => {
+  const html = read('member-premium-lesson.html');
+  const js = read('js/member-premium-lesson.js');
+  const doc = read('FOUNDING_35_EDITORIAL_GATE.md');
+  const slugs = ['sacred-law-emotional-boundaries','sacred-law-pattern-recognition','sacred-law-self-worth','sacred-law-strategic-retreat','sacred-law-authentic-voice'];
+  for (const slug of slugs) assert.match(html, new RegExp('data-premium-lesson-link="'+slug+'"'));
+  assert.match(js, /Track 6 · The Five Sacred Laws of Survival/);
+  assert.match(html, /Thirty-five-lesson editorial review queue/);
+  assert.match(read('member-store.html'), /All thirty-five are currently unpublished editorial drafts/);
+  assert.match(doc, /35 drafts · 6 tracks · 0 published/);
+  assert.match(doc, /Founding content scope is frozen/);
 });

@@ -134,14 +134,26 @@
     try {
       const { data, error } = await auth.client.functions.invoke('read-flamewalker-lesson', { body: { action: 'catalog' } });
       if (error || !Array.isArray(data?.lessons)) return;
-      const items = data.lessons.filter(item => item && item.track_slug === 'wounded-boy' && typeof item.slug === 'string' &&
+      const tracks = ['wounded-boy', 'placeholder-wound'];
+      const items = data.lessons.filter(item => item && tracks.includes(item.track_slug) && typeof item.slug === 'string' &&
         /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.slug) && item.slug.length <= 100)
-        .sort((a, b) => Number(a.lesson_number) - Number(b.lesson_number));
+        .sort((a, b) => tracks.indexOf(a.track_slug) - tracks.indexOf(b.track_slug) ||
+          Number(a.lesson_number) - Number(b.lesson_number));
       if (!items.length) return;
       const nav = document.querySelector('.premium-track-nav');
       if (!nav) return;
       nav.replaceChildren();
+      let priorTrack = '';
       for (const item of items) {
+        if (item.track_slug !== priorTrack) {
+          const group = document.createElement('li');
+          group.className = 'premium-track-heading';
+          group.textContent = item.track_slug === 'wounded-boy'
+            ? 'Track 1 · The Wounded Boy and Inherited Manhood'
+            : 'Track 2 · The Placeholder Wound';
+          nav.append(group);
+          priorTrack = item.track_slug;
+        }
         const li = document.createElement('li');
         const link = document.createElement('a');
         link.href = 'member-premium-lesson.html?lesson=' + encodeURIComponent(item.slug);
@@ -384,7 +396,11 @@
     if (steps.length < 2) { noticeState('Lesson unavailable', 'No content sections were found.'); return; }
     notice.hidden = true;
     main.hidden = false;
-    el('premium-lesson-sequence').textContent = 'Lesson ' + String(lesson.lesson_number).padStart(2, '0') +
+    const trackLabel = lesson.track_slug === 'placeholder-wound'
+      ? 'Track 2 · The Placeholder Wound'
+      : 'Track 1 · The Wounded Boy and Inherited Manhood';
+    el('premium-lesson-sequence').textContent = trackLabel + ' · Lesson ' +
+      String(lesson.lesson_number).padStart(2, '0') +
       (lesson.status === 'editorial_review' ? ' · Private editorial preview' : ' · Published');
     el('premium-reader-heading').textContent = lesson.title || 'Member lesson';
     el('premium-reader-intro').textContent = lesson.summary || '';

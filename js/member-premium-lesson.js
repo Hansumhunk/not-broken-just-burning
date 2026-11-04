@@ -111,9 +111,10 @@
     el('premium-lesson-title').textContent = title;
     el('premium-lesson-status').textContent = message;
   }
-  function appendText(container, tag, text) {
+  function appendText(container, tag, text, extraClass = '') {
     const p = document.createElement(tag);
     p.textContent = text;
+    if (extraClass) p.classList.add(extraClass);
     container.appendChild(p);
   }
   function prettyHeading(s) {
@@ -287,7 +288,10 @@
       el('premium-step-title').textContent = label(step);
       const body = el('premium-reader-body');
       body.replaceChildren();
-      step.blocks.forEach(b => appendText(body, b.kind === 'heading' ? 'h3' : 'p', b.text));
+      // Preserve editorial manuscript text while giving deliberate one-word
+      // conjunctions a more readable rhythm than a full prose paragraph.
+      step.blocks.forEach(b => appendText(body, b.kind === 'heading' ? 'h3' : 'p', b.text,
+        b.kind === 'paragraph' && /^(?:and|or):?$/i.test(b.text.trim()) ? 'premium-prose-connector' : ''));
       el('premium-pause-note').value = notes.get(current) || '';
       el('premium-pause-status').textContent = '';
       el('premium-pause-reflection').open = false;

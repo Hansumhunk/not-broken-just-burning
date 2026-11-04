@@ -286,3 +286,13 @@ test('the recovered Sacred Laws remain private, correctly ordered, and awaiting 
   assert.match(doc, /35 drafts · 6 tracks · 0 published/);
   assert.match(doc, /Founding content scope is frozen/);
 });
+
+
+test('short rhetorical connectors display compactly without editing the protected lesson text', () => {
+  const js = read('js/member-premium-lesson.js');
+  const css = read('css/member-premium-lesson.css');
+  assert.ok(js.includes('/^(?:and|or):?$/i.test(b.text.trim())'));
+  assert.ok(js.includes("'premium-prose-connector'"));
+  assert.match(css, /\.premium-lesson-body p\.premium-prose-connector/);
+  assert.match(css, /margin:-\.35rem 0 \.45rem/);
+});

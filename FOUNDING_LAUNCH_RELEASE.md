@@ -1,3 +1,19 @@
+# Current founding release inventory — November 4, 2026
+
+**CURRENT STATUS: 20 private editorial-review lessons across 3 tracks; ZERO published; paid checkout CLOSED.**
+
+- **Track 1, `wounded-boy`:** 7 full-length guided manuscripts and exercises.
+- **Track 2, `placeholder-wound`:** 8 guided relationship lessons; lessons 1–3 were previously expanded and lessons 4–8 were expanded from five existing short NBJB public-education drafts on November 4.
+- **Track 3, `safe-room-courtroom`:** 5 newly expanded, research-oriented learning drafts adapted from the first five existing `When the Safe Room Becomes the Courtroom` lesson foundations. These are educational reflections only, not verified clinical or legal findings.
+
+All ten newly imported lessons include teaching sections, concrete situations, Next Honest Action, Smaller Door, and eight guided prompts. No manuscript bodies from Drive or Supabase were added to the public repository. Original Google Drive files remain unchanged.
+
+**Important:** The 20 lesson target counts *prepared drafts*, not editorially approved or purchasable lessons. Review the entire corpus for teaching clarity, examples, source/factual accuracy (especially research claims in the Safe Room foundations), trauma-informed boundaries, responsive reader rendering, and usable exercises. A saved reviewer checklist does not approve or publish a lesson. No live payment activation without verified entitlements, cancellation and finalized legal terms.
+
+The following sections record earlier stages of this project and may refer to the former 3, 7, or 10 lesson milestones. They are preserved as history rather than current inventory.
+
+---
+
 # Flamewalker+ founding release: exactly what is offered
 
 **Status:** Launch preparation, not live subscription sales.  

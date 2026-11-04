@@ -1,0 +1,50 @@
+/* Public founding curriculum: honest status, clear teaching value, no fake checkout. */
+.plus-hero{padding-bottom:36px}
+.plus-hero .hero-lead{max-width:790px}
+.plus-status{display:flex;flex-wrap:wrap;gap:9px 20px;align-items:center;padding:15px 18px;margin:24px 0 22px;width:fit-content;max-width:100%;border:1px solid var(--line-hot);background:rgba(255,122,45,.055);border-radius:14px;line-height:1.5}
+.plus-status strong{color:var(--ember-pale);font-size:.86rem}
+.plus-status span{color:var(--muted);font-size:.88rem}
+.plus-benefit-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:64px}
+.plus-benefit-grid article,.plus-lesson-card,.plus-plan{border:1px solid var(--line);border-radius:18px;background:var(--panel);box-shadow:0 10px 40px rgba(0,0,0,.1)}
+.plus-benefit-grid article{padding:24px;min-width:0}
+.plus-benefit-grid h2{font-size:clamp(1.2rem,2vw,1.5rem);margin:8px 0 10px}
+.plus-benefit-grid p,.plus-course-intro>p:not(.eyebrow),.plus-track-header p:not(.eyebrow),.plus-plan p:not(.eyebrow){color:var(--muted)}
+.plus-kicker{color:var(--ember-pale);font-size:.73rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.plus-course-intro{scroll-margin-top:90px;max-width:900px;margin-bottom:30px}
+.plus-course-intro h2,.plus-faq h2{font-size:clamp(1.75rem,3vw,2.5rem);margin:9px 0 14px}
+.plus-track-jumps{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 0}
+.plus-track-jumps a{padding:10px 15px;border-radius:999px;border:1px solid var(--line-hot);color:var(--ember-pale);font-size:.87rem;font-weight:700}
+.plus-track-jumps a:hover,.plus-track-jumps a:focus-visible{background:rgba(255,122,45,.1);color:var(--text)}
+.plus-track{scroll-margin-top:90px;margin-bottom:54px}
+.plus-track-header{display:flex;justify-content:space-between;gap:22px;align-items:start;margin:0 0 23px}
+.plus-track-header>div{max-width:760px}
+.plus-track-header h2{font-size:clamp(1.6rem,3vw,2.55rem);margin:6px 0 12px;line-height:1.2}
+.plus-track-state{white-space:nowrap;border:1px solid var(--line);color:var(--muted);padding:8px 12px;border-radius:999px;font-size:.75rem;font-weight:700}
+.plus-lesson-grid{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.plus-lesson-card{display:flex;gap:18px;padding:21px 24px;min-width:0}
+.plus-lesson-number{font:700 1.15rem 'Cinzel',serif;color:var(--ember-pale);flex:none}
+.plus-lesson-copy{min-width:0}
+.plus-lesson-copy h3{font-size:1.08rem;line-height:1.38;margin:0 0 11px}
+.plus-lesson-copy>p{font-size:.88rem;color:var(--muted);margin:0 0 12px}
+.plus-lesson-copy .plus-exercise{margin:0;border-top:1px solid var(--line);padding-top:12px;font-size:.8rem}
+.plus-exercise strong{color:var(--ember-pale)}
+.plus-note{font-size:.9rem;color:var(--muted);max-width:80ch;margin:17px 0 0}
+.plus-terms-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-bottom:70px}
+.plus-plan{padding:clamp(23px,3vw,34px)}
+.plus-plan h2{font-size:1.8rem;margin:5px 0 6px}
+.plus-plan p.plus-price{font-size:2.1rem;line-height:1.3;color:var(--text);font-weight:800;margin:14px 0}
+.plus-plan .plus-price small{font-size:.8rem;font-weight:500;color:var(--muted)}
+.plus-plan p.plus-annual{font-size:.85rem;color:var(--ember-pale);margin:-8px 0 20px}
+.plus-plan .button{margin-top:18px}
+.plus-plan-coming{border-color:var(--line-hot)}
+.plus-unavailable{padding:13px;border-left:3px solid var(--ember-bright);background:rgba(255,122,45,.045);font-size:.82rem}
+.plus-faq{max-width:960px;margin-bottom:70px}
+.plus-faq-list{display:grid;gap:10px;margin-top:20px}
+.plus-faq details{padding:17px 22px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.plus-faq summary{cursor:pointer;font-weight:700}
+.plus-faq details[open]{border-color:var(--line-hot)}
+.plus-faq details p{font-size:.9rem;color:var(--muted);margin:12px 0 3px}
+.plus-last-cta{margin-bottom:75px}
+@media(max-width:860px){.plus-benefit-grid{grid-template-columns:1fr}.plus-benefit-grid article{padding:20px}.plus-track-header{display:block}.plus-track-state{display:inline-block;margin-top:8px}.plus-lesson-grid{grid-template-columns:1fr}.plus-terms-grid{grid-template-columns:1fr}}
+@media(max-width:540px){.plus-lesson-card{padding:19px 17px;gap:12px}.plus-status{width:100%}.plus-track-jumps a{width:100%;text-align:center}.plus-faq details{padding:15px 17px}}
+@media(prefers-reduced-motion:reduce){.plus-track-jumps a{transition:none}}

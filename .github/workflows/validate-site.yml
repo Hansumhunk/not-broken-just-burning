@@ -73,6 +73,8 @@ jobs:
         run: node --test scripts/test_member_access_guard.js
       - name: Test protected Flamewalker Plus editorial review
         run: node --test scripts/test_premium_editorial_review.js
+      - name: Verify honest public Flamewalker Plus curriculum preview
+        run: node --test scripts/test_plus_preview.js
       - name: Smoke-test live Flamewalker Supabase Auth
         if: ${{ github.base_ref == 'main' || github.ref_name == 'main' || startsWith(github.ref_name, 'release/') }}
         run: python scripts/validate_supabase_runtime.py

@@ -59,7 +59,7 @@
     try {
       const { data, error } = await auth.client.functions.invoke('read-flamewalker-lesson', { body: { action: 'catalog' } });
       if (error || !Array.isArray(data?.lessons)) return;
-      const tracks = ['wounded-boy', 'placeholder-wound', 'safe-room-courtroom', 'steadiness-command', 'life-rebuilt'];
+      const tracks = ['wounded-boy', 'placeholder-wound', 'safe-room-courtroom', 'steadiness-command', 'life-rebuilt', 'sacred-laws'];
       const items = data.lessons.filter(item => item && tracks.includes(item.track_slug) && typeof item.slug === 'string' &&
         /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.slug) && item.slug.length <= 100)
         .sort((a, b) => tracks.indexOf(a.track_slug) - tracks.indexOf(b.track_slug) ||
@@ -83,7 +83,9 @@
                 ? 'Track 3 · When the Safe Room Becomes the Courtroom'
                 : item.track_slug === 'steadiness-command'
                   ? 'Track 4 · Steadiness & Emotional Command'
-                  : 'Track 5 · Rebuilding a Life That Holds';
+                  : item.track_slug === 'life-rebuilt'
+                    ? 'Track 5 · Rebuilding a Life That Holds'
+                    : 'Track 6 · The Five Sacred Laws of Survival';
           nav.append(group);
           priorTrack = item.track_slug;
         }
@@ -369,7 +371,9 @@
           ? 'Track 3 · When the Safe Room Becomes the Courtroom'
           : lesson.track_slug === 'steadiness-command'
             ? 'Track 4 · Steadiness & Emotional Command'
-            : 'Track 5 · Rebuilding a Life That Holds';
+            : lesson.track_slug === 'life-rebuilt'
+              ? 'Track 5 · Rebuilding a Life That Holds'
+              : 'Track 6 · The Five Sacred Laws of Survival';
     el('premium-lesson-sequence').textContent = trackLabel + ' · Lesson ' +
       String(lesson.lesson_number).padStart(2, '0') +
       (lesson.status === 'editorial_review' ? ' · Private editorial preview' : ' · Published');
@@ -433,7 +437,8 @@
           : previousTrack === 'placeholder-wound' ? 'Track 2 · The Placeholder Wound'
           : previousTrack === 'safe-room-courtroom' ? 'Track 3 · When the Safe Room Becomes the Courtroom'
           : previousTrack === 'steadiness-command' ? 'Track 4 · Steadiness & Emotional Command'
-          : 'Track 5 · Rebuilding a Life That Holds';
+          : previousTrack === 'life-rebuilt' ? 'Track 5 · Rebuilding a Life That Holds'
+          : 'Track 6 · The Five Sacred Laws of Survival';
         list.append(trackHeader);
       }
       const li = document.createElement('li');

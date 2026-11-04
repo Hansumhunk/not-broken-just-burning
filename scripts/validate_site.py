@@ -308,6 +308,7 @@ def main() -> int:
             "css/member-premium-lesson.css",
             "css/members.css",
             "js/member-auth.js",
+            "js/member-billing.js",
             "js/member-bootstrap.js",
             "js/member-dashboard.js",
             "js/member-workshop.js",

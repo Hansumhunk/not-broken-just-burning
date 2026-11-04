@@ -8,6 +8,9 @@
   const progressKey = userId ? 'nbjb.plus.lesson-progress.v1.' + userId : null;
   const positionKey = userId ? 'nbjb.plus.reading-position.v1.' + userId + '.' + slug : null;
   const fontKey = 'nbjb.plus.reader-font.v1';
+  // A review checklist belongs to the authorized reviewer and this exact draft
+  // revision. It is never a publication flag or a server-side entitlement.
+  const editorialKey = userId ? 'nbjb.plus.editorial-review.v1.' + userId + '.' + slug : null;
   const el = id => document.getElementById(id);
   const main = el('premium-lesson-content');
   const notice = el('premium-lesson-status-panel');
@@ -369,6 +372,13 @@
   }
   function renderLesson(data) {
     lesson = data;
+    const reviewPanel = el('premium-editorial-review');
+    if (reviewPanel) {
+      // The server never returns an editorial_review body except to the
+      // nominated reviewer. Never reveal these controls based on a browser flag.
+      reviewPanel.hidden = lesson.status !== 'editorial_review';
+      if (!reviewPanel.hidden) hydrateEditorialReview();
+    }
     const blocks = Array.isArray(lesson.content?.blocks) ? lesson.content.blocks : [];
     steps = [...sectionize(blocks), { title: 'Guided reflection', exercise: true, blocks: [] }];
     if (steps.length < 2) { noticeState('Lesson unavailable', 'No content sections were found.'); return; }
@@ -397,6 +407,65 @@
       ? 'Basic device read-aloud is optional. Its voice quality varies by browser and device.'
       : 'Your browser does not support basic device read-aloud. Reading remains available.';
   }
+  const editorialItems = ['tone', 'boundaries', 'exercises', 'accuracy', 'proofreading'];
+  function editorialChecks() {
+    return editorialItems.filter(item => el('premium-review-' + item)?.checked);
+  }
+  function hydrateEditorialReview() {
+    let record = null;
+    try { record = JSON.parse(storageRead(editorialKey) || 'null'); } catch (_) { /* no prior notes */ }
+    // Edits to a manuscript invalidate earlier review checks for that revision.
+    const currentRevision = String(lesson?.updated_at || '');
+    const matching = record && record.revision === currentRevision;
+    const checks = matching && Array.isArray(record.checks) ? record.checks : [];
+    for (const item of editorialItems) el('premium-review-' + item).checked = checks.includes(item);
+    el('premium-editorial-notes').value = matching ? String(record.notes || '').slice(0, 4000) : '';
+    el('premium-editorial-status').textContent = matching
+      ? 'Review notes recovered for this manuscript revision. Nothing has been published.'
+      : 'Editorial checklist ready for this draft. Nothing has been published.';
+    updateEditorialCount();
+  }
+  function updateEditorialCount() {
+    const count = editorialChecks().length;
+    el('premium-editorial-count').textContent = count + ' of ' + editorialItems.length + ' review areas checked';
+  }
+  function editorialSummary() {
+    return [
+      'Flamewalker+ editorial review — NOT publication approval',
+      'Lesson: ' + String(lesson?.title || slug),
+      'Draft revision: ' + String(lesson?.updated_at || 'unknown'),
+      ...editorialItems.map(item => (el('premium-review-' + item).checked ? '[x] ' : '[ ] ') + item),
+      'Editorial notes:',
+      el('premium-editorial-notes').value.trim() || '(none)',
+      'Publication status remains editorial_review until separately approved and published.'
+    ].join('\n');
+  }
+  document.querySelectorAll('[data-premium-review-check]').forEach(checkbox =>
+    checkbox.addEventListener('change', updateEditorialCount));
+  el('premium-editorial-save')?.addEventListener('click', () => {
+    if (!editorialKey || lesson?.status !== 'editorial_review') return;
+    const draft = {
+      revision: String(lesson.updated_at || ''),
+      checks: editorialChecks(),
+      notes: el('premium-editorial-notes').value.trim().slice(0, 4000),
+      savedAt: new Date().toISOString()
+    };
+    const saved = storageWrite(editorialKey, JSON.stringify(draft));
+    el('premium-editorial-status').textContent = saved
+      ? 'Review notes saved on this device only. This does not approve or publish the lesson.'
+      : 'Could not save your review notes in this browser. Use Copy Review Summary instead.';
+    updateEditorialCount();
+  });
+  el('premium-editorial-copy')?.addEventListener('click', async () => {
+    if (lesson?.status !== 'editorial_review') return;
+    try {
+      await navigator.clipboard.writeText(editorialSummary());
+      el('premium-editorial-status').textContent = 'Review summary copied. The draft is still unpublished.';
+    } catch (_) {
+      el('premium-editorial-status').textContent = 'Copy failed. Select and copy your review notes manually.';
+    }
+  });
+
   function exerciseStatus(text, failed = false) {
     const node = el('premium-exercise-status');
     node.textContent = text;
@@ -508,22 +577,26 @@
       noticeState('Sign in required', 'Sign in with Flamewalker to view available lessons.');
       return;
     }
-    await loadCatalog();
     await entitlements?.ready;
-    const tier = entitlements?.load?.()?.tier;
-    if (tier !== 'paid') {
-      noticeState('Flamewalker+ lessons are being prepared',
-        'The paid curriculum remains in editorial review. Eligible paid members can read lessons once published.');
-      return;
-    }
+    // The server — not a frontend tier label — authorizes lesson bodies.
+    // It permits the nominated editorial reviewer to inspect unpublished
+    // drafts without requiring that internal account to buy a subscription.
+    // Ordinary free accounts continue to receive HTTP 403 and no lesson.
     noticeState('Checking access…', 'Your private lesson is being verified by the server.');
     try {
       const { data, error } = await auth.client.functions.invoke('read-flamewalker-lesson', { body: { slug } });
       if (error || !data?.lesson) {
-        noticeState('Lesson not available yet', 'This lesson is still in review or access could not be confirmed.');
+        const denied = error?.context?.status === 403 || data?.error === 'paid_membership_required';
+        noticeState(denied ? 'Flamewalker+ access not available yet' : 'Lesson not available yet',
+          denied
+            ? 'This content requires active paid access, or the designated editorial-review account. The paid membership is not for sale yet.'
+            : 'This lesson is still in review, or access could not be confirmed. Please try again later.');
         return;
       }
       renderLesson(data.lesson);
+      // Only request the editorial/published catalog once server access to
+      // this protected lesson has been confirmed for the current account.
+      await loadCatalog();
     } catch (error) {
       console.error('premium_lesson_unavailable', error);
       noticeState('Lesson temporarily unavailable', 'Try again later. Your membership was not changed.');

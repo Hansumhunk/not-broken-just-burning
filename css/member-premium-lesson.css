@@ -110,3 +110,22 @@
 .premium-browser-voice .premium-audio-status{margin-top:0}
 .premium-audio-speed{display:flex;align-items:center;gap:7px}
 @media(max-width:680px){.premium-browser-voice>summary small{display:block;margin-left:0}}
+
+/* Founder-only manuscript review controls are displayed only after a
+   server-authorized editorial_review lesson body was returned. */
+.premium-editorial-review{
+  max-width:76ch;margin:30px 0 20px;padding:clamp(18px,3vw,30px);
+  border:1px solid rgba(255,160,105,.32);border-radius:16px;
+  background:rgba(255,122,45,.045);
+}
+.premium-editorial-review h2{font-size:clamp(1.3rem,2.3vw,1.9rem);margin:8px 0 15px}
+.premium-editorial-review p{font-size:.92rem;line-height:1.65}
+.premium-editorial-checklist{display:grid;gap:12px;border:0;padding:12px 0;margin:6px 0}
+.premium-editorial-checklist legend{font-weight:700;margin-bottom:10px}
+.premium-editorial-checklist label{display:flex;gap:12px;align-items:flex-start;line-height:1.55;cursor:pointer}
+.premium-editorial-checklist input{flex:0 0 auto;min-width:19px;min-height:19px;margin-top:2px;accent-color:var(--ember-bright)}
+.premium-editorial-label{display:block;margin:16px 0 10px;font-weight:700}
+.premium-editorial-review textarea{box-sizing:border-box;width:100%;resize:vertical;min-height:130px;padding:14px;
+  background:#101014;color:var(--text);border:1px solid var(--line);border-radius:10px;font:inherit;line-height:1.5}
+.premium-editorial-review textarea:focus-visible,.premium-editorial-checklist input:focus-visible{outline:2px solid var(--ember-bright);outline-offset:2px}
+#premium-editorial-status,#premium-editorial-count{color:var(--muted)}

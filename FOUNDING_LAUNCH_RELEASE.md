@@ -40,3 +40,18 @@ All three are currently in Supabase `flamewalker_premium_lessons` with `status =
 4. Confirm live Stripe verification/payment enablement in the live dashboard.
 
 **Core rule:** Founding version is small by design; paid access must be reliable, not a promise of unfinished features.
+
+## Editorial reader handoff — November 4, 2026
+
+The private reader at `member-premium-lesson.html?lesson=father-wound` accepts access decisions **only from the server-authorized `read-flamewalker-lesson` function**. The existing function permits (1) eligible paid members to read `published` lessons and (2) the nominated internal reviewer to read `editorial_review` manuscripts. Free members are denied with HTTP 403. The browser tier display is not the security authority.
+
+For authorized editorial previews, the reader now provides a five-area checklist with optional notes, revision-aware local storage, and a **Copy Review Summary** action. The checklist is **not formal approval**; it cannot publish manuscripts, change their editorial status, or grant paid membership. It is only a device-local review aid. Approvals and any server-side publication will be deliberately separate, after founder signoff.
+
+Reviewer access depends on the server-side `NBJB_SANDBOX_TEST_USER_ID` secret. Never add that ID, credentials, premium prose, or private journal material to the public repository.
+
+**Review links (must be signed in as designated reviewer):**
+- `member-premium-lesson.html?lesson=father-wound`
+- `member-premium-lesson.html?lesson=mother-wound`
+- `member-premium-lesson.html?lesson=learned-silence`
+
+**Remaining acceptance:** Founder reads each draft and marks requested edits; verify a normal Free account sees no lesson body; approve manuscripts explicitly; publish only approved lessons; test live paid content delivery before enabling live checkout. Sandbox billing and currently disabled public checkout are unaffected.

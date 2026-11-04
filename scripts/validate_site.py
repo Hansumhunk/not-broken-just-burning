@@ -450,10 +450,22 @@ def main() -> int:
             for forbidden in ("stripe.checkout.sessions.create", "stripe.customers.create", "stripe.subscriptions.create"):
                 if forbidden in preflight:
                     errors.append("Live Stripe preflight must not create payments or customers")
-        # Flamewalker+ remains roadmap-only in this release. Browser billing controls,
-        # billing client code, and Stripe Edge Function source must not reach main yet.
+        # The premium storefront may stage a disabled billing client, but it
+        # must remain safely hidden until a separate approved public launch.
+        billing_client = ROOT / "js/member-billing.js"
+        if billing_client.exists():
+            billing_code = billing_client.read_text(encoding="utf-8")
+            if (
+                "const PUBLIC_CHECKOUT_UI_ENABLED = false;" not in billing_code
+                or "if (!PUBLIC_CHECKOUT_UI_ENABLED) return;" not in billing_code
+            ):
+                errors.append("Premium billing UI cannot be enabled in the Free launch.")
+            staged_store = (ROOT / "member-store.html").read_text(encoding="utf-8")
+            if 'id="member-live-billing" aria-labelledby="member-live-billing-title" hidden' not in staged_store:
+                errors.append("Premium Store checkout panel must remain hidden in the Free launch.")
+        # Unreviewed Stripe server billing artifacts and migrations must not
+        # be deployed into the production branch as part of ordinary website work.
         paid_only_paths = {
-            "js/member-billing.js",
             "STRIPE_INTEGRATION.md",
             "supabase/config.toml",
             "supabase/functions/create-checkout-session/index.ts",

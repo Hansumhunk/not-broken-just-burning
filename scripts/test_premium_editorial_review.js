@@ -96,7 +96,7 @@ test('expanded relationship modules deliver additional guided value without gati
   const library = read('member-library.html');
   const release = read('FOUNDING_LAUNCH_RELEASE.md');
   assert.match(store, /seven on Inherited Manhood, eight on Relationship Clarity, and five on Trust, Therapy, and Credibility/);
-  assert.match(store, /original short articles were designed for free education/);
+  assert.match(store, /original shorter public educational articles remain available for future free use/i);
   assert.match(library, /Original shorter educational articles can remain free/);
   assert.match(release, /7 original full-length \+ 3 newly expanded = 10 substantial guided lessons/);
   assert.match(release, /All ten currently remain/);
@@ -108,7 +108,7 @@ test('Track 2 copy describes expanded exercises accurately without suggesting pu
   const library = read('member-library.html');
   const release = read('FOUNDING_LAUNCH_RELEASE.md');
   assert.match(store, /eight relationship recovery modules, each with practical exercises/);
-  assert.match(store, /Original shorter educational articles can remain free|original short articles were designed for free education/i);
+  assert.match(store, /original shorter public educational articles remain available for future free use/i);
   assert.match(library, /eight expanded relationship modules/);
   assert.match(library, /eight guided modules now form the relationship/);
   assert.match(library, /five expanded lessons about trust/);

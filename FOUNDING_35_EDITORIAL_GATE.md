@@ -23,7 +23,7 @@ The Sacred Laws track draws from an existing five-law April 2025 source, confirm
 | Teaching blocks inspected | 3,491; zero empty |
 | Guided prompt entries inspected | 261; zero empty |
 | Short paragraph fragments | 10 (mostly short words like “and”, “Or:” in earlier manuscripts; verify layout) |
-| Possible malformed exercise entries | Two entries: `THE NEED` and `CATEGORY` in `allowed-to-need` |
+| Former malformed exercise entries | Resolved: six source worksheet column headings in `allowed-to-need` rewritten as six source-faithful guided questions. Readback verified; 0 short prompts across library |
 | Protected-table security | Row-level security on; no direct `anon` or `authenticated` table grants observed |
 
 These checks verify structure, **not** whether the writing is accurate, useful, original, publication-ready, or safe in every context.
@@ -41,7 +41,7 @@ These checks verify structure, **not** whether the writing is accurate, useful, 
 ## Prioritized review backlog
 
 ### Pass 1 — Fix known worksheet and formatting problems
-- Inspect **`allowed-to-need`** (“What You Learned You Were Allowed to Need”) using its original Google Doc and protected reader. Two exercise entries are only `THE NEED` and `CATEGORY`; determine whether they are table headers misparsed as questions. Repair only after checking source context.
+- **Completed November 4:** Read the original `allowed-to-need` Google Doc. Its six `Needs Permission Map` entries were worksheet column headings, not reflection questions. Replaced those six labels with six source-faithful questions in the protected manuscript; kept the lesson in `editorial_review`. The `updated_at` revision changed, so prior local editorial review notes must be revalidated.
 - Check ten unusually short paragraphs in `allowed-to-need`, `inherited-vs-chosen-manhood` and `learned-silence`. These may be stylistic joiners or extraction artifacts. Fix only if the actual reading experience suffers.
 - Recheck exercise count and prompts after each repair; old saved review checkmarks must be revalidated when the manuscript revision changes.
 
@@ -69,4 +69,4 @@ These checks verify structure, **not** whether the writing is accurate, useful, 
 
 ## Immediate next piece of work
 
-Start with **`allowed-to-need`**, the two suspect exercise prompts, and its original workbook formatting; correct it in Supabase only after comparing the source. This is the first meaningful quality improvement in the locked thirty-five-lesson library.
+The first source-faithful exercise repair is **complete** (`allowed-to-need`, six corrected prompts). Next: inspect the ten short paragraph fragments in early source manuscripts in the actual reader and evaluate readability before altering them.

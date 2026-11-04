@@ -24,8 +24,8 @@ test('the founding-preview copy cannot be mistaken for an active checkout', () =
   assert.match(html, /Coming Soon · Editorial review/);
   assert.match(html, /None is published or for sale yet/);
   assert.match(html, /Paid checkout is closed/);
-  assert.match(html, /$14\.99/);
-  assert.match(html, /$149/);
+  assert.match(html, /\$14\.99/);
+  assert.match(html, /\$149/);
   assert.match(html, /AI Doc Maker voiceovers are not offered/);
   assert.doesNotMatch(html, /stripe\.com|checkout\.stripe|data-requires-tier="paid"|member-premium-lesson\.html/);
   assert.match(html, /not automatically uploaded, encrypted, or synchronized/);

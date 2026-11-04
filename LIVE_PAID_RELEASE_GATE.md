@@ -1,14 +1,14 @@
 # Flamewalker+ live launch gate — November 4, 2026
 
 ## Release posture
-- 35 protected drafts in six tracks; **0 published**. Content scope frozen until review.
+- **Seven approved and published** founding-track lessons in Supabase. The other **28 remain editorial drafts** across five tracks. Content scope remains frozen to the seven-lesson founding release until later reviews.
 - Free membership is live. Public Store continues to advertise "coming soon."
 - Dedicated live Stripe checkout, portal and webhook functions exist in Supabase, but live prices, account activation, signatures, and customer purchase/entitlement cycle still require actual live-mode acceptance.
-- The connected Stripe integration exposes only the "Not Broken Just Burning sandbox" test-mode account. The founder needs to connect/verify the **live merchant account** or run the internal live QA function from an authorized account.
+- The correct live Stripe account is connected and its recurring prices, webhook endpoint, and Customer Portal were read and verified. Remaining Stripe account verification item was escalated to Stripe Support; it is not yet marked cleared in the last observed Stripe account API state.
 - This PR prepares a hidden client billing panel with recurring terms, consent, and management. The code flag remains **false**, and the server live billing launch mode remains independently controlled.
 
 ## Proposed narrow launch, not an approval
-Start by editorially approving **seven** coherent Wounded Boy and Inherited Manhood lessons and their worksheets, rather than holding release for all thirty-five. This is a release-scoping proposal only: Rickey must approve the actual revision of every published lesson. Unapproved and source-sensitive lessons stay private in editorial review. The paid offer must clearly describe exactly what is available on purchase day.
+**Approved and completed:** Rickey explicitly approved the seven current Wounded Boy and Inherited Manhood lesson revisions for publication. An atomic SQL operation published exactly seven approved rows, retaining their reviewed content revisions; 28 other rows remain editorial drafts. Public sales remain closed. The paid offer must clearly describe exactly what is available on purchase day.
 
 ## Live Stripe account read-only verification — November 4, 2026
 
@@ -26,11 +26,11 @@ The correct **live** merchant account is now connected alongside the sandbox. Ve
 
 ## Editorial sprint and server-side launch guard — November 4, 2026
 
-- Founding seven reviewed structurally: 2,453 nonempty teaching blocks; 39 nonempty guided prompts; all seven still in editorial review. No diagnostic claims were surfaced by the narrow keyword scan, but this is not formal clinical or publisher signoff.
+- Founding seven reviewed structurally: 2,453 nonempty teaching blocks; 39 nonempty guided prompts; founder has now approved and published all seven in Supabase. No diagnostic claims were surfaced by the narrow keyword scan, but this is not formal clinical or publisher signoff.
 - Corrected first three protected manuscripts: internal future-product notes removed from reader body, generic guided questions replaced with specific practical ones, Next Honest Action and Smaller Door rewritten to match the actual lesson text. Verified Supabase readback and zero empty blocks; revision timestamps updated.
 - Earlier repairs to Lessons 5, 6, and 7 remained intact; Lesson 4 has a full Armor Audit. The secure review queue is indexed in `FOUNDING_7_REVIEW_QUEUE.md` without exposing private lesson bodies.
-- Deployed `create-live-checkout-session` **version 6** in Supabase with a strict server-side check requiring at least **seven published lesson rows** before initiating new customer or Checkout creation. Its existing separate canary/public mode gate remains unchanged. Fetched the deployed function after deployment and verified both checks are present.
-- Because the database currently contains **35 `editorial_review` rows and zero `published` rows**, real Checkout remains blocked. The merchant key and real subscription lifecycle still require a controlled human-authorized live canary after editorial approval.
+- Deployed `create-live-checkout-session` **version 7** in Supabase: still checks for at least **seven published lessons**, preserves separate canary authorization, and adds a hard **public checkout lock** `PUBLIC_LIVE_CHECKOUT_ENABLED=false` regardless of the `NBJB_LIVE_BILLING_MODE` secret. Verified the active deployed code. Only a distinct approved launch change may unlock public checkout.
+- The database contains exactly **7 `published` and 28 `editorial_review` rows**. Public Checkout remains blocked independently on server and client, but a nominated canary account may be tested later. Live checkout/entitlement/webhook/cancellation lifecycle still requires controlled authorized testing.
 
 ## Hard gates before taking money
 1. **Editorial:** Founder reads current manuscript revisions and exercises, verifies tone, attribution, safety and meaningful value. Explicitly approve selected manuscripts. Set only those approved rows to 'published'; preserve untouched drafts.
@@ -53,11 +53,11 @@ The correct **live** merchant account is now connected alongside the sandbox. Ve
 - Future certification or other high-touch programs.
 
 ## Current code contract
-The Store's 'member-live-billing' panel remains hidden when 'PUBLIC_CHECKOUT_UI_ENABLED=false'. If enabled in a future launch, paid accounts get a Stripe Portal button, free accounts get checkout options **only** when the server catalog returns at least seven 'published' lessons. A separate server-side 'NBJB_LIVE_BILLING_MODE' check must also permit checkout. Plan identifiers are fixed and verified by Stripe server code, not supplied as arbitrary client prices.
+The Store's 'member-live-billing' panel remains hidden when 'PUBLIC_CHECKOUT_UI_ENABLED=false'. If enabled in a future launch, paid accounts get a Stripe Portal button, free accounts get checkout options **only** when the server catalog returns at least seven 'published' lessons. Public checkout also requires a **separate deployment** switching the server's `PUBLIC_LIVE_CHECKOUT_ENABLED` constant to true **and** an appropriate `NBJB_LIVE_BILLING_MODE` setting; the current deployed constant is false. Plan identifiers are fixed and verified by Stripe server code, not supplied as arbitrary client prices.
 
 ## Last audit
 - Prior PR #128 static test passed; manual browser check still outstanding.
-- This branch has deliberately **not published content or enabled paid checkout**.
+- Seven lessons were published directly to protected Supabase after explicit founder approval; **this branch still does not enable paid checkout**. All 28 other lesson drafts remain protected.
 - Three deployed dedicated live Stripe server functions are not yet source-controlled in this GitHub repository; preserve a verified source copy before production edits.
 
 Launch success = genuine paid purchase + delivered approved lessons + reliable cancellation, not simply a visible payment button.

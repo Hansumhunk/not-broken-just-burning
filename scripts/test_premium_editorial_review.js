@@ -318,6 +318,8 @@ test('live subscription UI is prepared but closed until explicit final launch ap
 test('deployed live checkout source requires a real published library before Stripe customer creation', () => {
   const source = read('launch-backend-staging/create-live-checkout-session/index.ts');
   assert.match(source, /NBJB_LIVE_BILLING_MODE/);
+  assert.match(source, /const PUBLIC_LIVE_CHECKOUT_ENABLED = false;/);
+  assert.match(source, /\(!PUBLIC_LIVE_CHECKOUT_ENABLED \|\| launchMode !== "public"\)/);
   assert.match(source, /flamewalker_premium_lessons/);
   assert.match(source, /count: "exact", head: true/);
   assert.match(source, /\.eq\("status", "published"\)/);

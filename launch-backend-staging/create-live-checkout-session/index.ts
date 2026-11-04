@@ -37,7 +37,12 @@ export default {
     const launchMode = Deno.env.get("NBJB_LIVE_BILLING_MODE");
     const canaryUser = Deno.env.get("NBJB_LIVE_CANARY_USER_ID");
     const isCanary = launchMode === "canary" && canaryUser === userId;
-    if (launchMode !== "public" && !isCanary) return json({ error: "live_checkout_not_enabled" }, 503);
+    // Hard public release lock. Only an explicitly approved final launch PR may
+    // switch this flag; canary testing remains independently restricted by user ID.
+    const PUBLIC_LIVE_CHECKOUT_ENABLED = false;
+    if ((!PUBLIC_LIVE_CHECKOUT_ENABLED || launchMode !== "public") && !isCanary) {
+      return json({ error: "live_checkout_not_enabled" }, 503);
+    }
     // The sandbox QA identity must not contaminate real customer billing.
     if (userId === Deno.env.get("NBJB_SANDBOX_TEST_USER_ID")) {
       return json({ error: "sandbox_test_account_not_eligible" }, 403);

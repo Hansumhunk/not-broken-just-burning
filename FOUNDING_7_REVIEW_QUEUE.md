@@ -1,6 +1,6 @@
 # Flamewalker+ — founding 7 founder review queue
 
-**Status November 4, 2026: one founder content acceptance (Lesson 1), six awaiting review, zero published. This queue is NOT a publication authorization.** The source manuscripts remain in the private database; this public GitHub checklist contains only non-sensitive titles, links and editorial criteria.
+**Status November 4, 2026: Lesson 1 founder-accepted; Lessons 2–7 batch-audited and recommended for one founder decision; zero published. This queue is NOT a publication authorization.** The source manuscripts remain in the private database; this public GitHub checklist contains only non-sensitive titles, links and editorial criteria.
 
 ## Open each private lesson while logged in as the designated editorial reviewer
 
@@ -36,6 +36,17 @@ Founder signoff decision for each lesson: **APPROVE CURRENT REVISION** / **REVIS
 - Deployed Supabase function **create-live-checkout-session v6** now checks a server-side count of at least **seven rows with status=published**, in addition to the independent `NBJB_LIVE_BILLING_MODE` launch switch. With **zero published** now, checkout remains unavailable even if a browser attempts to call it. Deployed source copied to `launch-backend-staging/` in this launch PR for inspection.
 - The reader-only connector styling fix remains unmerged in PR #128 until real-browser visual QA. The staging checkout UI and policy links remain a draft in PR #129. Neither PR has opened public checkout.
 
-## Next decision
+## Batch review result and single founder decision
 
-Review **The Father Wound** first, mark requested changes or approve that exact revision, then continue through lesson 7. If fewer than seven are approved, keep checkout closed and edit the remaining lessons; do not pad the release with drafts. Once seven are approved, verify free/paid access, a real controlled Stripe canary, webhook/entitlement fulfillment and cancellation before public billing goes live.
+The assistant completed one combined structure, exercise, safety-language and distinctiveness review of the seven-lesson founding track, with a targeted reading of each lesson's opening, complete list of headings, guided exercise and relevant safety sections. This is **not a complete external clinical, legal or originality review** and is not a substitution for real-browser QA.
+
+- **Seven of seven** lessons pass the database content contract: **2,453 nonempty reader blocks, 39 complete guided prompts, seven specific Next Honest Actions, seven smaller-door alternatives, safety/support notes present in all seven, no empty prompts or exposed internal production notes**.
+- Only **two passages of 70+ characters** repeat verbatim across more than one lesson, and both are intentional (one safety/support sentence and one shared reforge definition). The six lessons are not clones of Lesson 1.
+- **Lesson 4** is now fixed: five former Armor Audit headings were rewritten as source-faithful practical questions. Its updated source revision is `2026-11-04 23:03:02.569843+00`. No change to lesson body or `editorial_review` status.
+- Other six manuscripts are unchanged in this batch. The user previously accepted Lesson 1's current content.
+
+### One consolidated approval instead of six rounds
+
+When ready, Rickey can explicitly accept **all six remaining current revisions together**, or send one list of edits/holds. The requested scope is only Track 1 (seven lesson manuscripts); it is **not** an instruction to publish the other 28 drafts or activate Stripe. Confirm the approved revision timestamps before changing statuses. If fewer than seven are approved, keep checkout closed.
+
+**Deployment gates remain independent:** reviewer phone/desktop QA, real Free-vs-Paid access test, Stripe live canary with real authorized payment and successful webhook, Customer Portal/cancellation check, accurate day-one storefront copy, and the final deliberate public billing switch. Approval of manuscript content does not by itself charge anyone.

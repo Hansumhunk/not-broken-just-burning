@@ -113,12 +113,13 @@
        <button type="button" class="premium-control" id="premium-font-more" aria-label="Increase text size">A+</button>
      </div>
    </div>
-   <details class="premium-browser-voice" id="premium-browser-voice" open>
+   <p class="premium-audio-explainer" id="premium-voice-unavailable" role="status">Read to Me is temporarily unavailable while we improve it. Written lessons and guided exercises remain available.</p>
+   <details class="premium-browser-voice" id="premium-browser-voice" hidden>
      <summary>Listen aloud <small>Device voice · continues through every section</small></summary>
      <p class="premium-audio-explainer">This uses your browser's built-in voice, not a studio recording. Choose <strong>Read from here</strong> to continue through the lesson and its final reflection questions, or listen only to the current section. Voice quality and background playback vary by device.</p>
      <div class="premium-voice-tools" aria-label="Device read-aloud controls">
-       <button type="button" class="premium-control" id="premium-speak" aria-label="Read aloud from this section to the end of the lesson">▶ Read from here</button>
-       <button type="button" class="premium-control" id="premium-speak-section" aria-label="Read only the current section aloud">▶ This section only</button>
+       <button type="button" class="premium-control" id="premium-speak" disabled aria-label="Read aloud from this section to the end of the lesson">▶ Read from here</button>
+       <button type="button" class="premium-control" id="premium-speak-section" disabled aria-label="Read only the current section aloud">▶ This section only</button>
        <button type="button" class="premium-control" id="premium-pause" disabled>Pause</button>
        <button type="button" class="premium-control" id="premium-stop" disabled>Stop</button>
        <label for="premium-speed">Speed <select id="premium-speed"><option value="0.85">0.85×</option><option value="1" selected>1×</option><option value="1.15">1.15×</option><option value="1.3">1.3×</option></select></label>

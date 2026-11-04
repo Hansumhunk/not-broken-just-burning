@@ -308,6 +308,8 @@ test('live subscription UI is prepared but closed until explicit final launch ap
   assert.match(js, /'create-live-customer-portal-session'/);
   assert.match(js, /url\.protocol === 'https:' && url\.hostname === expected/);
   assert.match(js, /entitlements\.refresh\(\)/);
+  assert.match(js, /if \(params\.get\('checkout'\) === 'success'\)/);
+  assert.ok(js.indexOf("if (params.get('checkout') === 'success')") < js.lastIndexOf('purchase.hidden = false;'), 'redirect handling prevents a second purchase');
   assert.match(bootstrap, /store: \["js\/member-billing\.js"\]/);
   assert.match(validator, /"js\/member-billing\.js"/);
   assert.doesNotMatch(js, /sk_live_|rk_live_|STRIPE_LIVE_SECRET_KEY/);

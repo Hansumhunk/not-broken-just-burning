@@ -50,36 +50,42 @@ test('the reviewer checklist stores no manuscript content and can never grant en
   assert.match(snippet, /This does not approve or publish the lesson/);
 });
 
-test('the private reader lists seven foundational and three relationship lessons in two distinct tracks', () => {
+test('the private reader lists twenty lessons in three distinct tracks', () => {
   const html = read('member-premium-lesson.html');
   const slugs = [
     'father-wound', 'mother-wound', 'learned-silence',
     'bullying-shame-early-armor', 'what-strength-looked-like',
     'allowed-to-need', 'inherited-vs-chosen-manhood',
-    'being-needed-vs-chosen', 'the-love-bargain', 'red-flags-and-responsibility'
+    'being-needed-vs-chosen', 'the-love-bargain', 'red-flags-and-responsibility',
+    'betrayal-rewrite-trap', 'children-not-relationship-glue', 'loyalty-without-self-abandonment',
+    'grieving-future-never-happened', 'other-person-not-your-measure',
+    'promise-of-the-room', 'split-alliance-therapy-triangle', 'professional-authority-multiplier',
+    'when-you-stop-trusting-own-account', 'double-bind-darvo-reaction'
   ];
   const links = Array.from(html.matchAll(/data-premium-lesson-link="([^"]+)"/g)).map(match => match[1]);
   assert.deepEqual(links, slugs);
   assert.match(html, /Track 1 · The Wounded Boy and Inherited Manhood/);
   assert.match(html, /Track 2 · The Placeholder Wound/);
+  assert.match(html, /Track 3 · When the Safe Room Becomes the Courtroom/);
   assert.match(html, /Editorial preview: unpublished lessons are available only to the approved reviewer/);
   const js = read('js/member-premium-lesson.js');
-  assert.match(js, /const tracks = \['wounded-boy', 'placeholder-wound'\]/);
+  assert.match(js, /const tracks = \['wounded-boy', 'placeholder-wound', 'safe-room-courtroom'\]/);
   assert.match(js, /tracks\.indexOf\(a\.track_slug\)/);
   assert.match(js, /group\.className = 'premium-track-heading'/);
   assert.match(js, /Track 2 · The Placeholder Wound/);
 });
 
-test('membership and library descriptions promise ten draft lessons, not live paid access', () => {
+test('membership and library descriptions promise twenty drafts, not live paid access', () => {
   const store = read('member-store.html');
   const library = read('member-library.html');
   const doc = read('FOUNDING_LAUNCH_RELEASE.md');
-  assert.match(store, /Planned founding library: ten written self-guided lessons/);
-  assert.match(store, /All ten are currently unpublished editorial drafts/);
+  assert.match(store, /Planned founding library: twenty written self-guided lessons/);
+  assert.match(store, /All twenty are currently unpublished editorial drafts/);
   assert.match(store, /Planned: not for sale yet/);
   assert.match(library, /Seven-Lesson Track · Coming Soon/);
   assert.match(library, /checkout remains closed/);
-  assert.match(library, /Three Guided Lessons · Coming Soon/);
+  assert.match(library, /Eight-Lesson Track · Coming Soon/);
+  assert.match(library, /Five-Lesson Track · Coming Soon/);
   assert.match(doc, /All seven are present in Supabase/);
   assert.match(doc, /status = editorial_review/);
   assert.match(doc, /No source manuscript bodies were added to public GitHub/);
@@ -89,7 +95,7 @@ test('expanded relationship modules deliver additional guided value without gati
   const store = read('member-store.html');
   const library = read('member-library.html');
   const release = read('FOUNDING_LAUNCH_RELEASE.md');
-  assert.match(store, /seven full-length Masculine Restoration lessons and three expanded relationship modules/);
+  assert.match(store, /seven on Inherited Manhood, eight on Relationship Clarity, and five on Trust, Therapy, and Credibility/);
   assert.match(store, /original short articles were designed for free education/);
   assert.match(library, /Original shorter educational articles can remain free/);
   assert.match(release, /7 original full-length \+ 3 newly expanded = 10 substantial guided lessons/);
@@ -101,11 +107,11 @@ test('Track 2 copy describes expanded exercises accurately without suggesting pu
   const store = read('member-store.html');
   const library = read('member-library.html');
   const release = read('FOUNDING_LAUNCH_RELEASE.md');
-  assert.match(store, /each with scenarios and a seven- or eight-prompt guided exercise/);
+  assert.match(store, /eight relationship recovery modules, each with practical exercises/);
   assert.match(store, /Original shorter educational articles can remain free|original short articles were designed for free education/i);
-  assert.match(library, /seven- or eight-question reflection exercises/);
-  assert.match(library, /Four-Lens Reciprocity Map/);
-  assert.match(library, /Six-Column Decision Review/);
+  assert.match(library, /eight expanded relationship modules/);
+  assert.match(library, /eight guided modules now form the relationship/);
+  assert.match(library, /five expanded lessons about trust/);
   assert.match(release, /content.version = 2/);
   assert.match(release, /status = editorial_review/);
   assert.match(release, /no Stripe checkout was enabled/);
@@ -237,4 +243,15 @@ test('AI Doc Maker recordings cannot be served by the premium lesson API', () =>
   assert.doesNotMatch(reader, /syncRecordedAudio\(|premium-recorded-audio|AI Doc Maker/);
   assert.doesNotMatch(html, /AI Doc Maker|aidocmaker\.com|premium-recorded-audio|premium-audio-credit/);
   assert.match(html, /id="premium-speak"/);
+});
+
+test('every protected founding lesson link is unique across three tracks', () => {
+  const html = read('member-premium-lesson.html');
+  const links = [...html.matchAll(/data-premium-lesson-link="([^"]+)"/g)].map(m => m[1]);
+  assert.equal(links.length, 20);
+  assert.equal(new Set(links).size, 20);
+  assert.match(html, /Review the twenty founding lessons/);
+  const script = read('js/member-premium-lesson.js');
+  assert.match(script, /'safe-room-courtroom'/);
+  assert.match(script, /Track 3 · When the Safe Room Becomes the Courtroom/);
 });

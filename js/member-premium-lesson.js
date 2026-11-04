@@ -59,7 +59,7 @@
     try {
       const { data, error } = await auth.client.functions.invoke('read-flamewalker-lesson', { body: { action: 'catalog' } });
       if (error || !Array.isArray(data?.lessons)) return;
-      const tracks = ['wounded-boy', 'placeholder-wound'];
+      const tracks = ['wounded-boy', 'placeholder-wound', 'safe-room-courtroom'];
       const items = data.lessons.filter(item => item && tracks.includes(item.track_slug) && typeof item.slug === 'string' &&
         /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.slug) && item.slug.length <= 100)
         .sort((a, b) => tracks.indexOf(a.track_slug) - tracks.indexOf(b.track_slug) ||
@@ -77,7 +77,9 @@
           group.className = 'premium-track-heading';
           group.textContent = item.track_slug === 'wounded-boy'
             ? 'Track 1 · The Wounded Boy and Inherited Manhood'
-            : 'Track 2 · The Placeholder Wound';
+            : item.track_slug === 'placeholder-wound'
+              ? 'Track 2 · The Placeholder Wound'
+              : 'Track 3 · When the Safe Room Becomes the Courtroom';
           nav.append(group);
           priorTrack = item.track_slug;
         }
@@ -357,7 +359,9 @@
     main.hidden = false;
     const trackLabel = lesson.track_slug === 'placeholder-wound'
       ? 'Track 2 · The Placeholder Wound'
-      : 'Track 1 · The Wounded Boy and Inherited Manhood';
+      : lesson.track_slug === 'safe-room-courtroom'
+        ? 'Track 3 · When the Safe Room Becomes the Courtroom'
+        : 'Track 1 · The Wounded Boy and Inherited Manhood';
     el('premium-lesson-sequence').textContent = trackLabel + ' · Lesson ' +
       String(lesson.lesson_number).padStart(2, '0') +
       (lesson.status === 'editorial_review' ? ' · Private editorial preview' : ' · Published');
@@ -417,7 +421,9 @@
         previousTrack = item.track_slug;
         const trackHeader = document.createElement('li');
         trackHeader.className = 'premium-review-track';
-        trackHeader.textContent = previousTrack === 'wounded-boy' ? 'Track 1 · The Wounded Boy' : 'Track 2 · The Placeholder Wound';
+        trackHeader.textContent = previousTrack === 'wounded-boy' ? 'Track 1 · The Wounded Boy'
+          : previousTrack === 'placeholder-wound' ? 'Track 2 · The Placeholder Wound'
+          : 'Track 3 · When the Safe Room Becomes the Courtroom';
         list.append(trackHeader);
       }
       const li = document.createElement('li');

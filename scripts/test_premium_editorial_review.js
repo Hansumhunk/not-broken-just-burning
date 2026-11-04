@@ -115,7 +115,7 @@ test('Track 2 copy describes expanded exercises accurately without suggesting pu
   assert.match(store, /original shorter public educational articles remain available for future free use/i);
   assert.match(library, /eight expanded relationship modules/);
   assert.match(library, /eight guided modules now form the relationship/);
-  assert.match(library, /five expanded lessons about trust/);
+  assert.match(library, /five lessons about trust and helping processes/);
   assert.match(release, /content.version = 2/);
   assert.match(release, /status = editorial_review/);
   assert.match(release, /no Stripe checkout was enabled/);

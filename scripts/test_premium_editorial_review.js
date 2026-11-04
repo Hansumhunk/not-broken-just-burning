@@ -227,3 +227,14 @@ test('device read-aloud advances through every section and optional exercise in 
   assert.equal(context.current, 0, 'stop cancels pending auto-advance');
   assert.equal(spoken.length, beforeStop, 'stale speech callbacks are ignored');
 });
+
+test('AI Doc Maker recordings cannot be served by the premium lesson API', () => {
+  const backend = read('supabase/functions/read-flamewalker-lesson/index.ts');
+  const reader = read('js/member-premium-lesson.js');
+  const html = read('member-premium-lesson.html');
+  assert.match(backend, /if \(body\?\.action === "audio"\) return reply\(\{ available: false, error: "narration_paused" \}, 410\)/);
+  assert.doesNotMatch(backend, /createSignedUrl\(/);
+  assert.doesNotMatch(reader, /syncRecordedAudio\(|premium-recorded-audio|AI Doc Maker/);
+  assert.doesNotMatch(html, /AI Doc Maker|aidocmaker\.com|premium-recorded-audio|premium-audio-credit/);
+  assert.match(html, /id="premium-speak"/);
+});

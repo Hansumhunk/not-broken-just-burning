@@ -1,6 +1,6 @@
 # Flamewalker+ — founding 7 founder review queue
 
-**Status November 4, 2026: seven protected editorial drafts; zero approved/published. This queue is NOT a publication authorization.** The source manuscripts remain in the private database; this public GitHub checklist contains only non-sensitive titles, links and editorial criteria.
+**Status November 4, 2026: one founder content acceptance (Lesson 1), six awaiting review, zero published. This queue is NOT a publication authorization.** The source manuscripts remain in the private database; this public GitHub checklist contains only non-sensitive titles, links and editorial criteria.
 
 ## Open each private lesson while logged in as the designated editorial reviewer
 
@@ -14,6 +14,13 @@
 | 06 | [What You Learned You Were Allowed to Need](https://notbrokenjustburning.com/member-premium-lesson.html?lesson=allowed-to-need) | 6 | Review repaired Needs Permission Map and safety of making requests. |
 | 07 | [Inherited Manhood vs. Chosen Manhood](https://notbrokenjustburning.com/member-premium-lesson.html?lesson=inherited-vs-chosen-manhood) | 6 | Review full KEEP/REFORGE/RETIRE/BUILD/ACT/REVIEW Code and seven-day practice. |
 
+
+## Founder content review recorded — Lesson 1
+
+- **The Father Wound** (`father-wound`): founder replied **“okay, this all looks good”** after the Lesson 1 review handoff. Treat this as **content acceptance of the current revision**, not permission to activate public sales or publish the entire track.
+- Accepted Supabase manuscript revision: `updated_at = 2026-11-04 22:52:28.328069+00`; 149 reading blocks, five guided prompts. Any further manuscript change requires renewed editorial acceptance.
+- **Still outstanding:** real desktop/mobile reader check, premium content access verification, and final release acceptance. Database status stays `editorial_review` until those are complete.
+- **Next founder review:** Lesson 2, *The Mother Wound* (`mother-wound`), current revision `updated_at = 2026-11-04 22:52:29.580414+00`; 205 reading blocks and five guided prompts.
 ## Approve the actual current revision, not an old draft
 
 For each lesson, read the body and the entire guided exercise in the authenticated reader, verify correct section navigation and local-only reflection saving, inspect a phone and desktop layout, check an optional device voice read-aloud session, and record factual/cultural/trauma-informed edits before signing off. Check that a free account cannot retrieve the manuscript. The checklist stored on the device is not founder approval and cannot change publication status.

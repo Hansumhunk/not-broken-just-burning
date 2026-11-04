@@ -20,6 +20,11 @@ Start by editorially approving **seven** coherent Wounded Boy and Inherited Manh
 7. **Security:** Review Supabase advisory warnings (compromised-password protection disabled and pg_net in public schema) and tighten where appropriate. Never move a production extension blindly. Keep all secrets server-side, and back up/version the deployed live Stripe function source before altering it.
 8. **Separate launch PR:** Only after all above pass, change the client gate to true, enable server public billing mode, update static launch copy/links in Store, public Plus preview, Join and Terms, and ensure every displayed benefit is published and accessible. Verify GitHub Actions and deployment.
 
+## Focused worksheet improvements — protected database, November 4
+- The 'what-strength-looked-like' Strength Model Audit originally used six worksheet column labels as input prompts; these were replaced with **seven** source-faithful actionable questions, including the original manuscript's seventh 'chosen rule' step.
+- The 'inherited-vs-chosen-manhood' Chosen Manhood Code originally used six chapter labels as prompts; these were replaced with **six** source-faithful fully worded questions for KEEP, REFORGE, RETIRE, BUILD, ACT and REVIEW.
+- Both rows were read back successfully in Supabase; teaching blocks were unchanged and both remain 'editorial_review'. The revision timestamps changed, so saved reviewer checkmarks for those drafts must be revalidated. Both changes still require founder review.
+
 ## What does not block first release
 - Remaining 28 drafts after a founder-approved seven-lesson launch.
 - Studio voiceovers, video courses, app, community and merchandise.

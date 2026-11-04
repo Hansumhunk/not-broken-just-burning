@@ -270,7 +270,7 @@ test('new practical tracks appear in private reader and editorial queue without 
   }
   assert.match(js, /Track 4 · Steadiness & Emotional Command/);
   assert.match(js, /Track 5 · Rebuilding a Life That Holds/);
-  assert.match(html, /Thirty-lesson editorial review queue/);
+  assert.match(html, /Thirty-five-lesson editorial review queue/);
   assert.match(read('member-store.html'), /All thirty-five are currently unpublished editorial drafts/);
 });
 

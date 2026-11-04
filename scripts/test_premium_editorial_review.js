@@ -286,3 +286,29 @@ test('the recovered Sacred Laws remain private, correctly ordered, and awaiting 
   assert.match(doc, /35 drafts · 6 tracks · 0 published/);
   assert.match(doc, /Founding content scope is frozen/);
 });
+
+
+test('live subscription UI is prepared but closed until explicit final launch approval', () => {
+  const html = read('member-store.html');
+  const js = read('js/member-billing.js');
+  const bootstrap = read('js/member-bootstrap.js');
+  const validator = read('scripts/validate_site.py');
+  assert.match(html, /id="member-live-billing"[^>]*hidden/);
+  assert.match(html, /id="member-billing-consent"/);
+  assert.match(html, /data-live-billing-offer="flamewalker_plus_monthly"/);
+  assert.match(html, /data-live-billing-offer="flamewalker_plus_annual"/);
+  assert.match(html, /id="member-billing-portal"/);
+  assert.match(html, /href="terms\.html"/);
+  assert.match(html, /href="refunds\.html"/);
+  assert.match(js, /const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+  assert.match(js, /if \(!PUBLIC_CHECKOUT_UI_ENABLED\) return;/);
+  assert.match(js, /const MIN_PUBLISHED_LESSONS = 7;/);
+  assert.match(js, /item\?\.status === 'published'/);
+  assert.match(js, /'create-live-checkout-session'/);
+  assert.match(js, /'create-live-customer-portal-session'/);
+  assert.match(js, /url\.protocol === 'https:' && url\.hostname === expected/);
+  assert.match(js, /entitlements\.refresh\(\)/);
+  assert.match(bootstrap, /store: \["js\/member-billing\.js"\]/);
+  assert.match(validator, /"js\/member-billing\.js"/);
+  assert.doesNotMatch(js, /sk_live_|rk_live_|STRIPE_LIVE_SECRET_KEY/);
+});

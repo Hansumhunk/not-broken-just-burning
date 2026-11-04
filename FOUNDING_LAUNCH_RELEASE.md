@@ -1,5 +1,23 @@
 # Current founding release inventory — November 4, 2026
 
+**CURRENT STATUS: 30 protected editorial-review lesson drafts in FIVE tracks; ZERO published; paid checkout CLOSED.**
+
+- **Track 1 — The Wounded Boy and Inherited Manhood (`wounded-boy`):** 7 full-length guided manuscripts.
+- **Track 2 — The Placeholder Wound (`placeholder-wound`):** 8 guided relationship recovery lessons.
+- **Track 3 — When the Safe Room Becomes the Courtroom (`safe-room-courtroom`):** 5 research-oriented learning drafts; sources and claims need editorial verification.
+- **Track 4 — Steadiness & Emotional Command (`steadiness-command`):** 5 newly authored guided lessons on body care, emotional awareness, reactions, boundaries, and sustainable discipline.
+- **Track 5 — Rebuilding a Life That Holds (`life-rebuilt`):** 5 newly authored guided lessons on provision, fatherhood, brotherhood, self-leadership, and integration.
+
+**Source for Tracks 4 and 5:** Google Drive's `Masculine Restoration - Foundation Architecture v0.1` (a declared *foundation or skeleton*, not a previously completed course). These ten private educational lesson drafts expand its existing topics into examples, practical tools, eight optional reflection prompts each, Next Honest Actions and Smaller Door exercises. No real private family or case details were included. This status is an educational content inventory, not clinical review or editorial publication approval.
+
+Original source documents remain unchanged and no private lesson bodies were committed to public GitHub Pages. Paid checkout, lesson publication flags, and protected reader entitlements remain unchanged.
+
+**Next acceptance work:** Founder reviews all 30 manuscripts and guided prompts, checks overlap and factual claims (especially health and Safe Room research), tests the actual reader and worksheet on devices, approves explicitly, verifies Free vs. Paid access and finalized billing/refunds before selling subscriptions.
+
+## Historical project checkpoints (earlier 20-, 10-, and 3-lesson milestones)
+
+# Prior twenty-lesson inventory — November 4, 2026
+
 **CURRENT STATUS: 20 private editorial-review lessons across 3 tracks; ZERO published; paid checkout CLOSED.**
 
 - **Track 1, `wounded-boy`:** 7 full-length guided manuscripts and exercises.

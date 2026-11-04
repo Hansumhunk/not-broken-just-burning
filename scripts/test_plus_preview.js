@@ -5,7 +5,7 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const read = name => fs.readFileSync(path.join(root, name), 'utf8');
 
-test('Flamewalker Plus has a public, indexable, accessible twenty-lesson curriculum preview', () => {
+test('Flamewalker Plus has a public, indexable, accessible thirty-lesson curriculum preview', () => {
   const html = read('flamewalker-plus.html');
   const foundation = [...html.matchAll(/data-plus-lesson data-plus-track="wounded-boy"/g)];
   const relationship = [...html.matchAll(/data-plus-lesson data-plus-track="placeholder-wound"/g)];
@@ -13,9 +13,13 @@ test('Flamewalker Plus has a public, indexable, accessible twenty-lesson curricu
   assert.equal(relationship.length, 8);
   const trust = [...html.matchAll(/data-plus-lesson data-plus-track="safe-room-courtroom"/g)];
   assert.equal(trust.length, 5);
+  assert.equal([...html.matchAll(/data-plus-lesson data-plus-track="steadiness-command"/g)].length, 5);
+  assert.equal([...html.matchAll(/data-plus-lesson data-plus-track="life-rebuilt"/g)].length, 5);
   assert.match(html, /id="wounded-boy"/);
   assert.match(html, /id="placeholder-wound"/);
   assert.match(html, /id="safe-room-courtroom"/);
+  assert.match(html, /id="steadiness-command"/);
+  assert.match(html, /id="life-rebuilt"/);
   assert.match(html, /href="#main-content"/);
   assert.match(html, /<main id="main-content">/);
   assert.match(html, /rel="canonical" href="https:\/\/notbrokenjustburning\.com\/flamewalker-plus\.html"/);
@@ -42,14 +46,17 @@ test('site visitors and signed-in members can discover the preview without a bro
   assert.match(read('member-store.html'), /Planned: not for sale yet/);
 });
 
-test('twenty planned lessons are honestly presented in three distinct tracks', () => {
+test('thirty planned lessons are honestly presented in five distinct tracks', () => {
   const html = read('flamewalker-plus.html');
   const cards = [...html.matchAll(/data-plus-lesson data-plus-track="([^"]+)"/g)].map(m=>m[1]);
   assert.deepEqual(cards.filter(v=>v==="wounded-boy").length,7);
   assert.deepEqual(cards.filter(v=>v==="placeholder-wound").length,8);
   assert.deepEqual(cards.filter(v=>v==="safe-room-courtroom").length,5);
-  assert.match(html, /Twenty manuscripts prepared across three tracks/);
+  assert.equal(cards.filter(v=>v==="steadiness-command").length,5);
+  assert.equal(cards.filter(v=>v==="life-rebuilt").length,5);
+  assert.equal(cards.length,30);
+  assert.match(html, /Thirty manuscripts prepared across five tracks/);
   assert.match(html, /Research references and clinical\/legal boundaries still require editorial verification/);
-  assert.match(html, /No\. All twenty lessons are still undergoing editorial review/);
-  assert.match(read('join.html'), /Explore the twenty-lesson curriculum preview/);
+  assert.match(html, /No\. All thirty lessons are still undergoing editorial review/);
+  assert.match(read('join.html'), /Explore the thirty-lesson curriculum preview/);
 });

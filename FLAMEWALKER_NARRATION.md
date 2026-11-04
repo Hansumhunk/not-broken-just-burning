@@ -1,3 +1,5 @@
+> **PAUSED / ARCHIVED — November 4, 2026.** AI Doc Maker voiceover is not offered in the Flamewalker+ lesson player. The incomplete recordings are retained privately, and the authenticated lesson API's old audio action returns `410 narration_paused` without issuing a playback URL. This document is historical production reference only. Do not direct members to the batch uploader or offer studio narration until a complete approved recording set is intentionally reintroduced.
+
 # Flamewalker+ narration production workflow
 
 ## Current state

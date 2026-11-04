@@ -24,6 +24,14 @@ The correct **live** merchant account is now connected alongside the sandbox. Ve
 
 **No live prices, billing settings, account data, or security secrets were mutated during this inspection.** Keep live checkout closed until remaining launch gates pass.
 
+## Editorial sprint and server-side launch guard — November 4, 2026
+
+- Founding seven reviewed structurally: 2,453 nonempty teaching blocks; 39 nonempty guided prompts; all seven still in editorial review. No diagnostic claims were surfaced by the narrow keyword scan, but this is not formal clinical or publisher signoff.
+- Corrected first three protected manuscripts: internal future-product notes removed from reader body, generic guided questions replaced with specific practical ones, Next Honest Action and Smaller Door rewritten to match the actual lesson text. Verified Supabase readback and zero empty blocks; revision timestamps updated.
+- Earlier repairs to Lessons 5, 6, and 7 remained intact; Lesson 4 has a full Armor Audit. The secure review queue is indexed in `FOUNDING_7_REVIEW_QUEUE.md` without exposing private lesson bodies.
+- Deployed `create-live-checkout-session` **version 6** in Supabase with a strict server-side check requiring at least **seven published lesson rows** before initiating new customer or Checkout creation. Its existing separate canary/public mode gate remains unchanged. Fetched the deployed function after deployment and verified both checks are present.
+- Because the database currently contains **35 `editorial_review` rows and zero `published` rows**, real Checkout remains blocked. The merchant key and real subscription lifecycle still require a controlled human-authorized live canary after editorial approval.
+
 ## Hard gates before taking money
 1. **Editorial:** Founder reads current manuscript revisions and exercises, verifies tone, attribution, safety and meaningful value. Explicitly approve selected manuscripts. Set only those approved rows to 'published'; preserve untouched drafts.
 2. **Real-browser QA:** Authenticated reviewer inspects desktop/mobile reader, worksheet copy/clear, lesson progress and device voice. Verify no reflection text is unexpectedly uploaded or persisted.

@@ -295,48 +295,72 @@
     }
   }
   function renderFatherMapInline(step, body, positiveInheritance) {
-    let lastField = null;
-    function placeColumn(column) {
-      const input = el(fatherMapFields[column - 1]);
-      const field = input?.closest('.premium-map-field');
-      if (!field) return;
-      body.append(field);
-      lastField = field;
+    // Each map column is a two-pane row: manuscript guidance on the left,
+    // the original editable input on the right. Keep moving the SAME input
+    // nodes as the learner progresses so answers never reset on navigation.
+    function makeRow() {
+      const row = document.createElement('div');
+      row.className = 'premium-map-row';
+      const reading = document.createElement('div');
+      reading.className = 'premium-map-reading';
+      const writing = document.createElement('div');
+      writing.className = 'premium-map-writing';
+      row.append(reading, writing);
+      body.append(row);
+      return { reading, writing };
     }
-    function renderBlock(block) {
-      appendText(body, block.kind === 'heading' ? 'h3' : 'p', block.text,
+    function placeColumn(column, row) {
+      const field = el(fatherMapFields[column - 1])?.closest('.premium-map-field');
+      if (field) row.writing.append(field);
+    }
+    function renderBlock(target, block) {
+      appendText(target, block.kind === 'heading' ? 'h3' : 'p', block.text,
         block.kind === 'paragraph' && /^(?:and|or):?$/i.test(block.text.trim()) ? 'premium-prose-connector' : '');
     }
 
     if (positiveInheritance) {
-      step.blocks.forEach(renderBlock);
-      placeColumn(1);
+      const row = makeRow();
+      step.blocks.forEach(block => renderBlock(row.reading, block));
+      placeColumn(1, row);
     } else if (step.continuation >= 2) {
-      appendText(body, 'p', 'Review your own answers here. Change anything you want, then Copy or Save your map.', 'premium-map-continuity');
-      for (let n = 1; n <= 4; n++) placeColumn(n);
-      step.blocks.forEach(renderBlock);
+      appendText(body, 'p', 'Review your answers below. Update anything you want, then Copy or Save the map.',
+        'premium-map-continuity');
+      step.blocks.forEach(block => renderBlock(body, block));
+      const names = ['What I received', 'What I missed', 'What I learned', 'What I choose now'];
+      for (let n = 1; n <= 4; n++) {
+        const row = makeRow();
+        appendText(row.reading, 'h3', 'Column ' + n + ' — ' + names[n - 1]);
+        appendText(row.reading, 'p', 'Your response carries forward from the earlier map sections.');
+        placeColumn(n, row);
+      }
     } else {
-      let awaitingColumn = 0;
+      let active = null;
       for (const block of step.blocks) {
         const heading = block.kind === 'heading' ? block.text.trim() : '';
-        const nextColumn = /^COLUMN\s+([1-4])\b/i.exec(heading);
-        if (nextColumn) {
-          if (awaitingColumn) placeColumn(awaitingColumn);
-          awaitingColumn = Number(nextColumn[1]);
-        } else if (awaitingColumn === 4 && /^EXAMPLE\s+\d+/i.test(heading)) {
-          placeColumn(4);
-          awaitingColumn = 0;
-        }
-        renderBlock(block);
-        // The next page begins by classifying the previously written rule.
-        // Reuse the *same* input and checkboxes rather than starting a new map.
-        if (step.continuation === 1 && /^Then mark each statement:/i.test(block.text.trim())) {
-          placeColumn(3);
+        const match = /^COLUMN\s+([1-4])\b/i.exec(heading);
+        if (match) {
+          active = makeRow();
+          renderBlock(active.reading, block);
+          placeColumn(Number(match[1]), active);
+        } else if (active && /^EXAMPLE\s+\d+/i.test(heading)) {
+          // Worked examples are illustrations, not more fields to complete.
+          active = null;
+          renderBlock(body, block);
+        } else if (step.continuation === 1 && /^Then mark each statement:/i.test(block.text.trim())) {
+          // Column 3's classification instructions continue on the next page;
+          // bring the same editable Column 3 box alongside this explanation.
+          active = makeRow();
+          renderBlock(active.reading, block);
+          placeColumn(3, active);
+        } else {
+          renderBlock(active ? active.reading : body, block);
         }
       }
-      if (awaitingColumn) placeColumn(awaitingColumn);
     }
-    if (lastField) lastField.after(el('premium-map-actions'), el('premium-map-status'));
+
+    // Save/Copy appear once at the end of the current map view, outside the
+    // right-hand answer pane. Neither action runs automatically.
+    body.append(el('premium-map-actions'), el('premium-map-status'));
   }
 
   function render({ focus = false } = {}) {
@@ -362,6 +386,7 @@
       el('premium-step-kicker').textContent = 'Part ' + (current + 1) + ' · ' + estimate(step);
       el('premium-step-title').textContent = label(step);
       const body = el('premium-reader-body');
+      body.classList.toggle('premium-map-layout', isFatherPractice);
       body.replaceChildren();
       // For map lessons, place each real input immediately after the explanation
       // of its column, not at the very bottom or on a separate reflection page.

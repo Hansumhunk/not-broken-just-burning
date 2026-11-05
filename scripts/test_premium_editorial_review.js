@@ -1025,10 +1025,13 @@ test('Needs Permission Map places answers beside six questions and keeps both ne
 
   const complete=ws.completedWorksheetText();
   assert.match(complete,/NEEDS PERMISSION MAP — MY CHOSEN SUPPORT/);
+  assert.match(complete,/PART I — POSITIVE INHERITANCE/);
+  assert.match(complete,/My grandmother taught me patience/);
+  assert.match(complete,/PART II — THE NEEDS PERMISSION MAP/);
   assert.match(complete,/NEED 1/);
   assert.match(complete,/NEED 2/);
-  assert.match(complete,/PART II — THE REQUEST CHECK/);
-  assert.match(complete,/PART III — FINAL REFLECTION/);
+  assert.match(complete,/PART III — THE REQUEST CHECK/);
+  assert.match(complete,/PART IV — FINAL REFLECTION/);
   assert.match(complete,/Asking clearly is responsible/);
   const review=node();ws.renderCompletion(review);
   const paper=find(review,x=>x.className==='premium-worksheet-paper')[0];

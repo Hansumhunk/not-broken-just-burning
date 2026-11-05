@@ -29,6 +29,7 @@ on:
       - 'scripts/validate_supabase_runtime.py'
       - 'supabase/migrations/**'
       - 'PLATFORM_QA_GATE_2026-11-05.md'
+      - 'FLAMEWALKER_PLUS_RELEASE_CHECKLIST.md'
       - '.github/workflows/validate-site.yml'
       - '.github/workflows/clear-stale-pages.yml'
   pull_request:
@@ -51,6 +52,7 @@ on:
       - 'scripts/validate_supabase_runtime.py'
       - 'supabase/migrations/**'
       - 'PLATFORM_QA_GATE_2026-11-05.md'
+      - 'FLAMEWALKER_PLUS_RELEASE_CHECKLIST.md'
       - '.github/workflows/validate-site.yml'
       - '.github/workflows/clear-stale-pages.yml'
 

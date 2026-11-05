@@ -25,6 +25,7 @@
   let steps = [];
   let current = 0;
   let lesson = null;
+  let inlineWorkspace = null;
   let reviewCatalog = [];
   let reading = false;
   let speechMode = 'all';
@@ -371,13 +372,15 @@
     // Restore answer fields to their hidden, stable parking area before
     // replacing section prose; typed values remain in the same DOM nodes.
     parkFatherMap();
+    inlineWorkspace?.park();
     const onFatherMap = slug === 'father-wound' && /father imprint map/i.test(step.title) && !final;
     const onPositiveInheritance = slug === 'father-wound' && /^part 8\b/i.test(step.title) && !final;
     const isFatherPractice = onFatherMap || onPositiveInheritance;
+    const isStructuredPractice = Boolean(inlineWorkspace?.matches(step));
     el('premium-father-map-guide').hidden = !onFatherMap;
     el('premium-father-positive-guide').hidden = !onPositiveInheritance;
     el('premium-father-map').hidden = true;
-    el('premium-pause-reflection').hidden = isFatherPractice || final;
+    el('premium-pause-reflection').hidden = isFatherPractice || isStructuredPractice || final;
     el('premium-current-step').hidden = final;
     el('premium-exercise').hidden = !final;
     if (final) {
@@ -386,11 +389,12 @@
       el('premium-step-kicker').textContent = 'Part ' + (current + 1) + ' · ' + estimate(step);
       el('premium-step-title').textContent = label(step);
       const body = el('premium-reader-body');
-      body.classList.toggle('premium-map-layout', isFatherPractice);
+      body.classList.toggle('premium-map-layout', isFatherPractice || isStructuredPractice);
       body.replaceChildren();
       // For map lessons, place each real input immediately after the explanation
       // of its column, not at the very bottom or on a separate reflection page.
       if (isFatherPractice) renderFatherMapInline(step, body, onPositiveInheritance);
+      else if (isStructuredPractice) inlineWorkspace.render(step, body, appendText);
       else step.blocks.forEach(b => appendText(body, b.kind === 'heading' ? 'h3' : 'p', b.text,
         b.kind === 'paragraph' && /^(?:and|or):?$/i.test(b.text.trim()) ? 'premium-prose-connector' : ''));
       el('premium-pause-note').value = notes.get(current) || '';
@@ -462,6 +466,11 @@
     }
     const blocks = Array.isArray(lesson.content?.blocks) ? lesson.content.blocks : [];
     steps = [...sectionize(blocks), { title: 'Guided reflection', exercise: true, blocks: [] }];
+    inlineWorkspace = window.NBJBPremiumWorkspaces?.create?.({
+      slug,
+      parking: el('premium-workspace-parking'),
+      saveToWork: (text, context, status) => saveReflectionToWork(text, context, status)
+    }) || null;
     const promptLabel = el('premium-editorial-prompt-label');
     const promptCount = Array.isArray(lesson.content?.exercise?.prompts) ? lesson.content.exercise.prompts.length : 0;
     if (promptLabel) promptLabel.textContent = promptCount + (promptCount === 1 ? ' reflection prompt' : ' reflection prompts');

@@ -166,9 +166,32 @@
 @media(max-width:680px){.premium-inline-map .button{width:100%}}
 
 
-/* Place the response directly under each manuscript column's examples. */
-.premium-lesson-body>.premium-map-field{margin:16px 0 25px;border-color:rgba(248,117,42,.42);background:rgba(248,117,42,.055)}
-.premium-lesson-body>.premium-map-field>label strong{color:#ffb482}
-.premium-lesson-body>.premium-pause-actions{margin:18px 0 12px}
-.premium-lesson-body>.premium-map-status{margin:7px 0 22px}
-.premium-lesson-body .premium-map-continuity{font-weight:600;color:var(--text);margin:0 0 17px}
+/* Read left, respond right: map columns share their row with the
+   corresponding editable answer, reducing vertical scrolling on desktop. */
+.premium-lesson-body.premium-map-layout{max-width:100%;width:100%}
+.premium-map-layout .premium-map-row{
+  display:grid;
+  grid-template-columns:minmax(0,1.2fr) minmax(300px,.9fr);
+  gap:clamp(18px,3vw,38px);
+  align-items:start;
+  margin:18px 0 25px;
+  padding:8px 0 22px;
+  border-bottom:1px solid rgba(248,117,42,.18);
+}
+.premium-map-layout .premium-map-reading,.premium-map-layout .premium-map-writing{min-width:0}
+.premium-map-layout .premium-map-reading h3{margin:4px 0 18px}
+.premium-map-layout .premium-map-reading p{max-width:65ch}
+.premium-map-layout .premium-map-writing .premium-map-field{
+  width:100%;
+  margin:0;
+  border-color:rgba(248,117,42,.43);
+  background:rgba(248,117,42,.055);
+}
+.premium-map-layout .premium-map-writing .premium-map-field>label strong{color:#ffb482}
+.premium-map-layout>.premium-pause-actions{margin:18px 0 12px}
+.premium-map-layout>.premium-map-status{margin:7px 0 22px}
+.premium-map-layout .premium-map-continuity{font-weight:600;color:var(--text);margin:0 0 17px}
+@media(max-width:800px){
+  .premium-map-layout .premium-map-row{grid-template-columns:minmax(0,1fr);gap:13px}
+  .premium-map-layout .premium-map-writing .premium-map-field{max-width:100%}
+}

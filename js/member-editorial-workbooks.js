@@ -58,29 +58,65 @@
     // Reuse matching answer fields, but keep genuinely distinct questions separate.
     const earlyConfig={
       'split-alliance-therapy-triangle':{
-        cue:'alliance integrity check:',map:[0,1,2,3,4]
+        cue:'alliance integrity check:',mode:'question',map:[0,1,2,3,4]
       },
       'double-bind-darvo-reaction':{
-        cue:'sequence map:',map:[0,1,2,null,null,5]
+        cue:'sequence map:',mode:'question',map:[0,1,2,null,null,5]
+      },
+      'the-love-bargain':{
+        heading:'the bargain check',mode:'ask-yourself',map:[0,1,2]
+      },
+      'promise-of-the-room':{
+        cue:'write two columns:',mode:'next-paragraphs',map:[0,1]
+      },
+      'when-you-stop-trusting-own-account':{
+        cue:'use five columns:',mode:'next-paragraphs',map:[0,1,2,3,4]
+      },
+      'professional-authority-multiplier':{
+        cue:'translate the label',mode:'instead-of',map:[null,null,null]
+      },
+      'loyalty-without-self-abandonment':{
+        heading:'the loyalty audit',mode:'ask-whether',map:[null]
       }
     }[slug] || null;
     const earlyCount=earlyConfig?.map.length || 0;
     const earlyCue=earlyConfig?.cue || '';
+    const earlyHeading=earlyConfig?.heading || '';
+    const isEarlyCue=block=>!!earlyConfig && (
+      (earlyCue && block.kind==='paragraph' &&
+        String(block.text||'').trim().toLowerCase()===earlyCue) ||
+      (earlyHeading && block.kind==='heading' &&
+        String(block.text||'').trim().toLowerCase()===earlyHeading)
+    );
+    const isEarlyQuestion=text=>{
+      const value=String(text||'').trim();
+      switch(earlyConfig?.mode){
+        case 'question': return value.endsWith('?');
+        case 'ask-yourself': return /^ask yourself:/i.test(value);
+        case 'instead-of': return /^instead of /i.test(value);
+        case 'ask-whether': return /^ask whether /i.test(value);
+        case 'next-paragraphs': return true;
+        default: return false;
+      }
+    };
     const isEarlyExercise=step=>earlyCount>0 && !step.exercise &&
-      (step.blocks||[]).some(block=>
-        block.kind==='paragraph' && String(block.text||'').trim().toLowerCase()===earlyCue);
+      (step.blocks||[]).some(isEarlyCue);
+    // Discover the original prompts only from authorized lesson blocks, never
+    // from public JavaScript. These may be statements or column names, not just
+    // sentences ending in a question mark.
     const earlyQuestions=[];
     const earlyStep=steps.find(isEarlyExercise);
     if(earlyStep){
       let inExercise=false;
       for(const block of earlyStep.blocks||[]){
         const wording=String(block.text||'').trim();
-        if(block.kind==='paragraph' && wording.toLowerCase()===earlyCue){
+        if(isEarlyCue(block)){
           inExercise=true;
           continue;
         }
         if(inExercise && block.kind==='heading')break;
-        if(inExercise && block.kind==='paragraph' && wording.endsWith('?'))
+        if(inExercise && block.kind==='paragraph' &&
+            isEarlyQuestion(wording) && earlyQuestions.length<earlyCount)
           earlyQuestions.push(wording);
       }
     }
@@ -150,7 +186,11 @@
         'MY RESPONSES'
       ];
       if(earlyExtras.size && earlyQuestions.length===earlyCount){
-        lines.push('','SEQUENCE MAP · EARLIER EXERCISE');
+        const earlyTitle=slug==='double-bind-darvo-reaction'
+          ? 'SEQUENCE MAP · EARLIER EXERCISE'
+          : String(earlyHeading||earlyCue||title).replace(/:$/,'').toUpperCase()+
+            ' · EARLIER EXERCISE';
+        lines.push('',earlyTitle);
         earlyQuestions.forEach((question,i)=>{
           const linkedIndex=earlyConfig.map[i];
           const field=linkedIndex===null ? earlyExtras.get(i) : allFields[linkedIndex];
@@ -167,8 +207,11 @@
       return lines.join('\n');
     }
     function progress(){
-      const answered=allFields.filter(f=>f.input.value.trim()).length;
-      return answered+' of '+allFields.length+' questions answered. Unanswered prompts are marked in the document.';
+      const extraFields=Array.from(earlyExtras.values());
+      const answered=allFields.filter(f=>f.input.value.trim()).length+
+        extraFields.filter(f=>f.input.value.trim()).length;
+      const total=allFields.length+extraFields.length;
+      return answered+' of '+total+' questions answered. Unanswered prompts are marked in the document.';
     }
     function park(){
       for(const item of allFields){
@@ -226,13 +269,14 @@
         let index=0;
         for(const block of step.blocks||[]){
           const wording=String(block.text||'').trim();
-          if(block.kind==='paragraph' && wording.toLowerCase()===earlyCue){
+          if(isEarlyCue(block)){
             inExercise=true;
-            appendText(body,'p',block.text);
+            appendText(body,block.kind==='heading'?'h3':'p',block.text);
             continue;
           }
           if(inExercise && block.kind==='heading')inExercise=false;
-          if(inExercise && block.kind==='paragraph' && wording.endsWith('?') && index<earlyCount){
+          if(inExercise && block.kind==='paragraph' &&
+              isEarlyQuestion(wording) && index<earlyCount){
             const r=el('div','premium-map-row');
             const reading=el('div','premium-map-reading');
             const writing=el('div','premium-map-writing');

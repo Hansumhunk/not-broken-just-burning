@@ -366,3 +366,17 @@ test('the final release checklist retains independent billing and editorial appr
   assert.match(doc, /separate explicit approval/i);
   assert.match(doc, /28 editorial drafts/i);
 });
+
+test('the inline Imprint Map supplies four editable columns in the correct lesson section', () => {
+  const html = read('member-premium-lesson.html');
+  const js = read('js/member-premium-lesson.js');
+  for (const id of ['premium-map-received', 'premium-map-missed', 'premium-map-learned',
+    'premium-map-decision', 'premium-map-chosen-rule', 'premium-map-copy', 'premium-map-save', 'premium-map-clear']) {
+    assert.match(html, new RegExp('id="' + id + '"'));
+  }
+  assert.match(html, /id="premium-father-map"[^>]*hidden/);
+  assert.match(html, /not saved automatically or uploaded/);
+  assert.match(js, /step\.title === 'The Father Imprint Map'/);
+  assert.match(js, /el\('premium-father-map'\)\.hidden = !onFatherMap/);
+  assert.match(js, /const READ_TO_ME_ENABLED = false;/);
+});

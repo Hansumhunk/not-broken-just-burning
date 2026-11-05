@@ -10,6 +10,7 @@
     membershipStatus: 'active',
     cancelAtPeriodEnd: false,
     validUntil: null,
+    hasStripeBilling: false,
     products: [],
     events: [],
     updatedAt: null,
@@ -17,12 +18,19 @@
   };
 
   function normalizeMembership(row) {
-    const paid = row?.tier === 'paid_member' && ['active', 'trialing', 'past_due'].includes(row?.status);
+    const now = Date.now();
+    const starts = !row?.valid_from || (Number.isFinite(Date.parse(row.valid_from)) && Date.parse(row.valid_from) <= now);
+    const remains = !row?.valid_until || (Number.isFinite(Date.parse(row.valid_until)) && Date.parse(row.valid_until) > now);
+    const paid = row?.tier === 'paid_member' &&
+      ['active', 'trialing', 'past_due'].includes(row?.status) && starts && remains;
     return {
       tier: paid ? 'paid' : 'free',
       membershipStatus: row?.status || 'active',
       cancelAtPeriodEnd: Boolean(row?.cancel_at_period_end),
-      validUntil: row?.valid_until || null
+      validUntil: row?.valid_until || null,
+      // Only a boolean reaches the UI: do not keep Stripe customer references
+      // in application state. The billing endpoint revalidates user ownership.
+      hasStripeBilling: row?.provider === 'stripe' && Boolean(row?.provider_customer_ref)
     };
   }
 
@@ -99,7 +107,7 @@
     const user = auth?.user;
 
     if (!client || !user?.id) {
-      state = { ...state, tier: 'guest', updatedAt: Date.now() };
+      state = { ...state, tier: 'guest', hasStripeBilling: false, updatedAt: Date.now() };
       apply();
       return load();
     }
@@ -108,7 +116,7 @@
       const [membershipResult, productsResult, eventsResult] = await Promise.all([
         client
           .from('membership_entitlements')
-          .select('tier,status,valid_until,cancel_at_period_end')
+          .select('tier,status,valid_from,valid_until,cancel_at_period_end,provider,provider_customer_ref')
           .eq('user_id', user.id)
           .single(),
         client
@@ -148,6 +156,7 @@
       state = {
         ...state,
         tier: 'free',
+        hasStripeBilling: false,
         products: [],
         events: [],
         updatedAt: Date.now(),

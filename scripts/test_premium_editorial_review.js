@@ -665,13 +665,19 @@ test('Strength Model Audit and Needs Permission Map reuse named repeatable recor
     const step={title:cfg.title,continuation:0,blocks:[
       {kind:'paragraph',text:'Earlier chapter prose.'},
       {kind:'heading',text:cfg.heading},
-      {kind:'paragraph',text:'Complete this audit.'}
+      {kind:'paragraph',text:'Complete this audit.'},
+      ...(cfg.slug==='what-strength-looked-like'
+        ? Array.from({length:7},(_,i)=>[
+            {kind:'paragraph',text:(i+1)+'. STRENGTH QUESTION '+(i+1)},
+            {kind:'paragraph',text:'Answer this question '+(i+1)}
+          ]).flat()
+        : [])
     ]};
     assert.equal(ws.matches(step),true);
     const page=node();ws.park();ws.render(step,page,appendText);
     const rows=find(page,x=>x.className==='premium-map-row');
-    assert.equal(rows.length,1);
-    assert.equal(find(rows[0].children[0],x=>x.textContent==='Complete this audit.').length,1);
+    assert.equal(rows.length,cfg.slug==='what-strength-looked-like'?7:1);
+    assert.equal(find(page,x=>x.textContent==='Complete this audit.').length,1);
     assert.equal(find(page,x=>x.tag==='select')[0].children.length,cfg.initial);
     const answers=find(page,x=>x.tag==='textarea');
     assert.equal(answers.length,cfg.fields);
@@ -824,4 +830,111 @@ test('Complete Armor worksheet uses full-document local storage and My Work expo
     assert.match(source,/entry\.data\?\.worksheet/);
     assert.match(source,/key !== 'worksheet'/);
   }
+});
+
+
+
+test('Strength Model Audit follows each numbered question and compiles one complete five-rule document', async () => {
+  const {create,node,find,appendText,context}=simulatePracticeWorkspace();
+  const saves=[];
+  const ws=create({
+    slug:'what-strength-looked-like',parking:node(),
+    saveToWork:()=>{throw new Error('Strength must save one full document rather than clipped notes');},
+    saveWholeToWork:(full,title,status)=>{
+      saves.push({full,title});
+      status.textContent='Saved one complete document';
+    },
+    getFinalResponses:()=>[{prompt:'Final chosen identity',response:'Steady and responsible without self-erasure'}]
+  });
+  const title='Part 12 — The Six NBJB Strength Anchors';
+  const first={
+    title,continuation:0,blocks:[
+      {kind:'paragraph',text:'Use the six NBJB anchors to examine strength.'},
+      {kind:'paragraph',text:'1. STEADINESS'},
+      {kind:'paragraph',text:'Keep your feet under you.'},
+      {kind:'heading',text:'THE STRENGTH MODEL AUDIT'},
+      {kind:'paragraph',text:'Choose five inherited rules.'},
+      {kind:'paragraph',text:'1. INHERITED RULE'},
+      {kind:'paragraph',text:'Some examples of rules.'}
+    ]
+  };
+  assert.equal(ws.matches(first),true);
+  let page=node();
+  ws.park();ws.render(first,page,appendText);
+  let rows=find(page,n=>n.className==='premium-map-row');
+  assert.equal(rows.length,1,'strength anchors preceding the audit must not generate fields');
+  const received=find(rows[0],n=>n.tag==='textarea')[0];
+  const ruleSelector=find(page,n=>n.tag==='select')[0];
+  assert.equal(ruleSelector.children.length,5,'the five rules have separate persistent records');
+  const firstRule=('I learned work without rest. ').repeat(7);
+  received.value=firstRule;
+  assert.equal(saves.length,0,'typing is not a storage action');
+
+  const continued={title,continuation:1,blocks:[
+    {kind:'paragraph',text:'Inherited rule examples continued'},
+    ...[2,3,4,5,6].flatMap(i=>[
+      {kind:'paragraph',text:i+'. QUESTION '+i},
+      {kind:'paragraph',text:'Instructions for question '+i}
+    ])
+  ]};
+  ws.park();page=node();ws.render(continued,page,appendText);
+  rows=find(page,n=>n.className==='premium-map-row');
+  assert.equal(rows.length,6,'the inherited rule continues beside its original input, followed by questions 2–6');
+  assert.equal(find(rows[0],n=>n.tag==='textarea')[0],received);
+  assert.equal(received.value,firstRule);
+  rows.forEach((row,i)=>{
+    const inp=find(row,n=>n.tag==='textarea')[0];
+    assert.ok(inp,'the question has a matching input');
+    if(i)inp.value=('Specific answer for question '+(i+1)+'. ').repeat(6);
+  });
+
+  const last={title,continuation:2,blocks:[
+    {kind:'paragraph',text:'7. CHOSEN RULE'},
+    {kind:'paragraph',text:'Rewrite your inherited rule in language you can live.'}
+  ]};
+  ws.park();page=node();ws.render(last,page,appendText);
+  rows=find(page,n=>n.className==='premium-map-row');
+  assert.equal(rows.length,1);
+  const choice=find(rows[0],n=>n.tag==='textarea')[0];
+  choice.value='Responsibility includes rest.';
+  const selector=find(page,n=>n.tag==='select')[0];
+  for(let k=1;k<5;k++){
+    selector.value=String(k);selector.events.change();
+    const active=find(rows[0],n=>n.tag==='textarea')[0];
+    active.value=('My chosen rule '+(k+1)+'. ').repeat(10);
+  }
+  selector.value='0';selector.events.change();
+  assert.equal(find(rows[0],n=>n.tag==='textarea')[0].value,'Responsibility includes rest.');
+  assert.equal(received.value,firstRule,'switching records preserves previous responses');
+
+  const finalText=ws.completedWorksheetText();
+  assert.match(finalText,/STRENGTH MODEL AUDIT — MY CHOSEN RULES/);
+  assert.match(finalText,/RULE 1/);
+  assert.match(finalText,/RULE 5/);
+  assert.match(finalText,/FINAL REFLECTION/);
+  assert.match(finalText,/Responsibility includes rest/);
+  assert.match(finalText,/Steady and responsible without self-erasure/);
+  assert.equal(saves.length,0);
+  const preview=node();ws.renderCompletion(preview);
+  const paper=find(preview,n=>n.className==='premium-worksheet-paper')[0];
+  assert.equal(paper.textContent,finalText,'final worksheet preview is complete');
+  const copy=find(preview,n=>n.tag==='button' && n.textContent==='Copy Full Worksheet')[0];
+  await copy.events.click();
+  assert.equal(context.copied,finalText);
+  const save=find(preview,n=>n.tag==='button' && n.textContent==='Save Full Worksheet to My Work')[0];
+  save.events.click();
+  assert.equal(saves.length,1,'one click makes one My Work document');
+  assert.equal(saves[0].full,finalText);
+  assert.equal(saves[0].title,'Strength Model Audit');
+});
+
+test('Strength Model Audit preserves published text, access controls, and billing locks', () => {
+  const module=read('js/member-lesson-workspaces.js');
+  const reader=read('js/member-premium-lesson.js');
+  const billing=read('js/member-billing.js');
+  assert.match(module,/strengthWorksheet = slug === 'what-strength-looked-like'/);
+  assert.ok(module.includes('strengthTargets[Number(numbered[1])-1]'));
+  assert.match(module,/PART II — THE ARMOR AUDIT/);
+  assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
+  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
 });

@@ -19,7 +19,7 @@
 
   function normalizeMembership(row) {
     const now = Date.now();
-    const starts = !row?.valid_from || (Number.isFinite(Date.parse(row.valid_from)) && Date.parse(row.valid_from) <= now);
+    const starts = Boolean(row?.valid_from) && Number.isFinite(Date.parse(row.valid_from)) && Date.parse(row.valid_from) <= now;
     const remains = !row?.valid_until || (Number.isFinite(Date.parse(row.valid_until)) && Date.parse(row.valid_until) > now);
     const paid = row?.tier === 'paid_member' &&
       ['active', 'trialing', 'past_due'].includes(row?.status) && starts && remains;

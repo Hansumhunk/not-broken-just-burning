@@ -376,8 +376,14 @@ test('the inline Imprint Map supplies four editable columns in the correct lesso
   }
   assert.match(html, /id="premium-father-map"[^>]*hidden/);
   assert.match(html, /not saved automatically or uploaded/);
-  assert.match(js, /step\.title === 'The Father Imprint Map'/);
-  assert.match(js, /el\('premium-father-map'\)\.hidden = !onFatherMap/);
+  assert.ok(js.includes('function renderFatherMapInline(step, body, positiveInheritance)'));
+  assert.ok(js.includes('if (isFatherPractice) renderFatherMapInline(step, body, onPositiveInheritance)'));
+  assert.ok(js.includes("el('premium-father-map').hidden = true;"));
+  assert.ok(js.includes("el('premium-pause-reflection').hidden = isFatherPractice || final;"));
+  assert.ok(html.includes('id="premium-map-grid"'));
+  assert.ok(html.includes('id="premium-map-actions"'));
+  assert.ok(html.includes('Read a column. Fill in its box. Then continue.'));
+  assert.doesNotMatch(html, /fill in your Father Imprint Map on this page/);
   assert.match(js, /const READ_TO_ME_ENABLED = false;/);
 });
 

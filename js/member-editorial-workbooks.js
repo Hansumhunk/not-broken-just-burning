@@ -82,3 +82,63 @@
     feedback.setAttribute('aria-live','polite');
     parking.append(controls,feedback);
     let preview=null;
+
+    function answers(){return allFields.some(f=>f.input.value.trim());}
+    function completedWorksheetText(){
+      const lines=[
+        'NOT BROKEN JUST BURNING',
+        title.toUpperCase(),
+        'Guided workbook · '+safeTitle,
+        '',
+        'MY RESPONSES'
+      ];
+      allFields.forEach((f,i)=>{
+        lines.push('',(i+1)+'. '+f.prompt);
+        lines.push(f.input.value.trim() || '[Not answered yet]');
+      });
+      lines.push('','Personal reflection and practical planning. This is not a diagnosis or professional advice.');
+      return lines.join('\n');
+    }
+    function progress(){
+      const answered=allFields.filter(f=>f.input.value.trim()).length;
+      return answered+' of '+allFields.length+' questions answered. Unanswered prompts are marked in the document.';
+    }
+    function park(){
+      for(const field of allFields)parking.append(field.row);
+      parking.append(controls,feedback);
+    }
+    function matches(step){
+      if(!step || step.exercise)return false;
+      const i=steps.indexOf(step);
+      return i>=focus && step.title===focusStep.title;
+    }
+    async function copyWorkbook(output){
+      if(!answers()){
+        output.textContent='Answer at least one question before copying.';
+        return;
+      }
+      try{
+        await navigator.clipboard.writeText(completedWorksheetText());
+        output.textContent='Complete workbook copied. Paste it somewhere you control to keep it.';
+      }catch(_){
+        output.textContent='Copy was blocked. Select and copy the document manually.';
+      }
+    }
+    function saveWorkbook(output){
+      if(!answers()){
+        output.textContent='Answer at least one question before saving.';
+        return;
+      }
+      const full=completedWorksheetText();
+      if(full.length>20000){
+        output.textContent='This workbook exceeds the local document limit. Use Copy to preserve every answer.';
+        return;
+      }
+      if(typeof saveWholeToWork!=='function'){
+        output.textContent='Saving is unavailable. Use Copy to keep your answers.';
+        return;
+      }
+      saveWholeToWork(full,title,output);
+    }
+    copy.addEventListener('click',()=>copyWorkbook(feedback));
+    save.addEventListener('click',()=>saveWorkbook(feedback));

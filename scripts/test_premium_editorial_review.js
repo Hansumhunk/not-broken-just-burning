@@ -520,7 +520,7 @@ test('exercise usability audit covers the 35-lesson library and preserves privat
   const slugs = [...html.matchAll(/data-premium-lesson-link="([^"]+)"/g)].map(match => match[1]);
   assert.equal(slugs.length, 35);
   for (const slug of slugs) assert.ok(doc.includes('`' + slug + '`'), 'missing audit entry: ' + slug);
-  assert.match(doc, /six additional published lessons/i);
+  assert.match(doc, /Fix #2–7 before expanding sales/);
   assert.match(doc, /editorial_review/);
   assert.match(doc, /No changes to Stripe launch gates or disabled Read to Me/);
 });

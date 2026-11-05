@@ -280,6 +280,39 @@
 
 
     function completedWorksheetText() {
+      if(needsWorksheet){
+        const lines=[
+          'NOT BROKEN JUST BURNING',
+          'NEEDS PERMISSION MAP — MY CHOSEN SUPPORT',
+          'A personal working document from What You Learned You Were Allowed to Need',
+          '',
+          'PART I — THE NEEDS PERMISSION MAP'
+        ];
+        let count=0;
+        records.forEach((rec,i)=>{
+          if(!rec.inputs.some(input=>input.value.trim()))return;
+          count++;
+          lines.push('','NEED '+(i+1));
+          config.questions.forEach(([question],j)=>{
+            lines.push('',(j+1)+'. '+question);
+            lines.push(rec.inputs[j].value.trim() || '[Not answered yet]');
+          });
+        });
+        if(!count)lines.push('','[No needs have been answered yet]');
+        lines.push('','PART II — THE REQUEST CHECK');
+        requestQuestions.forEach(([question],i)=>{
+          lines.push('',(i+1)+'. '+question);
+          lines.push(requestFields[i].input.value.trim() || '[Not answered yet]');
+        });
+        const final=typeof getFinalResponses==='function'?getFinalResponses():[];
+        if(Array.isArray(final) && final.some(x=>x?.response?.trim())){
+          lines.push('','PART III — FINAL REFLECTION');
+          final.filter(x=>x?.response?.trim()).forEach(x=>
+            lines.push('',x.prompt || 'Reflection',x.response.trim()));
+        }
+        lines.push('','Prepared privately in Flamewalker+. These answers are personal reflection, not a diagnosis or professional advice.');
+        return lines.join('\n');
+      }
       if(strengthWorksheet){
         const lines=[
           'NOT BROKEN JUST BURNING',
@@ -342,6 +375,14 @@
       return lines.join('\n');
     }
     function worksheetProgress() {
+      if(needsWorksheet){
+        const active=records.filter(rec=>rec.inputs.some(i=>i.value.trim()));
+        const answered=active.reduce((n,rec)=>n+rec.inputs.filter(i=>i.value.trim()).length,0);
+        const check=requestFields.filter(f=>f.input.value.trim()).length;
+        return active.length+' '+(active.length===1?'need':'needs')+' examined · '+
+          answered+' of '+active.length*config.questions.length+' map questions · '+
+          check+' of 7 request-check questions answered';
+      }
       if(strengthWorksheet){
         const attempted=records.filter(rec=>rec.inputs.some(input=>input.value.trim()));
         const answered=attempted.reduce((sum,rec)=>sum+rec.inputs.filter(i=>i.value.trim()).length,0);
@@ -362,13 +403,15 @@
         '. Unanswered prompts remain visibly marked; you can return and edit them.';
     }
     function renderCompletion(container) {
-      if((!shameQuestions && !strengthWorksheet) || !container)return;
+      if((!shameQuestions && !strengthWorksheet && !needsWorksheet) || !container)return;
       if(!worksheetPreview){
         const section=node('section','premium-worksheet-completion');
         const eyebrow=node('p','eyebrow','Your completed work · Personal document');
-        const heading=node('h3','',strengthWorksheet?'My Strength Model Audit':'The Shame Separation & Armor Audit');
+        const heading=node('h3','',needsWorksheet?'My Needs Permission Map & Request Check':strengthWorksheet?'My Strength Model Audit':'The Shame Separation & Armor Audit');
         const intro=node('p','premium-map-help',
-          strengthWorksheet
+          needsWorksheet
+            ? 'Your needs, the rules you learned, your requests, and your final reflections are collected below. Review and revise, then Copy or Save your complete worksheet. Nothing uploads automatically.'
+            : strengthWorksheet
             ? 'Your inherited rules, their costs and your chosen replacements are assembled below. Return to the audit to change any answer, then Copy or Save this complete document. No automatic upload.'
             : 'Your answers from both exercises are assembled below. Review the whole page, return to any question to edit it, then choose Copy or Save. No answer is uploaded automatically.');
         const progress=node('p','premium-worksheet-progress');
@@ -400,7 +443,7 @@
             status.textContent='Full worksheet saving is unavailable. Use Copy to keep your complete answers.';
             return;
           }
-          saveWholeToWork(text,config.title === 'Strength Model Audit' ? 'Strength Model Audit' : 'Shame Separation & Armor Audit',status);
+          saveWholeToWork(text,needsWorksheet ? 'Needs Permission Map & Request Check' : strengthWorksheet ? 'Strength Model Audit' : 'Shame Separation & Armor Audit',status);
         });
         worksheetPreview={section,progress,paper,status};
       }
@@ -415,6 +458,7 @@
           (fields[2].checks.some(x=>x.checked) || Boolean(fields[3].choice.value)));
       }
       return shameFields.some(field=>field.input.value.trim()) ||
+        requestFields.some(field=>field.input.value.trim()) ||
         records.some(rec=>rec.inputs.some(input=>input.value.trim()));
     }
     function serializedParts(){
@@ -439,19 +483,19 @@
     async function copy(){
       if(!answers()){ui.status.textContent='Write at least one answer first.';return;}
       try{
-        await navigator.clipboard.writeText(shameQuestions || strengthWorksheet ? completedWorksheetText() : serializedParts().join('\n\n---\n\n'));
+        await navigator.clipboard.writeText(shameQuestions || strengthWorksheet || needsWorksheet ? completedWorksheetText() : serializedParts().join('\n\n---\n\n'));
         ui.status.textContent='Answers copied. Paste them somewhere private to keep them.';
       }catch(_){ui.status.textContent='Copy was blocked. Select and copy your answers manually.';}
     }
     function save(){
       if(!answers()){ui.status.textContent='Write at least one answer first.';return;}
-      if((shameQuestions || strengthWorksheet) && typeof saveWholeToWork==='function'){
+      if((shameQuestions || strengthWorksheet || needsWorksheet) && typeof saveWholeToWork==='function'){
         const full=completedWorksheetText();
         if(full.length>20000){
           ui.status.textContent='This full worksheet is too long for one local entry. Use Copy to retain every answer.';
           return;
         }
-        saveWholeToWork(full,strengthWorksheet?'Strength Model Audit':'Shame Separation & Armor Audit',ui.status);
+        saveWholeToWork(full,needsWorksheet?'Needs Permission Map & Request Check':strengthWorksheet?'Strength Model Audit':'Shame Separation & Armor Audit',ui.status);
         return;
       }
       const parts=serializedParts();

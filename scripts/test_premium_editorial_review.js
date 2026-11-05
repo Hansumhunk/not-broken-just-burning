@@ -92,7 +92,7 @@ test('membership and library accurately distinguish published founding lessons f
   assert.match(library, /twenty-eight additional manuscripts remain private editorial drafts/);
   assert.match(read('flamewalker-plus.html'), /7 published · Enrollment pending/);
   assert.match(read('flamewalker-plus.html'), /Paid checkout is closed/);
-  assert.match(library, /checkout remains closed/);
+  assert.match(library, /Paid membership enrollment remains closed/);
   assert.match(library, /Eight-Lesson Track · Coming Soon/);
   assert.match(library, /Five-Lesson Track · Coming Soon/);
   assert.match(doc, /All seven are present in Supabase/);

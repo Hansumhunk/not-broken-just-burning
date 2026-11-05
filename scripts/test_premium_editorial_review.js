@@ -379,7 +379,7 @@ test('the inline Imprint Map supplies four editable columns in the correct lesso
   assert.ok(js.includes('function renderFatherMapInline(step, body, positiveInheritance)'));
   assert.ok(js.includes('if (isFatherPractice) renderFatherMapInline(step, body, onPositiveInheritance)'));
   assert.ok(js.includes("el('premium-father-map').hidden = true;"));
-  assert.ok(js.includes("el('premium-pause-reflection').hidden = isFatherPractice || final;"));
+  assert.ok(js.includes("el('premium-pause-reflection').hidden = isFatherPractice || isStructuredPractice || final;"));
   assert.ok(html.includes('id="premium-map-grid"'));
   assert.ok(html.includes('id="premium-map-actions"'));
   assert.ok(html.includes('Read a column. Fill in its box. Then continue.'));
@@ -509,7 +509,7 @@ test('father map desktop uses a two-column row and mobile stacks the panels', ()
   assert.match(css, /grid-template-columns:minmax\(0,1\.2fr\) minmax\(300px,\.9fr\)/);
   assert.match(css, /@media\(max-width:800px\)/);
   assert.match(css, /grid-template-columns:minmax\(0,1fr\)/);
-  assert.match(js, /body\.classList\.toggle\('premium-map-layout', isFatherPractice\)/);
+  assert.match(js, /body\.classList\.toggle\('premium-map-layout', isFatherPractice \|\| isStructuredPractice\)/);
   assert.match(js, /const READ_TO_ME_ENABLED = false;/);
 });
 
@@ -607,6 +607,7 @@ test('Silence Inventory and Armor Audit support editable repeatable records and 
   const {create,node,context,find,appendText}=simulatePracticeWorkspace();
   const saved=[];
   function verify(slug,heading,expectedEntries,expectedQuestions){
+    const savedBefore=saved.length;
     const ws=create({slug,parking:node(),saveToWork:(text,kind,status)=>{
       saved.push({text,kind});status.textContent='Saved to My Work on this device.';
     }});
@@ -623,7 +624,7 @@ test('Silence Inventory and Armor Audit support editable repeatable records and 
     const first=find(page,n=>n.tag==='textarea');
     assert.equal(first.length,expectedQuestions);
     first[0].value='My own example';
-    assert.equal(saved.length,0);
+    assert.equal(saved.length,savedBefore,'no automatic save before deliberate action');
     ws.park();
     const next=node(); ws.render({...step,continuation:1},next,appendText);
     assert.equal(find(next,n=>n.tag==='textarea')[0],first[0]);

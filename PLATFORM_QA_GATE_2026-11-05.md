@@ -56,6 +56,12 @@ The founder reported all five practical mobile checks passed: no horizontal over
 
 **Usability follow-ups discovered in this audit:** The editorial workbook originally rendered at a later section despite an earlier manuscript exercise in multiple lessons. PR #147 addressed Split Alliance; PR #148 addressed DARVO. PR #149 additionally covers early exercises in `the-love-bargain`, `promise-of-the-room`, `professional-authority-multiplier`, `when-you-stop-trusting-own-account`, and `loyalty-without-self-abandonment`. Where wording/meaning genuinely matches, the same input is reused. Distinct earlier questions retain independent inputs and are included in the consolidated document.
 
+## Existing Stripe customers must be able to manage billing — 2026-11-05
+
+The live Stripe subscription and matching Supabase entitlement were reconciled on November 5 without changing payment details: both remain active and schedule paid access to end on December 2, 2026 at 23:03:33 UTC. The default Stripe portal configuration is active and offers cancellation at period-end, invoices and payment-method changes.
+
+The Store's UI previously hid the entire billing panel whenever public checkout was closed, inadvertently hiding the Manage Billing button from already-paying members. The frontend now distinguishes **billing management for an existing Stripe profile** from **new purchase eligibility**. The purchaser view remains hidden while `PUBLIC_CHECKOUT_UI_ENABLED=false`; a positive Stripe billing profile reveals the portal management option. A direct synthetic attempt to trigger a hidden purchase remains blocked. Expired access is downgraded in client display without hiding billing management for existing customers. This is an engineering and configuration test, not a real paying-member browser portal acceptance test.
+
 ## Still requires hands-on acceptance — not proven by green CI
 
 1. **Signed-in and signed-out account journeys:** Guest/free lesson denial, prior recovery, sign-out/My Work isolation, and re-login were confirmed. Still cover new-account email verification, first-run onboarding as needed, live browser Back after logout, and expired-session handling; do not repeat completed recovery testing without a regression.

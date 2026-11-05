@@ -17,6 +17,14 @@
 - **Live Stripe account read (November 5):** Account is `business_type=individual`; `charges_enabled=true` and `payouts_enabled=true`; `requirements.currently_due=[]`, `requirements.past_due=[]`, and `current_deadline=null`. One live monthly test subscription is active with a future scheduled `cancel_at`. No new charge or cancel operation was initiated in this verification. A separately escalated Scalapay/support item may still exist; the earlier November 6 requirement should **not** be reported as currently due without new Stripe support evidence.
 - **Security:** Production member-data privileges were tightened on six tables (migration `20261105200137_revoke_unsafe_member_table_privileges`, PR #150); unsafe broad authenticated `TRUNCATE`, `TRIGGER`, and `REFERENCES` grants now absent. Server-backed session verification was added and tested (PR #151). See `PLATFORM_QA_GATE_2026-11-05.md` for the authoritative acceptance matrix.
 
+## Existing paid-customer management gate — verified November 5
+
+- Read-only comparison confirms the **existing live Stripe subscription** remains active, with a scheduled cancellation at **2026-12-02 23:03:33 UTC**, and its **same** server-side Supabase paid entitlement is active, marked for cancellation, and expires at the exact same time.
+- Stripe's active default billing portal configuration permits self-service cancellation at the end of the period, invoice history and payment method updates. No portal session was created and no billing mutation occurred during this verification.
+- **Concrete UI blocker found:** the disabled new-sales flag also prevented already-paying members from seeing the Manage Billing entry. This PR exposes only the management view for a server-recorded Stripe billing customer while leaving all new checkout buttons and sales disabled. Expired paid-access status is now interpreted consistently with the server's validity dates; former Stripe customers can still manage billing without being classified as paid learners.
+- The paid portal's deployed server function independently requires authenticated access and a billing record for the authenticated user. The sandbox editorial reviewer is excluded by server policy.
+- **Remaining:** an existing paid account still needs one real-browser click of Manage Billing to confirm the resulting Stripe portal session; **do not cancel or buy again** merely to test it.
+
 ## Open acceptance checks
 
 - [x] Founder confirmed signed-out guest and ordinary **Free** account denial on unpublished draft `the-love-bargain` in a live browser.
@@ -25,7 +33,8 @@
 - [ ] Test **reviewer** alone may read remaining unpublished `being-needed-vs-chosen` manuscript; ordinary Paid/Free accounts may not.
 - [x] Founder confirmed one mobile five-point reader/workbook acceptance pass (responsive layout, typing, answer persistence during navigation, explicit save and opening full My Work document, tappable navigation). Broader desktop/browser and privacy regression still open.
 - [ ] Complete alternate-device/desktop keyboard, screen-reader, no-audio and private-reflection privacy acceptance; check saved works are not automatically uploaded.
-- [ ] Check Stripe Customer Portal access and the existing live subscription's scheduled cancellation presentation. Do not initiate another charge or cancel again merely for testing. Confirm paid access lasts until the correct expiration and returns to Free afterward.
+- [x] Verified the live subscription's scheduled December 2 cancellation exactly matches its active Supabase entitlement, and Stripe Customer Portal configuration supports cancel-at-period-end, invoices and card updates.
+- [ ] Confirm the existing paying user can open Stripe Customer Portal from the newly exposed **Manage Billing** option. No new purchase or cancellation is necessary. Recheck paid-to-Free transition after the scheduled expiration.
 - [ ] Confirm legal seller identity, terms, renewal disclosure, contact inbox workflow, refund commitments (first monthly payment 14 days; first annual payment 30 days), and any applicable taxes.
 - [ ] Confirm the separately escalated Scalapay/Stripe Support case is closed, if still open. The **live Stripe Account API on November 5 showed no currently/past-due verification requirements and no deadline**; do not repeat the old November 6 warning as a current account requirement.
 - [ ] Review Supabase security advisories: leaked-password protection disabled and pg_net in public schema. Do not move extensions blindly.

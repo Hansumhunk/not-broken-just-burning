@@ -7,8 +7,9 @@
   const MIN_PUBLISHED_LESSONS = 7;
   const region = document.getElementById('member-live-billing');
   if (!region) return;
+  // Existing subscribers must retain access to billing management even while
+  // new public checkout is closed. Never reveal the purchase panel by default.
   region.hidden = true;
-  if (!PUBLIC_CHECKOUT_UI_ENABLED) return;
 
   const auth = window.NBJBAuth;
   const entitlements = window.NBJBEntitlements;
@@ -19,6 +20,8 @@
   const consent = document.getElementById('member-billing-consent');
   const buttons = [...document.querySelectorAll('[data-live-billing-offer]')];
   const manageButton = document.getElementById('member-billing-portal');
+  const heading = document.getElementById('member-live-billing-title');
+  function elHeading(value) { if (heading) heading.textContent = value; }
 
   function message(text, error = false) {
     status.textContent = text;
@@ -57,6 +60,11 @@
 
   for (const button of buttons) {
     button.addEventListener('click', () => {
+      // Defense in depth: disabling new sales is independent of billing management.
+      if (!PUBLIC_CHECKOUT_UI_ENABLED) {
+        message('New Flamewalker+ subscriptions are not on sale yet.', true);
+        return;
+      }
       if (!consent?.checked) {
         message('Please review and acknowledge the subscription terms before proceeding.', true);
         consent?.focus();
@@ -75,22 +83,31 @@
   });
 
   async function start() {
-    region.hidden = false;
+    region.hidden = true;
     purchase.hidden = true;
     management.hidden = true;
-    message('Checking your membership and published lesson availability…');
-    if (!auth?.user?.id || !entitlements?.refresh) {
-      message('Sign in to your Flamewalker account to review billing options.', true);
-      return;
-    }
+    if (!auth?.user?.id || !entitlements?.refresh) return;
+
     const current = await entitlements.refresh();
-    if (current?.tier === 'paid') {
+    if (current?.hasStripeBilling) {
+      // Billing management remains available for a customer with a Stripe
+      // billing record even if the paid lesson entitlement has ended.
+      region.hidden = false;
       management.hidden = false;
+      elHeading('Manage your Flamewalker+ billing');
       message(current.cancelAtPeriodEnd
-        ? 'Your subscription is scheduled to end after the current paid period. Manage billing in Stripe.'
-        : 'Your Flamewalker+ membership is active. Manage future billing in Stripe.');
+        ? 'Your subscription is scheduled to end after the current paid period. Review invoices or billing in Stripe.'
+        : current.tier === 'paid'
+          ? 'Your Flamewalker+ membership is active. Manage billing in Stripe.'
+          : 'Review past payments and billing in Stripe. Paid lesson access is not currently active.');
       return;
     }
+    // Free members cannot start a new subscription until the separate,
+    // explicit launch approval enables both checkout gates.
+    if (!PUBLIC_CHECKOUT_UI_ENABLED) return;
+    region.hidden = false;
+    elHeading('Choose your guided learning membership');
+    message('Checking published lesson availability…');
     try {
       const response = await auth.client.functions.invoke('read-flamewalker-lesson', {
         body: { action: 'catalog' }
@@ -118,9 +135,10 @@
     }
   }
   start().catch(() => {
-    region.hidden = false;
+    // On an entitlement read failure, fail closed: neither purchases nor
+    // unverified billing-management links should be exposed.
+    region.hidden = true;
     purchase.hidden = true;
     management.hidden = true;
-    message('We could not verify billing readiness. No checkout is available.', true);
   });
 })();

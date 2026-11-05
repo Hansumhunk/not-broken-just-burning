@@ -630,8 +630,8 @@ test('Silence Inventory and Armor Audit support editable repeatable records and 
     assert.equal(find(next,n=>n.tag==='textarea')[0],first[0]);
     assert.equal(find(next,n=>n.tag==='textarea')[0].value,'My own example');
     const buttons=find(next,n=>n.tag==='button');
-    const save=buttons.find(n=>n.textContent==='Save to My Work');
-    const copy=buttons.find(n=>n.textContent==='Copy My Answers');
+    const save=buttons.find(n=>n.textContent=== (slug.includes('armor') ? 'Save Full Worksheet to My Work' : 'Save to My Work'));
+    const copy=buttons.find(n=>n.textContent=== (slug.includes('armor') ? 'Copy Full Worksheet' : 'Copy My Answers'));
     assert.ok(save && copy);
     save.events.click();
     assert.ok(saved.at(-1).text.includes('My own example'));

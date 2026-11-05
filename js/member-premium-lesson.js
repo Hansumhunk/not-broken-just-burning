@@ -112,9 +112,10 @@
     el('premium-lesson-title').textContent = title;
     el('premium-lesson-status').textContent = message;
   }
-  function appendText(container, tag, text) {
+  function appendText(container, tag, text, extraClass = '') {
     const p = document.createElement(tag);
     p.textContent = text;
+    if (extraClass) p.classList.add(extraClass);
     container.appendChild(p);
   }
   function prettyHeading(s) {
@@ -290,7 +291,9 @@
       el('premium-step-title').textContent = label(step);
       const body = el('premium-reader-body');
       body.replaceChildren();
-      step.blocks.forEach(b => appendText(body, b.kind === 'heading' ? 'h3' : 'p', b.text));
+      // Give deliberate one-word rhetorical bridges a compact treatment without altering manuscript text.
+      step.blocks.forEach(b => appendText(body, b.kind === 'heading' ? 'h3' : 'p', b.text,
+        b.kind === 'paragraph' && /^(?:and|or):?$/i.test(b.text.trim()) ? 'premium-prose-connector' : ''));
       el('premium-pause-note').value = notes.get(current) || '';
       el('premium-pause-status').textContent = '';
       el('premium-pause-reflection').open = false;

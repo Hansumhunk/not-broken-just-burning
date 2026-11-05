@@ -512,3 +512,15 @@ test('father map desktop uses a two-column row and mobile stacks the panels', ()
   assert.match(js, /body\.classList\.toggle\('premium-map-layout', isFatherPractice\)/);
   assert.match(js, /const READ_TO_ME_ENABLED = false;/);
 });
+
+
+test('exercise usability audit covers the 35-lesson library and preserves private release gates', () => {
+  const doc = read('FLAMEWALKER_EXERCISE_USABILITY_AUDIT.md');
+  const html = read('member-premium-lesson.html');
+  const slugs = [...html.matchAll(/data-premium-lesson-link="([^"]+)"/g)].map(match => match[1]);
+  assert.equal(slugs.length, 35);
+  for (const slug of slugs) assert.ok(doc.includes('`' + slug + '`'), 'missing audit entry: ' + slug);
+  assert.match(doc, /six additional published lessons/i);
+  assert.match(doc, /editorial_review/);
+  assert.match(doc, /No changes to Stripe launch gates or disabled Read to Me/);
+});

@@ -77,7 +77,7 @@
       '',
       entry.title || 'Saved reflection',
       '',
-      entry.summary || '(no summary saved)'
+      typeof entry.data?.worksheet === 'string' ? entry.data.worksheet : (entry.summary || '(no summary saved)')
     ];
     if (meta.themes.length) sections.push('', `THEMES: ${meta.themes.join(', ')}`);
     if (meta.context) sections.push('', `CONTEXT: ${meta.context}`);
@@ -86,7 +86,7 @@
     if (meta.changed) sections.push('', `WHAT CHANGED: ${meta.changed}`);
     if (meta.followUpStatus) sections.push('', `FOLLOW-UP STATUS: ${followUpLabels[meta.followUpStatus] || meta.followUpStatus}`);
     if (meta.followUpNote) sections.push('', `FOLLOW-UP NOTE: ${meta.followUpNote}`);
-    const details = Object.entries(entry.data || {}).filter(([, value]) => value !== '' && value !== null && value !== undefined);
+    const details = Object.entries(entry.data || {}).filter(([key, value]) => key !== 'worksheet' && value !== '' && value !== null && value !== undefined);
     if (details.length) {
       sections.push('', 'TOOL DETAILS');
       details.forEach(([key, value]) => sections.push(`${key.replace(/[-_]/g, ' ').toUpperCase()}: ${Array.isArray(value) ? value.join(', ') : String(value)}`));
@@ -289,6 +289,19 @@
       const summary = document.createElement('p');
       summary.textContent = entry.summary || 'No summary saved.';
       card.append(top, title, summary);
+      // Full guided worksheets live in data, not the 2,400-character card summary.
+      if(typeof entry.data?.worksheet === 'string'){
+        const detail=document.createElement('details');
+        detail.className='member-full-worksheet';
+        const trigger=document.createElement('summary');
+        trigger.textContent='Open full completed worksheet';
+        const paper=document.createElement('pre');
+        paper.className='member-full-worksheet-paper';
+        paper.textContent=entry.data.worksheet;
+        detail.append(trigger,paper);
+        card.appendChild(detail);
+      }
+
 
       if (meta.themes.length) {
         const tags = document.createElement('div');
@@ -326,7 +339,7 @@
 
       card.appendChild(buildMetaEditor(entry));
 
-      const detailEntries = Object.entries(entry.data || {}).filter(([, value]) => value !== '' && value !== null && value !== undefined);
+      const detailEntries = Object.entries(entry.data || {}).filter(([key, value]) => key !== 'worksheet' && value !== '' && value !== null && value !== undefined);
       if (detailEntries.length) {
         const details = document.createElement('details');
         details.className = 'member-work-details';

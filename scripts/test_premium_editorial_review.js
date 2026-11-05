@@ -933,7 +933,7 @@ test('Strength Model Audit preserves published text, access controls, and billin
   const reader=read('js/member-premium-lesson.js');
   const billing=read('js/member-billing.js');
   assert.match(module,/strengthWorksheet = slug === 'what-strength-looked-like'/);
-  assert.match(module,/strengthTargets\\[Number\\(numbered\\[1\\]\\)-1\\]/);
+  assert.ok(module.includes('strengthTargets[Number(numbered[1])-1]'));
   assert.match(module,/PART II — THE ARMOR AUDIT/);
   assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
   assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);

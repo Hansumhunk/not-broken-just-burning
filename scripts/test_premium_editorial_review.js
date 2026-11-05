@@ -552,6 +552,7 @@ function simulatePracticeWorkspace() {
     document:{createElement:tag=>node(tag),createTextNode:t=>node('text','',t)},
     copied:''
   };
+  vm.runInNewContext(read('js/member-chosen-code.js'),context);
   vm.runInNewContext(read('js/member-lesson-workspaces.js'),context);
   const find=(root,test)=>{
     const out=[];

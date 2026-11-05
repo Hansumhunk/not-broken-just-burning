@@ -1518,3 +1518,126 @@ test('DARVO early exercise is protected at runtime and lesson publication settin
   assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
   assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
 });
+
+
+test('editorial QA: earlier draft exercises have inline answers and preserve unique responses', async () => {
+  const {createEditorial,node,find,appendText}=simulatePracticeWorkspace();
+  const cases=[
+    {slug:'the-love-bargain',heading:'The Bargain Check',source:[
+      'Ask yourself: What am I hoping for?',
+      'Ask yourself: What did we agree?',
+      'Ask yourself: What would I choose?'
+    ],map:[0,1,2],anchor:'PART 8 — THE BARGAIN-TO-CHOICE WORKSHEET'},
+    {slug:'promise-of-the-room',cue:'Write two columns:',source:[
+      'What I expected the process to do.',
+      'What actually received attention.'
+    ],map:[0,1],anchor:'THE PROCESS-GOALS COMPARISON'},
+    {slug:'when-you-stop-trusting-own-account',cue:'Use five columns:',source:[
+      'Known facts','Supporting evidence','My emotions','My interpretations','Unknowns'
+    ],map:[0,1,2,3,4],anchor:'WHEN THE STORY OF AN EVENT BECOMES CONTESTED'},
+    {slug:'professional-authority-multiplier',cue:'Translate the Label',lead:'Rewrite terms as actions.',source:[
+      'Instead of "label A," write behavior.',
+      'Instead of "label B," describe context.',
+      'Instead of "label C," describe statements.'
+    ],map:[null,null,null],anchor:'THE BEHAVIOR TRANSLATION METHOD'},
+    {slug:'loyalty-without-self-abandonment',heading:'The loyalty audit',source:[
+      'Ask whether continuing this agreement serves your values.'
+    ],map:[null],anchor:'THE SHARED-EFFORT TEST'}
+  ];
+  for(const c of cases){
+    const saved=[];
+    const blocks=[
+      {kind:'heading',text:'Exercise'},
+      {kind:c.heading?'heading':'paragraph',text:c.heading||c.cue},
+      ...(c.lead ? [{kind:'paragraph',text:c.lead}] : []),
+      ...c.source.map(text=>({kind:'paragraph',text})),
+      {kind:'paragraph',text:'Do not assign intent from the label alone.'},
+      {kind:'heading',text:'After the exercise'},
+      {kind:'paragraph',text:'Move on when ready.'}
+    ];
+    const steps=[
+      {title:'Opening',continuation:0,blocks:[{kind:'paragraph',text:'Overview'}]},
+      {title:'Opening',continuation:1,blocks},
+      {title:'Opening',continuation:2,blocks:[{kind:'paragraph',text:'Teaching continues'}]},
+      {title:'Opening',continuation:3,blocks:[
+        {kind:'heading',text:c.anchor},
+        {kind:'paragraph',text:'Practice this skill in greater depth.'}
+      ]},
+      {title:'Guided reflection',exercise:true,blocks:[]}
+    ];
+    const prompts=Array.from({length:8},(_,i)=>'Authorized guided prompt '+(i+1)+'?');
+    const ws=createEditorial({
+      slug:c.slug,parking:node(),steps,
+      lessonTitle:'Authorized lesson',exercise:{title:'Guided workbook',prompts},
+      saveWholeToWork:(text,title,status)=>{
+        saved.push({text,title});status.textContent='Saved on this device.';
+      }
+    });
+    assert.ok(ws,c.slug+' workbook exists');
+    assert.equal(ws.focusIndex,3,c.slug+' later workbook anchor remains intact');
+    assert.equal(ws.matches(steps[0]),false,c.slug+' does not inject on intro');
+    assert.equal(ws.matches(steps[1]),true,c.slug+' early exercise is interactive');
+    assert.equal(ws.matches(steps[3]),true,c.slug+' later workbook remains interactive');
+    const earlyPage=node();ws.park();ws.render(steps[1],earlyPage,appendText);
+    const rows=find(earlyPage,n=>n.className==='premium-map-row');
+    assert.equal(rows.length,c.source.length,c.slug+' early field count');
+    const originalFields=rows.map((row,i)=>{
+      assert.equal(find(row.children[0],n=>n.textContent===c.source[i]).length,1,
+        c.slug+' retains the original source question');
+      const inputs=find(row.children[1],n=>n.tag==='textarea');
+      assert.equal(inputs.length,1,c.slug+' includes an answer box beside its prompt');
+      inputs[0].value='Earlier response '+(i+1);
+      return inputs[0];
+    });
+    assert.equal(saved.length,0,'no answers are saved automatically');
+    const laterPage=node();ws.park();ws.render(steps[3],laterPage,appendText);
+    const laterRows=find(laterPage,n=>n.className==='premium-map-row');
+    assert.equal(laterRows.length,8,c.slug+' final guided questions remain');
+    const laterFields=laterRows.map(row=>find(row,n=>n.tag==='textarea')[0]);
+    c.map.forEach((mapped,i)=>{
+      if(mapped===null){
+        assert.ok(!laterFields.includes(originalFields[i]),
+          c.slug+' genuinely distinct earlier answers are not misfiled');
+      }else{
+        assert.equal(laterFields[mapped],originalFields[i],
+          c.slug+' reuses the original field rather than duplicating an answer');
+      }
+    });
+    const combined=ws.completedWorksheetText();
+    c.map.forEach((mapped,i)=>{
+      assert.ok(combined.includes('Earlier response '+(i+1)),c.slug+' preserves early response');
+      if(mapped===null)assert.ok(combined.includes(c.source[i]),
+        c.slug+' names the unmatched early prompt in the completed document');
+    });
+    ws.park();
+    const returnPage=node();ws.render(steps[1],returnPage,appendText);
+    const returned=find(returnPage,n=>n.className==='premium-map-row');
+    returned.forEach((row,i)=>{
+      assert.equal(find(row,n=>n.tag==='textarea')[0],originalFields[i],
+        c.slug+' preserves DOM input across back/forward');
+    });
+    const completion=node();ws.renderCompletion(completion);
+    const documentText=find(completion,n=>n.className==='premium-worksheet-paper')[0];
+    assert.equal(documentText.textContent,combined,c.slug+' full review document matches inputs');
+    const save=find(completion,n=>n.tag==='button' && n.textContent==='Save Complete Workbook to My Work')[0];
+    save.events.click();
+    assert.equal(saved.length,1,c.slug+' saves once, only on explicit click');
+    assert.equal(saved[0].text,combined,c.slug+' saves complete document without truncation');
+  }
+});
+
+test('editorial QA early-exercise fixtures do not leak protected question text into public module', () => {
+  const module=read('js/member-editorial-workbooks.js');
+  const reader=read('js/member-premium-lesson.js');
+  const billing=read('js/member-billing.js');
+  for(const slug of [
+    'the-love-bargain','promise-of-the-room','when-you-stop-trusting-own-account',
+    'professional-authority-multiplier','loyalty-without-self-abandonment'
+  ])assert.ok(module.includes("'"+slug+"':{"),slug+' has a validated early-exercise configuration');
+  assert.ok(module.includes('earlyQuestions.push(wording)'));
+  assert.ok(module.includes('isEarlyQuestion(wording)'));
+  assert.ok(!module.includes('What was I hoping this relationship would solve outside the relationship itself?'));
+  assert.ok(!module.includes('What I hoped therapy would help us do.'));
+  assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
+  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+});

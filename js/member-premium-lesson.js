@@ -277,19 +277,83 @@
       label.append(textarea); fields.append(label);
     });
   }
+  // Treat the manuscript's four columns as actual inline writing prompts.
+  // The fields are DOM-moved rather than recreated, preserving typed answers
+  // while the reader advances through Parts 10–13. No automatic persistence.
+  const fatherMapFields = [
+    'premium-map-received', 'premium-map-missed', 'premium-map-learned', 'premium-map-decision'
+  ];
+  function parkFatherMap() {
+    const parking = el('premium-map-grid');
+    for (const id of fatherMapFields) {
+      const field = el(id)?.closest('.premium-map-field');
+      if (field) parking.append(field);
+    }
+    for (const id of ['premium-map-actions', 'premium-map-status']) {
+      const node = el(id);
+      if (node) el('premium-father-map').append(node);
+    }
+  }
+  function renderFatherMapInline(step, body, positiveInheritance) {
+    let lastField = null;
+    function placeColumn(column) {
+      const input = el(fatherMapFields[column - 1]);
+      const field = input?.closest('.premium-map-field');
+      if (!field) return;
+      body.append(field);
+      lastField = field;
+    }
+    function renderBlock(block) {
+      appendText(body, block.kind === 'heading' ? 'h3' : 'p', block.text,
+        block.kind === 'paragraph' && /^(?:and|or):?$/i.test(block.text.trim()) ? 'premium-prose-connector' : '');
+    }
+
+    if (positiveInheritance) {
+      step.blocks.forEach(renderBlock);
+      placeColumn(1);
+    } else if (step.continuation >= 2) {
+      appendText(body, 'p', 'Review your own answers here. Change anything you want, then Copy or Save your map.', 'premium-map-continuity');
+      for (let n = 1; n <= 4; n++) placeColumn(n);
+      step.blocks.forEach(renderBlock);
+    } else {
+      let awaitingColumn = 0;
+      for (const block of step.blocks) {
+        const heading = block.kind === 'heading' ? block.text.trim() : '';
+        const nextColumn = /^COLUMN\s+([1-4])\b/i.exec(heading);
+        if (nextColumn) {
+          if (awaitingColumn) placeColumn(awaitingColumn);
+          awaitingColumn = Number(nextColumn[1]);
+        } else if (awaitingColumn === 4 && /^EXAMPLE\s+\d+/i.test(heading)) {
+          placeColumn(4);
+          awaitingColumn = 0;
+        }
+        renderBlock(block);
+        // The next page begins by classifying the previously written rule.
+        // Reuse the *same* input and checkboxes rather than starting a new map.
+        if (step.continuation === 1 && /^Then mark each statement:/i.test(block.text.trim())) {
+          placeColumn(3);
+        }
+      }
+      if (awaitingColumn) placeColumn(awaitingColumn);
+    }
+    if (lastField) lastField.after(el('premium-map-actions'), el('premium-map-status'));
+  }
+
   function render({ focus = false } = {}) {
     if (!steps.length) return;
     stopSpeech('Read from here to listen to the rest of the lesson using your device voice.');
     const step = steps[current];
     const final = Boolean(step.exercise);
-    // Keep the actual worksheet available on EVERY Father Imprint Map continuation
-    // page, not just the final reflection. Inputs are stable DOM nodes so moving
-    // between map sections does not erase entries. Other lessons are unchanged.
-    const onFatherMap = slug === 'father-wound' && step.title === 'The Father Imprint Map' && !final;
-    const onPositiveInheritance = slug === 'father-wound' && step.title === 'Part 8 — Positive Inheritance' && !final;
+    // Restore answer fields to their hidden, stable parking area before
+    // replacing section prose; typed values remain in the same DOM nodes.
+    parkFatherMap();
+    const onFatherMap = slug === 'father-wound' && /father imprint map/i.test(step.title) && !final;
+    const onPositiveInheritance = slug === 'father-wound' && /^part 8\b/i.test(step.title) && !final;
+    const isFatherPractice = onFatherMap || onPositiveInheritance;
     el('premium-father-map-guide').hidden = !onFatherMap;
     el('premium-father-positive-guide').hidden = !onPositiveInheritance;
-    el('premium-father-map').hidden = !onFatherMap;
+    el('premium-father-map').hidden = true;
+    el('premium-pause-reflection').hidden = isFatherPractice || final;
     el('premium-current-step').hidden = final;
     el('premium-exercise').hidden = !final;
     if (final) {
@@ -299,8 +363,10 @@
       el('premium-step-title').textContent = label(step);
       const body = el('premium-reader-body');
       body.replaceChildren();
-      // Give deliberate one-word rhetorical bridges a compact treatment without altering manuscript text.
-      step.blocks.forEach(b => appendText(body, b.kind === 'heading' ? 'h3' : 'p', b.text,
+      // For map lessons, place each real input immediately after the explanation
+      // of its column, not at the very bottom or on a separate reflection page.
+      if (isFatherPractice) renderFatherMapInline(step, body, onPositiveInheritance);
+      else step.blocks.forEach(b => appendText(body, b.kind === 'heading' ? 'h3' : 'p', b.text,
         b.kind === 'paragraph' && /^(?:and|or):?$/i.test(b.text.trim()) ? 'premium-prose-connector' : ''));
       el('premium-pause-note').value = notes.get(current) || '';
       el('premium-pause-status').textContent = '';

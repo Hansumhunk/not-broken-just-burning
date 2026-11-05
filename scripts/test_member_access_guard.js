@@ -19,7 +19,7 @@ test('all member pages fail closed before session verification', () => {
     const html = read(file);
     assert.match(html, /id="nbjb-member-access-gate"/, file);
     assert.match(html, /body\[data-member-page\]:not\(\[data-member-access="granted"\]\) main\{display:none!important\}/, file);
-    assert.match(html, /<script src="js\/member-bootstrap\.js"><\/script>/, file);
+    assert.match(html, new RegExp('<script src="js/member-bootstrap[.]js(?:[?][^"]*)?"></script>'), file);
     assert.doesNotMatch(html, /<body\b[^>]*data-member-access="granted"/, file + ' cannot be initially granted');
   }
   assert.doesNotMatch(read('member-auth.html'), /id="nbjb-member-access-gate"/);

@@ -56,7 +56,9 @@
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = src;
+      script.src = src === 'js/member-premium-lesson.js'
+        ? src + '?v=inline-map-v2'
+        : src;
       script.onload = resolve;
       script.onerror = () => reject(new Error("Failed to load " + src));
       document.body.appendChild(script);

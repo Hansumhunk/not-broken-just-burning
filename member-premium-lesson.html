@@ -13,7 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/brand.css">
 <link rel="stylesheet" href="css/experience.css"><link rel="stylesheet" href="css/members.css?v=20261102-nav3">
-<link rel="stylesheet" href="css/member-expansion.css"><link rel="stylesheet" href="css/member-premium-lesson.css">
+<link rel="stylesheet" href="css/member-expansion.css"><link rel="stylesheet" href="css/member-premium-lesson.css?v=inline-map-v2">
 <style id="nbjb-member-access-gate">body[data-member-page]:not([data-member-access="granted"]) main{display:none!important}</style></head>
 <body data-member-page="premium-lesson"><a class="skip-link" href="#main-content">Skip to content</a>
 <div class="ember-field" aria-hidden="true"></div>
@@ -26,7 +26,7 @@
 <section class="section-shell premium-compact-hero">
   <p class="eyebrow">Flamewalker+ · Founding Guided Learning</p>
   <h1>Learn a little. <span>Practice what matters.</span></h1>
-  <p>One chapter at a time. Read it, listen to it, or return to it later. You decide the pace.</p>
+  <p>One chapter at a time. Read it, practice what matters, or return to it later. You decide the pace.</p>
 </section>
 <section class="member-shell" aria-label="Member platform navigation">
  <div class="member-shell-copy"><strong>Flamewalker Hub</strong><span>Current access: <strong data-member-tier-label>Flamewalker</strong></span></div>
@@ -130,17 +130,17 @@
     <p id="premium-step-kicker" class="eyebrow">Your current section</p>
     <h2 id="premium-step-title">Loading section…</h2>
     <aside class="premium-map-bridge" id="premium-father-positive-guide" hidden>
-      <strong>Where do these answers go?</strong> This Positive Inheritance section prepares you for the Father Imprint Map in the next section. Jot a few words on paper if you prefer, or carry your thoughts forward to the four fill-in boxes on the lesson page. You do not need to answer every question.
+      <strong>Start with your own answer.</strong> After these questions, type what you received into the box directly below. The same answer follows you into the Father Imprint Map on the next pages. Prefer a notebook? That works too. Nothing is saved until you choose Copy or Save.
     </aside>
     <aside class="premium-map-bridge" id="premium-father-map-guide" hidden>
-      <strong>This part is a worksheet, not just an example.</strong> Read the columns below, then <a href="#premium-father-map">fill in your Father Imprint Map on this page</a>. Prefer handwriting? Draw four columns on paper: <em>What I Received, What I Missed, What I Learned, What I Choose Now.</em>
+      <strong>Read a column. Fill in its box. Then continue.</strong> Your answers stay in the same boxes as you move through these sections. You can copy or explicitly save the completed map at any point; nothing is uploaded automatically.
     </aside>
     <div class="premium-lesson-body" id="premium-reader-body"></div>
     <section class="premium-inline-map" id="premium-father-map" aria-labelledby="premium-father-map-heading" hidden>
       <p class="eyebrow">Write it down · Optional guided practice</p>
       <h3 id="premium-father-map-heading">Your Father Imprint Map</h3>
       <p class="premium-map-help">You can type directly into these boxes as you read the examples, or use pen and paper. You don't have to complete everything. Your entries stay on this page while it remains open, but are <strong>not saved automatically or uploaded</strong>. Use Copy or Save to My Work before closing or reloading.</p>
-      <div class="premium-map-grid">
+      <div class="premium-map-grid" id="premium-map-grid">
         <div class="premium-map-field">
           <label for="premium-map-received"><strong>Column 1 · What I received</strong><small>What helped me? What strength or positive inheritance would I preserve?</small></label>
           <textarea id="premium-map-received" rows="4" maxlength="450" autocomplete="off" placeholder="For example: a strong work ethic, humor, practical skills…"></textarea>
@@ -172,7 +172,7 @@
           <textarea id="premium-map-chosen-rule" rows="4" maxlength="450" autocomplete="off" placeholder="A responsible man works hard and knows rest is part of endurance…"></textarea>
         </div>
       </div>
-      <div class="premium-pause-actions">
+      <div class="premium-pause-actions" id="premium-map-actions">
         <button type="button" class="button button-ghost" id="premium-map-copy">Copy My Map</button>
         <button type="button" class="button button-primary" id="premium-map-save">Save Map to My Work</button>
         <button type="button" class="button button-ghost" id="premium-map-clear">Clear Map</button>
@@ -248,5 +248,5 @@
 </main>
 <footer class="site-footer section-shell"><div><strong>NOT BROKEN JUST BURNING</strong><p>Keep the steel. Drop the rust.</p></div><div class="footer-meta"><p>Flamewalker+ developing written-learning track.</p><p class="footer-links"><a href="privacy.html">Privacy &amp; Data Use</a> · <a href="contact.html">Contact</a></p></div></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="js/nbjb-config.js"></script><script src="js/nbjb-auth.js"></script><script src="js/main.js"></script><script src="js/member-bootstrap.js"></script>
+<script src="js/nbjb-config.js"></script><script src="js/nbjb-auth.js"></script><script src="js/main.js"></script><script src="js/member-bootstrap.js?v=inline-map-v2"></script>
 </body></html>

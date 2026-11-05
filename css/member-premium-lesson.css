@@ -164,3 +164,11 @@
 .premium-map-field .premium-map-followup{display:block;margin-top:16px}
 .premium-map-status{min-height:1.4em;color:var(--muted);font-size:.85rem;line-height:1.6}
 @media(max-width:680px){.premium-inline-map .button{width:100%}}
+
+
+/* Place the response directly under each manuscript column's examples. */
+.premium-lesson-body>.premium-map-field{margin:16px 0 25px;border-color:rgba(248,117,42,.42);background:rgba(248,117,42,.055)}
+.premium-lesson-body>.premium-map-field>label strong{color:#ffb482}
+.premium-lesson-body>.premium-pause-actions{margin:18px 0 12px}
+.premium-lesson-body>.premium-map-status{margin:7px 0 22px}
+.premium-lesson-body .premium-map-continuity{font-weight:600;color:var(--text);margin:0 0 17px}

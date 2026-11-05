@@ -665,13 +665,19 @@ test('Strength Model Audit and Needs Permission Map reuse named repeatable recor
     const step={title:cfg.title,continuation:0,blocks:[
       {kind:'paragraph',text:'Earlier chapter prose.'},
       {kind:'heading',text:cfg.heading},
-      {kind:'paragraph',text:'Complete this audit.'}
+      {kind:'paragraph',text:'Complete this audit.'},
+      ...(cfg.slug==='what-strength-looked-like'
+        ? Array.from({length:7},(_,i)=>[
+            {kind:'paragraph',text:(i+1)+'. STRENGTH QUESTION '+(i+1)},
+            {kind:'paragraph',text:'Answer this question '+(i+1)}
+          ]).flat()
+        : [])
     ]};
     assert.equal(ws.matches(step),true);
     const page=node();ws.park();ws.render(step,page,appendText);
     const rows=find(page,x=>x.className==='premium-map-row');
-    assert.equal(rows.length,1);
-    assert.equal(find(rows[0].children[0],x=>x.textContent==='Complete this audit.').length,1);
+    assert.equal(rows.length,cfg.slug==='what-strength-looked-like'?7:1);
+    assert.equal(find(page,x=>x.textContent==='Complete this audit.').length,1);
     assert.equal(find(page,x=>x.tag==='select')[0].children.length,cfg.initial);
     const answers=find(page,x=>x.tag==='textarea');
     assert.equal(answers.length,cfg.fields);

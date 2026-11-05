@@ -952,6 +952,7 @@ test('Needs Permission Map places answers beside six questions and keeps both ne
   const title='Part 11 — Positive Inheritance';
   const part16={title,continuation:0,blocks:[
     {kind:'paragraph',text:'Who respected my needs?'},
+    ...["Who met my needs well?","Who made home feel safe?","Who taught me how to ask?","Who respected my privacy?","Who comforted me without making me ashamed?","Who taught independence without abandonment?","Who let me fail and still helped me learn?","What kind of care do I want to pass forward?"].map(q=>({kind:'paragraph',text:'- '+q})),
     {kind:'heading',text:'THE NEEDS PERMISSION MAP'},
     {kind:'paragraph',text:'Choose several needs that matter to you.'},
     ...[1,2,3].flatMap(i=>[

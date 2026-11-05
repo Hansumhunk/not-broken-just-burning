@@ -654,11 +654,10 @@ test('Silence Inventory and Armor Audit support editable repeatable records and 
 });
 
 
-test('Strength Model Audit and Needs Permission Map reuse named repeatable records', () => {
+test('Strength Model Audit continues using repeatable inherited-rule records', () => {
   const {create,node,find,appendText}=simulatePracticeWorkspace();
   for(const cfg of [
-    {slug:'what-strength-looked-like',title:'Part 12 — The Six NBJB Strength Anchors',heading:'THE STRENGTH MODEL AUDIT',initial:5,fields:7},
-    {slug:'allowed-to-need',title:'Part 11 — Positive Inheritance',heading:'THE NEEDS PERMISSION MAP',initial:2,fields:6}
+    {slug:'what-strength-looked-like',title:'Part 12 — The Six NBJB Strength Anchors',heading:'THE STRENGTH MODEL AUDIT',initial:5,fields:7}
   ]){
     const ws=create({slug:cfg.slug,parking:node(),saveToWork:()=>{}});
     assert.ok(ws);

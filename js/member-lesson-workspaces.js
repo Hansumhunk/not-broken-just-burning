@@ -562,7 +562,66 @@
         body.append(instruction);
         return;
       }
-      if(strengthWorksheet && config.kind==='records'){
+      if(needsWorksheet && config.kind==='records'){
+        // The map follows Positive Inheritance and spans reader Parts 16–17;
+        // the seven-question Request Check continues through Part 18.
+        // Place every answer beside its numbered prompt, never beside
+        // unrelated introductory teaching or after the examples.
+        let started=step.continuation>0;
+        let requestMode=step.continuation>=2;
+        let active=null;
+        if(started && !requestMode){
+          body.append(recordWrap);
+          // Page 17 begins with the guidance for Question 3, which was
+          // introduced at the end of the preceding page.
+          if(step.continuation===1){
+            active=makeRow(body);
+            active.reading.append(node('h3','','3. Current Strategy — continued guidance'));
+            needTargets[2]=active.writing;
+          }
+        }
+        for(const block of step.blocks){
+          const t=block.text.trim();
+          if(block.kind==='heading' && config.heading.test(t)){
+            started=true;
+            requestMode=false;
+            active=null;
+            text(body,block);
+            body.append(recordWrap);
+            continue;
+          }
+          if(block.kind==='heading' && /^THE REQUEST CHECK$/i.test(t)){
+            requestMode=true;
+            active=null;
+            text(body,block);
+            body.append(node('p','premium-map-continuity',
+              'Before asking for support, answer these seven questions. Your responses join the same complete worksheet at the end.'));
+            continue;
+          }
+          if(!started && !requestMode){
+            text(body,block);
+            continue;
+          }
+          const numbered=/^([1-7])\.\s+/.exec(t);
+          if(numbered && requestMode){
+            const index=Number(numbered[1])-1;
+            active=makeRow(body);
+            requestTargets[index]=active.writing;
+            active.writing.append(requestFields[index].wrap);
+          }else if(numbered && Number(numbered[1])<=6){
+            active=makeRow(body);
+            needTargets[Number(numbered[1])-1]=active.writing;
+          }else if(/^EXAMPLE$/i.test(t)){
+            active=null;
+          }
+          text(active?active.reading:body,block);
+        }
+        if(showRecord)showRecord(currentRecord);
+        if(requestMode && !requestTargets.some(Boolean)){
+          body.append(node('p','premium-map-continuity',
+            'Your Request Check responses carry forward. Continue to the final reflection to review and save your complete document.'));
+        }
+      } else if(strengthWorksheet && config.kind==='records'){
         // The six strength anchors are teaching prompts, NOT seven audit
         // questions. Begin the form only after THE STRENGTH MODEL AUDIT.
         // The audit then spans four reader sections, so reuse the same inputs

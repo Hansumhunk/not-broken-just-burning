@@ -690,29 +690,156 @@ test('Strength Model Audit continues using repeatable inherited-rule records', (
   }
 });
 
-test('Chosen Manhood Code presents six named stages and keeps all text on the review page', () => {
-  const {create,node,find,appendText}=simulatePracticeWorkspace();
-  const ws=create({slug:'inherited-vs-chosen-manhood',parking:node(),saveToWork:()=>{}});
+test('Chosen Manhood Code walks every manuscript question and preserves independent rule records', async () => {
+  const {create,node,find,appendText,context}=simulatePracticeWorkspace();
+  const saved=[];
+  const ws=create({
+    slug:'inherited-vs-chosen-manhood',parking:node(),
+    saveToWork:()=>{throw new Error('never save a fragmented stage note');},
+    saveWholeToWork:(body,title,status)=>{
+      saved.push({body,title});status.textContent='Saved complete code';
+    },
+    getFinalResponses:()=>[{prompt:'Chosen manhood means',response:'Strength with restraint.'}]
+  });
+  assert.ok(ws);
   const title='Part 12 — The One-Page Chosen Manhood Code';
-  const headings=['KEEP','REFORGE','RETIRE','BUILD','ACT','REVIEW'];
-  const step={title,continuation:0,blocks:headings.map((word,i)=>[
-    {kind:'heading',text:'PART '+String.fromCharCode(65+i)+' — '+word},
-    {kind:'paragraph',text:'Guidance for '+word}
-  ]).flat()};
-  const page=node();ws.park();ws.render(step,page,appendText);
-  const rows=find(page,x=>x.className==='premium-map-row');
-  assert.equal(rows.length,6);
-  assert.equal(ws.matches(step),true);
-  const values=rows.map(row=>find(row,x=>x.tag==='textarea')[0]);
-  values[0].value='I keep reliable kindness';
-  values[3].value='Build through six anchors';
-  assert.ok(ws.serializedParts().some(x=>x.includes('I keep reliable kindness')));
-  ws.park();
-  const later=node();ws.render({title,continuation:1,blocks:[{kind:'paragraph',text:'Review your commitments'}]},later,appendText);
-  const review=find(later,x=>x.className==='premium-map-row');
-  assert.equal(review.length,6);
-  assert.equal(find(review[0],x=>x.tag==='textarea')[0],values[0]);
-  assert.equal(find(review[3],x=>x.tag==='textarea')[0].value,'Build through six anchors');
+  const prompts={
+    A:['- What is it?','- Where did I learn it?','- Why do I choose it now?'],
+    B:['- Old rule','- Useful value inside it','- Cost of the old form','- Chosen rule'],
+    C:['- Old rule','- What it once protected','- What it costs now','- What replaces it']
+  };
+  const first={title,continuation:0,blocks:[
+    {kind:'paragraph',text:'This is the primary integration tool for the track.'},
+    ...['A','B','C'].flatMap(key=>[
+      {kind:'heading',text:'PART '+key+' — '+({A:'KEEP',B:'REFORGE',C:'RETIRE'})[key]},
+      {kind:'paragraph',text:'List the inherited rules.'},
+      {kind:'paragraph',text:'For each:'},
+      ...prompts[key].map(q=>({kind:'paragraph',text:q}))
+    ]),
+    {kind:'heading',text:'PART D — BUILD'},
+    {kind:'paragraph',text:'Write one personal statement for each of the six anchors:'},
+    ...['Steadiness.','Direction.','Strength with restraint.','Protection with boundaries.',
+      'Responsibility with self-respect.','Brotherhood and connection.']
+      .map(text=>({kind:'paragraph',text})),
+    {kind:'heading',text:'PART E — ACT'},
+    {kind:'paragraph',text:'Choose one behavior for the next seven days.'},
+    {kind:'paragraph',text:'- observable;'},
+    {kind:'paragraph',text:'- realistic;'},
+    {kind:'paragraph',text:'- inside your control;'},
+    {kind:'paragraph',text:'- connected to one chosen principle.'},
+    {kind:'heading',text:'PART F — REVIEW'},
+    {kind:'paragraph',text:'After seven days, ask:'}
+  ]};
+  let page=node();ws.park();ws.render(first,page,appendText);
+  const rows=find(page,n=>n.className==='premium-map-row');
+  assert.equal(rows.length,18,'3 Keep + 4 Reforge + 4 Retire + 6 Build + 1 Act');
+  for(const row of rows) {
+    assert.equal(find(row.children[1],n=>n.tag==='textarea').length,1,'a writing box is beside its question');
+    assert.ok(find(row.children[0],n=>n.tag==='p').length>0,'original question remains on the left');
+  }
+  const keepInput=find(rows[0],n=>n.tag==='textarea')[0];
+  keepInput.value='Reliability learned from my grandfather';
+  const pickers=find(page,n=>n.tag==='select');
+  assert.equal(pickers.length,3,'Keep, Reforge and Retire have independent selectors');
+  assert.equal(pickers[0].children.length,3);
+  assert.equal(pickers[1].children.length,3);
+  assert.equal(pickers[2].children.length,1);
+  pickers[0].value='1';pickers[0].events.change();
+  const keepSecond=find(rows[0],n=>n.tag==='textarea')[0];
+  assert.notEqual(keepSecond,keepInput);
+  keepSecond.value='Patience I choose to continue';
+  pickers[0].value='0';pickers[0].events.change();
+  assert.equal(find(rows[0],n=>n.tag==='textarea')[0],keepInput);
+  assert.equal(keepInput.value,'Reliability learned from my grandfather');
+  const reforge=find(rows[3],n=>n.tag==='textarea')[0];
+  reforge.value='Never ask for help';
+  const retire=find(rows[7],n=>n.tag==='textarea')[0];
+  retire.value='Anger proves respect';
+  const build=find(rows[11],n=>n.tag==='textarea')[0];
+  build.value='Remain steady under pressure';
+  const act=find(rows[17],n=>n.tag==='textarea')[0];
+  act.value='Practice one calm boundary statement each day';
+  assert.equal(saved.length,0,'typing and switching never automatically save');
+
+  const next={title,continuation:1,blocks:[
+    {kind:'paragraph',text:'- Did I do it?'},
+    {kind:'paragraph',text:'- What got in the way?'},
+    {kind:'paragraph',text:'- Which old rule returned?'},
+    {kind:'paragraph',text:'- What helped?'},
+    {kind:'paragraph',text:'- What needs to change?'}
+  ]};
+  ws.park();page=node();ws.render(next,page,appendText);
+  const reviewRows=find(page,n=>n.className==='premium-map-row');
+  assert.equal(reviewRows.length,5,'five seven-day Review questions have independent boxes');
+  find(reviewRows[0],n=>n.tag==='textarea')[0].value='Yes, five out of seven days';
+  ws.park();page=node();ws.render(first,page,appendText);
+  assert.equal(find(page,n=>n.className==='premium-map-row')[0].children[1].children[0]
+    .children[0].children.at(-1),keepInput,'the original Keep input is reused across navigation');
+  assert.equal(keepInput.value,'Reliability learned from my grandfather');
+
+  const pressure={title:'Part 13 — The Pressure Test',continuation:0,blocks:[
+    {kind:'paragraph',text:'Choose the three states most likely to pull you backward.'},
+    ...[1,2,3,4].flatMap(i=>[
+      {kind:'paragraph',text:i+'. Pressure question '+i},
+      {kind:'paragraph',text:'Explain and reflect on pressure '+i}
+    ]),
+    {kind:'paragraph',text:'EXAMPLE'},
+    {kind:'paragraph',text:'A worked example of choosing restraint.'}
+  ]};
+  ws.park();page=node();ws.render(pressure,page,appendText);
+  const pressureRows=find(page,n=>n.className==='premium-map-row');
+  assert.equal(pressureRows.length,5,'the three pressure states each have a state field plus four questions');
+  const pressureInput=find(pressureRows[0],n=>n.tag==='textarea')[0];
+  pressureInput.value='Feeling disrespected';
+  const pressureSelector=find(page,n=>n.tag==='select')[0];
+  assert.equal(pressureSelector.children.length,3);
+  pressureSelector.value='1';pressureSelector.events.change();
+  find(pressureRows[0],n=>n.tag==='textarea')[0].value='Exhaustion';
+  pressureSelector.value='0';pressureSelector.events.change();
+  assert.equal(find(pressureRows[0],n=>n.tag==='textarea')[0].value,'Feeling disrespected');
+  const smaller={title:'The Smaller Door',continuation:0,blocks:[
+    {kind:'paragraph',text:'If the full code feels like too much, complete three lines:'},
+    {kind:'paragraph',text:'“One rule I inherited was ______.”'},
+    {kind:'paragraph',text:'“I choose instead ______.”'},
+    {kind:'paragraph',text:'“This week I will prove that by ______.”'}
+  ]};
+  ws.park();page=node();ws.render(smaller,page,appendText);
+  const smallRows=find(page,n=>n.className==='premium-map-row');
+  assert.equal(smallRows.length,3,'the optional three-line version is also fillable');
+  find(smallRows[1],n=>n.tag==='textarea')[0].value='I choose responsibility without exhaustion';
+  const full=ws.completedWorksheetText();
+  assert.match(full,/MY CHOSEN MANHOOD CODE/);
+  for(const label of ['PART A — KEEP','PART B — REFORGE','PART C — RETIRE',
+    'PART D — BUILD','PART E — ACT','PART F — REVIEW AFTER SEVEN DAYS',
+    'THE PRESSURE TEST','THE SMALLER DOOR','FINAL GUIDED REFLECTION']) assert.ok(full.includes(label),label);
+  for(const entry of ['Reliability learned from my grandfather','Patience I choose to continue',
+    'Never ask for help','Feeling disrespected','Exhaustion','Strength with restraint.']) assert.ok(full.includes(entry),entry);
+  assert.equal(saved.length,0);
+  const final=node();ws.renderCompletion(final);
+  const paper=find(final,n=>n.className==='premium-worksheet-paper')[0];
+  assert.equal(paper.textContent,full,'complete preview matches complete document');
+  const copy=find(final,n=>n.tag==='button' && n.textContent==='Copy Full Personal Code')[0];
+  await copy.events.click();
+  assert.equal(context.copied,full);
+  const save=find(final,n=>n.tag==='button' && n.textContent==='Save Full Code to My Work')[0];
+  save.events.click();
+  assert.equal(saved.length,1,'one click saves exactly one complete document');
+  assert.equal(saved[0].body,full,'no answers are truncated');
+  assert.equal(saved[0].title,'My Chosen Manhood Code');
+});
+
+test('Chosen Manhood full worksheet is member-only with private manual saving and public checkout locked', () => {
+  const loader=read('js/member-bootstrap.js');
+  const reader=read('js/member-premium-lesson.js');
+  const chosen=read('js/member-chosen-code.js');
+  const platform=read('js/member-platform.js');
+  const billing=read('js/member-billing.js');
+  assert.ok(loader.includes('"premium-lesson": ["js/member-chosen-code.js", "js/member-lesson-workspaces.js", "js/member-premium-lesson.js"]'));
+  assert.ok(chosen.includes('saveWholeToWork(full,'));
+  assert.ok(chosen.includes('Nothing is uploaded automatically.'));
+  assert.ok(platform.includes('member-full-worksheet-paper'));
+  assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
+  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
 });
 
 

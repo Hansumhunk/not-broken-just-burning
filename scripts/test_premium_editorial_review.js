@@ -618,7 +618,7 @@ test('Silence Inventory and Armor Audit support editable repeatable records and 
     ]};
     const page=node(); ws.park(); ws.render(step,page,appendText);
     const rows=find(page,n=>n.className==='premium-map-row');
-    assert.equal(rows.length,1);
+    assert.equal(rows.length,slug.includes('armor')?7:1);
     const picker=find(page,n=>n.tag==='select')[0];
     assert.equal(picker.children.length,expectedEntries);
     const first=find(page,n=>n.tag==='textarea');

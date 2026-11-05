@@ -81,14 +81,17 @@ test('the private reader lists thirty-five lessons in six distinct tracks', () =
   assert.match(js, /Track 2 · The Placeholder Wound/);
 });
 
-test('membership and library descriptions promise thirty-five drafts, not live paid access', () => {
+test('membership and library accurately distinguish published founding lessons from drafts without opening sales', () => {
   const store = read('member-store.html');
   const library = read('member-library.html');
   const doc = read('FOUNDING_LAUNCH_RELEASE.md');
-  assert.match(store, /Planned founding library: thirty-five self-guided lesson drafts/);
-  assert.match(store, /All thirty-five are currently unpublished editorial drafts/);
+  assert.match(store, /Seven founding lessons on inherited manhood are now approved and published/);
+  assert.match(store, /Seven founding lessons are published in the protected library/);
   assert.match(store, /Planned: not for sale yet/);
-  assert.match(library, /Seven-Lesson Track · Coming Soon/);
+  assert.match(library, /Seven-Lesson Track · Enrollment Pending/);
+  assert.match(library, /twenty-eight additional manuscripts remain private editorial drafts/);
+  assert.match(read('flamewalker-plus.html'), /7 published · Enrollment pending/);
+  assert.match(read('flamewalker-plus.html'), /Paid checkout is closed/);
   assert.match(library, /checkout remains closed/);
   assert.match(library, /Eight-Lesson Track · Coming Soon/);
   assert.match(library, /Five-Lesson Track · Coming Soon/);
@@ -288,7 +291,7 @@ test('new practical tracks appear in private reader and editorial queue without 
   assert.match(js, /Track 4 · Steadiness & Emotional Command/);
   assert.match(js, /Track 5 · Rebuilding a Life That Holds/);
   assert.match(html, /Thirty-five-lesson editorial review queue/);
-  assert.match(read('member-store.html'), /All thirty-five are currently unpublished editorial drafts/);
+  assert.match(read('member-store.html'), /Seven founding lessons are published in the protected library/);
 });
 
 test('the recovered Sacred Laws remain private, correctly ordered, and awaiting founder approval', () => {
@@ -299,7 +302,7 @@ test('the recovered Sacred Laws remain private, correctly ordered, and awaiting 
   for (const slug of slugs) assert.match(html, new RegExp('data-premium-lesson-link="'+slug+'"'));
   assert.match(js, /Track 6 · The Five Sacred Laws of Survival/);
   assert.match(html, /Thirty-five-lesson editorial review queue/);
-  assert.match(read('member-store.html'), /All thirty-five are currently unpublished editorial drafts/);
+  assert.match(read('member-store.html'), /Seven founding lessons are published in the protected library/);
   assert.match(doc, /35 drafts · 6 tracks · 0 published/);
   assert.match(doc, /Founding content scope is frozen/);
 });

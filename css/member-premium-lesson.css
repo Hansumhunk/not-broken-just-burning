@@ -155,3 +155,12 @@
 .premium-map-field>label small{color:var(--muted);font-size:.82rem}
 .premium-map-field textarea,.premium-map-field select{box-sizing:border-box;display:block;width:100%;min-width:0;margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:#101014;color:var(--text);font:inherit;line-height:1.6}
 .premium-map-field textarea{min-height:115px;resize:vertical}
+
+.premium-map-field textarea:focus-visible,.premium-map-field select:focus-visible,.premium-map-classify input:focus-visible{outline:2px solid var(--ember-bright);outline-offset:2px}
+.premium-map-classify{border:0;margin:10px 0 0;padding:10px 0 0;display:flex;flex-wrap:wrap;gap:10px}
+.premium-map-classify legend{font-size:.8rem;color:var(--muted);line-height:1.5}
+.premium-map-classify label{display:inline-flex;gap:6px;align-items:center;font-size:.82rem}
+.premium-map-classify input{accent-color:var(--ember-bright);width:17px;height:17px}
+.premium-map-field .premium-map-followup{display:block;margin-top:16px}
+.premium-map-status{min-height:1.4em;color:var(--muted);font-size:.85rem;line-height:1.6}
+@media(max-width:680px){.premium-inline-map .button{width:100%}}

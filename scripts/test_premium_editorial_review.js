@@ -963,14 +963,16 @@ test('Needs Permission Map places answers beside six questions and keeps both ne
   assert.equal(ws.matches(part16),true);
   let page=node();ws.park();ws.render(part16,page,appendText);
   let rows=find(page,x=>x.className==='premium-map-row');
-  assert.equal(rows.length,3,'only the three need questions on this page receive answer boxes');
+  assert.equal(rows.length,11,'eight Positive Inheritance and three Needs Map questions have answer fields');
   assert.equal(find(page,x=>x.textContent==='Who respected my needs?').length,1,'positive teaching stays outside the worksheet');
+  const positiveInput=find(rows[0],x=>x.tag==='textarea')[0];
+  positiveInput.value='My grandmother taught me patience.';
   for(let i=0;i<3;i++){
-    const row=rows[i];
+    const row=rows[i+8];
     assert.equal(find(row.children[0],x=>x.textContent==='Guidance for need question '+(i+1)).length,1);
     assert.equal(find(row.children[1],x=>x.tag==='textarea').length,1);
   }
-  const firstInput=find(rows[0],x=>x.tag==='textarea')[0];
+  const firstInput=find(rows[8],x=>x.tag==='textarea')[0];
   firstInput.value='I need rest after hard work.';
   assert.equal(saved.length,0,'writing alone never saves private answers');
   const part17={title,continuation:1,blocks:[

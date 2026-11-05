@@ -312,7 +312,7 @@ test('short rhetorical connector blocks render as compact prose without changing
   const js = read('js/member-premium-lesson.js');
   const css = read('css/member-premium-lesson.css');
   assert.match(js, /premium-prose-connector/);
-  assert.match(css, /p\\.premium-prose-connector/);
+  assert.ok(css.includes('p.premium-prose-connector'));
   assert.match(js, /const READ_TO_ME_ENABLED = false;/);
 });
 

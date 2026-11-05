@@ -124,7 +124,7 @@
     status.setAttribute('aria-live','polite');
     return {buttons,copy,save,status};
   }
-  function create({slug, parking, saveToWork}) {
+  function create({slug, parking, saveToWork, saveWholeToWork, getFinalResponses}) {
     const config = configs[slug];
     if (!config || !parking) return null;
     const ui = actions();
@@ -253,12 +253,108 @@
     }
     parking.append(ui.buttons,ui.status);
 
+
+    function completedWorksheetText() {
+      if(!shameQuestions) return '';
+      const lines=[
+        'NOT BROKEN JUST BURNING',
+        'THE SHAME SEPARATION & ARMOR AUDIT',
+        'A personal working document from Bullying, Shame, and the Early Armor',
+        '',
+        'PART I — THE SHAME SEPARATION'
+      ];
+      shameQuestions.forEach(([question],i)=>{
+        lines.push('',(i+1)+'. '+question);
+        lines.push(shameFields[i].input.value.trim() || '[Not answered yet]');
+      });
+      lines.push('','PART II — THE ARMOR AUDIT');
+      let used=0;
+      records.forEach((record,i)=>{
+        if(!record.inputs.some(input=>input.value.trim()))return;
+        used++;
+        lines.push('','STRATEGY '+(i+1));
+        config.questions.forEach(([question],idx)=>{
+          lines.push('',(idx+1)+'. '+question);
+          lines.push(record.inputs[idx].value.trim() || '[Not answered yet]');
+        });
+      });
+      if(!used)lines.push('','[No strategy has been completed yet]');
+      const final=typeof getFinalResponses==='function'?getFinalResponses():[];
+      const answered=Array.isArray(final)?final.filter(x=>x && x.response?.trim()):[];
+      if(answered.length) {
+        lines.push('','PART III — FINAL REFLECTION');
+        answered.forEach(item=>lines.push('',item.prompt || 'Reflection',item.response.trim()));
+      }
+      lines.push('','Prepared privately in Flamewalker+. This is personal reflection, not a diagnosis or professional assessment.');
+      return lines.join('\n');
+    }
+    function worksheetProgress() {
+      const shameCount=shameFields.filter(field=>field.input.value.trim()).length;
+      const activeRecords=records.filter(rec=>rec.inputs.some(input=>input.value.trim()));
+      const completed=activeRecords.reduce((sum,rec)=>sum+rec.inputs.filter(input=>input.value.trim()).length,0);
+      const total=activeRecords.length*config.questions.length;
+      return shameCount+' of 6 Shame Separation questions · '+completed+' of '+total+
+        ' Armor Audit answers across '+activeRecords.length+' '+(activeRecords.length===1?'strategy':'strategies');
+    }
+    function refreshCompletion() {
+      if(!worksheetPreview)return;
+      worksheetPreview.paper.textContent=completedWorksheetText();
+      worksheetPreview.progress.textContent=worksheetProgress()+
+        '. Unanswered prompts remain visibly marked; you can return and edit them.';
+    }
+    function renderCompletion(container) {
+      if(!shameQuestions || !container)return;
+      if(!worksheetPreview){
+        const section=node('section','premium-worksheet-completion');
+        const eyebrow=node('p','eyebrow','Your completed work · Personal document');
+        const heading=node('h3','','The Shame Separation & Armor Audit');
+        const intro=node('p','premium-map-help',
+          'Your answers from both exercises are assembled below. Review the whole page, return to any question to edit it, then choose Copy or Save. No answer is uploaded automatically.');
+        const progress=node('p','premium-worksheet-progress');
+        const paper=node('pre','premium-worksheet-paper');
+        const controls=node('div','premium-pause-actions');
+        const copyButton=node('button','button button-ghost','Copy Full Worksheet');
+        const saveButton=node('button','button button-primary','Save Full Worksheet to My Work');
+        copyButton.type=saveButton.type='button';
+        const status=node('p','premium-map-status');
+        status.setAttribute('role','status');
+        status.setAttribute('aria-live','polite');
+        controls.append(copyButton,saveButton);
+        section.append(eyebrow,heading,intro,progress,paper,controls,status);
+        copyButton.addEventListener('click',async ()=>{
+          if(!answers()){status.textContent='Answer at least one question before copying the worksheet.';return;}
+          try{
+            await navigator.clipboard.writeText(completedWorksheetText());
+            status.textContent='The full worksheet was copied. Paste it somewhere private to keep it.';
+          }catch(_){status.textContent='Copy was blocked by your browser. You can select the worksheet text below.';}
+        });
+        saveButton.addEventListener('click',()=>{
+          if(!answers()){status.textContent='Answer at least one question before saving.';return;}
+          const text=completedWorksheetText();
+          if(text.length>20000){
+            status.textContent='The full worksheet is too long for one local entry. Use Copy to retain every answer.';
+            return;
+          }
+          if(typeof saveWholeToWork!=='function'){
+            status.textContent='Full worksheet saving is unavailable. Use Copy to keep your complete answers.';
+            return;
+          }
+          saveWholeToWork(text,'Shame Separation & Armor Audit',status);
+        });
+        worksheetPreview={section,progress,paper,status};
+      }
+      container.hidden=false;
+      container.replaceChildren(worksheetPreview.section);
+      refreshCompletion();
+    }
+
     function answers() {
       if(config.kind==='map' || config.kind==='stages') {
         return fields.some(f=>f.input.value.trim()) || (config.kind==='map' &&
           (fields[2].checks.some(x=>x.checked) || Boolean(fields[3].choice.value)));
       }
-      return records.some(rec=>rec.inputs.some(input=>input.value.trim()));
+      return shameFields.some(field=>field.input.value.trim()) ||
+        records.some(rec=>rec.inputs.some(input=>input.value.trim()));
     }
     function serializedParts(){
       if(config.kind==='stages'){
@@ -438,7 +534,8 @@
       }
       body.append(ui.buttons,ui.status);
     }
-    return {matches,render,park,answers,serializedParts,config};
+    return {matches,render,park,answers,serializedParts,config,
+      renderCompletion,refreshCompletion,completedWorksheetText,worksheetProgress};
   }
   window.NBJBPremiumWorkspaces=Object.freeze({create});
 })();

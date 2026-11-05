@@ -7,7 +7,12 @@
   const signedOut = q('#signed-out-state');
   const recovery = q('#recovery-state');
   function setStatus(message, bad=false){ if(!status) return; status.textContent=message||''; status.dataset.state=bad?'error':'ok'; }
-  function value(id){ return (document.getElementById(id)?.value || '').trim(); }
+  function value(id){
+    const input = document.getElementById(id);
+    const raw = String(input?.value || '');
+    // Whitespace is meaningful in passwords, but not around email addresses.
+    return id.includes('password') ? raw : raw.trim();
+  }
   function authFlowType(){
     const searchType = new URLSearchParams(location.search).get('type') || '';
     const hashType = new URLSearchParams(location.hash.replace(/^#/, '')).get('type') || '';

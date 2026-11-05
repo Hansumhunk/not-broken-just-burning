@@ -142,3 +142,9 @@
 
 .premium-map-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 @media(max-width:680px){.premium-map-grid{grid-template-columns:1fr}}
+
+.premium-map-bridge{max-width:75ch;padding:15px 18px;margin:12px 0 20px;border-left:3px solid var(--ember-bright);background:rgba(255,122,45,.06);border-radius:0 11px 11px 0;line-height:1.7}
+.premium-map-bridge a{color:#ffac78;text-decoration:underline}
+.premium-inline-map{max-width:80ch;margin:30px 0;padding:clamp(16px,3vw,28px);border:1px solid rgba(248,117,42,.32);border-radius:15px;background:rgba(248,117,42,.04);scroll-margin-top:80px}
+.premium-inline-map h3{font-family:'Cinzel',serif;font-size:clamp(1.2rem,2vw,1.55rem);margin:10px 0 16px}
+.premium-map-help{font-size:.9rem;line-height:1.65;color:var(--muted)}

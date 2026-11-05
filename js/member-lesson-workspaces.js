@@ -125,6 +125,9 @@
     return {buttons,copy,save,status};
   }
   function create({slug, parking, saveToWork, saveWholeToWork, getFinalResponses}) {
+    if(slug === 'inherited-vs-chosen-manhood' && window.NBJBChosenCode?.create){
+      return window.NBJBChosenCode.create({slug,parking,saveWholeToWork,getFinalResponses});
+    }
     const config = configs[slug];
     if (!config || !parking) return null;
     const ui = actions();

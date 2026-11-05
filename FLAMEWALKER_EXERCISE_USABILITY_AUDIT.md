@@ -4,7 +4,7 @@
 
 ## Finding
 
-The premium reader currently provides a general **Pause and reflect** note field and final guided-reflection fields for every lesson. It has a separate, functional, write-as-you-go **Father Imprint Map** implementation only for `father-wound`, merged in PR #136. In multiple other manuscripts, instructions such as "write four columns", "choose three situations", "for each complete", or "write a plan" occur much earlier than the final reflection. The missing connection between instruction and input causes avoidable confusion.
+The premium reader provides general **Pause and reflect** notes and final guided-reflection fields, plus dedicated, inline workspaces for **all seven founding lessons**. The Father Imprint Map shipped in PR #136. PRs #138 and #139 introduced reusable side-by-side maps, selectable repeatable records and multi-stage guided forms for the remaining six published lessons. Real desktop/mobile acceptance is still outstanding. In multiple other manuscripts, instructions such as "write four columns", "choose three situations", "for each complete", or "write a plan" occur much earlier than the final reflection. The missing connection between instruction and input causes avoidable confusion.
 
 **Severity:**
 - **HIGH**: Explicit multipart map/audit, columns or repeated-entry worksheet with no matching on-page fields. These should be interactive before inviting more paying users.
@@ -18,14 +18,14 @@ The premium reader currently provides a general **Pause and reflect** note field
 | # | Slug | Practice in manuscript | Priority | Work |
 |---|---|---|---|---|
 | 1 | `father-wound` | Four-column Father Imprint Map | COMPLETE | PR #136 side-by-side in reader; device QA still needed |
-| 2 | `mother-wound` | Four-column Maternal Imprint Map | HIGH | Reuse Father-style side-by-side columns |
-| 3 | `learned-silence` | Silence Inventory: three situations, multiple questions each | HIGH | Repeatable situation records + question fields |
-| 4 | `bullying-shame-early-armor` | Armor Audit for several strategies | HIGH | Repeatable strategy entries with protection, costs and choice |
-| 5 | `what-strength-looked-like` | Strength Model Audit of five inherited rules | HIGH | Five repeatable structured rule records |
-| 6 | `allowed-to-need` | Needs Permission Map across several needs | HIGH | Repeatable need-by-need map |
-| 7 | `inherited-vs-chosen-manhood` | Part A Keep, B Reforge, C Retire, D Build, E Act | HIGH | Multi-stage guided plan with repeated entries and a final review |
+| 2 | `mother-wound` | Four-column Maternal Imprint Map | COMPLETE | Reusable 4-column map, PR #138; device QA pending |
+| 3 | `learned-silence` | Silence Inventory: three situations, multiple questions each | COMPLETE | Three independent selectable situations, 10 prompts, PR #138; QA pending |
+| 4 | `bullying-shame-early-armor` | Armor Audit for several strategies | COMPLETE | Repeatable strategy records, PR #138; QA pending |
+| 5 | `what-strength-looked-like` | Strength Model Audit of five inherited rules | COMPLETE | Five independent inherited-rule records, PR #139; QA pending |
+| 6 | `allowed-to-need` | Needs Permission Map across several needs | COMPLETE | Repeatable need-by-need records, PR #139; QA pending |
+| 7 | `inherited-vs-chosen-manhood` | Parts A–F: Keep, Reforge, Retire, Build, Act, Review | COMPLETE | Six persistent guided stages, PR #139; QA pending |
 
-**Published lesson priority:** Fix #2–7 before expanding sales. Reader code can reuse one base component instead of six one-off HTML blocks. Preserve all approved manuscript text and publication statuses while implementing interface fixes.
+**Founding lesson implementation status:** All seven now have inline workspaces in the protected reader. **Device acceptance remains open:** verify text-to-form alignment, navigation retention, readability, Copy and Save on actual desktop and mobile browsers before opening public sales. Published manuscript content and statuses were not changed by these UI fixes.
 
 ## Track 2 — editorial drafts (8)
 
@@ -98,7 +98,8 @@ The premium reader currently provides a general **Pause and reflect** note field
 - [ ] Browser refresh doesn't falsely promise persistence. Longer answers are not silently truncated on save.
 - [ ] Controls are keyboard accessible; forms have accessible labels and no horizontal overflow.
 - [ ] Tests verify field placement and data preservation, not merely matching HTML identifiers.
-- [ ] The seven published lessons get interface review first; drafts retain `editorial_review` and require separate founder manuscript approval before publication.
+- [x] Dedicated interface workspaces for all seven published lessons have been implemented and automated-tested (PRs #136, #138, #139).
+- [ ] Founder must confirm the seven workspaces behave well on actual desktop and mobile browsers; drafts retain `editorial_review` until separate publication approval.
 - [ ] No changes to Stripe launch gates or disabled Read to Me.
 
 **Important:** An exercise's appearance in this table means the manuscript contains an instruction requiring learner participation. Priority is an interface-design recommendation, not a judgment of clinical or manuscript quality.

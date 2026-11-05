@@ -142,3 +142,69 @@
     }
     copy.addEventListener('click',()=>copyWorkbook(feedback));
     save.addEventListener('click',()=>saveWorkbook(feedback));
+
+    function render(step,body,appendText){
+      if(!matches(step))return;
+      const lead=el('section','premium-batch-workbook');
+      lead.append(
+        el('p','eyebrow','Write as you learn · Guided practice'),
+        el('h3','',title),
+        el('p','premium-map-help',
+          'Each question has an answer box beside it. Your answers follow you between these sections, '+
+          'but are not saved or uploaded automatically. Use Copy or Save before closing the lesson.')
+      );
+      let inserted=false;
+      const insert=()=>{
+        if(inserted)return;
+        body.append(lead);
+        for(const field of allFields)body.append(field.row);
+        body.append(controls,feedback);
+        inserted=true;
+      };
+      let anchorSeen=false,after=0;
+      for(const block of step.blocks||[]){
+        appendText(body,block.kind==='heading'?'h3':'p',block.text);
+        if(matchText(block.text))anchorSeen=true;
+        if(anchorSeen && ++after>=2)insert();
+      }
+      if(!inserted)insert();
+    }
+    function refreshCompletion(){
+      if(!preview)return;
+      preview.paper.textContent=completedWorksheetText();
+      preview.status.textContent=progress();
+    }
+    function renderCompletion(container){
+      if(!container)return;
+      if(!preview){
+        const section=el('section','premium-worksheet-completion');
+        const heading=el('h3','',title+' · My Completed Workbook');
+        const intro=el('p','premium-map-help',
+          'Your responses form one readable document. Return to the lesson to revise your answers, '+
+          'then copy or save this complete workbook. Nothing is automatically saved or uploaded.');
+        const status=el('p','premium-worksheet-progress');
+        const paper=el('pre','premium-worksheet-paper');
+        const actions=el('div','premium-pause-actions');
+        const copyButton=el('button','button button-ghost','Copy Complete Workbook');
+        const saveButton=el('button','button button-primary','Save Complete Workbook to My Work');
+        copyButton.type=saveButton.type='button';
+        const result=el('p','premium-map-status');
+        result.setAttribute('role','status');result.setAttribute('aria-live','polite');
+        copyButton.addEventListener('click',()=>copyWorkbook(result));
+        saveButton.addEventListener('click',()=>saveWorkbook(result));
+        actions.append(copyButton,saveButton);
+        section.append(heading,intro,status,paper,actions,result);
+        preview={section,paper,status};
+      }
+      container.hidden=false;
+      container.replaceChildren(preview.section);
+      refreshCompletion();
+    }
+    return {matches,render,park,answers,completedWorksheetText,renderCompletion,
+      refreshCompletion,replacesGuidedReflection:true,focusIndex:focus,promptCount:prompts.length};
+  }
+  window.NBJBEditorialWorkbooks=Object.freeze({
+    create,
+    supportedSlugs:Object.freeze(Object.keys(anchors))
+  });
+})();

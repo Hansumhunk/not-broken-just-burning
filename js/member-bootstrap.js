@@ -57,7 +57,7 @@
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
       script.src = (src === 'js/member-premium-lesson.js' || src === 'js/member-lesson-workspaces.js')
-        ? src + '?v=workspaces-v1'
+        ? src + '?v=workspaces-v2'
         : src;
       script.onload = resolve;
       script.onerror = () => reject(new Error("Failed to load " + src));

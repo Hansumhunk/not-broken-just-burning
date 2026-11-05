@@ -53,7 +53,7 @@ function simulate({ userId = '', restoredUserId = '', refreshError = false } = {
   const body = {
     dataset: { memberPage: 'work' },
     appendChild(node) {
-      loaded.push(node.src);
+      loaded.push(node.src.split('?')[0]); // Versioned assets still have the same authorized load path.
       queueMicrotask(() => node.onload?.());
     },
     insertBefore() {}

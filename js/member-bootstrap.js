@@ -56,8 +56,8 @@
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = (src === 'js/member-premium-lesson.js' || src === 'js/member-lesson-workspaces.js')
-        ? src + '?v=workspaces-v2'
+      script.src = ['js/member-premium-lesson.js', 'js/member-lesson-workspaces.js', 'js/member-history-insights.js', 'js/member-platform.js'].includes(src)
+        ? src + '?v=armor-workbook-v3'
         : src;
       script.onload = resolve;
       script.onerror = () => reject(new Error("Failed to load " + src));

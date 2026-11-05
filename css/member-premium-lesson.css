@@ -214,3 +214,51 @@
  .premium-workspace-records{padding:12px}
  .premium-workspace-actions .button{flex:1 1 auto}
 }
+
+
+/* The Shame Separation and Armor Audit are question-by-question exercises. */
+.premium-map-layout .premium-workspace-records{
+  margin:12px 0 25px;
+  max-width:100%;
+}
+.premium-map-layout .premium-workspace-records .premium-workspace-records{
+  border:0;
+}
+.premium-map-layout .premium-workspace-records>.premium-workspace-picker-label{
+  max-width:340px;
+}
+.premium-map-layout .premium-workspace-records>.premium-workspace-record-title{
+  margin-top:0;
+}
+.premium-map-layout .premium-workspace-records .premium-workspace-record{
+  display:none;
+}
+.premium-map-layout .premium-map-row .premium-map-field textarea{
+  min-height:105px;
+}
+.premium-worksheet-completion{
+  margin:32px 0 20px;
+  padding:clamp(17px,3vw,28px);
+  border:1px solid rgba(248,117,42,.4);
+  border-radius:15px;
+  background:rgba(248,117,42,.055);
+}
+.premium-worksheet-completion h3{font-size:clamp(1.25rem,2vw,1.7rem);margin:12px 0}
+.premium-worksheet-progress{color:var(--muted);font-size:.87rem;line-height:1.6}
+.premium-worksheet-paper{
+  box-sizing:border-box;
+  display:block;
+  width:100%;
+  padding:clamp(15px,2.8vw,28px);
+  margin:18px 0;
+  background:#f8f6f1;
+  border-radius:10px;
+  color:#262323;
+  border:1px solid rgba(0,0,0,.14);
+  font:400 .89rem/1.85 'Inter',sans-serif;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+@media(max-width:800px){
+ .premium-worksheet-completion .button{width:100%;justify-content:center}
+}

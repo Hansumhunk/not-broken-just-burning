@@ -383,8 +383,11 @@
     el('premium-pause-reflection').hidden = isFatherPractice || isStructuredPractice || final;
     el('premium-current-step').hidden = final;
     el('premium-exercise').hidden = !final;
+    const worksheetReview = el('premium-worksheet-review');
+    if (worksheetReview) worksheetReview.hidden = true;
     if (final) {
       buildExercise();
+      inlineWorkspace?.renderCompletion?.(worksheetReview);
     } else {
       el('premium-step-kicker').textContent = 'Part ' + (current + 1) + ' · ' + estimate(step);
       el('premium-step-title').textContent = label(step);
@@ -469,7 +472,9 @@
     inlineWorkspace = window.NBJBPremiumWorkspaces?.create?.({
       slug,
       parking: el('premium-workspace-parking'),
-      saveToWork: (text, context, status) => saveReflectionToWork(text, context, status)
+      saveToWork: (text, context, status) => saveReflectionToWork(text, context, status),
+      saveWholeToWork: (text, context, status) => saveCompleteWorksheetToWork(text, context, status),
+      getFinalResponses: () => reflectionAnswers()
     }) || null;
     const promptLabel = el('premium-editorial-prompt-label');
     const promptCount = Array.isArray(lesson.content?.exercise?.prompts) ? lesson.content.exercise.prompts.length : 0;
@@ -646,6 +651,32 @@
       ? 'Saved to My Work on this device.' + (clipped.length < body.length ? ' Only the first 2,400 characters were saved; use Copy for the full answer.' : ' You can find it from the Hub.')
       : 'This device could not save the reflection. Use Copy to keep it privately.';
   }
+  function saveCompleteWorksheetToWork(text, context, resultNode) {
+    // Complete worksheets are larger than ordinary 2,400-char notes. Store the
+    // full document in the device-local entry data and a short card summary,
+    // never silently truncate a member's answers.
+    const body = String(text || '').trim();
+    if (!body) { resultNode.textContent='Answer a question before saving.'; return; }
+    if (body.length > 20000) {
+      resultNode.textContent='The document is too long for one local entry. Copy the full worksheet instead.';
+      return;
+    }
+    const service = window.NBJBMemberService;
+    if (!service?.recordToolEntry) {
+      resultNode.textContent='My Work is unavailable on this device. Use Copy to keep your worksheet.';
+      return;
+    }
+    const saved = service.recordToolEntry('Lesson Worksheet', {
+      title: (lesson?.title || 'Flamewalker+') + ' · ' + context,
+      summary: 'Completed guided worksheet · Open the full document to review every question and answer.',
+      tags: ['Flamewalker+', 'Guided worksheet'],
+      data: { lessonSlug: slug, section: current + 1, worksheet: body }
+    });
+    resultNode.textContent = saved.ok
+      ? 'The entire worksheet was saved as ONE document in My Work on this device. No answers were uploaded.'
+      : 'The browser could not save the full worksheet. Copy it now to keep every answer.';
+  }
+
   // This worksheet is optional, in-browser work. Reading and navigation never
   // write its contents. Copy and Save each require an explicit button press.
   function fatherMapHasAnswers() {
@@ -704,6 +735,8 @@
       return { prompt: label.firstChild?.textContent?.trim() || 'Reflection', response };
     });
   }
+
+  el('premium-exercise-form')?.addEventListener('input', () => inlineWorkspace?.refreshCompletion?.());
 
   el('premium-chapter-select')?.addEventListener('change', ev => go(Number(ev.currentTarget.value)));
   el('premium-prev')?.addEventListener('click', () => go(current - 1));

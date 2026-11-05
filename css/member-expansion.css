@@ -410,3 +410,19 @@
 .member-history-extra-context > summary { color: var(--ember-pale); font-weight: 700; cursor: pointer; padding: 9px 0; }
 .member-history-session-note, .member-history-setup-note, .member-history-preview-note { margin: 12px 0; font-size: .91rem; color: var(--muted); }
 .member-history-restore-note { padding: 12px 14px; border: 1px solid var(--line-hot); border-radius: 12px; margin: 14px 0; }
+
+
+/* Completed lesson reflections are deliberately kept as one readable document. */
+.member-full-worksheet{margin:18px 0;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.025);padding:15px}
+.member-full-worksheet summary{font-weight:800;color:var(--ember-bright);cursor:pointer}
+.member-full-worksheet summary:focus-visible{outline:2px solid var(--ember-bright);outline-offset:4px}
+.member-full-worksheet-paper{
+  white-space:pre-wrap;overflow-wrap:anywhere;
+  box-sizing:border-box;width:100%;
+  margin:16px 0 0;padding:clamp(16px,3vw,28px);
+  background:#f7f6f1;color:#262323;border:1px solid rgba(0,0,0,.12);
+  border-radius:9px;font:400 .9rem/1.85 'Inter',sans-serif;
+}
+@media print{
+  .member-full-worksheet-paper{background:#fff;color:#000;border:0}
+}

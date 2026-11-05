@@ -410,7 +410,7 @@ def main() -> int:
             content = path.read_text(encoding="utf-8")
             if 'id="nbjb-member-access-gate"' not in content or 'data-member-access="granted"' not in content:
                 errors.append(f"{path.name}: missing fail-closed pre-auth member page gate.")
-            if 'src="js/member-bootstrap.js"' not in content:
+            if not re.search(r'src="js/member-bootstrap\\.js(?:\\?[^"]*)?"', content):
                 errors.append(f"{path.name}: member access bootstrap is missing.")
         bootstrap_text = (ROOT / "js" / "member-bootstrap.js").read_text(encoding="utf-8")
         for required in ('"pagehide"', '"pageshow"', 'hideMemberPage()', 'verifiedUser()', 'memberAccess = "granted"'):

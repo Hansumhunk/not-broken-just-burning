@@ -128,6 +128,10 @@
     const config = configs[slug];
     if (!config || !parking) return null;
     const ui = actions();
+    if(slug === 'bullying-shame-early-armor'){
+      ui.copy.textContent='Copy Full Worksheet';
+      ui.save.textContent='Save Full Worksheet to My Work';
+    }
     const fields = [];
     const records = [];
     let recordSelect = null;
@@ -378,12 +382,21 @@
     async function copy(){
       if(!answers()){ui.status.textContent='Write at least one answer first.';return;}
       try{
-        await navigator.clipboard.writeText(serializedParts().join('\n\n---\n\n'));
+        await navigator.clipboard.writeText(shameQuestions ? completedWorksheetText() : serializedParts().join('\n\n---\n\n'));
         ui.status.textContent='Answers copied. Paste them somewhere private to keep them.';
       }catch(_){ui.status.textContent='Copy was blocked. Select and copy your answers manually.';}
     }
     function save(){
       if(!answers()){ui.status.textContent='Write at least one answer first.';return;}
+      if(shameQuestions && typeof saveWholeToWork==='function'){
+        const full=completedWorksheetText();
+        if(full.length>20000){
+          ui.status.textContent='This full worksheet is too long for one local entry. Use Copy to retain every answer.';
+          return;
+        }
+        saveWholeToWork(full,'Shame Separation & Armor Audit',ui.status);
+        return;
+      }
       const parts=serializedParts();
       if(parts.some(x=>x.length>2400)){
         ui.status.textContent='An entry is too long to save without cutting it off. Use Copy for the full response.';

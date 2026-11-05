@@ -553,6 +553,7 @@ function simulatePracticeWorkspace() {
     copied:''
   };
   vm.runInNewContext(read('js/member-chosen-code.js'),context);
+  vm.runInNewContext(read('js/member-editorial-workbooks.js'),context);
   vm.runInNewContext(read('js/member-lesson-workspaces.js'),context);
   const find=(root,test)=>{
     const out=[];
@@ -560,7 +561,10 @@ function simulatePracticeWorkspace() {
     visit(root);return out;
   };
   const appendText=(target,tag,text)=>target.append(node(tag,'',''+text));
-  return {create:context.window.NBJBPremiumWorkspaces.create,node,context,find,appendText};
+  return {create:context.window.NBJBPremiumWorkspaces.create,
+    createEditorial:context.window.NBJBEditorialWorkbooks.create,
+    editorialSlugs:context.window.NBJBEditorialWorkbooks.supportedSlugs,
+    node,context,find,appendText};
 }
 
 test('maternal imprint map attaches editable columns beside manuscript and preserves values between sections', () => {

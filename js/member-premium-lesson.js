@@ -344,14 +344,16 @@
     stopSpeech('Read from here to listen to the rest of the lesson using your device voice.');
     const step = steps[current];
     const final = Boolean(step.exercise);
-    // Keep the actual worksheet available on EVERY Father Imprint Map continuation
-    // page, not just the final reflection. Inputs are stable DOM nodes so moving
-    // between map sections does not erase entries. Other lessons are unchanged.
-    const onFatherMap = slug === 'father-wound' && step.title === 'The Father Imprint Map' && !final;
-    const onPositiveInheritance = slug === 'father-wound' && step.title === 'Part 8 — Positive Inheritance' && !final;
+    // Restore answer fields to their hidden, stable parking area before
+    // replacing section prose; typed values remain in the same DOM nodes.
+    parkFatherMap();
+    const onFatherMap = slug === 'father-wound' && /father imprint map/i.test(step.title) && !final;
+    const onPositiveInheritance = slug === 'father-wound' && /^part 8\b/i.test(step.title) && !final;
+    const isFatherPractice = onFatherMap || onPositiveInheritance;
     el('premium-father-map-guide').hidden = !onFatherMap;
     el('premium-father-positive-guide').hidden = !onPositiveInheritance;
-    el('premium-father-map').hidden = !onFatherMap;
+    el('premium-father-map').hidden = true;
+    el('premium-pause-reflection').hidden = isFatherPractice || final;
     el('premium-current-step').hidden = final;
     el('premium-exercise').hidden = !final;
     if (final) {
@@ -361,8 +363,10 @@
       el('premium-step-title').textContent = label(step);
       const body = el('premium-reader-body');
       body.replaceChildren();
-      // Give deliberate one-word rhetorical bridges a compact treatment without altering manuscript text.
-      step.blocks.forEach(b => appendText(body, b.kind === 'heading' ? 'h3' : 'p', b.text,
+      // For map lessons, place each real input immediately after the explanation
+      // of its column, not at the very bottom or on a separate reflection page.
+      if (isFatherPractice) renderFatherMapInline(step, body, onPositiveInheritance);
+      else step.blocks.forEach(b => appendText(body, b.kind === 'heading' ? 'h3' : 'p', b.text,
         b.kind === 'paragraph' && /^(?:and|or):?$/i.test(b.text.trim()) ? 'premium-prose-connector' : ''));
       el('premium-pause-note').value = notes.get(current) || '';
       el('premium-pause-status').textContent = '';

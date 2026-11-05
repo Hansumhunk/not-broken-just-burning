@@ -1290,3 +1290,109 @@ test('draft batch preserves the seven published workspaces, source privacy and c
   assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
   assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
 });
+
+
+test('Split Alliance early exercise has five inline boxes sharing the later workbook answers', async () => {
+  const {createEditorial,node,find,appendText,context}=simulatePracticeWorkspace();
+  const saved=[];
+  const early=[
+    'Can I challenge a claim?',
+    'Can I correct a fact?',
+    'Can we both be challenged?',
+    'Can specific behavior be named?',
+    'Can a formulation be revised?'
+  ];
+  const fullPrompts=[
+    'Can I challenge a claim with respect?',
+    'Can I correct a checkable fact?',
+    'Can both people be responsible for behavior?',
+    'Does the process name behaviors before motives?',
+    'Can a formulation change when facts change?',
+    'Can safety affect the process?',
+    'How do I describe a specific concern?',
+    'Which respectful question should I ask next?'
+  ];
+  const steps=[
+    {title:'Opening',continuation:0,blocks:[{kind:'paragraph',text:'Introduction'}]},
+    {title:'Opening',continuation:1,blocks:[
+      {kind:'heading',text:'Exercise'},
+      {kind:'paragraph',text:'Alliance Integrity Check:'},
+      ...early.map(text=>({kind:'paragraph',text})),
+      {kind:'heading',text:'NBJB Principle'},
+      {kind:'paragraph',text:'A principle explained after the five questions.'}
+    ]},
+    {title:'Opening',continuation:2,blocks:[{kind:'paragraph',text:'More context'}]},
+    {title:'Opening',continuation:3,blocks:[
+      {kind:'heading',text:'THE FIVE-PART ALLIANCE INTEGRITY CHECK'},
+      {kind:'paragraph',text:'The complete workbook appears here.'}
+    ]},
+    {title:'Guided reflection',exercise:true,blocks:[]}
+  ];
+  const ws=createEditorial({
+    slug:'split-alliance-therapy-triangle',parking:node(),steps,
+    lessonTitle:'Protected lesson',exercise:{title:'Alliance Integrity Check',prompts:fullPrompts},
+    saveWholeToWork:(body,title,status)=>{
+      saved.push({body,title});
+      status.textContent='Saved complete workbook.';
+    }
+  });
+  assert.ok(ws);
+  assert.equal(ws.focusIndex,3,'the later workbook remains at its original section');
+  assert.equal(ws.matches(steps[0]),false);
+  assert.equal(ws.matches(steps[1]),true,'the earlier exercise now has its own inline writing boxes');
+  assert.equal(ws.matches(steps[2]),false,'ordinary teaching is not turned into an exercise');
+  assert.equal(ws.matches(steps[3]),true);
+  let page=node();
+  ws.park();ws.render(steps[1],page,appendText);
+  const earlyRows=find(page,n=>n.className==='premium-map-row');
+  assert.equal(earlyRows.length,5);
+  earlyRows.forEach((r,i)=>{
+    assert.equal(find(r.children[0],n=>n.textContent===early[i]).length,1,
+      'the original question appears on the left');
+    assert.equal(find(r.children[1],n=>n.tag==='textarea').length,1,
+      'one matching answer box appears on the right');
+  });
+  const first=find(earlyRows[0],n=>n.tag==='textarea')[0];
+  first.value='I wrote a specific response at the first exercise.';
+  assert.equal(saved.length,0,'typing does not save or upload responses');
+  ws.park();
+  page=node();ws.render(steps[3],page,appendText);
+  const laterRows=find(page,n=>n.className==='premium-map-row');
+  assert.equal(laterRows.length,8,'the later workbook retains all eight prompts');
+  assert.equal(find(laterRows[0],n=>n.tag==='textarea')[0],first,
+    'the same input is reused rather than creating duplicate answers');
+  assert.equal(find(laterRows[0],n=>n.tag==='textarea')[0].value,
+    'I wrote a specific response at the first exercise.');
+  const sixth=find(laterRows[5],n=>n.tag==='textarea')[0];
+  sixth.value='A safety issue could change the time allocation.';
+  ws.park();
+  page=node();ws.render(steps[1],page,appendText);
+  assert.equal(find(page,n=>n.tag==='textarea')[0],first);
+  assert.equal(first.value,'I wrote a specific response at the first exercise.');
+  const text=ws.completedWorksheetText();
+  assert.ok(text.includes(first.value));
+  assert.ok(text.includes(sixth.value));
+  const preview=node();ws.renderCompletion(preview);
+  const paper=find(preview,n=>n.className==='premium-worksheet-paper')[0];
+  assert.equal(paper.textContent,text);
+  assert.equal(saved.length,0);
+  const copy=find(preview,n=>n.tag==='button' && n.textContent==='Copy Complete Workbook')[0];
+  await copy.events.click();
+  assert.equal(context.copied,text);
+  const save=find(preview,n=>n.tag==='button' && n.textContent==='Save Complete Workbook to My Work')[0];
+  save.events.click();
+  assert.equal(saved.length,1);
+  assert.equal(saved[0].body,text,'early and later responses save in one full document');
+});
+
+test('split-alliance early inline exercise does not bundle manuscript wording or change access locks', () => {
+  const module=read('js/member-editorial-workbooks.js');
+  const reader=read('js/member-premium-lesson.js');
+  const billing=read('js/member-billing.js');
+  assert.match(module,/const earlyCount=slug==='split-alliance-therapy-triangle' \? 5 : 0/);
+  assert.ok(module.includes('writing.append(allFields[index++].field)'));
+  assert.ok(module.includes('item.right.append(item.field)'));
+  assert.ok(!module.includes('Can I disagree without disagreement becoming pathology?'));
+  assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
+  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+});

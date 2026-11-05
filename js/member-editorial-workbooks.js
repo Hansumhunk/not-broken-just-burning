@@ -54,6 +54,13 @@
     if(!hits.length)return null;
     const focus=(slug==='grieving-future-never-happened' ? hits[hits.length-1] : hits[0]);
     const focusStep=steps[focus];
+    // The early Alliance Integrity Check includes five questions before its
+    // later eight-question workbook. Reuse the SAME five answers in both places.
+    const earlyCount=slug==='split-alliance-therapy-triangle' ? 5 : 0;
+    const earlyCue=title.trim().toLowerCase()+':';
+    const isEarlyExercise=step=>earlyCount>0 && !step.exercise &&
+      (step.blocks||[]).some(block=>
+        block.kind==='paragraph' && String(block.text||'').trim().toLowerCase()===earlyCue);
     const allFields=prompts.map((prompt,i)=>{
       const row=el('div','premium-map-row');
       const left=el('div','premium-map-reading');
@@ -71,7 +78,7 @@
       label.append(caption,input);field.append(label);
       left.append(question);right.append(field);row.append(left,right);
       parking.append(row);
-      return {row,input,prompt};
+      return {row,input,prompt,field,right};
     });
     const controls=el('div','premium-pause-actions premium-workspace-actions');
     const copy=el('button','button button-ghost','Copy Complete Workbook');
@@ -104,13 +111,18 @@
       return answered+' of '+allFields.length+' questions answered. Unanswered prompts are marked in the document.';
     }
     function park(){
-      for(const field of allFields)parking.append(field.row);
+      for(const item of allFields){
+        // A field may currently live beside an early manuscript question.
+        // Restore it to its usual workbook row before changing reader pages.
+        item.right.append(item.field);
+        parking.append(item.row);
+      }
       parking.append(controls,feedback);
     }
     function matches(step){
       if(!step || step.exercise)return false;
       const i=steps.indexOf(step);
-      return i>=focus && step.title===focusStep.title;
+      return isEarlyExercise(step) || (i>=focus && step.title===focusStep.title);
     }
     async function copyWorkbook(output){
       if(!answers()){
@@ -145,6 +157,34 @@
 
     function render(step,body,appendText){
       if(!matches(step))return;
+      if(isEarlyExercise(step)){
+        let inExercise=false;
+        let index=0;
+        for(const block of step.blocks||[]){
+          const wording=String(block.text||'').trim();
+          if(block.kind==='paragraph' && wording.toLowerCase()===earlyCue){
+            inExercise=true;
+            appendText(body,'p',block.text);
+            continue;
+          }
+          if(inExercise && block.kind==='heading')inExercise=false;
+          if(inExercise && block.kind==='paragraph' && wording.endsWith('?') && index<earlyCount){
+            const r=el('div','premium-map-row');
+            const reading=el('div','premium-map-reading');
+            const writing=el('div','premium-map-writing');
+            appendText(reading,'p',block.text);
+            writing.append(allFields[index++].field);
+            r.append(reading,writing);
+            body.append(r);
+            continue;
+          }
+          appendText(body,block.kind==='heading'?'h3':'p',block.text);
+        }
+        body.append(el('p','premium-map-continuity',
+          'These answers continue into the full Alliance Integrity Check later in this lesson. '+
+          'They are not saved automatically.'),controls,feedback);
+        return;
+      }
       const lead=el('section','premium-batch-workbook');
       lead.append(
         el('p','eyebrow','Write as you learn · Guided practice'),

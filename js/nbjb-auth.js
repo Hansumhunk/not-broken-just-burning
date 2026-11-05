@@ -21,10 +21,31 @@
     window.dispatchEvent(new CustomEvent('nbjb:auth', { detail: snapshot }));
   }
   async function refresh() {
+    // getSession() restores local browser state; that alone is not a verified
+    // identity. Check any restored user against Supabase Auth before allowing
+    // protected member pages to load device-scoped account data.
     const { data, error } = await client.auth.getSession();
     if (error) throw error;
-    currentSession = data.session || null;
-    currentUser = currentSession?.user || null;
+    const restoredSession = data?.session || null;
+    if (!restoredSession) {
+      currentSession = null;
+      currentUser = null;
+      emit();
+      markReady();
+      return { user: null, session: null };
+    }
+    const verified = await client.auth.getUser();
+    if (verified.error || !verified.data?.user ||
+        verified.data.user.id !== restoredSession.user?.id) {
+      // Keep user-specific views unavailable when the server check fails.
+      currentSession = null;
+      currentUser = null;
+      emit();
+      markReady();
+      throw verified.error || new Error('Session identity verification failed');
+    }
+    currentSession = restoredSession;
+    currentUser = verified.data.user;
     emit();
     markReady();
     return { user: currentUser, session: currentSession };

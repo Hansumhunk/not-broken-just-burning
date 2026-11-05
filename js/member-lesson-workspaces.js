@@ -128,7 +128,7 @@
     const config = configs[slug];
     if (!config || !parking) return null;
     const ui = actions();
-    if(slug === 'bullying-shame-early-armor' || slug === 'what-strength-looked-like'){
+    if(slug === 'bullying-shame-early-armor' || slug === 'what-strength-looked-like' || slug === 'allowed-to-need'){
       ui.copy.textContent='Copy Full Worksheet';
       ui.save.textContent='Save Full Worksheet to My Work';
     }
@@ -158,8 +158,41 @@
     }) || [];
     let armorTargets = [];
     let strengthTargets = [];
+    let needTargets = [];
+    let requestTargets = [];
     const strengthWorksheet = slug === 'what-strength-looked-like';
+    const needsWorksheet = slug === 'allowed-to-need';
     let worksheetPreview = null;
+
+    const positiveQuestions = needsWorksheet ? [
+      ['Who met my needs well?', 'Name a person or a specific example of support.'],
+      ['Who made home feel safe?', 'What did they do that made a difference?'],
+      ['Who taught me how to ask?', 'What did asking sound or look like?'],
+      ['Who respected my privacy?', 'What boundary was honored?'],
+      ['Who comforted me without making me ashamed?', 'Describe a moment of care without humiliation.'],
+      ['Who taught independence without abandonment?', 'What did supported independence look like?'],
+      ['Who let me fail and still helped me learn?', 'What did that experience teach you?'],
+      ['What kind of care do I want to pass forward?', 'Name one useful behavior you would continue.']
+    ] : [];
+    const positiveFields = positiveQuestions.map(([question,help],i)=>{
+      const field=wrapField('Positive inheritance '+(i+1)+' · '+question,help,220);
+      parking.append(field.wrap);
+      return field;
+    });
+    const requestQuestions = needsWorksheet ? [
+      ['What exactly am I asking for?', 'Turn a vague wish into a specific, realistic request.'],
+      ['Is this a request or a demand?', 'Notice whether you are allowing another person a real choice.'],
+      ['Can the other person realistically say no?', 'What does respecting their autonomy look like?'],
+      ['What part remains my responsibility?', 'Name what you can still do or decide yourself.'],
+      ['What will I do if the answer is no?', 'Choose your response without punishment or coercion.'],
+      ['Is there another appropriate source of support?', 'Consider a friend, community, professional, or service when appropriate.'],
+      ['Am I asking directly, or expecting mind-reading?', 'Write the straightforward words you could use.']
+    ] : [];
+    const requestFields = requestQuestions.map(([question,help],i)=>{
+      const field=wrapField('Request check '+(i+1)+' · '+question,help,350);
+      parking.append(field.wrap);
+      return field;
+    });
 
     const labels = config.columns || config.questions;
 
@@ -170,7 +203,7 @@
       item.root.append(head,grid);
       item.grid = grid;
       labels.forEach(([name,desc])=>{
-        const field = wrapField(name,desc,strengthWorksheet?280:(config.kind === 'records'?170:330));
+        const field = wrapField(name,desc,strengthWorksheet || needsWorksheet?280:(config.kind === 'records'?170:330));
         grid.append(field.wrap);
         item.inputs.push(field.input);
         item.fields.push(field);
@@ -227,8 +260,8 @@
           for(const field of rec.fields)rec.grid.append(field.wrap);
           parking.append(rec.root);
         }
-        if(slug === 'bullying-shame-early-armor' || strengthWorksheet){
-          const targets = strengthWorksheet ? strengthTargets : armorTargets;
+        if(slug === 'bullying-shame-early-armor' || strengthWorksheet || needsWorksheet){
+          const targets = strengthWorksheet ? strengthTargets : needsWorksheet ? needTargets : armorTargets;
           targets.forEach((target,i)=>{
             if(target && records[currentRecord].fields[i])target.append(records[currentRecord].fields[i].wrap);
           });
@@ -262,6 +295,44 @@
 
 
     function completedWorksheetText() {
+      if(needsWorksheet){
+        const lines=[
+          'NOT BROKEN JUST BURNING',
+          'NEEDS PERMISSION MAP — MY CHOSEN SUPPORT',
+          'A personal working document from What You Learned You Were Allowed to Need',
+          '',
+          'PART I — POSITIVE INHERITANCE'
+        ];
+        positiveQuestions.forEach(([question],i)=>{
+          lines.push('',(i+1)+'. '+question);
+          lines.push(positiveFields[i].input.value.trim() || '[Not answered yet]');
+        });
+        lines.push('','PART II — THE NEEDS PERMISSION MAP');
+        let count=0;
+        records.forEach((rec,i)=>{
+          if(!rec.inputs.some(input=>input.value.trim()))return;
+          count++;
+          lines.push('','NEED '+(i+1));
+          config.questions.forEach(([question],j)=>{
+            lines.push('',(j+1)+'. '+question);
+            lines.push(rec.inputs[j].value.trim() || '[Not answered yet]');
+          });
+        });
+        if(!count)lines.push('','[No needs have been answered yet]');
+        lines.push('','PART III — THE REQUEST CHECK');
+        requestQuestions.forEach(([question],i)=>{
+          lines.push('',(i+1)+'. '+question);
+          lines.push(requestFields[i].input.value.trim() || '[Not answered yet]');
+        });
+        const final=typeof getFinalResponses==='function'?getFinalResponses():[];
+        if(Array.isArray(final) && final.some(x=>x?.response?.trim())){
+          lines.push('','PART IV — FINAL REFLECTION');
+          final.filter(x=>x?.response?.trim()).forEach(x=>
+            lines.push('',x.prompt || 'Reflection',x.response.trim()));
+        }
+        lines.push('','Prepared privately in Flamewalker+. These answers are personal reflection, not a diagnosis or professional advice.');
+        return lines.join('\n');
+      }
       if(strengthWorksheet){
         const lines=[
           'NOT BROKEN JUST BURNING',
@@ -324,6 +395,15 @@
       return lines.join('\n');
     }
     function worksheetProgress() {
+      if(needsWorksheet){
+        const active=records.filter(rec=>rec.inputs.some(i=>i.value.trim()));
+        const answered=active.reduce((n,rec)=>n+rec.inputs.filter(i=>i.value.trim()).length,0);
+        const check=requestFields.filter(f=>f.input.value.trim()).length;
+        const positive=positiveFields.filter(field=>field.input.value.trim()).length;
+        return positive+' of 8 positive-inheritance answers · '+active.length+' '+(active.length===1?'need':'needs')+' examined · '+
+          answered+' of '+active.length*config.questions.length+' map questions · '+
+          check+' of 7 request-check questions answered';
+      }
       if(strengthWorksheet){
         const attempted=records.filter(rec=>rec.inputs.some(input=>input.value.trim()));
         const answered=attempted.reduce((sum,rec)=>sum+rec.inputs.filter(i=>i.value.trim()).length,0);
@@ -344,13 +424,15 @@
         '. Unanswered prompts remain visibly marked; you can return and edit them.';
     }
     function renderCompletion(container) {
-      if((!shameQuestions && !strengthWorksheet) || !container)return;
+      if((!shameQuestions && !strengthWorksheet && !needsWorksheet) || !container)return;
       if(!worksheetPreview){
         const section=node('section','premium-worksheet-completion');
         const eyebrow=node('p','eyebrow','Your completed work · Personal document');
-        const heading=node('h3','',strengthWorksheet?'My Strength Model Audit':'The Shame Separation & Armor Audit');
+        const heading=node('h3','',needsWorksheet?'My Needs Permission Map & Request Check':strengthWorksheet?'My Strength Model Audit':'The Shame Separation & Armor Audit');
         const intro=node('p','premium-map-help',
-          strengthWorksheet
+          needsWorksheet
+            ? 'Your needs, the rules you learned, your requests, and your final reflections are collected below. Review and revise, then Copy or Save your complete worksheet. Nothing uploads automatically.'
+            : strengthWorksheet
             ? 'Your inherited rules, their costs and your chosen replacements are assembled below. Return to the audit to change any answer, then Copy or Save this complete document. No automatic upload.'
             : 'Your answers from both exercises are assembled below. Review the whole page, return to any question to edit it, then choose Copy or Save. No answer is uploaded automatically.');
         const progress=node('p','premium-worksheet-progress');
@@ -382,7 +464,7 @@
             status.textContent='Full worksheet saving is unavailable. Use Copy to keep your complete answers.';
             return;
           }
-          saveWholeToWork(text,config.title === 'Strength Model Audit' ? 'Strength Model Audit' : 'Shame Separation & Armor Audit',status);
+          saveWholeToWork(text,needsWorksheet ? 'Needs Permission Map & Request Check' : strengthWorksheet ? 'Strength Model Audit' : 'Shame Separation & Armor Audit',status);
         });
         worksheetPreview={section,progress,paper,status};
       }
@@ -397,6 +479,8 @@
           (fields[2].checks.some(x=>x.checked) || Boolean(fields[3].choice.value)));
       }
       return shameFields.some(field=>field.input.value.trim()) ||
+        positiveFields.some(field=>field.input.value.trim()) ||
+        requestFields.some(field=>field.input.value.trim()) ||
         records.some(rec=>rec.inputs.some(input=>input.value.trim()));
     }
     function serializedParts(){
@@ -421,19 +505,19 @@
     async function copy(){
       if(!answers()){ui.status.textContent='Write at least one answer first.';return;}
       try{
-        await navigator.clipboard.writeText(shameQuestions || strengthWorksheet ? completedWorksheetText() : serializedParts().join('\n\n---\n\n'));
+        await navigator.clipboard.writeText(shameQuestions || strengthWorksheet || needsWorksheet ? completedWorksheetText() : serializedParts().join('\n\n---\n\n'));
         ui.status.textContent='Answers copied. Paste them somewhere private to keep them.';
       }catch(_){ui.status.textContent='Copy was blocked. Select and copy your answers manually.';}
     }
     function save(){
       if(!answers()){ui.status.textContent='Write at least one answer first.';return;}
-      if((shameQuestions || strengthWorksheet) && typeof saveWholeToWork==='function'){
+      if((shameQuestions || strengthWorksheet || needsWorksheet) && typeof saveWholeToWork==='function'){
         const full=completedWorksheetText();
         if(full.length>20000){
           ui.status.textContent='This full worksheet is too long for one local entry. Use Copy to retain every answer.';
           return;
         }
-        saveWholeToWork(full,strengthWorksheet?'Strength Model Audit':'Shame Separation & Armor Audit',ui.status);
+        saveWholeToWork(full,needsWorksheet?'Needs Permission Map & Request Check':strengthWorksheet?'Strength Model Audit':'Shame Separation & Armor Audit',ui.status);
         return;
       }
       const parts=serializedParts();
@@ -460,6 +544,10 @@
       for(const f of shameFields)parking.append(f.wrap);
       armorTargets = [];
       strengthTargets = [];
+      needTargets = [];
+      requestTargets = [];
+      for(const field of positiveFields) parking.append(field.wrap);
+      for(const field of requestFields) parking.append(field.wrap);
       for(const rec of records)for(const field of rec.fields)rec.grid.append(field.wrap);
       for(const rec of records)parking.append(rec.root);
       if(recordWrap)parking.append(recordWrap);
@@ -497,7 +585,74 @@
         body.append(instruction);
         return;
       }
-      if(strengthWorksheet && config.kind==='records'){
+      if(needsWorksheet && config.kind==='records'){
+        // The map follows Positive Inheritance and spans reader Parts 16–17;
+        // the seven-question Request Check continues through Part 18.
+        // Place every answer beside its numbered prompt, never beside
+        // unrelated introductory teaching or after the examples.
+        let started=step.continuation>0;
+        let requestMode=step.continuation>=2;
+        let active=null;
+        if(started && !requestMode){
+          body.append(recordWrap);
+          // Page 17 begins with the guidance for Question 3, which was
+          // introduced at the end of the preceding page.
+          if(step.continuation===1){
+            active=makeRow(body);
+            active.reading.append(node('h3','','3. Current Strategy — continued guidance'));
+            needTargets[2]=active.writing;
+          }
+        }
+        for(const block of step.blocks){
+          const t=block.text.trim();
+          if(block.kind==='heading' && config.heading.test(t)){
+            started=true;
+            requestMode=false;
+            active=null;
+            text(body,block);
+            body.append(recordWrap);
+            continue;
+          }
+          if(block.kind==='heading' && /^THE REQUEST CHECK$/i.test(t)){
+            requestMode=true;
+            active=null;
+            text(body,block);
+            body.append(node('p','premium-map-continuity',
+              'Before asking for support, answer these seven questions. Your responses join the same complete worksheet at the end.'));
+            continue;
+          }
+          if(!started && !requestMode){
+            const pos=positiveQuestions.findIndex(([question])=>
+              question.toLowerCase()===t.replace(/^[-•]\s*/, '').toLowerCase());
+            if(pos>=0){
+              const row=makeRow(body);
+              text(row.reading,block);
+              row.writing.append(positiveFields[pos].wrap);
+            }else{
+              text(body,block);
+            }
+            continue;
+          }
+          const numbered=/^([1-7])\.\s+/.exec(t);
+          if(numbered && requestMode){
+            const index=Number(numbered[1])-1;
+            active=makeRow(body);
+            requestTargets[index]=active.writing;
+            active.writing.append(requestFields[index].wrap);
+          }else if(numbered && Number(numbered[1])<=6){
+            active=makeRow(body);
+            needTargets[Number(numbered[1])-1]=active.writing;
+          }else if(/^EXAMPLE$/i.test(t)){
+            active=null;
+          }
+          text(active?active.reading:body,block);
+        }
+        if(showRecord)showRecord(currentRecord);
+        if(requestMode && !requestTargets.some(Boolean)){
+          body.append(node('p','premium-map-continuity',
+            'Your Request Check responses carry forward. Continue to the final reflection to review and save your complete document.'));
+        }
+      } else if(strengthWorksheet && config.kind==='records'){
         // The six strength anchors are teaching prompts, NOT seven audit
         // questions. Begin the form only after THE STRENGTH MODEL AUDIT.
         // The audit then spans four reader sections, so reuse the same inputs

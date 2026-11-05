@@ -654,11 +654,10 @@ test('Silence Inventory and Armor Audit support editable repeatable records and 
 });
 
 
-test('Strength Model Audit and Needs Permission Map reuse named repeatable records', () => {
+test('Strength Model Audit continues using repeatable inherited-rule records', () => {
   const {create,node,find,appendText}=simulatePracticeWorkspace();
   for(const cfg of [
-    {slug:'what-strength-looked-like',title:'Part 12 — The Six NBJB Strength Anchors',heading:'THE STRENGTH MODEL AUDIT',initial:5,fields:7},
-    {slug:'allowed-to-need',title:'Part 11 — Positive Inheritance',heading:'THE NEEDS PERMISSION MAP',initial:2,fields:6}
+    {slug:'what-strength-looked-like',title:'Part 12 — The Six NBJB Strength Anchors',heading:'THE STRENGTH MODEL AUDIT',initial:5,fields:7}
   ]){
     const ws=create({slug:cfg.slug,parking:node(),saveToWork:()=>{}});
     assert.ok(ws);
@@ -937,4 +936,132 @@ test('Strength Model Audit preserves published text, access controls, and billin
   assert.match(module,/PART II — THE ARMOR AUDIT/);
   assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
   assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+});
+
+
+
+test('Needs Permission Map places answers beside six questions and keeps both needs when switching pages', async () => {
+  const {create,node,find,appendText,context}=simulatePracticeWorkspace();
+  const saved=[];
+  const ws=create({
+    slug:'allowed-to-need',parking:node(),
+    saveToWork:()=>{throw Error('Needs must save as one complete worksheet');},
+    saveWholeToWork:(body,title,status)=>{saved.push({body,title});status.textContent='Saved full worksheet';},
+    getFinalResponses:()=>[{prompt:'A lesson I choose',response:'Asking clearly is responsible.'}]
+  });
+  const title='Part 11 — Positive Inheritance';
+  const part16={title,continuation:0,blocks:[
+    {kind:'paragraph',text:'Who respected my needs?'},
+    ...["Who met my needs well?","Who made home feel safe?","Who taught me how to ask?","Who respected my privacy?","Who comforted me without making me ashamed?","Who taught independence without abandonment?","Who let me fail and still helped me learn?","What kind of care do I want to pass forward?"].map(q=>({kind:'paragraph',text:'- '+q})),
+    {kind:'heading',text:'THE NEEDS PERMISSION MAP'},
+    {kind:'paragraph',text:'Choose several needs that matter to you.'},
+    ...[1,2,3].flatMap(i=>[
+      {kind:'paragraph',text:i+'. NEED QUESTION '+i},
+      {kind:'paragraph',text:'Guidance for need question '+i}
+    ])
+  ]};
+  assert.equal(ws.matches(part16),true);
+  let page=node();ws.park();ws.render(part16,page,appendText);
+  let rows=find(page,x=>x.className==='premium-map-row');
+  assert.equal(rows.length,11,'eight Positive Inheritance and three Needs Map questions have answer fields');
+  assert.equal(find(page,x=>x.textContent==='Who respected my needs?').length,1,'positive teaching stays outside the worksheet');
+  const positiveInput=find(rows[0],x=>x.tag==='textarea')[0];
+  positiveInput.value='My grandmother taught me patience.';
+  for(let i=0;i<3;i++){
+    const row=rows[i+8];
+    assert.equal(find(row.children[0],x=>x.textContent==='Guidance for need question '+(i+1)).length,1);
+    assert.equal(find(row.children[1],x=>x.tag==='textarea').length,1);
+  }
+  const firstInput=find(rows[8],x=>x.tag==='textarea')[0];
+  firstInput.value='I need rest after hard work.';
+  assert.equal(saved.length,0,'writing alone never saves private answers');
+  const part17={title,continuation:1,blocks:[
+    {kind:'paragraph',text:'How do I handle this need now?'},
+    ...[4,5,6].flatMap(i=>[
+      {kind:'paragraph',text:i+'. NEED QUESTION '+i},
+      {kind:'paragraph',text:'Guidance for need question '+i}
+    ]),
+    {kind:'paragraph',text:'EXAMPLE'},
+    {kind:'paragraph',text:'Rest is a legitimate need.'},
+    {kind:'heading',text:'THE REQUEST CHECK'},
+    {kind:'paragraph',text:'Before asking for support, ask:'},
+    {kind:'paragraph',text:'1. What exactly am I asking for?'},
+    {kind:'paragraph',text:'2. Is this a request or a demand?'}
+  ]};
+  ws.park();page=node();ws.render(part17,page,appendText);
+  rows=find(page,x=>x.className==='premium-map-row');
+  assert.equal(rows.length,6,'four need fields plus two Request Check fields');
+  const selectedNeed=find(page,x=>x.tag==='select')[0];
+  assert.equal(selectedNeed.children.length,2,'two independent needs can be examined');
+  const question3=find(rows[0],x=>x.tag==='textarea')[0];
+  assert.equal(rows[0].children[0].children[0].textContent,'3. Current Strategy — continued guidance');
+  question3.value='I usually postpone rest.';
+  selectedNeed.value='1';
+  selectedNeed.events.change();
+  const secondNeedInput=find(rows[0],x=>x.tag==='textarea')[0];
+  assert.notEqual(secondNeedInput,question3,'switching needs uses different answer fields');
+  secondNeedInput.value='I take short breaks.';
+  selectedNeed.value='0';
+  selectedNeed.events.change();
+  assert.equal(find(rows[0],x=>x.tag==='textarea')[0],question3,'first need uses original input');
+  assert.equal(question3.value,'I usually postpone rest.');
+
+  const request1=find(rows[4],x=>x.tag==='textarea')[0];
+  request1.value='Can we share the household tasks tonight?';
+  const part18={title,continuation:2,blocks:[
+    ...[3,4,5,6,7].flatMap(i=>[
+      {kind:'paragraph',text:i+'. REQUEST CHECK QUESTION '+i},
+      {kind:'paragraph',text:'Request check guidance '+i}
+    ])
+  ]};
+  ws.park();page=node();ws.render(part18,page,appendText);
+  rows=find(page,x=>x.className==='premium-map-row');
+  assert.equal(rows.length,5,'five continuation questions each have their answer field');
+  const request3=find(rows[0],x=>x.tag==='textarea')[0];
+  request3.value='My partner can say no and I can still arrange support.';
+  assert.ok(ws.completedWorksheetText().includes('Can we share the household tasks tonight?'));
+  assert.ok(ws.completedWorksheetText().includes('My partner can say no and I can still arrange support.'));
+  assert.ok(ws.completedWorksheetText().includes('I usually postpone rest.'));
+
+  const complete=ws.completedWorksheetText();
+  assert.match(complete,/NEEDS PERMISSION MAP — MY CHOSEN SUPPORT/);
+  assert.match(complete,/PART I — POSITIVE INHERITANCE/);
+  assert.match(complete,/My grandmother taught me patience/);
+  assert.match(complete,/PART II — THE NEEDS PERMISSION MAP/);
+  assert.match(complete,/NEED 1/);
+  assert.match(complete,/NEED 2/);
+  assert.match(complete,/PART III — THE REQUEST CHECK/);
+  assert.match(complete,/PART IV — FINAL REFLECTION/);
+  assert.match(complete,/Asking clearly is responsible/);
+  const review=node();ws.renderCompletion(review);
+  const paper=find(review,x=>x.className==='premium-worksheet-paper')[0];
+  assert.equal(paper.textContent,complete);
+  assert.equal(saved.length,0,'rendering the full worksheet does not save it');
+  const copy=find(review,x=>x.tag==='button' && x.textContent==='Copy Full Worksheet')[0];
+  await copy.events.click();
+  assert.equal(context.copied,complete,'copy retains the entire document');
+  const save=find(review,x=>x.tag==='button' && x.textContent==='Save Full Worksheet to My Work')[0];
+  save.events.click();
+  assert.equal(saved.length,1,'one click saves one complete document');
+  assert.equal(saved[0].body,complete);
+  assert.equal(saved[0].title,'Needs Permission Map & Request Check');
+  ws.park();page=node();ws.render(part16,page,appendText);
+  assert.equal(find(page,x=>x.tag==='textarea')[0].value,'My grandmother taught me patience.',
+    'positive inheritance answer survives returning to an earlier section');
+  assert.equal(find(page,x=>x.tag==='textarea')[8].value,'I need rest after hard work.',
+    'need answer survives returning to an earlier section');
+});
+
+test('Needs lesson retains privacy, publication and checkout locks', () => {
+  const source=read('js/member-lesson-workspaces.js');
+  const reader=read('js/member-premium-lesson.js');
+  const html=read('member-premium-lesson.html');
+  const billing=read('js/member-billing.js');
+  assert.match(source,/const needsWorksheet = slug === 'allowed-to-need'/);
+  assert.ok(source.includes("requestTargets[index]=active.writing"));
+  assert.match(source,/NEEDS PERMISSION MAP — MY CHOSEN SUPPORT/);
+  assert.match(source,/My answers are personal reflection|These answers are personal reflection/);
+  assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
+  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+  assert.match(html,/premium-worksheet-review/);
 });

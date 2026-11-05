@@ -427,3 +427,79 @@ test('map worksheet only saves on user request and copies all four answers', asy
   assert.equal(elements['premium-map-received'].value,'');
   assert.equal(flags[0].checked,false);
 });
+
+
+test('Father Map places answer boxes after each column and keeps the same inputs across pages', () => {
+  const vm = require('node:vm');
+  const js = read('js/member-premium-lesson.js');
+  const start = js.indexOf('  const fatherMapFields = [');
+  const end = js.indexOf('  function render({ focus = false }', start);
+  assert.ok(start > 0 && end > start);
+  const node = label => ({
+    label,children:[],parent:null,
+    append(...items) {
+      for (const item of items) {
+        if (item.parent) item.parent.children.splice(item.parent.children.indexOf(item), 1);
+        this.children.push(item); item.parent = this;
+      }
+    },
+    after(...items) {
+      const parent = this.parent;
+      let at = parent.children.indexOf(this) + 1;
+      for (const item of items) {
+        if (item.parent) item.parent.children.splice(item.parent.children.indexOf(item), 1);
+        parent.children.splice(at++, 0, item); item.parent = parent;
+      }
+    },
+    closest() { return this.field || null; }
+  });
+  const fields = ['received','missed','learned','decision'].map((name,i) => {
+    const field = node('field-'+(i+1));
+    const input = node('input-'+name);
+    input.field = field; input.value = ''; field.append(input);
+    return {id:'premium-map-'+name,field,input};
+  });
+  const grid = node('grid'), parking=node('map'), actions=node('actions'),status=node('status');
+  parking.append(grid,actions,status);
+  const ids = {'premium-map-grid':grid,'premium-father-map':parking,
+    'premium-map-actions':actions,'premium-map-status':status};
+  for (const field of fields) {ids[field.id]=field.input;grid.append(field.field);}
+  const ctx = {el:id=>ids[id],appendText:(body,tag,text)=>body.append(node('text:'+text))};
+  vm.runInNewContext(js.slice(start,end),ctx);
+  let page=node('page10');
+  ctx.parkFatherMap();
+  ctx.renderFatherMapInline({blocks:[{kind:'paragraph',text:'What did I receive?'}]},page,true);
+  assert.deepEqual(page.children.map(n=>n.label).slice(0,2),['text:What did I receive?','field-1']);
+  fields[0].input.value='I learned practical skills';
+  ctx.parkFatherMap();
+  page=node('page11');
+  ctx.renderFatherMapInline({continuation:0,blocks:[
+    {kind:'heading',text:'COLUMN 1 — WHAT I RECEIVED'},
+    {kind:'paragraph',text:'Received examples and prompts'},
+    {kind:'heading',text:'COLUMN 2 — WHAT I MISSED'},
+    {kind:'paragraph',text:'Missed examples and prompts'},
+    {kind:'heading',text:'COLUMN 3 — WHAT I LEARNED'},
+    {kind:'paragraph',text:'Learned rule examples'}]},page,false);
+  const labels=page.children.map(n=>n.label);
+  assert.ok(labels.indexOf('text:Received examples and prompts') < labels.indexOf('field-1'));
+  assert.ok(labels.indexOf('field-1') < labels.indexOf('text:COLUMN 2 — WHAT I MISSED'));
+  assert.ok(labels.indexOf('text:Missed examples and prompts') < labels.indexOf('field-2'));
+  assert.ok(labels.indexOf('text:Learned rule examples') < labels.indexOf('field-3'));
+  assert.equal(fields[0].input.value,'I learned practical skills','navigation keeps typed responses');
+  ctx.parkFatherMap();
+  page=node('page12');
+  ctx.renderFatherMapInline({continuation:1,blocks:[
+    {kind:'paragraph',text:'Then mark each statement:'},
+    {kind:'heading',text:'FACT INTERPRETATION PATTERN UNKNOWN'},
+    {kind:'heading',text:'COLUMN 4 — WHAT I CHOOSE NOW'},
+    {kind:'paragraph',text:'For each inherited rule, choose'},
+    {kind:'heading',text:'EXAMPLE 1'},
+    {kind:'paragraph',text:'Sample'}]},page,false);
+  assert.deepEqual(page.children.filter(n=>n.label.startsWith('field-')).map(n=>n.label),['field-3','field-4']);
+  assert.equal(fields[0].input.value,'I learned practical skills');
+  ctx.parkFatherMap();
+  page=node('page13');
+  ctx.renderFatherMapInline({continuation:2,blocks:[{kind:'heading',text:'EXAMPLE 3'}]},page,false);
+  assert.deepEqual(page.children.filter(n=>n.label.startsWith('field-')).map(n=>n.label),
+    ['field-1','field-2','field-3','field-4']);
+});

@@ -94,6 +94,7 @@
     let recordView = null;
     let recordWrap = null;
     let addButton = null;
+    let showRecord = null;
     const labels = config.columns || config.questions;
 
     function createRecord(index) {
@@ -163,6 +164,7 @@
         });
         show(currentRecord);
       };
+      showRecord = show;
       recordSelect.addEventListener('change',()=>show(Number(recordSelect.value)));
       addButton.addEventListener('click',()=>{
         if(records.length>=config.maximum)return;
@@ -243,6 +245,7 @@
       if(config.kind==='records'){
         const row=makeRow(body);
         step.blocks.forEach(block=>text(row.reading,block));
+        if(showRecord)showRecord(currentRecord);
         row.writing.append(recordWrap);
       } else {
         let active=null,seen=0;

@@ -14,6 +14,19 @@
       ]
     },
 
+
+    'inherited-vs-chosen-manhood': {
+      kind: 'stages', title: 'One-Page Chosen Manhood Code',
+      heading: /part 12.*one-page chosen manhood code/i,
+      columns: [
+        ['KEEP', 'List 3–5 inherited strengths worth preserving. What are they, where did you learn them, and why do you choose them now?'],
+        ['REFORGE', 'For 3–5 rules: old rule, useful value, cost, and healthier chosen rule.'],
+        ['RETIRE', 'For 1–5 rules: old rule, former protection, present cost, and what replaces it.'],
+        ['BUILD', 'Write one chosen statement for each of the six NBJB strength anchors.'],
+        ['ACT', 'Choose one realistic behavior you can practice over the next seven days.'],
+        ['REVIEW', 'After seven days: did I do it, what got in the way, what helped, and what needs to change?']
+      ]
+    },
     'what-strength-looked-like': {
       kind: 'records', title: 'Strength Model Audit', heading: /strength model audit/i,
       sectionTitle: /part 12.*six nbjb strength anchors/i,
@@ -139,12 +152,13 @@
       parking.append(item.root);
       return item;
     }
-    if (config.kind==='map') {
+    if (config.kind==='map' || config.kind==='stages') {
       labels.forEach(([name,desc],i)=> {
-        const field = wrapField('Column '+(i+1)+' · '+name,desc,330);
+        const field = wrapField((config.kind==='stages'?'Stage ':'Column ')+(i+1)+' · '+name,desc,config.kind==='stages'?800:330);
         fields.push(field);
         parking.append(field.wrap);
       });
+      if(config.kind==='map') {
       // Preserve the manuscript's categorization and choice prompts.
       const classification = node('fieldset','premium-map-classify');
       classification.append(node('legend','','Classify a learned rule (choose any that fit)'));
@@ -165,6 +179,7 @@
       choiceLabel.append(choice);
       fields[3].wrap.append(choiceLabel);
       fields[2].checks=checks;fields[3].choice=choice;
+      }
     } else {
       for(let i=0;i<config.initial;i++)createRecord(i);
       recordWrap=node('section','premium-workspace-records');
@@ -207,13 +222,17 @@
     parking.append(ui.buttons,ui.status);
 
     function answers() {
-      if(config.kind==='map') {
-        return fields.some(f=>f.input.value.trim()) ||
-          fields[2].checks.some(x=>x.checked) || Boolean(fields[3].choice.value);
+      if(config.kind==='map' || config.kind==='stages') {
+        return fields.some(f=>f.input.value.trim()) || (config.kind==='map' &&
+          (fields[2].checks.some(x=>x.checked) || Boolean(fields[3].choice.value)));
       }
       return records.some(rec=>rec.inputs.some(input=>input.value.trim()));
     }
     function serializedParts(){
+      if(config.kind==='stages'){
+        return fields.map((field,i)=> config.title+' — '+labels[i][0]+'\n'+field.input.value.trim())
+          .filter((part,i)=>Boolean(fields[i].input.value.trim()));
+      }
       if(config.kind==='map'){
         const chunks=[config.title];
         fields.forEach((field,i)=>chunks.push('Column '+(i+1)+' — '+labels[i][0]+'\n'+
@@ -274,7 +293,30 @@
         'Read the examples on the left and enter your own answers on the right. '+
         'Nothing is saved automatically. Copy or Save before leaving this page.');
       body.append(note);
-      if(config.kind==='records'){
+      if(config.kind==='stages'){
+        let active=null,seen=0;
+        for(const block of step.blocks){
+          const heading=block.kind==='heading'?block.text.trim():'';
+          const m=/^PART\s+([A-F])\s+—/i.exec(heading);
+          if(m){
+            active=makeRow(body);
+            const idx=m[1].toUpperCase().charCodeAt(0)-65;
+            text(active.reading,block);
+            active.writing.append(fields[idx].wrap);
+            seen++;
+          }else text(active?active.reading:body,block);
+        }
+        // Continuation after the six stage headings: keep all written code
+        // visible together without creating fresh inputs.
+        if(!seen){
+          fields.forEach((field,i)=>{
+            const row=makeRow(body);
+            row.reading.append(node('h3','', 'Stage '+(i+1)+' — '+labels[i][0]));
+            row.reading.append(node('p','','Review and refine the answer you wrote.'));
+            row.writing.append(field.wrap);
+          });
+        }
+      } else if(config.kind==='records'){
         // Start beside the audit heading if this worksheet is embedded inside
         // a longer chapter, not beside unrelated earlier teaching.
         let row=null;

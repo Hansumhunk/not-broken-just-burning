@@ -1197,3 +1197,96 @@ test('Needs lesson retains privacy, publication and checkout locks', () => {
   assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
   assert.match(html,/premium-worksheet-review/);
 });
+
+
+test('all 28 editorial lessons build a contextual, private eight-question workbook in one batch', async () => {
+  const {createEditorial,editorialSlugs,node,context,find,appendText}=simulatePracticeWorkspace();
+  const source=read('js/member-editorial-workbooks.js');
+  const anchors=[...source.matchAll(/^\s{4}'([^']+)':'([^']+)'[,]?$/gm)]
+    .map(match=>({slug:match[1],phrase:match[2]}));
+  assert.equal(anchors.length,28,'exactly the 28 draft lessons are configured');
+  assert.equal(editorialSlugs.length,28);
+  const draftQuestions=[
+    'What happened in this situation?',
+    'What facts could I verify?',
+    'What is one plausible alternative explanation?',
+    'What would a healthy boundary look like?',
+    'What values do I choose to practice?',
+    'What support may help me decide?',
+    'What next action is within my control?',
+    'How will I review this after seven days?'
+  ];
+  for(const {slug,phrase} of anchors){
+    const saved=[];
+    const steps=[
+      {title:'Introduction',continuation:0,blocks:[{kind:'paragraph',text:'Read the lesson first.'}]},
+      {title:'Practice section',continuation:0,blocks:[
+        {kind:'paragraph',text:'Preparation before the map.'},
+        {kind:'heading',text:phrase.toUpperCase()},
+        {kind:'paragraph',text:'Use this exercise to examine the topic.'}
+      ]},
+      {title:'Practice section',continuation:1,blocks:[{kind:'paragraph',text:'Continued exercise examples.'}]},
+      {title:'Guided reflection',exercise:true,blocks:[]}
+    ];
+    const ws=createEditorial({slug,parking:node(),steps,
+      lessonTitle:'Authorized protected lesson',
+      exercise:{title:'Private exercise '+slug,prompts:draftQuestions},
+      saveWholeToWork:(body,title,status)=>{
+        saved.push({body,title});status.textContent='Saved one complete local document.';
+      }
+    });
+    assert.ok(ws,'missing workbook for '+slug);
+    assert.equal(ws.focusIndex,1,slug);
+    assert.equal(ws.promptCount,8);
+    assert.equal(ws.matches(steps[0]),false);
+    assert.equal(ws.matches(steps[1]),true);
+    assert.equal(ws.matches(steps[2]),true);
+    assert.equal(ws.matches(steps[3]),false);
+    const first=node();
+    ws.park();ws.render(steps[1],first,appendText);
+    const pairs=find(first,n=>n.className==='premium-map-row');
+    assert.equal(pairs.length,8,slug);
+    pairs.forEach((pair,i)=>{
+      const questions=find(pair.children[0],n=>n.textContent?.includes(draftQuestions[i]));
+      const inputs=find(pair.children[1],n=>n.tag==='textarea');
+      assert.equal(questions.length,1,slug+': question wording on left');
+      assert.equal(inputs.length,1,slug+': one answer box beside each prompt');
+    });
+    const firstInput=find(pairs[0],n=>n.tag==='textarea')[0];
+    firstInput.value='A concrete observation specific to '+slug;
+    assert.equal(saved.length,0,'typing must not save '+slug);
+    ws.park();
+    const next=node();ws.render(steps[2],next,appendText);
+    const retained=find(next,n=>n.tag==='textarea')[0];
+    assert.equal(retained,firstInput,'same field across section navigation '+slug);
+    assert.equal(retained.value,'A concrete observation specific to '+slug);
+    const preview=node();ws.renderCompletion(preview);
+    const paper=find(preview,n=>n.className==='premium-worksheet-paper')[0];
+    const full=ws.completedWorksheetText();
+    assert.equal(paper.textContent,full,slug);
+    assert.ok(full.includes('A concrete observation specific to '+slug));
+    assert.ok(full.includes('[Not answered yet]'));
+    assert.equal(saved.length,0,'preview must not auto-save '+slug);
+    const save=find(preview,n=>n.tag==='button' && n.textContent==='Save Complete Workbook to My Work')[0];
+    save.events.click();
+    assert.equal(saved.length,1,'one document per save click '+slug);
+    assert.equal(saved[0].body,full,'full response preserved '+slug);
+  }
+  assert.ok(!source.includes(draftQuestions[0]),'question text is not bundled in public JS');
+  assert.ok(!source.includes('What is one plausible alternative explanation?'));
+});
+
+test('draft batch preserves the seven published workspaces, source privacy and checkout locks', () => {
+  const module=read('js/member-editorial-workbooks.js');
+  const reader=read('js/member-premium-lesson.js');
+  const loader=read('js/member-bootstrap.js');
+  const billing=read('js/member-billing.js');
+  assert.ok(loader.includes('js/member-editorial-workbooks.js'));
+  assert.ok(reader.includes('window.NBJBEditorialWorkbooks?.create?.('));
+  assert.ok(reader.includes('lesson.content?.exercise'));
+  assert.ok(reader.includes("el('premium-exercise-form').hidden = Boolean(inlineWorkspace?.replacesGuidedReflection)"));
+  assert.ok(module.includes('replacesGuidedReflection:true'));
+  assert.ok(module.includes('maxLength=1300'));
+  assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
+  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+});

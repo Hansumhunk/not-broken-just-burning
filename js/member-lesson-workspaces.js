@@ -128,7 +128,7 @@
     const config = configs[slug];
     if (!config || !parking) return null;
     const ui = actions();
-    if(slug === 'bullying-shame-early-armor' || slug === 'what-strength-looked-like'){
+    if(slug === 'bullying-shame-early-armor' || slug === 'what-strength-looked-like' || slug === 'allowed-to-need'){
       ui.copy.textContent='Copy Full Worksheet';
       ui.save.textContent='Save Full Worksheet to My Work';
     }
@@ -158,8 +158,26 @@
     }) || [];
     let armorTargets = [];
     let strengthTargets = [];
+    let needTargets = [];
+    let requestTargets = [];
     const strengthWorksheet = slug === 'what-strength-looked-like';
+    const needsWorksheet = slug === 'allowed-to-need';
     let worksheetPreview = null;
+
+    const requestQuestions = needsWorksheet ? [
+      ['What exactly am I asking for?', 'Turn a vague wish into a specific, realistic request.'],
+      ['Is this a request or a demand?', 'Notice whether you are allowing another person a real choice.'],
+      ['Can the other person realistically say no?', 'What does respecting their autonomy look like?'],
+      ['What part remains my responsibility?', 'Name what you can still do or decide yourself.'],
+      ['What will I do if the answer is no?', 'Choose your response without punishment or coercion.'],
+      ['Is there another appropriate source of support?', 'Consider a friend, community, professional, or service when appropriate.'],
+      ['Am I asking directly, or expecting mind-reading?', 'Write the straightforward words you could use.']
+    ] : [];
+    const requestFields = requestQuestions.map(([question,help],i)=>{
+      const field=wrapField('Request check '+(i+1)+' · '+question,help,350);
+      parking.append(field.wrap);
+      return field;
+    });
 
     const labels = config.columns || config.questions;
 
@@ -170,7 +188,7 @@
       item.root.append(head,grid);
       item.grid = grid;
       labels.forEach(([name,desc])=>{
-        const field = wrapField(name,desc,strengthWorksheet?280:(config.kind === 'records'?170:330));
+        const field = wrapField(name,desc,strengthWorksheet || needsWorksheet?280:(config.kind === 'records'?170:330));
         grid.append(field.wrap);
         item.inputs.push(field.input);
         item.fields.push(field);
@@ -227,8 +245,8 @@
           for(const field of rec.fields)rec.grid.append(field.wrap);
           parking.append(rec.root);
         }
-        if(slug === 'bullying-shame-early-armor' || strengthWorksheet){
-          const targets = strengthWorksheet ? strengthTargets : armorTargets;
+        if(slug === 'bullying-shame-early-armor' || strengthWorksheet || needsWorksheet){
+          const targets = strengthWorksheet ? strengthTargets : needsWorksheet ? needTargets : armorTargets;
           targets.forEach((target,i)=>{
             if(target && records[currentRecord].fields[i])target.append(records[currentRecord].fields[i].wrap);
           });
@@ -460,6 +478,9 @@
       for(const f of shameFields)parking.append(f.wrap);
       armorTargets = [];
       strengthTargets = [];
+      needTargets = [];
+      requestTargets = [];
+      for(const field of requestFields) parking.append(field.wrap);
       for(const rec of records)for(const field of rec.fields)rec.grid.append(field.wrap);
       for(const rec of records)parking.append(rec.root);
       if(recordWrap)parking.append(recordWrap);

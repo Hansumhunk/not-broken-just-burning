@@ -175,3 +175,16 @@ test('early-release navigation has explicit sign out and honest planned-feature 
   assert.match(dashboard, /Flamewalker%20Free%20Early%20Access%20Feedback/);
   assert.match(dashboard, /Please do not send personal journal entries/);
 });
+
+test('production migration removes RLS-bypassing authenticated privileges from member tables', () => {
+  const sql = read('supabase/migrations/20261105200137_revoke_unsafe_member_table_privileges.sql');
+  assert.match(sql, /REVOKE TRUNCATE, TRIGGER, REFERENCES ON TABLE/);
+  for (const table of [
+    'learning_progress','member_continue_state','member_path_progress',
+    'member_path_state','member_preferences','profiles'
+  ]) {
+    assert.ok(sql.includes('public.'+table),table+' must be protected');
+  }
+  assert.match(sql, /FROM authenticated;/);
+  assert.doesNotMatch(sql, /\b(?:DELETE FROM|TRUNCATE TABLE|DROP TABLE)\b/i);
+});

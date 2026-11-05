@@ -27,6 +27,8 @@ on:
       - 'scripts/test_member_access_guard.js'
       - 'scripts/test_premium_editorial_review.js'
       - 'scripts/validate_supabase_runtime.py'
+      - 'supabase/migrations/**'
+      - 'PLATFORM_QA_GATE_2026-11-05.md'
       - '.github/workflows/validate-site.yml'
       - '.github/workflows/clear-stale-pages.yml'
   pull_request:
@@ -47,6 +49,8 @@ on:
       - 'scripts/test_member_access_guard.js'
       - 'scripts/test_premium_editorial_review.js'
       - 'scripts/validate_supabase_runtime.py'
+      - 'supabase/migrations/**'
+      - 'PLATFORM_QA_GATE_2026-11-05.md'
       - '.github/workflows/validate-site.yml'
       - '.github/workflows/clear-stale-pages.yml'
 

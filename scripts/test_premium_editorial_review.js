@@ -652,3 +652,59 @@ test('Silence Inventory and Armor Audit support editable repeatable records and 
   assert.equal(find(a.page,n=>n.tag==='textarea').length,7,'only selected strategy is displayed');
   assert.ok(saved.length>=2);
 });
+
+
+test('Strength Model Audit and Needs Permission Map reuse named repeatable records', () => {
+  const {create,node,find,appendText}=simulatePracticeWorkspace();
+  for(const cfg of [
+    {slug:'what-strength-looked-like',title:'Part 12 — The Six NBJB Strength Anchors',heading:'THE STRENGTH MODEL AUDIT',initial:5,fields:7},
+    {slug:'allowed-to-need',title:'Part 11 — Positive Inheritance',heading:'THE NEEDS PERMISSION MAP',initial:2,fields:6}
+  ]){
+    const ws=create({slug:cfg.slug,parking:node(),saveToWork:()=>{}});
+    assert.ok(ws);
+    const step={title:cfg.title,continuation:0,blocks:[
+      {kind:'paragraph',text:'Earlier chapter prose.'},
+      {kind:'heading',text:cfg.heading},
+      {kind:'paragraph',text:'Complete this audit.'}
+    ]};
+    assert.equal(ws.matches(step),true);
+    const page=node();ws.park();ws.render(step,page,appendText);
+    const rows=find(page,x=>x.className==='premium-map-row');
+    assert.equal(rows.length,1);
+    assert.equal(find(rows[0].children[0],x=>x.textContent==='Complete this audit.').length,1);
+    assert.equal(find(page,x=>x.tag==='select')[0].children.length,cfg.initial);
+    const answers=find(page,x=>x.tag==='textarea');
+    assert.equal(answers.length,cfg.fields);
+    answers[0].value='My real-life example';
+    ws.park();
+    const next=node();
+    ws.render({title:cfg.title,continuation:1,blocks:[{kind:'paragraph',text:'Continue the audit'}]},next,appendText);
+    assert.equal(find(next,x=>x.tag==='textarea')[0],answers[0]);
+    assert.equal(find(next,x=>x.tag==='textarea')[0].value,'My real-life example');
+  }
+});
+
+test('Chosen Manhood Code presents six named stages and keeps all text on the review page', () => {
+  const {create,node,find,appendText}=simulatePracticeWorkspace();
+  const ws=create({slug:'inherited-vs-chosen-manhood',parking:node(),saveToWork:()=>{}});
+  const title='Part 12 — The One-Page Chosen Manhood Code';
+  const headings=['KEEP','REFORGE','RETIRE','BUILD','ACT','REVIEW'];
+  const step={title,continuation:0,blocks:headings.map((word,i)=>[
+    {kind:'heading',text:'PART '+String.fromCharCode(65+i)+' — '+word},
+    {kind:'paragraph',text:'Guidance for '+word}
+  ]).flat()};
+  const page=node();ws.park();ws.render(step,page,appendText);
+  const rows=find(page,x=>x.className==='premium-map-row');
+  assert.equal(rows.length,6);
+  assert.equal(ws.matches(step),true);
+  const values=rows.map(row=>find(row,x=>x.tag==='textarea')[0]);
+  values[0].value='I keep reliable kindness';
+  values[3].value='Build through six anchors';
+  assert.ok(ws.serializedParts().some(x=>x.includes('I keep reliable kindness')));
+  ws.park();
+  const later=node();ws.render({title,continuation:1,blocks:[{kind:'paragraph',text:'Review your commitments'}]},later,appendText);
+  const review=find(later,x=>x.className==='premium-map-row');
+  assert.equal(review.length,6);
+  assert.equal(find(review[0],x=>x.tag==='textarea')[0],values[0]);
+  assert.equal(find(review[3],x=>x.tag==='textarea')[0].value,'Build through six anchors');
+});

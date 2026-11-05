@@ -49,7 +49,8 @@
     work: ["js/member-history-insights.js"],
     workshop: ["js/tool-member-history.js", "js/member-workshop.js"],
     "start-here": ["js/member-start-here.js"],
-    "premium-lesson": ["js/member-premium-lesson.js"]
+    "premium-lesson": ["js/member-premium-lesson.js"],
+    store: ["js/member-billing.js"]
   };
 
   function loadScript(src) {

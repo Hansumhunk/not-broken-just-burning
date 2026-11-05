@@ -74,5 +74,12 @@
   function onChange(fn) { listeners.add(fn); fn({ user: currentUser, session: currentSession }); return () => listeners.delete(fn); }
   client.auth.onAuthStateChange((_event, session) => { currentSession = session || null; currentUser = session?.user || null; emit(); markReady(); });
   window.NBJBAuth = { client, ready, refresh, signUp, signIn, sendMagicLink, sendRecovery, updatePassword, signOut, onChange, get user(){return currentUser;}, get session(){return currentSession;} };
-  refresh().catch(() => { emit(); markReady(); });
+  refresh().catch(() => {
+    // A local session may have been supplied by an initial auth event.
+    // Never leave that unverified identity exposed after a failed check.
+    currentSession = null;
+    currentUser = null;
+    emit();
+    markReady();
+  });
 })();

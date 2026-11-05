@@ -387,6 +387,7 @@
     if (worksheetReview) worksheetReview.hidden = true;
     if (final) {
       buildExercise();
+      el('premium-exercise-form').hidden = Boolean(inlineWorkspace?.replacesGuidedReflection);
       inlineWorkspace?.renderCompletion?.(worksheetReview);
     } else {
       el('premium-step-kicker').textContent = 'Part ' + (current + 1) + ' · ' + estimate(step);
@@ -469,7 +470,16 @@
     }
     const blocks = Array.isArray(lesson.content?.blocks) ? lesson.content.blocks : [];
     steps = [...sectionize(blocks), { title: 'Guided reflection', exercise: true, blocks: [] }];
-    inlineWorkspace = window.NBJBPremiumWorkspaces?.create?.({
+    // Protected draft prompts are supplied only after authenticated access to
+    // this lesson succeeds. No editorial text is bundled in public scripts.
+    inlineWorkspace = window.NBJBEditorialWorkbooks?.create?.({
+      slug,
+      parking: el('premium-workspace-parking'),
+      steps,
+      exercise: lesson.content?.exercise,
+      lessonTitle: lesson.title,
+      saveWholeToWork: (text, context, status) => saveCompleteWorksheetToWork(text, context, status)
+    }) || window.NBJBPremiumWorkspaces?.create?.({
       slug,
       parking: el('premium-workspace-parking'),
       saveToWork: (text, context, status) => saveReflectionToWork(text, context, status),

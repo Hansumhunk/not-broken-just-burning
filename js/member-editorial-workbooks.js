@@ -32,3 +32,53 @@
     'boundaries-without-cruelty':'four-part boundary builder',
     'discipline-without-self-punishment':'minimum viable commitment'
   });
+
+  function el(tag, cls, text) {
+    const item=document.createElement(tag);
+    if(cls)item.className=cls;
+    if(text!==undefined)item.textContent=text;
+    return item;
+  }
+  function create({slug, parking, steps, exercise, lessonTitle, saveWholeToWork}) {
+    const anchor=anchors[slug];
+    if(!anchor || !parking || !Array.isArray(steps) || !exercise)return null;
+    const prompts=Array.isArray(exercise.prompts)
+      ? exercise.prompts.filter(p=>typeof p==='string' && p.trim()) : [];
+    if(!prompts.length || prompts.length>30)return null;
+    const title=String(exercise.title || 'Guided practice');
+    const safeTitle=String(lessonTitle || slug);
+    const matchText=text=>String(text||'').toLowerCase().includes(anchor);
+    const candidate=step=>!step.exercise && (matchText(step.title) ||
+      (step.blocks||[]).some(block=>matchText(block.text)));
+    const hits=steps.map((step,i)=>candidate(step)?i:-1).filter(i=>i>=0);
+    if(!hits.length)return null;
+    const focus=(slug==='grieving-future-never-happened' ? hits[hits.length-1] : hits[0]);
+    const focusStep=steps[focus];
+    const allFields=prompts.map((prompt,i)=>{
+      const row=el('div','premium-map-row');
+      const left=el('div','premium-map-reading');
+      const right=el('div','premium-map-writing');
+      const question=el('p','premium-draft-question',(i+1)+'. '+prompt);
+      const field=el('div','premium-map-field');
+      const label=el('label');
+      const caption=el('strong','', 'Your response · Question '+(i+1));
+      const input=el('textarea');
+      input.rows=4;
+      input.maxLength=1300;
+      input.autocomplete='off';
+      input.placeholder='Write your response here…';
+      input.setAttribute('aria-label',prompt);
+      label.append(caption,input);field.append(label);
+      left.append(question);right.append(field);row.append(left,right);
+      parking.append(row);
+      return {row,input,prompt};
+    });
+    const controls=el('div','premium-pause-actions premium-workspace-actions');
+    const copy=el('button','button button-ghost','Copy Complete Workbook');
+    const save=el('button','button button-primary','Save Complete Workbook to My Work');
+    copy.type=save.type='button';controls.append(copy,save);
+    const feedback=el('p','premium-map-status');
+    feedback.setAttribute('role','status');
+    feedback.setAttribute('aria-live','polite');
+    parking.append(controls,feedback);
+    let preview=null;

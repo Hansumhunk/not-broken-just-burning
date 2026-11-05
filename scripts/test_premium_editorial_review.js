@@ -708,3 +708,120 @@ test('Chosen Manhood Code presents six named stages and keeps all text on the re
   assert.equal(find(review[0],x=>x.tag==='textarea')[0],values[0]);
   assert.equal(find(review[3],x=>x.tag==='textarea')[0].value,'Build through six anchors');
 });
+
+
+
+test('Shame Separation gives each of six numbered questions a side-by-side answer and carries it into the Armor Audit', () => {
+  const {create,node,find,appendText}=simulatePracticeWorkspace();
+  const stored=[];
+  const ws=create({
+    slug:'bullying-shame-early-armor',parking:node(),
+    saveToWork:()=>{throw new Error('must save as a single complete worksheet instead');},
+    saveWholeToWork:(body,context,status)=>{stored.push({body,context});status.textContent='Saved full worksheet';},
+    getFinalResponses:()=>[{prompt:'Final learning',response:'Choose safe, measured openness.'}]
+  });
+  const shame={
+    title:'Part 9 — The Shame Separation',continuation:0,blocks:[
+      {kind:'paragraph',text:'Use this tool before the Armor Audit.'},
+      ...Array.from({length:6},(_,i)=>[
+        {kind:'paragraph',text:(i+1)+'. QUESTION '+(i+1)},
+        {kind:'paragraph',text:'Explanation for question '+(i+1)}
+      ]).flat(),
+      {kind:'paragraph',text:'EXAMPLE'},
+      {kind:'paragraph',text:'This is a worked example.'}
+    ]
+  };
+  assert.equal(ws.matches(shame),true);
+  const page=node();ws.park();ws.render(shame,page,appendText);
+  const rows=find(page,x=>x.className==='premium-map-row');
+  assert.equal(rows.length,6);
+  const fields=rows.map((row,i)=>{
+    assert.ok(find(row.children[0],x=>x.textContent===(i+1)+'. QUESTION '+(i+1)).length>0);
+    const inputs=find(row.children[1],x=>x.tag==='textarea');
+    assert.equal(inputs.length,1,'each question has its own right-hand input');
+    return inputs[0];
+  });
+  fields.forEach((input,i)=>{input.value=('Answered shame question '+(i+1)+'. ').repeat(16);});
+  assert.equal(stored.length,0,'typing never triggers storage');
+
+  const armor={
+    title:'Part 10 — The Armor Audit',continuation:0,blocks:[
+      {kind:'paragraph',text:'Choose several armor strategies you recognize.'},
+      {kind:'paragraph',text:'For each:'},
+      ...[1,2,3,4,5].flatMap(i=>[
+        {kind:'paragraph',text:i+'. ARMOR QUESTION '+i},
+        {kind:'paragraph',text:'Guidance for '+i}
+      ]),
+      {kind:'paragraph',text:'EXAMPLE'},
+      {kind:'paragraph',text:'Example of humor as armor'}
+    ]
+  };
+  ws.park();
+  assert.equal(ws.matches(armor),true);
+  const armorPage=node();ws.render(armor,armorPage,appendText);
+  const armorRows=find(armorPage,x=>x.className==='premium-map-row');
+  assert.equal(armorRows.length,7,'one name, five source questions and one chosen-rule field');
+  armorRows.forEach(row=>assert.equal(find(row.children[1],x=>x.tag==='textarea').length,1));
+  const strategyInputs=armorRows.map(row=>find(row.children[1],x=>x.tag==='textarea')[0]);
+  strategyInputs[0].value='Humor as protection';
+  strategyInputs[1].value='I was laughed at';
+  strategyInputs[6].value='I can use humor without hiding my feelings';
+
+  const full=ws.completedWorksheetText();
+  assert.ok(full.length>2400,'test ensures the completed document is larger than ordinary My Work summaries');
+  assert.ok(full.includes('PART I — THE SHAME SEPARATION'));
+  assert.ok(full.includes('PART II — THE ARMOR AUDIT'));
+  assert.ok(full.includes('PART III — FINAL REFLECTION'));
+  assert.ok(full.includes('I can use humor without hiding my feelings'));
+  assert.ok(full.includes('Answered shame question 1.'));
+  assert.equal(fields[0].value,('Answered shame question 1. ').repeat(16));
+  const review=node();
+  ws.renderCompletion(review);
+  const paper=find(review,x=>x.className==='premium-worksheet-paper')[0];
+  assert.ok(paper);
+  assert.equal(paper.textContent,full);
+  assert.equal(stored.length,0,'preview does not autosave');
+  const save=find(review,x=>x.tag==='button' && x.textContent==='Save Full Worksheet to My Work')[0];
+  assert.ok(save);
+  save.events.click();
+  assert.equal(stored.length,1,'one click stores one complete document');
+  assert.equal(stored[0].body,full,'not truncated at 2,400 characters');
+  assert.equal(stored[0].context,'Shame Separation & Armor Audit');
+
+  ws.park();
+  const returned=node();ws.render(shame,returned,appendText);
+  assert.equal(find(returned,x=>x.tag==='textarea')[0],fields[0],
+    'moving back to Shame Separation uses same input node');
+});
+
+test('Complete Armor worksheet uses full-document local storage and My Work exposes its entire content', () => {
+  const reader=read('js/member-premium-lesson.js');
+  const history=read('js/member-history-insights.js');
+  const platform=read('js/member-platform.js');
+  const service=read('js/member-service.js');
+  const from=reader.indexOf('  function saveCompleteWorksheetToWork(');
+  const end=reader.indexOf('  // This worksheet is optional',from);
+  assert.ok(from>0 && end>from);
+  const calls=[];
+  const ctx={
+    window:{NBJBMemberService:{recordToolEntry:(tool,entry)=>{calls.push({tool,entry});return {ok:true};}}},
+    lesson:{title:'Bullying, Shame, and the Early Armor'},
+    slug:'bullying-shame-early-armor',current:14
+  };
+  const vm=require('node:vm');
+  vm.runInNewContext(reader.slice(from,end),ctx);
+  const text='A'.repeat(4000)+'\n\nMY FULL ANSWERS';
+  const status={textContent:''};
+  ctx.saveCompleteWorksheetToWork(text,'Shame Separation & Armor Audit',status);
+  assert.equal(calls.length,1);
+  assert.equal(calls[0].tool,'Lesson Worksheet');
+  assert.equal(calls[0].entry.data.worksheet,text);
+  assert.ok(calls[0].entry.summary.length<2400);
+  assert.ok(status.textContent.includes('ONE document'));
+  assert.match(service,/summary: String\(payload\.summary \|\| ''\)\.slice\(0, 2400\)/);
+  for(const source of [history,platform]){
+    assert.match(source,/member-full-worksheet-paper/);
+    assert.match(source,/entry\.data\?\.worksheet/);
+    assert.match(source,/key !== 'worksheet'/);
+  }
+});

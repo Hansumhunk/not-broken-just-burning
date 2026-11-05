@@ -49,15 +49,15 @@
     work: ["js/member-history-insights.js"],
     workshop: ["js/tool-member-history.js", "js/member-workshop.js"],
     "start-here": ["js/member-start-here.js"],
-    "premium-lesson": ["js/member-premium-lesson.js"],
+    "premium-lesson": ["js/member-lesson-workspaces.js", "js/member-premium-lesson.js"],
     store: ["js/member-billing.js"]
   };
 
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = src === 'js/member-premium-lesson.js'
-        ? src + '?v=map-columns-v3'
+      script.src = (src === 'js/member-premium-lesson.js' || src === 'js/member-lesson-workspaces.js')
+        ? src + '?v=workspaces-v1'
         : src;
       script.onload = resolve;
       script.onerror = () => reject(new Error("Failed to load " + src));

@@ -47,6 +47,8 @@
 .premium-lesson-body h3{font-size:clamp(1rem,1.8vw,1.27rem);line-height:1.4;font-family:'Cinzel',serif;color:#ffac78;border-left:2px solid #e46b2b;padding-left:12px;margin:23px 0 12px}
 .premium-lesson-body p{white-space:pre-line;line-height:1.83;color:var(--text);margin:0 0 1.05rem;font-size:1em}
 .premium-lesson-body p:last-child{margin-bottom:0}
+/* Deliberate one-word conjunctions are compact rhetorical bridges, not empty prose. */
+.premium-lesson-body p.premium-prose-connector{font-style:italic;line-height:1.5;color:var(--muted);margin:-.35rem 0 .45rem;}
 .premium-pause-reflection{border:1px solid rgba(242,142,82,.25);border-radius:15px;padding:15px 18px;margin:24px 0 4px;background:rgba(248,117,42,.055);max-width:75ch}
 .premium-pause-reflection summary{font-weight:750;cursor:pointer;line-height:1.5}
 .premium-pause-reflection summary small{color:var(--muted);font-weight:400;font-size:.8rem;margin-left:.5rem}

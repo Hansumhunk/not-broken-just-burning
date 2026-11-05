@@ -308,6 +308,7 @@ def main() -> int:
             "css/member-premium-lesson.css",
             "css/members.css",
             "js/member-auth.js",
+            "js/member-billing.js",
             "js/member-bootstrap.js",
             "js/member-dashboard.js",
             "js/member-workshop.js",
@@ -449,10 +450,27 @@ def main() -> int:
             for forbidden in ("stripe.checkout.sessions.create", "stripe.customers.create", "stripe.subscriptions.create"):
                 if forbidden in preflight:
                     errors.append("Live Stripe preflight must not create payments or customers")
-        # Flamewalker+ remains roadmap-only in this release. Browser billing controls,
-        # billing client code, and Stripe Edge Function source must not reach main yet.
+        # The prepared billing interface is allowed only behind a disabled
+        # browser feature switch and a separate hard-locked server endpoint.
+        billing_client = ROOT / "js/member-billing.js"
+        if billing_client.exists():
+            billing_code = billing_client.read_text(encoding="utf-8")
+            if (
+                "const PUBLIC_CHECKOUT_UI_ENABLED = false;" not in billing_code
+                or "if (!PUBLIC_CHECKOUT_UI_ENABLED) return;" not in billing_code
+            ):
+                errors.append("Premium billing UI cannot be enabled before launch authorization.")
+            staged_store = (ROOT / "member-store.html").read_text(encoding="utf-8")
+            if 'id="member-live-billing" aria-labelledby="member-live-billing-title" hidden' not in staged_store:
+                errors.append("Premium Store checkout panel must remain hidden during prelaunch.")
+        staged_server = ROOT / "launch-backend-staging/create-live-checkout-session/index.ts"
+        if staged_server.exists():
+            server_code = staged_server.read_text(encoding="utf-8")
+            for must in ("const PUBLIC_LIVE_CHECKOUT_ENABLED = false;", "publishedLessons < 7", "NBJB_LIVE_BILLING_MODE"):
+                if must not in server_code:
+                    errors.append("Live Checkout staged backend must be hard-locked and require published content.")
+        # Unreviewed legacy billing and migrations are excluded from the static site.
         paid_only_paths = {
-            "js/member-billing.js",
             "STRIPE_INTEGRATION.md",
             "supabase/config.toml",
             "supabase/functions/create-checkout-session/index.ts",

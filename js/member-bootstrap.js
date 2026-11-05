@@ -57,7 +57,7 @@
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
       script.src = src === 'js/member-premium-lesson.js'
-        ? src + '?v=inline-map-v2'
+        ? src + '?v=map-columns-v3'
         : src;
       script.onload = resolve;
       script.onerror = () => reject(new Error("Failed to load " + src));

@@ -128,7 +128,7 @@
     const config = configs[slug];
     if (!config || !parking) return null;
     const ui = actions();
-    if(slug === 'bullying-shame-early-armor'){
+    if(slug === 'bullying-shame-early-armor' || slug === 'what-strength-looked-like'){
       ui.copy.textContent='Copy Full Worksheet';
       ui.save.textContent='Save Full Worksheet to My Work';
     }
@@ -157,6 +157,8 @@
       return field;
     }) || [];
     let armorTargets = [];
+    let strengthTargets = [];
+    const strengthWorksheet = slug === 'what-strength-looked-like';
     let worksheetPreview = null;
 
     const labels = config.columns || config.questions;
@@ -168,7 +170,7 @@
       item.root.append(head,grid);
       item.grid = grid;
       labels.forEach(([name,desc])=>{
-        const field = wrapField(name,desc,config.kind === 'records'?170:330);
+        const field = wrapField(name,desc,strengthWorksheet?280:(config.kind === 'records'?170:330));
         grid.append(field.wrap);
         item.inputs.push(field.input);
         item.fields.push(field);
@@ -225,8 +227,9 @@
           for(const field of rec.fields)rec.grid.append(field.wrap);
           parking.append(rec.root);
         }
-        if(slug === 'bullying-shame-early-armor'){
-          armorTargets.forEach((target,i)=>{
+        if(slug === 'bullying-shame-early-armor' || strengthWorksheet){
+          const targets = strengthWorksheet ? strengthTargets : armorTargets;
+          targets.forEach((target,i)=>{
             if(target && records[currentRecord].fields[i])target.append(records[currentRecord].fields[i].wrap);
           });
         }else{
@@ -420,6 +423,7 @@
       for(const f of fields)parking.append(f.wrap);
       for(const f of shameFields)parking.append(f.wrap);
       armorTargets = [];
+      strengthTargets = [];
       for(const rec of records)for(const field of rec.fields)rec.grid.append(field.wrap);
       for(const rec of records)parking.append(rec.root);
       if(recordWrap)parking.append(recordWrap);

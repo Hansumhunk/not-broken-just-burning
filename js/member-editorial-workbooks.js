@@ -54,13 +54,36 @@
     if(!hits.length)return null;
     const focus=(slug==='grieving-future-never-happened' ? hits[hits.length-1] : hits[0]);
     const focusStep=steps[focus];
-    // The early Alliance Integrity Check includes five questions before its
-    // later eight-question workbook. Reuse the SAME five answers in both places.
-    const earlyCount=slug==='split-alliance-therapy-triangle' ? 5 : 0;
-    const earlyCue=title.trim().toLowerCase()+':';
+    // Early manuscript exercises sometimes precede the fuller guided workbook.
+    // Reuse matching answer fields, but keep genuinely distinct questions separate.
+    const earlyConfig={
+      'split-alliance-therapy-triangle':{
+        cue:'alliance integrity check:',map:[0,1,2,3,4]
+      },
+      'double-bind-darvo-reaction':{
+        cue:'sequence map:',map:[0,1,2,null,null,5]
+      }
+    }[slug] || null;
+    const earlyCount=earlyConfig?.map.length || 0;
+    const earlyCue=earlyConfig?.cue || '';
     const isEarlyExercise=step=>earlyCount>0 && !step.exercise &&
       (step.blocks||[]).some(block=>
         block.kind==='paragraph' && String(block.text||'').trim().toLowerCase()===earlyCue);
+    const earlyQuestions=[];
+    const earlyStep=steps.find(isEarlyExercise);
+    if(earlyStep){
+      let inExercise=false;
+      for(const block of earlyStep.blocks||[]){
+        const wording=String(block.text||'').trim();
+        if(block.kind==='paragraph' && wording.toLowerCase()===earlyCue){
+          inExercise=true;
+          continue;
+        }
+        if(inExercise && block.kind==='heading')break;
+        if(inExercise && block.kind==='paragraph' && wording.endsWith('?'))
+          earlyQuestions.push(wording);
+      }
+    }
     const allFields=prompts.map((prompt,i)=>{
       const row=el('div','premium-map-row');
       const left=el('div','premium-map-reading');
@@ -80,6 +103,30 @@
       parking.append(row);
       return {row,input,prompt,field,right};
     });
+    // Extra early-only prompts must never be stored as privileged manuscript
+    // strings in public JavaScript. Their labels come from the authorized lesson.
+    const earlyExtras=new Map();
+    if(earlyConfig){
+      earlyConfig.map.forEach((linkedIndex,i)=>{
+        if(linkedIndex!==null)return;
+        const prompt=earlyQuestions[i] || 'Sequence question '+(i+1);
+        const holder=el('div');
+        const field=el('div','premium-map-field');
+        const label=el('label');
+        const caption=el('strong','', 'Your response · Sequence question '+(i+1));
+        const input=el('textarea');
+        input.rows=4;
+        input.maxLength=1300;
+        input.autocomplete='off';
+        input.placeholder='Write your response here…';
+        input.setAttribute('aria-label',prompt);
+        label.append(caption,input);
+        field.append(label);
+        holder.append(field);
+        parking.append(holder);
+        earlyExtras.set(i,{field,input,prompt,holder});
+      });
+    }
     const controls=el('div','premium-pause-actions premium-workspace-actions');
     const copy=el('button','button button-ghost','Copy Complete Workbook');
     const save=el('button','button button-primary','Save Complete Workbook to My Work');
@@ -90,7 +137,10 @@
     parking.append(controls,feedback);
     let preview=null;
 
-    function answers(){return allFields.some(f=>f.input.value.trim());}
+    function answers(){
+      return allFields.some(f=>f.input.value.trim()) ||
+        Array.from(earlyExtras.values()).some(f=>f.input.value.trim());
+    }
     function completedWorksheetText(){
       const lines=[
         'NOT BROKEN JUST BURNING',
@@ -99,6 +149,16 @@
         '',
         'MY RESPONSES'
       ];
+      if(earlyExtras.size && earlyQuestions.length===earlyCount){
+        lines.push('','SEQUENCE MAP · EARLIER EXERCISE');
+        earlyQuestions.forEach((question,i)=>{
+          const linkedIndex=earlyConfig.map[i];
+          const field=linkedIndex===null ? earlyExtras.get(i) : allFields[linkedIndex];
+          lines.push('',(i+1)+'. '+question,
+            field?.input.value.trim() || '[Not answered yet]');
+        });
+        lines.push('','FOLLOW-UP GUIDED WORKBOOK');
+      }
       allFields.forEach((f,i)=>{
         lines.push('',(i+1)+'. '+f.prompt);
         lines.push(f.input.value.trim() || '[Not answered yet]');
@@ -116,6 +176,10 @@
         // Restore it to its usual workbook row before changing reader pages.
         item.right.append(item.field);
         parking.append(item.row);
+      }
+      for(const extra of earlyExtras.values()){
+        extra.holder.append(extra.field);
+        parking.append(extra.holder);
       }
       parking.append(controls,feedback);
     }
@@ -173,7 +237,10 @@
             const reading=el('div','premium-map-reading');
             const writing=el('div','premium-map-writing');
             appendText(reading,'p',block.text);
-            writing.append(allFields[index++].field);
+            const linkedIndex=earlyConfig.map[index];
+            const field=linkedIndex===null ? earlyExtras.get(index) : allFields[linkedIndex];
+            if(field)writing.append(field.field);
+            index++;
             r.append(reading,writing);
             body.append(r);
             continue;
@@ -181,8 +248,8 @@
           appendText(body,block.kind==='heading'?'h3':'p',block.text);
         }
         body.append(el('p','premium-map-continuity',
-          'These answers continue into the full Alliance Integrity Check later in this lesson. '+
-          'They are not saved automatically.'),controls,feedback);
+          'These answers remain in your completed workbook. Matching answers also carry '+
+          'into the later guided questions. Nothing is saved automatically.'),controls,feedback);
         return;
       }
       const lead=el('section','premium-batch-workbook');

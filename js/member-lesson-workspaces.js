@@ -497,7 +497,49 @@
         body.append(instruction);
         return;
       }
-      if(slug==='bullying-shame-early-armor' && config.kind==='records'){
+      if(strengthWorksheet && config.kind==='records'){
+        // The six strength anchors are teaching prompts, NOT seven audit
+        // questions. Begin the form only after THE STRENGTH MODEL AUDIT.
+        // The audit then spans four reader sections, so reuse the same inputs
+        // on each continuation instead of recreating or erasing them.
+        let started=step.continuation>0;
+        let active=null;
+        if(started){
+          body.append(recordWrap);
+          if(step.continuation===1){
+            active=makeRow(body);
+            active.reading.append(node('h3','','1. Inherited Rule — continued examples'));
+            strengthTargets[0]=active.writing;
+          }
+        }
+        for(const block of step.blocks){
+          const t=block.text.trim();
+          if(block.kind==='heading' && config.heading.test(t)){
+            started=true;
+            active=null;
+            text(body,block);
+            body.append(recordWrap);
+            continue;
+          }
+          if(!started){
+            text(body,block);
+            continue;
+          }
+          const numbered=/^([1-7])\.\s+/.exec(t);
+          if(numbered){
+            active=makeRow(body);
+            strengthTargets[Number(numbered[1])-1]=active.writing;
+          }else if(/^EXAMPLE\s+\d+/i.test(t)){
+            active=null;
+          }
+          text(active?active.reading:body,block);
+        }
+        if(started && !strengthTargets.some(Boolean)){
+          body.append(node('p','premium-map-continuity',
+            'Your earlier audit answers are retained. Keep reading the worked examples, then review your complete worksheet on the final reflection page.'));
+        }
+        if(showRecord)showRecord(currentRecord);
+      } else if(slug==='bullying-shame-early-armor' && config.kind==='records'){
         body.append(recordWrap);
         let active=makeRow(body);
         armorTargets[0]=active.writing;

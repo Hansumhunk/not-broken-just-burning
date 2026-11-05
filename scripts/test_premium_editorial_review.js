@@ -1389,10 +1389,132 @@ test('split-alliance early inline exercise does not bundle manuscript wording or
   const module=read('js/member-editorial-workbooks.js');
   const reader=read('js/member-premium-lesson.js');
   const billing=read('js/member-billing.js');
-  assert.match(module,/const earlyCount=slug==='split-alliance-therapy-triangle' \? 5 : 0/);
-  assert.ok(module.includes('writing.append(allFields[index++].field)'));
+  assert.ok(module.includes("'split-alliance-therapy-triangle':{"));
+  assert.ok(module.includes('map:[0,1,2,3,4]'));
+  assert.ok(module.includes('if(field)writing.append(field.field)'));
   assert.ok(module.includes('item.right.append(item.field)'));
   assert.ok(!module.includes('Can I disagree without disagreement becoming pathology?'));
+  assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
+  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+});
+
+
+test('DARVO Sequence Map has six inline answer boxes on section 2 and preserves every answer in one document', async () => {
+  const {createEditorial,node,find,appendText,context}=simulatePracticeWorkspace();
+  const early=[
+    'What happened first?',
+    'What did I do?',
+    'What did the other person do next?',
+    'How was my response interpreted?',
+    'What evidence supports that interpretation?',
+    'What alternative explanations remain possible?'
+  ];
+  const full=[
+    'What happened first in the specific exchange I want to examine?',
+    'What did I actually say or do next?',
+    'What did the other person do, and what was said about my response?',
+    'Which claims are observable and which describe presumed motives?',
+    'Where could I take accountability for my response even if the original issue remains valid?',
+    'What alternate explanations or missing information should be considered?',
+    'Was there a genuine safety concern requiring a different response?',
+    'What next boundary or request would reduce escalation without demanding a confession?'
+  ];
+  const saved=[];
+  const steps=[
+    {title:'Opening',continuation:0,blocks:[{kind:'paragraph',text:'Understand double binds'}]},
+    {title:'Opening',continuation:1,blocks:[
+      {kind:'heading',text:'Exercise'},
+      {kind:'paragraph',text:'Sequence Map:'},
+      ...early.map(text=>({kind:'paragraph',text})),
+      {kind:'heading',text:'NBJB Principle'},
+      {kind:'paragraph',text:'Your reaction is part of the story.'}
+    ]},
+    {title:'Opening',continuation:2,blocks:[{kind:'paragraph',text:'DARVO is a framework.'}]},
+    {title:'Opening',continuation:3,blocks:[
+      {kind:'heading',text:'THE CHRONOLOGICAL SEQUENCE MAP'},
+      {kind:'paragraph',text:'Write the exchange in order.'}
+    ]},
+    {title:'Guided reflection',exercise:true,blocks:[]}
+  ];
+  const ws=createEditorial({
+    slug:'double-bind-darvo-reaction',parking:node(),steps,
+    lessonTitle:'Protected DARVO lesson',exercise:{
+      title:'Sequence Map · Behavior, Reaction and Interpretation',prompts:full
+    },
+    saveWholeToWork:(body,title,status)=>{
+      saved.push({body,title});status.textContent='Saved.';
+    }
+  });
+  assert.ok(ws);
+  assert.equal(ws.focusIndex,3);
+  assert.equal(ws.matches(steps[0]),false);
+  assert.equal(ws.matches(steps[1]),true);
+  assert.equal(ws.matches(steps[2]),false);
+  assert.equal(ws.matches(steps[3]),true);
+  let page=node();ws.park();ws.render(steps[1],page,appendText);
+  const rows=find(page,n=>n.className==='premium-map-row');
+  assert.equal(rows.length,6,'all six source questions have answer boxes');
+  rows.forEach((row,i)=>{
+    assert.equal(find(row.children[0],n=>n.textContent===early[i]).length,1);
+    assert.equal(find(row.children[1],n=>n.tag==='textarea').length,1);
+  });
+  const earlyInputs=rows.map(row=>find(row,n=>n.tag==='textarea')[0]);
+  earlyInputs.forEach((input,i)=>input.value='Sequence detail '+(i+1));
+  assert.equal(saved.length,0,'typing is not auto-saved');
+  ws.park();
+  page=node();ws.render(steps[3],page,appendText);
+  const laterRows=find(page,n=>n.className==='premium-map-row');
+  assert.equal(laterRows.length,8,'later guided workbook retains every prompt');
+  const laterInputs=laterRows.map(row=>find(row,n=>n.tag==='textarea')[0]);
+  for(const [earlyIndex,laterIndex] of [[0,0],[1,1],[2,2],[5,5]]){
+    assert.equal(laterInputs[laterIndex],earlyInputs[earlyIndex],
+      'matching earlier answers use the same textarea, not a duplicate');
+    assert.equal(laterInputs[laterIndex].value,'Sequence detail '+(earlyIndex+1));
+  }
+  assert.ok(!laterInputs.includes(earlyInputs[3]),
+    'interpretation question has its own answer and is never misfiled as an unrelated later prompt');
+  assert.ok(!laterInputs.includes(earlyInputs[4]),
+    'evidence question has its own answer and is never misfiled as an accountability answer');
+  laterInputs[4].value='I can improve how I respond.';
+  laterInputs[6].value='Safety check.';
+  const compiled=ws.completedWorksheetText();
+  assert.ok(compiled.includes('SEQUENCE MAP · EARLIER EXERCISE'));
+  assert.ok(compiled.includes('FOLLOW-UP GUIDED WORKBOOK'));
+  for(let i=0;i<6;i++){
+    assert.ok(compiled.includes(early[i]));
+    assert.ok(compiled.includes('Sequence detail '+(i+1)));
+  }
+  assert.ok(compiled.includes('I can improve how I respond.'));
+  assert.ok(compiled.includes('Safety check.'));
+  ws.park();page=node();ws.render(steps[1],page,appendText);
+  const returned=find(page,n=>n.className==='premium-map-row');
+  for(let i=0;i<6;i++){
+    const field=find(returned[i],n=>n.tag==='textarea')[0];
+    assert.equal(field,earlyInputs[i]);
+    assert.equal(field.value,'Sequence detail '+(i+1));
+  }
+  const completion=node();ws.renderCompletion(completion);
+  const paper=find(completion,n=>n.className==='premium-worksheet-paper')[0];
+  assert.equal(paper.textContent,compiled);
+  const copy=find(completion,n=>n.tag==='button' && n.textContent==='Copy Complete Workbook')[0];
+  await copy.events.click();
+  assert.equal(context.copied,compiled);
+  const save=find(completion,n=>n.tag==='button' && n.textContent==='Save Complete Workbook to My Work')[0];
+  save.events.click();
+  assert.equal(saved.length,1);
+  assert.equal(saved[0].body,compiled,'the saved document contains the early and guided exercise in full');
+});
+
+test('DARVO early exercise is protected at runtime and lesson publication settings remain unchanged', () => {
+  const module=read('js/member-editorial-workbooks.js');
+  const reader=read('js/member-premium-lesson.js');
+  const billing=read('js/member-billing.js');
+  assert.ok(module.includes("'double-bind-darvo-reaction':{"));
+  assert.ok(module.includes('map:[0,1,2,null,null,5]'));
+  assert.ok(module.includes('earlyQuestions.push(wording)'));
+  assert.ok(!module.includes('What happened first?'),
+    'unpublished source prompts must remain inside authorized lesson data');
+  assert.ok(!module.includes('What evidence supports that interpretation?'));
   assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
   assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
 });

@@ -262,6 +262,34 @@
 
 
     function completedWorksheetText() {
+      if(strengthWorksheet){
+        const lines=[
+          'NOT BROKEN JUST BURNING',
+          'STRENGTH MODEL AUDIT — MY CHOSEN RULES',
+          'A personal working document from What Strength Looked Like in Your House',
+          '',
+          'THE FIVE INHERITED RULES (WITH OPTIONAL ADDITIONAL RULES)'
+        ];
+        records.forEach((record,i)=>{
+          if(!record.inputs.some(input=>input.value.trim()))return;
+          lines.push('','RULE '+(i+1));
+          config.questions.forEach(([question],idx)=>{
+            lines.push('',(idx+1)+'. '+question);
+            lines.push(record.inputs[idx].value.trim() || '[Not answered yet]');
+          });
+        });
+        if(!records.some(rec=>rec.inputs.some(input=>input.value.trim()))){
+          lines.push('','[No inherited rules have been answered yet]');
+        }
+        const final=typeof getFinalResponses==='function'?getFinalResponses():[];
+        if(Array.isArray(final)&&final.some(a=>a?.response?.trim())){
+          lines.push('','FINAL REFLECTION');
+          final.filter(a=>a?.response?.trim()).forEach(a=>
+            lines.push('',a.prompt || 'Reflection',a.response.trim()));
+        }
+        lines.push('','My answers are a personal reflection, not a professional or clinical assessment.');
+        return lines.join('\n');
+      }
       if(!shameQuestions) return '';
       const lines=[
         'NOT BROKEN JUST BURNING',
@@ -296,6 +324,12 @@
       return lines.join('\n');
     }
     function worksheetProgress() {
+      if(strengthWorksheet){
+        const attempted=records.filter(rec=>rec.inputs.some(input=>input.value.trim()));
+        const answered=attempted.reduce((sum,rec)=>sum+rec.inputs.filter(i=>i.value.trim()).length,0);
+        return attempted.length+' inherited '+(attempted.length===1?'rule':'rules')+
+          ' examined · '+answered+' of '+(attempted.length*config.questions.length)+' questions answered';
+      }
       const shameCount=shameFields.filter(field=>field.input.value.trim()).length;
       const activeRecords=records.filter(rec=>rec.inputs.some(input=>input.value.trim()));
       const completed=activeRecords.reduce((sum,rec)=>sum+rec.inputs.filter(input=>input.value.trim()).length,0);
@@ -310,13 +344,15 @@
         '. Unanswered prompts remain visibly marked; you can return and edit them.';
     }
     function renderCompletion(container) {
-      if(!shameQuestions || !container)return;
+      if((!shameQuestions && !strengthWorksheet) || !container)return;
       if(!worksheetPreview){
         const section=node('section','premium-worksheet-completion');
         const eyebrow=node('p','eyebrow','Your completed work · Personal document');
-        const heading=node('h3','','The Shame Separation & Armor Audit');
+        const heading=node('h3','',strengthWorksheet?'My Strength Model Audit':'The Shame Separation & Armor Audit');
         const intro=node('p','premium-map-help',
-          'Your answers from both exercises are assembled below. Review the whole page, return to any question to edit it, then choose Copy or Save. No answer is uploaded automatically.');
+          strengthWorksheet
+            ? 'Your inherited rules, their costs and your chosen replacements are assembled below. Return to the audit to change any answer, then Copy or Save this complete document. No automatic upload.'
+            : 'Your answers from both exercises are assembled below. Review the whole page, return to any question to edit it, then choose Copy or Save. No answer is uploaded automatically.');
         const progress=node('p','premium-worksheet-progress');
         const paper=node('pre','premium-worksheet-paper');
         const controls=node('div','premium-pause-actions');
@@ -346,7 +382,7 @@
             status.textContent='Full worksheet saving is unavailable. Use Copy to keep your complete answers.';
             return;
           }
-          saveWholeToWork(text,'Shame Separation & Armor Audit',status);
+          saveWholeToWork(text,config.title === 'Strength Model Audit' ? 'Strength Model Audit' : 'Shame Separation & Armor Audit',status);
         });
         worksheetPreview={section,progress,paper,status};
       }
@@ -385,19 +421,19 @@
     async function copy(){
       if(!answers()){ui.status.textContent='Write at least one answer first.';return;}
       try{
-        await navigator.clipboard.writeText(shameQuestions ? completedWorksheetText() : serializedParts().join('\n\n---\n\n'));
+        await navigator.clipboard.writeText(shameQuestions || strengthWorksheet ? completedWorksheetText() : serializedParts().join('\n\n---\n\n'));
         ui.status.textContent='Answers copied. Paste them somewhere private to keep them.';
       }catch(_){ui.status.textContent='Copy was blocked. Select and copy your answers manually.';}
     }
     function save(){
       if(!answers()){ui.status.textContent='Write at least one answer first.';return;}
-      if(shameQuestions && typeof saveWholeToWork==='function'){
+      if((shameQuestions || strengthWorksheet) && typeof saveWholeToWork==='function'){
         const full=completedWorksheetText();
         if(full.length>20000){
           ui.status.textContent='This full worksheet is too long for one local entry. Use Copy to retain every answer.';
           return;
         }
-        saveWholeToWork(full,'Shame Separation & Armor Audit',ui.status);
+        saveWholeToWork(full,strengthWorksheet?'Strength Model Audit':'Shame Separation & Armor Audit',ui.status);
         return;
       }
       const parts=serializedParts();

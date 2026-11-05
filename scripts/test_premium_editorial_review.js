@@ -366,3 +366,58 @@ test('the final release checklist retains independent billing and editorial appr
   assert.match(doc, /separate explicit approval/i);
   assert.match(doc, /28 editorial drafts/i);
 });
+
+test('the inline Imprint Map supplies four editable columns in the correct lesson section', () => {
+  const html = read('member-premium-lesson.html');
+  const js = read('js/member-premium-lesson.js');
+  for (const id of ['premium-map-received', 'premium-map-missed', 'premium-map-learned',
+    'premium-map-decision', 'premium-map-chosen-rule', 'premium-map-copy', 'premium-map-save', 'premium-map-clear']) {
+    assert.match(html, new RegExp('id="' + id + '"'));
+  }
+  assert.match(html, /id="premium-father-map"[^>]*hidden/);
+  assert.match(html, /not saved automatically or uploaded/);
+  assert.match(js, /step\.title === 'The Father Imprint Map'/);
+  assert.match(js, /el\('premium-father-map'\)\.hidden = !onFatherMap/);
+  assert.match(js, /const READ_TO_ME_ENABLED = false;/);
+});
+
+
+test('map worksheet only saves on user request and copies all four answers', async () => {
+  const vm = require('node:vm');
+  const js = read('js/member-premium-lesson.js');
+  const a = js.indexOf('  function fatherMapHasAnswers()');
+  const z = js.indexOf('  function reflectionAnswers()', a);
+  assert.ok(a > 0 && z > a);
+  const handlers = {};
+  const elements = {};
+  for (const id of ['premium-map-received','premium-map-missed','premium-map-learned',
+    'premium-map-chosen-rule','premium-map-decision','premium-map-status',
+    'premium-map-copy','premium-map-save','premium-map-clear']) {
+    elements[id] = {value:'',textContent:'',addEventListener(event,fn){handlers[id]=fn;}};
+  }
+  const flags = [{value:'Fact',checked:true}];
+  let copied='',saved='';
+  vm.runInNewContext(js.slice(a,z),{
+    el:id=>elements[id],
+    document:{querySelectorAll:()=>flags},
+    navigator:{clipboard:{writeText:async x=>{copied=x;}}},
+    saveReflectionToWork:x=>{saved=x;}
+  });
+  assert.equal(saved,'');
+  elements['premium-map-received'].value='Skills';
+  elements['premium-map-missed'].value='Praise';
+  elements['premium-map-learned'].value='Work proves worth';
+  elements['premium-map-decision'].value='REFORGE';
+  elements['premium-map-chosen-rule'].value='Rest matters';
+  await handlers['premium-map-copy']();
+  assert.match(copied,/Skills/);
+  assert.match(copied,/Praise/);
+  assert.match(copied,/Work proves worth/);
+  assert.match(copied,/Rest matters/);
+  assert.equal(saved,'');
+  handlers['premium-map-save']();
+  assert.equal(saved,copied);
+  handlers['premium-map-clear']();
+  assert.equal(elements['premium-map-received'].value,'');
+  assert.equal(flags[0].checked,false);
+});

@@ -282,6 +282,14 @@
     stopSpeech('Read from here to listen to the rest of the lesson using your device voice.');
     const step = steps[current];
     const final = Boolean(step.exercise);
+    // Keep the actual worksheet available on EVERY Father Imprint Map continuation
+    // page, not just the final reflection. Inputs are stable DOM nodes so moving
+    // between map sections does not erase entries. Other lessons are unchanged.
+    const onFatherMap = slug === 'father-wound' && step.title === 'The Father Imprint Map' && !final;
+    const onPositiveInheritance = slug === 'father-wound' && step.title === 'Part 8 — Positive Inheritance' && !final;
+    el('premium-father-map-guide').hidden = !onFatherMap;
+    el('premium-father-positive-guide').hidden = !onPositiveInheritance;
+    el('premium-father-map').hidden = !onFatherMap;
     el('premium-current-step').hidden = final;
     el('premium-exercise').hidden = !final;
     if (final) {
@@ -538,6 +546,58 @@
       ? 'Saved to My Work on this device.' + (clipped.length < body.length ? ' Only the first 2,400 characters were saved; use Copy for the full answer.' : ' You can find it from the Hub.')
       : 'This device could not save the reflection. Use Copy to keep it privately.';
   }
+  // This worksheet is optional, in-browser work. Reading and navigation never
+  // write its contents. Copy and Save each require an explicit button press.
+  function fatherMapHasAnswers() {
+    return ['premium-map-received', 'premium-map-missed', 'premium-map-learned',
+      'premium-map-chosen-rule', 'premium-map-decision']
+      .some(id => Boolean(el(id).value.trim())) ||
+      [...document.querySelectorAll('[data-map-category]')].some(node => node.checked);
+  }
+  function fatherMapText() {
+    const response = id => el(id).value.trim() || '(not answered)';
+    const categories = [...document.querySelectorAll('[data-map-category]')]
+      .filter(node => node.checked).map(node => node.value);
+    return [
+      'The Father Wound — Father Imprint Map',
+      'Column 1 · What I received:\n' + response('premium-map-received'),
+      'Column 2 · What I missed:\n' + response('premium-map-missed'),
+      'Column 3 · What I learned:\n' + response('premium-map-learned'),
+      'Statement classification: ' + (categories.join(', ') || '(not selected)'),
+      'Column 4 · What I choose now:',
+      'Choice: ' + (el('premium-map-decision').value || '(not selected)'),
+      'My chosen rule or next step:\n' + response('premium-map-chosen-rule')
+    ].join('\n\n');
+  }
+  el('premium-map-copy')?.addEventListener('click', async () => {
+    const status = el('premium-map-status');
+    if (!fatherMapHasAnswers()) {
+      status.textContent = 'Write in at least one box before copying your map.';
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(fatherMapText());
+      status.textContent = 'Your complete map was copied. Paste it somewhere you control to keep it.';
+    } catch (_) {
+      status.textContent = 'Copy was blocked. You can select and copy the answers from each box manually.';
+    }
+  });
+  el('premium-map-save')?.addEventListener('click', () => {
+    const status = el('premium-map-status');
+    if (!fatherMapHasAnswers()) {
+      status.textContent = 'Write in at least one box before saving your map.';
+      return;
+    }
+    saveReflectionToWork(fatherMapText(), 'Father Imprint Map', status);
+  });
+  el('premium-map-clear')?.addEventListener('click', () => {
+    for (const id of ['premium-map-received', 'premium-map-missed',
+      'premium-map-learned', 'premium-map-chosen-rule']) el(id).value = '';
+    el('premium-map-decision').value = '';
+    for (const node of document.querySelectorAll('[data-map-category]')) node.checked = false;
+    el('premium-map-status').textContent = 'The map boxes on this page are cleared. Previously copied or saved work was not deleted.';
+  });
+
   function reflectionAnswers() {
     return Array.from(el('premium-exercise-fields').querySelectorAll('label')).map(label => {
       const response = label.querySelector('textarea')?.value.trim() || '';

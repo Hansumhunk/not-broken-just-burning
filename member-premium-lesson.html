@@ -129,7 +129,57 @@
    <section class="premium-current-step" id="premium-current-step" aria-labelledby="premium-step-title" tabindex="-1">
     <p id="premium-step-kicker" class="eyebrow">Your current section</p>
     <h2 id="premium-step-title">Loading section…</h2>
+    <aside class="premium-map-bridge" id="premium-father-positive-guide" hidden>
+      <strong>Where do these answers go?</strong> This Positive Inheritance section prepares you for the Father Imprint Map in the next section. Jot a few words on paper if you prefer, or carry your thoughts forward to the four fill-in boxes on the lesson page. You do not need to answer every question.
+    </aside>
+    <aside class="premium-map-bridge" id="premium-father-map-guide" hidden>
+      <strong>This part is a worksheet, not just an example.</strong> Read the columns below, then <a href="#premium-father-map">fill in your Father Imprint Map on this page</a>. Prefer handwriting? Draw four columns on paper: <em>What I Received, What I Missed, What I Learned, What I Choose Now.</em>
+    </aside>
     <div class="premium-lesson-body" id="premium-reader-body"></div>
+    <section class="premium-inline-map" id="premium-father-map" aria-labelledby="premium-father-map-heading" hidden>
+      <p class="eyebrow">Write it down · Optional guided practice</p>
+      <h3 id="premium-father-map-heading">Your Father Imprint Map</h3>
+      <p class="premium-map-help">You can type directly into these boxes as you read the examples, or use pen and paper. You don't have to complete everything. Your entries stay on this page while it remains open, but are <strong>not saved automatically or uploaded</strong>. Use Copy or Save to My Work before closing or reloading.</p>
+      <div class="premium-map-grid">
+        <div class="premium-map-field">
+          <label for="premium-map-received"><strong>Column 1 · What I received</strong><small>What helped me? What strength or positive inheritance would I preserve?</small></label>
+          <textarea id="premium-map-received" rows="4" maxlength="450" autocomplete="off" placeholder="For example: a strong work ethic, humor, practical skills…"></textarea>
+        </div>
+        <div class="premium-map-field">
+          <label for="premium-map-missed"><strong>Column 2 · What I missed</strong><small>What support or experience did I wish had been available?</small></label>
+          <textarea id="premium-map-missed" rows="4" maxlength="450" autocomplete="off" placeholder="For example: praise, patience, permission to rest…"></textarea>
+        </div>
+        <div class="premium-map-field">
+          <label for="premium-map-learned"><strong>Column 3 · What I learned</strong><small>What rule did I learn from these experiences? Name the rule without assigning motives.</small></label>
+          <textarea id="premium-map-learned" rows="4" maxlength="450" autocomplete="off" placeholder="I learned that a good man always has to be working…"></textarea>
+          <fieldset class="premium-map-classify">
+            <legend>My statement may be (choose any that fit):</legend>
+            <label><input type="checkbox" value="Fact" data-map-category> Fact</label>
+            <label><input type="checkbox" value="Interpretation" data-map-category> Interpretation</label>
+            <label><input type="checkbox" value="Pattern" data-map-category> Pattern</label>
+            <label><input type="checkbox" value="Unknown" data-map-category> Unknown</label>
+          </fieldset>
+        </div>
+        <div class="premium-map-field">
+          <label for="premium-map-decision"><strong>Column 4 · What I choose now</strong><small>Decide which inherited rule to keep, reforge, or retire. Then write your chosen rule.</small></label>
+          <select id="premium-map-decision" aria-label="What I choose to do with this rule">
+            <option value="">Choose when ready…</option>
+            <option value="KEEP">KEEP · Preserve a healthy rule</option>
+            <option value="REFORGE">REFORGE · Make the rule healthier</option>
+            <option value="RETIRE">RETIRE · Release a rule that no longer serves</option>
+          </select>
+          <label for="premium-map-chosen-rule" class="premium-map-followup">My chosen rule or next step:</label>
+          <textarea id="premium-map-chosen-rule" rows="4" maxlength="450" autocomplete="off" placeholder="A responsible man works hard and knows rest is part of endurance…"></textarea>
+        </div>
+      </div>
+      <div class="premium-pause-actions">
+        <button type="button" class="button button-ghost" id="premium-map-copy">Copy My Map</button>
+        <button type="button" class="button button-primary" id="premium-map-save">Save Map to My Work</button>
+        <button type="button" class="button button-ghost" id="premium-map-clear">Clear Map</button>
+      </div>
+      <p class="premium-map-status" id="premium-map-status" role="status" aria-live="polite"></p>
+      <p class="premium-map-help">If this feels like too much, write only one inherited rule and stop. The rest can wait.</p>
+    </section>
     <details class="premium-pause-reflection" id="premium-pause-reflection">
      <summary>Pause and reflect <small>Optional · one thought is enough</small></summary>
      <label for="premium-pause-note">What stood out, or what would you do differently after reading this part?</label>

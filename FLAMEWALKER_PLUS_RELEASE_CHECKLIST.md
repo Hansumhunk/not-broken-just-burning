@@ -25,6 +25,14 @@
 - The paid portal's deployed server function independently requires authenticated access and a billing record for the authenticated user. The sandbox editorial reviewer is excluded by server policy.
 - **Remaining:** an existing paid account still needs one real-browser click of Manage Billing to confirm the resulting Stripe portal session; **do not cancel or buy again** merely to test it.
 
+## Seller identity and tax configuration — November 5 read-only verification
+
+- **Legal merchant identity still needs founder confirmation.** Stripe live account is verified as `business_type=individual`; charges and payouts are enabled with zero currently or past-due account requirements. The public NBJB terms and refund pages describe billing, but do not presently identify a formally confirmed NBJB legal seller. The founder recently stated that NBJB has not yet been separately registered. The account should **not** be treated as a registered NBJB company on this basis alone.
+- **Florida naming requirement:** A Florida individual conducting business under a name other than their legal name generally must register a fictitious name (DBA); a new LLC under its own legal name has a different formation route. Florida's official source says the DBA registration fee is $50 and requires qualifying prior newspaper publication. [Florida Division of Corporations](https://dos.fl.gov/sunbiz/start-business/efile/fl-fictitious-name-registration/). **Decision:** choose the lawful operator (individual/DBA, separate LLC, or another reviewed arrangement), then ensure Stripe, receipts, terms, and support identity agree.
+- **Tax readiness is not established:** Live Stripe Tax Settings report `status=active` and default code `txcd_10000000` (general electronically supplied services). Live Stripe Tax Registrations API returned **zero registered jurisdictions**. The deployed `create-live-checkout-session` function currently omits `automatic_tax: { enabled: true }`. Stripe says collecting tax via Stripe Tax requires an appropriate active registration; turning on tax calculation alone is not a substitute for determining actual obligations. [Stripe tax guidance](https://github.com/stripe/ai/blob/main/providers/grok/plugin/skills/stripe-best-practices/references/tax.md). Determine whether NBJB's membership is taxable in applicable states before changing registrations or checkout behavior. Do **not** register to collect tax blindly.
+- **Product catalog:** The intended recurring plans exist at $14.99/month and $149/year. An **additional active one-time annual product** has a description referencing a year of membership. Verify public purchase links do not present it as automatically renewing, and do not remove or modify it during technical QA.
+- Existing subscription billing, account access and checkout flags were **not changed** by these read-only verifications.
+
 ## Open acceptance checks
 
 - [x] Founder confirmed signed-out guest and ordinary **Free** account denial on unpublished draft `the-love-bargain` in a live browser.
@@ -35,7 +43,10 @@
 - [ ] Complete alternate-device/desktop keyboard, screen-reader, no-audio and private-reflection privacy acceptance; check saved works are not automatically uploaded.
 - [x] Verified the live subscription's scheduled December 2 cancellation exactly matches its active Supabase entitlement, and Stripe Customer Portal configuration supports cancel-at-period-end, invoices and card updates.
 - [ ] Confirm the existing paying user can open Stripe Customer Portal from the newly exposed **Manage Billing** option. No new purchase or cancellation is necessary. Recheck paid-to-Free transition after the scheduled expiration.
-- [ ] Confirm legal seller identity, terms, renewal disclosure, contact inbox workflow, refund commitments (first monthly payment 14 days; first annual payment 30 days), and any applicable taxes.
+- [ ] **Owner decision required:** confirm NBJB's legal operating identity (e.g. individual/DBA or separate entity) and complete applicable registration. Update Stripe/account disclosure, Terms and receipts consistently before sales.
+- [ ] Verify taxability and any required registrations with a qualified tax professional, then test Stripe checkout tax treatment. Current configuration has no tax registrations and no `automatic_tax` in the deployed Checkout function; do not assume it collects required sales taxes.
+- [ ] Confirm the NBJB support inbox can receive and respond to billing/cancellation/refund requests; verify the published 14-day first monthly, 30-day first annual and 7-day unintended renewal policy is operational.
+- [ ] Check that the separate active one-time annual Stripe product is not confused with the recurring annual subscription in public sales links.
 - [ ] Confirm the separately escalated Scalapay/Stripe Support case is closed, if still open. The **live Stripe Account API on November 5 showed no currently/past-due verification requirements and no deadline**; do not repeat the old November 6 warning as a current account requirement.
 - [ ] Review Supabase security advisories: leaked-password protection disabled and pg_net in public schema. Do not move extensions blindly.
 - [ ] Obtain **separate explicit approval** for the final public launch change to both client and server checkout gates; confirm live access and billing after activation.

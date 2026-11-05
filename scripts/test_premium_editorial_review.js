@@ -838,7 +838,7 @@ test('Chosen Manhood full worksheet is member-only with private manual saving an
   const chosen=read('js/member-chosen-code.js');
   const platform=read('js/member-platform.js');
   const billing=read('js/member-billing.js');
-  assert.ok(loader.includes('"premium-lesson": ["js/member-chosen-code.js", "js/member-lesson-workspaces.js", "js/member-premium-lesson.js"]'));
+  assert.ok(loader.includes('"premium-lesson": ["js/member-chosen-code.js", "js/member-editorial-workbooks.js", "js/member-lesson-workspaces.js", "js/member-premium-lesson.js"]'));
   assert.ok(chosen.includes('saveWholeToWork(full,'));
   assert.ok(chosen.includes('Nothing is uploaded automatically.'));
   assert.ok(platform.includes('member-full-worksheet-paper'));

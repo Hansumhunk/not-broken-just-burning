@@ -1641,3 +1641,120 @@ test('editorial QA early-exercise fixtures do not leak protected question text i
   assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
   assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
 });
+
+
+function simulateLiveBilling({ hasStripeBilling = false, tier = 'free', cancelAtPeriodEnd = false, remoteError = null } = {}) {
+  const invoked = [], redirects = [];
+  const create = (value = {}) => ({
+    hidden: true,
+    textContent: '',
+    dataset: {},
+    disabled: false,
+    handlers: {},
+    addEventListener(type, callback) { this.handlers[type] = callback; },
+    ...value
+  });
+  const els = {
+    'member-live-billing': create(),
+    'member-live-billing-title': create(),
+    'member-billing-status': create(),
+    'member-billing-purchase': create(),
+    'member-billing-management': create(),
+    'member-billing-available-lessons': create(),
+    'member-billing-consent': create({ checked: true }),
+    'member-billing-portal': create()
+  };
+  const monthly = create({ dataset: { liveBillingOffer: 'flamewalker_plus_monthly' } });
+  const annual = create({ dataset: { liveBillingOffer: 'flamewalker_plus_annual' } });
+  const context = {
+    document: {
+      getElementById(id) { return els[id] || null; },
+      querySelectorAll(selector) { return selector === '[data-live-billing-offer]' ? [monthly, annual] : []; }
+    },
+    window: {
+      NBJBAuth: {
+        user: { id: 'synthetic-member' },
+        client: {
+          functions: {
+            async invoke(name, options) {
+              invoked.push(name);
+              return remoteError
+                ? { error: new Error('Expected test rejection') }
+                : { data: { url: name.includes('portal')
+                    ? 'https://billing.stripe.com/p/session/test-link'
+                    : 'https://checkout.stripe.com/c/pay/test-link' } };
+            }
+          }
+        }
+      },
+      NBJBEntitlements: {
+        async refresh() { return { hasStripeBilling, tier, cancelAtPeriodEnd }; }
+      },
+      location: {
+        search: '',
+        assign(url) { redirects.push(url); }
+      }
+    },
+    URL, URLSearchParams, console
+  };
+  vm.runInNewContext(read('js/member-billing.js'), context);
+  return { els, monthly, annual, invoked, redirects };
+}
+
+test('closed enrollment hides purchase options for free members and disallows synthetic checkout clicks', async () => {
+  const app = simulateLiveBilling();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(app.els['member-live-billing'].hidden, true);
+  assert.equal(app.els['member-billing-purchase'].hidden, true);
+  assert.equal(app.els['member-billing-management'].hidden, true);
+  await app.monthly.handlers.click();
+  assert.equal(app.invoked.length, 0, 'checkout must not even be called if a hidden button is activated');
+  assert.match(app.els['member-billing-status'].textContent, /not on sale yet/i);
+});
+
+test('existing Stripe customer can manage a subscription while new sales stay closed', async () => {
+  const app = simulateLiveBilling({ hasStripeBilling: true, tier: 'paid', cancelAtPeriodEnd: true });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(app.els['member-live-billing'].hidden, false);
+  assert.equal(app.els['member-billing-purchase'].hidden, true);
+  assert.equal(app.els['member-billing-management'].hidden, false);
+  assert.match(app.els['member-billing-status'].textContent, /scheduled to end/);
+  app.els['member-billing-portal'].handlers.click();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(app.invoked, ['create-live-customer-portal-session']);
+  assert.deepEqual(app.redirects, ['https://billing.stripe.com/p/session/test-link']);
+});
+
+test('expired Stripe customers can review billing without getting lesson access or a new purchase offer', async () => {
+  const app = simulateLiveBilling({ hasStripeBilling: true, tier: 'free', cancelAtPeriodEnd: true });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(app.els['member-live-billing'].hidden, false);
+  assert.equal(app.els['member-billing-purchase'].hidden, true);
+  assert.equal(app.els['member-billing-management'].hidden, false);
+  assert.match(app.els['member-billing-status'].textContent, /paid period/);
+  await app.annual.handlers.click();
+  assert.equal(app.invoked.length, 0);
+});
+
+test('Stripe portal request failure leaves the member on NBJB without a redirect', async () => {
+  const app = simulateLiveBilling({ hasStripeBilling: true, tier: 'paid', remoteError: true });
+  await new Promise(resolve => setImmediate(resolve));
+  app.els['member-billing-portal'].handlers.click();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(app.invoked.length, 1);
+  assert.equal(app.redirects.length, 0);
+  assert.match(app.els['member-billing-status'].textContent, /could not open Stripe/i);
+});
+
+test('client paid tier respects authoritative validity dates; billing management remains separate', () => {
+  const code = read('js/member-entitlements.js');
+  const billing = read('js/member-billing.js');
+  assert.match(code, /valid_from,valid_until,cancel_at_period_end,provider,provider_customer_ref/);
+  assert.match(code, /Date\.parse\(row\.valid_until\) > now/);
+  assert.match(code, /Date\.parse\(row\.valid_from\) <= now/);
+  assert.match(code, /hasStripeBilling: row\?\.provider === 'stripe'/);
+  assert.match(billing, /if \(!PUBLIC_CHECKOUT_UI_ENABLED\) return;/);
+  assert.match(billing, /if \(!PUBLIC_CHECKOUT_UI_ENABLED\) \{/);
+  assert.match(billing, /if \(current\?\.hasStripeBilling\)/);
+  assert.doesNotMatch(billing, /PUBLIC_CHECKOUT_UI_ENABLED = true/);
+});

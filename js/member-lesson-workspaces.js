@@ -13,6 +13,34 @@
         ['What healthy closeness means now', 'Which healthy relationship rules do I choose today?']
       ]
     },
+
+    'what-strength-looked-like': {
+      kind: 'records', title: 'Strength Model Audit', heading: /strength model audit/i,
+      sectionTitle: /part 12.*six nbjb strength anchors/i,
+      singular: 'Inherited rule', initial: 5, maximum: 7,
+      questions: [
+        ['Inherited rule', 'Which rule about strength did I absorb?'],
+        ['Where I learned it', 'Who or what modeled it?'],
+        ['What was useful about it?', 'Name the legitimate value inside the rule.'],
+        ['What does it cost me now?', 'Which effect can I observe?'],
+        ['Which NBJB anchor does it affect?', 'Steadiness, Direction, Strength with restraint, Protection with boundaries, Responsibility with self-respect, or Brotherhood and connection.'],
+        ['Keep, Reforge, or Retire', 'Which response makes sense today?'],
+        ['Chosen rule', 'Rewrite the rule so you can live it.']
+      ]
+    },
+    'allowed-to-need': {
+      kind: 'records', title: 'Needs Permission Map', heading: /needs permission map/i,
+      sectionTitle: /part 11.*positive inheritance/i,
+      singular: 'Need', initial: 2, maximum: 6,
+      questions: [
+        ['The need', 'Rest, help, privacy, affection, guidance or another legitimate need?'],
+        ['Early message', 'What did I learn about having this need?'],
+        ['Current strategy', 'What do I do when this need appears now?'],
+        ['Category: A, B, or C', 'A = I can manage it; B = I can ask for help; C = professional, community or system support.'],
+        ['Keep, Reforge, or Retire', 'Which inherited rule governs this need, and what should change?'],
+        ['Clear request or action', 'What specific responsible next action can I take?']
+      ]
+    },
     'learned-silence': {
       kind: 'records', title: 'Silence Inventory', heading: /silence inventory/i,
       singular: 'Situation', initial: 3, maximum: 5,
@@ -234,7 +262,11 @@
       if(recordWrap)parking.append(recordWrap);
       parking.append(ui.buttons,ui.status);
     }
-    function matches(step) {return !step.exercise && config.heading.test(step.title);}
+    function matches(step) {
+      return !step.exercise && (config.heading.test(step.title) ||
+        (config.sectionTitle && config.sectionTitle.test(step.title)) ||
+        step.blocks.some(block=>block.kind==='heading' && config.heading.test(block.text)));
+    }
     function render(step,body,appendText) {
       if(!matches(step))return;
       const text=(target,block)=>appendText(target,block.kind==='heading'?'h3':'p',block.text);
@@ -243,8 +275,19 @@
         'Nothing is saved automatically. Copy or Save before leaving this page.');
       body.append(note);
       if(config.kind==='records'){
-        const row=makeRow(body);
-        step.blocks.forEach(block=>text(row.reading,block));
+        // Start beside the audit heading if this worksheet is embedded inside
+        // a longer chapter, not beside unrelated earlier teaching.
+        let row=null;
+        for(const block of step.blocks){
+          if(!row && block.kind==='heading' && config.heading.test(block.text))row=makeRow(body);
+          if(!row && config.heading.test(step.title))row=makeRow(body);
+          if(!row && config.sectionTitle && config.sectionTitle.test(step.title) &&
+              (step.continuation > 0 || !step.blocks.some(x=>x.kind==='heading' && config.heading.test(x.text)))) {
+            row=makeRow(body);
+          }
+          text(row?row.reading:body,block);
+        }
+        if(!row)row=makeRow(body);
         if(showRecord)showRecord(currentRecord);
         row.writing.append(recordWrap);
       } else {

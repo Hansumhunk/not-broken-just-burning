@@ -195,3 +195,22 @@
   .premium-map-layout .premium-map-row{grid-template-columns:minmax(0,1fr);gap:13px}
   .premium-map-layout .premium-map-writing .premium-map-field{max-width:100%}
 }
+
+
+/* Reusable guided exercises: read source examples at left, work in the
+   corresponding inputs at right; retain a single-column mobile layout. */
+.premium-workspace-actions{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0 8px}
+.premium-workspace-records{border:1px solid rgba(248,117,42,.32);padding:15px;border-radius:13px;background:rgba(248,117,42,.045);min-width:0}
+.premium-workspace-picker-label{font-size:.87rem;color:var(--text);font-weight:700;display:block;margin:0 0 12px}
+.premium-workspace-picker-label select{display:block;width:100%;margin-top:8px;padding:10px;border-radius:9px;border:1px solid var(--line);background:#101014;color:var(--text);font:inherit}
+.premium-workspace-record-title{font:700 1rem 'Inter',sans-serif;color:#ffb482;margin:12px 0}
+.premium-workspace-field-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.premium-workspace-field-grid .premium-map-field{padding:12px}
+.premium-workspace-field-grid textarea{min-height:80px}
+.premium-workspace-records>button{margin-top:15px}
+.premium-map-layout>.premium-workspace-actions{margin:22px 0 10px}
+.premium-map-layout>.premium-map-status{margin:6px 0 18px}
+@media(max-width:800px){
+ .premium-workspace-records{padding:12px}
+ .premium-workspace-actions .button{flex:1 1 auto}
+}

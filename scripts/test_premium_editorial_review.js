@@ -379,7 +379,7 @@ test('the inline Imprint Map supplies four editable columns in the correct lesso
   assert.ok(js.includes('function renderFatherMapInline(step, body, positiveInheritance)'));
   assert.ok(js.includes('if (isFatherPractice) renderFatherMapInline(step, body, onPositiveInheritance)'));
   assert.ok(js.includes("el('premium-father-map').hidden = true;"));
-  assert.ok(js.includes("el('premium-pause-reflection').hidden = isFatherPractice || final;"));
+  assert.ok(js.includes("el('premium-pause-reflection').hidden = isFatherPractice || isStructuredPractice || final;"));
   assert.ok(html.includes('id="premium-map-grid"'));
   assert.ok(html.includes('id="premium-map-actions"'));
   assert.ok(html.includes('Read a column. Fill in its box. Then continue.'));
@@ -509,7 +509,7 @@ test('father map desktop uses a two-column row and mobile stacks the panels', ()
   assert.match(css, /grid-template-columns:minmax\(0,1\.2fr\) minmax\(300px,\.9fr\)/);
   assert.match(css, /@media\(max-width:800px\)/);
   assert.match(css, /grid-template-columns:minmax\(0,1fr\)/);
-  assert.match(js, /body\.classList\.toggle\('premium-map-layout', isFatherPractice\)/);
+  assert.match(js, /body\.classList\.toggle\('premium-map-layout', isFatherPractice \|\| isStructuredPractice\)/);
   assert.match(js, /const READ_TO_ME_ENABLED = false;/);
 });
 
@@ -523,4 +523,132 @@ test('exercise usability audit covers the 35-lesson library and preserves privat
   assert.match(doc, /Fix #2–7 before expanding sales/);
   assert.match(doc, /editorial_review/);
   assert.match(doc, /No changes to Stripe launch gates or disabled Read to Me/);
+});
+
+
+function simulatePracticeWorkspace() {
+  const vm = require('node:vm');
+  function node(tag='div', className='', textContent='') {
+    return {
+      tag,className,textContent,children:[],parent:null,events:{},value:'',checked:false,
+      append(...items) {
+        for(const item of items) {
+          if(item.parent) item.parent.children.splice(item.parent.children.indexOf(item),1);
+          this.children.push(item);item.parent=this;
+        }
+      },
+      replaceChildren(...items) {
+        for(const item of this.children)item.parent=null;
+        this.children=[];
+        if(items.length)this.append(...items);
+      },
+      addEventListener(event,fn) {this.events[event]=fn;},
+      setAttribute(name,value) {this[name]=value;}
+    };
+  }
+  const context={
+    window:{},
+    navigator:{clipboard:{async writeText(t){context.copied=t;}}},
+    document:{createElement:tag=>node(tag),createTextNode:t=>node('text','',t)},
+    copied:''
+  };
+  vm.runInNewContext(read('js/member-lesson-workspaces.js'),context);
+  const find=(root,test)=>{
+    const out=[];
+    function visit(n){if(test(n))out.push(n);for(const child of n.children||[])visit(child);}
+    visit(root);return out;
+  };
+  const appendText=(target,tag,text)=>target.append(node(tag,'',''+text));
+  return {create:context.window.NBJBPremiumWorkspaces.create,node,context,find,appendText};
+}
+
+test('maternal imprint map attaches editable columns beside manuscript and preserves values between sections', () => {
+  const {create,node,find,appendText}=simulatePracticeWorkspace();
+  const parking=node();
+  const saved=[];
+  const ws=create({slug:'mother-wound',parking,saveToWork:(text,context,status)=>{
+    saved.push(text);status.textContent='Saved to My Work on this device.';
+  }});
+  assert.ok(ws);
+  const step={title:'The Maternal Imprint Map',continuation:0,blocks:[
+    {kind:'paragraph',text:'Complete the map with examples.'},
+    {kind:'heading',text:'COLUMN 1 — WHAT CLOSENESS TAUGHT ME'},
+    {kind:'paragraph',text:'Closeness examples.'},
+    {kind:'heading',text:'COLUMN 2 — WHAT APPROVAL REQUIRED'},
+    {kind:'paragraph',text:'Approval examples.'},
+    {kind:'heading',text:'COLUMN 3 — WHAT ROLE I LEARNED TO PLAY'},
+    {kind:'paragraph',text:'Role examples.'},
+    {kind:'heading',text:'COLUMN 4 — WHAT HEALTHY CLOSENESS MEANS TO ME NOW'},
+    {kind:'paragraph',text:'Chosen closeness examples.'}
+  ]};
+  const first=node();
+  ws.park(); ws.render(step,first,appendText);
+  const rows=find(first,n=>n.className==='premium-map-row');
+  assert.equal(rows.length,4);
+  assert.equal(find(rows[0].children[0],n=>n.textContent==='Closeness examples.').length,1);
+  assert.equal(find(rows[0].children[1],n=>n.tag==='textarea').length,1);
+  const firstInput=find(rows[0],n=>n.tag==='textarea')[0];
+  firstInput.value='Closeness with room for privacy';
+  assert.equal(saved.length,0,'never automatically save on entering values');
+  ws.park();
+  const last=node();
+  ws.render({title:'The Maternal Imprint Map',continuation:1,blocks:[
+    {kind:'paragraph',text:'KEEP REFORGE RETIRE'},
+    {kind:'heading',text:'EXAMPLE 1'},
+    {kind:'paragraph',text:'Worked example'}]},last,appendText);
+  const review=find(last,n=>n.className==='premium-map-row');
+  assert.equal(review.length,4,'later map page reviews all four fields');
+  assert.equal(find(review[0],n=>n.tag==='textarea')[0],firstInput,'input object is reused, not recreated');
+  assert.equal(firstInput.value,'Closeness with room for privacy');
+  assert.ok(ws.serializedParts()[0].includes('Closeness with room for privacy'));
+});
+
+test('Silence Inventory and Armor Audit support editable repeatable records and explicit saves', async () => {
+  const {create,node,context,find,appendText}=simulatePracticeWorkspace();
+  const saved=[];
+  function verify(slug,heading,expectedEntries,expectedQuestions){
+    const savedBefore=saved.length;
+    const ws=create({slug,parking:node(),saveToWork:(text,kind,status)=>{
+      saved.push({text,kind});status.textContent='Saved to My Work on this device.';
+    }});
+    assert.ok(ws);
+    const step={title:heading,continuation:0,blocks:[
+      {kind:'paragraph',text:'Choose examples from your life.'},
+      {kind:'paragraph',text:'For each, complete the questions.'}
+    ]};
+    const page=node(); ws.park(); ws.render(step,page,appendText);
+    const rows=find(page,n=>n.className==='premium-map-row');
+    assert.equal(rows.length,1);
+    const picker=find(page,n=>n.tag==='select')[0];
+    assert.equal(picker.children.length,expectedEntries);
+    const first=find(page,n=>n.tag==='textarea');
+    assert.equal(first.length,expectedQuestions);
+    first[0].value='My own example';
+    assert.equal(saved.length,savedBefore,'no automatic save before deliberate action');
+    ws.park();
+    const next=node(); ws.render({...step,continuation:1},next,appendText);
+    assert.equal(find(next,n=>n.tag==='textarea')[0],first[0]);
+    assert.equal(find(next,n=>n.tag==='textarea')[0].value,'My own example');
+    const buttons=find(next,n=>n.tag==='button');
+    const save=buttons.find(n=>n.textContent==='Save to My Work');
+    const copy=buttons.find(n=>n.textContent==='Copy My Answers');
+    assert.ok(save && copy);
+    save.events.click();
+    assert.ok(saved.at(-1).text.includes('My own example'));
+    return {ws,page:next,picker:find(next,n=>n.tag==='select')[0]};
+  }
+  const s=verify('learned-silence','The Silence Inventory',3,10);
+  const select=s.picker;
+  select.value='2';select.events.change();
+  const record3=find(s.page,n=>n.tag==='textarea')[0];
+  assert.notEqual(record3.value,'My own example');
+  record3.value='Another situation';
+  assert.equal(s.ws.serializedParts().length,2);
+  const a=verify('bullying-shame-early-armor','Part 10 — The Armor Audit',1,7);
+  const add=find(a.page,n=>n.tag==='button' && n.textContent==='Add another strategy')[0];
+  assert.ok(add);
+  add.events.click();
+  assert.equal(a.picker.children.length,2,'a second strategy becomes available');
+  assert.equal(find(a.page,n=>n.tag==='textarea').length,7,'only selected strategy is displayed');
+  assert.ok(saved.length>=2);
 });

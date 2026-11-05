@@ -1046,8 +1046,10 @@ test('Needs Permission Map places answers beside six questions and keeps both ne
   assert.equal(saved[0].body,complete);
   assert.equal(saved[0].title,'Needs Permission Map & Request Check');
   ws.park();page=node();ws.render(part16,page,appendText);
-  assert.equal(find(page,x=>x.tag==='textarea')[0].value,'I need rest after hard work.',
-    'answer survives returning to an earlier section');
+  assert.equal(find(page,x=>x.tag==='textarea')[0].value,'My grandmother taught me patience.',
+    'positive inheritance answer survives returning to an earlier section');
+  assert.equal(find(page,x=>x.tag==='textarea')[8].value,'I need rest after hard work.',
+    'need answer survives returning to an earlier section');
 });
 
 test('Needs lesson retains privacy, publication and checkout locks', () => {

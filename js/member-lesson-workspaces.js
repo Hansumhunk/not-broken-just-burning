@@ -164,6 +164,21 @@
     const needsWorksheet = slug === 'allowed-to-need';
     let worksheetPreview = null;
 
+    const positiveQuestions = needsWorksheet ? [
+      ['Who met my needs well?', 'Name a person or a specific example of support.'],
+      ['Who made home feel safe?', 'What did they do that made a difference?'],
+      ['Who taught me how to ask?', 'What did asking sound or look like?'],
+      ['Who respected my privacy?', 'What boundary was honored?'],
+      ['Who comforted me without making me ashamed?', 'Describe a moment of care without humiliation.'],
+      ['Who taught independence without abandonment?', 'What did supported independence look like?'],
+      ['Who let me fail and still helped me learn?', 'What did that experience teach you?'],
+      ['What kind of care do I want to pass forward?', 'Name one useful behavior you would continue.']
+    ] : [];
+    const positiveFields = positiveQuestions.map(([question,help],i)=>{
+      const field=wrapField('Positive inheritance '+(i+1)+' · '+question,help,220);
+      parking.append(field.wrap);
+      return field;
+    });
     const requestQuestions = needsWorksheet ? [
       ['What exactly am I asking for?', 'Turn a vague wish into a specific, realistic request.'],
       ['Is this a request or a demand?', 'Notice whether you are allowing another person a real choice.'],
@@ -286,8 +301,13 @@
           'NEEDS PERMISSION MAP — MY CHOSEN SUPPORT',
           'A personal working document from What You Learned You Were Allowed to Need',
           '',
-          'PART I — THE NEEDS PERMISSION MAP'
+          'PART I — POSITIVE INHERITANCE'
         ];
+        positiveQuestions.forEach(([question],i)=>{
+          lines.push('',(i+1)+'. '+question);
+          lines.push(positiveFields[i].input.value.trim() || '[Not answered yet]');
+        });
+        lines.push('','PART II — THE NEEDS PERMISSION MAP');
         let count=0;
         records.forEach((rec,i)=>{
           if(!rec.inputs.some(input=>input.value.trim()))return;
@@ -299,14 +319,14 @@
           });
         });
         if(!count)lines.push('','[No needs have been answered yet]');
-        lines.push('','PART II — THE REQUEST CHECK');
+        lines.push('','PART III — THE REQUEST CHECK');
         requestQuestions.forEach(([question],i)=>{
           lines.push('',(i+1)+'. '+question);
           lines.push(requestFields[i].input.value.trim() || '[Not answered yet]');
         });
         const final=typeof getFinalResponses==='function'?getFinalResponses():[];
         if(Array.isArray(final) && final.some(x=>x?.response?.trim())){
-          lines.push('','PART III — FINAL REFLECTION');
+          lines.push('','PART IV — FINAL REFLECTION');
           final.filter(x=>x?.response?.trim()).forEach(x=>
             lines.push('',x.prompt || 'Reflection',x.response.trim()));
         }
@@ -379,7 +399,8 @@
         const active=records.filter(rec=>rec.inputs.some(i=>i.value.trim()));
         const answered=active.reduce((n,rec)=>n+rec.inputs.filter(i=>i.value.trim()).length,0);
         const check=requestFields.filter(f=>f.input.value.trim()).length;
-        return active.length+' '+(active.length===1?'need':'needs')+' examined · '+
+        const positive=positiveFields.filter(field=>field.input.value.trim()).length;
+        return positive+' of 8 positive-inheritance answers · '+active.length+' '+(active.length===1?'need':'needs')+' examined · '+
           answered+' of '+active.length*config.questions.length+' map questions · '+
           check+' of 7 request-check questions answered';
       }
@@ -458,6 +479,7 @@
           (fields[2].checks.some(x=>x.checked) || Boolean(fields[3].choice.value)));
       }
       return shameFields.some(field=>field.input.value.trim()) ||
+        positiveFields.some(field=>field.input.value.trim()) ||
         requestFields.some(field=>field.input.value.trim()) ||
         records.some(rec=>rec.inputs.some(input=>input.value.trim()));
     }
@@ -524,6 +546,7 @@
       strengthTargets = [];
       needTargets = [];
       requestTargets = [];
+      for(const field of positiveFields) parking.append(field.wrap);
       for(const field of requestFields) parking.append(field.wrap);
       for(const rec of records)for(const field of rec.fields)rec.grid.append(field.wrap);
       for(const rec of records)parking.append(rec.root);
@@ -599,7 +622,15 @@
             continue;
           }
           if(!started && !requestMode){
-            text(body,block);
+            const pos=positiveQuestions.findIndex(([question])=>
+              question.toLowerCase()===t.replace(/^[-•]\s*/, '').toLowerCase());
+            if(pos>=0){
+              const row=makeRow(body);
+              text(row.reading,block);
+              row.writing.append(positiveFields[pos].wrap);
+            }else{
+              text(body,block);
+            }
             continue;
           }
           const numbered=/^([1-7])\.\s+/.exec(t);

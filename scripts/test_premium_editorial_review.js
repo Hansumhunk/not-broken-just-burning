@@ -356,3 +356,13 @@ test('deployed live checkout source requires a real published library before Str
   assert.ok(source.indexOf('publishedLessons < 7') < source.indexOf('stripe.customers.create('),
     'content availability must be checked before customer creation');
 });
+
+
+test('the final release checklist retains independent billing and editorial approval gates', () => {
+  const doc = read('FLAMEWALKER_PLUS_RELEASE_CHECKLIST.md');
+  assert.match(doc, /seven approved founding lessons/i);
+  assert.match(doc, /PUBLIC_CHECKOUT_UI_ENABLED=false/);
+  assert.match(doc, /PUBLIC_LIVE_CHECKOUT_ENABLED=false/);
+  assert.match(doc, /separate explicit approval/i);
+  assert.match(doc, /28 editorial drafts/i);
+});

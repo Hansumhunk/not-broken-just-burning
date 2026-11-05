@@ -136,6 +136,25 @@
     let recordWrap = null;
     let addButton = null;
     let showRecord = null;
+
+    // Six Shame Separation prompts appear in the preceding reading section.
+    // Keep their input nodes alive so the final worksheet can include them.
+    const shameQuestions = slug === 'bullying-shame-early-armor' ? [
+      ['What happened?', 'State the event or pattern as clearly as possible.'],
+      ['What was said or done to me?', 'What external message did I receive?'],
+      ['What did I begin believing about myself?', 'Name the internalized shame.'],
+      ['What part was never mine to carry?', 'Separate others’ behavior from your worth.'],
+      ['What am I actually responsible for?', 'Own your conduct without taking imaginary blame.'],
+      ['What does responsibility require now?', 'Repair, boundary, apology, distance, learning, or nothing further?']
+    ] : null;
+    const shameFields = shameQuestions?.map(([question,help],i)=>{
+      const field=wrapField('Question '+(i+1)+' · '+question,help,550);
+      parking.append(field.wrap);
+      return field;
+    }) || [];
+    let armorTargets = [];
+    let worksheetPreview = null;
+
     const labels = config.columns || config.questions;
 
     function createRecord(index) {

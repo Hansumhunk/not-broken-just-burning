@@ -148,3 +148,10 @@
 .premium-inline-map{max-width:80ch;margin:30px 0;padding:clamp(16px,3vw,28px);border:1px solid rgba(248,117,42,.32);border-radius:15px;background:rgba(248,117,42,.04);scroll-margin-top:80px}
 .premium-inline-map h3{font-family:'Cinzel',serif;font-size:clamp(1.2rem,2vw,1.55rem);margin:10px 0 16px}
 .premium-map-help{font-size:.9rem;line-height:1.65;color:var(--muted)}
+
+.premium-map-field{min-width:0;padding:15px;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.18)}
+.premium-map-field>label{display:block;line-height:1.55}
+.premium-map-field>label strong,.premium-map-field>label small{display:block}
+.premium-map-field>label small{color:var(--muted);font-size:.82rem}
+.premium-map-field textarea,.premium-map-field select{box-sizing:border-box;display:block;width:100%;min-width:0;margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:#101014;color:var(--text);font:inherit;line-height:1.6}
+.premium-map-field textarea{min-height:115px;resize:vertical}

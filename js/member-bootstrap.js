@@ -49,15 +49,15 @@
     work: ["js/member-history-insights.js"],
     workshop: ["js/tool-member-history.js", "js/member-workshop.js"],
     "start-here": ["js/member-start-here.js"],
-    "premium-lesson": ["js/member-chosen-code.js", "js/member-lesson-workspaces.js", "js/member-premium-lesson.js"],
+    "premium-lesson": ["js/member-chosen-code.js", "js/member-editorial-workbooks.js", "js/member-lesson-workspaces.js", "js/member-premium-lesson.js"],
     store: ["js/member-billing.js"]
   };
 
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = ['js/member-chosen-code.js', 'js/member-premium-lesson.js', 'js/member-lesson-workspaces.js', 'js/member-history-insights.js', 'js/member-platform.js'].includes(src)
-        ? src + '?v=chosen-code-v6'
+      script.src = ['js/member-editorial-workbooks.js', 'js/member-chosen-code.js', 'js/member-premium-lesson.js', 'js/member-lesson-workspaces.js', 'js/member-history-insights.js', 'js/member-platform.js'].includes(src)
+        ? src + '?v=batch28-v7'
         : src;
       script.onload = resolve;
       script.onerror = () => reject(new Error("Failed to load " + src));

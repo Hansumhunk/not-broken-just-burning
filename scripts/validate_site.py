@@ -318,6 +318,7 @@ def main() -> int:
             "js/member-premium-lesson.js",
             "js/member-lesson-workspaces.js",
             "js/member-chosen-code.js",
+            "js/member-editorial-workbooks.js",
             "js/member-service.js",
             "js/member-start-here.js",
             "js/nbjb-auth.js",

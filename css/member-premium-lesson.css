@@ -139,3 +139,6 @@
 .premium-review-queue a[aria-current="page"],.premium-review-queue a:hover,.premium-review-queue a:focus-visible{color:var(--ember-bright)}
 .premium-review-queue small{color:var(--muted);line-height:1.5}
 .premium-review-queue li.premium-review-track{font-weight:800;font-size:.82rem;color:var(--ember-bright);padding-top:10px}
+
+.premium-map-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media(max-width:680px){.premium-map-grid{grid-template-columns:1fr}}

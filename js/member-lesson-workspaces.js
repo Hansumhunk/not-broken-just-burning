@@ -476,6 +476,14 @@
           }
           text(active?active.reading:body,block);
         }
+        // Never leave a question without its field if the manuscript changes
+        // or an exercise is split differently in a future revision.
+        config.questions.forEach(([question,help],i)=>{
+          if(armorTargets[i])return;
+          const missing=makeRow(body);
+          missing.reading.append(node('h3','',question),node('p','',help));
+          armorTargets[i]=missing.writing;
+        });
         if(showRecord)showRecord(currentRecord);
       } else if(config.kind==='stages'){
         let active=null,seen=0;

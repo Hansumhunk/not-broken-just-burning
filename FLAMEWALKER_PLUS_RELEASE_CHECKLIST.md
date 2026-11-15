@@ -1,5 +1,17 @@
 # Flamewalker+ final launch checklist — November 15, 2026
 
+## Production sales release — November 15, 2026
+
+- [x] **Founder's explicit launch instruction executed.** PR #166 merged to `main` at `473cb1d64040fa804aee38ccc310cf82a1c2886f`; GitHub Pages build and site validation both completed successfully. `js/member-billing.js` now has `PUBLIC_CHECKOUT_UI_ENABLED=true`. Member Store shows live monthly ($14.99) and annual ($149) offers only after authenticated entitlement/catalog checks; public syllabus and Join copy reflect seven **published** lessons and 28 private drafts.
+- [x] **Production checkout backend deployed:** `create-live-checkout-session` Edge Function version 8 `ACTIVE`, `verify_jwt=true`; `PUBLIC_LIVE_CHECKOUT_ENABLED=true`. Existing restrictions remain: authenticated user, seven published manuscripts, specific recurring lookup keys and amounts, already-subscribed rejection, sandbox test-account exclusion, Stripe live-customer ownership mapping.
+- [x] **Production webhook hardened:** `stripe-live-webhook` v6 `ACTIVE` with signature validation, paid Checkout gating, async-paid handling, and retryable processing receipt responses. Seven published manuscripts, 28 drafts, previously processed live subscription events and Stripe merchant KYC/currently_due=0 verified before launch.
+- [x] **Monitoring:** a separate NBJB Checkout Launch Watch was enabled, daily for 14 initial-launch checks beginning November 16, without duplicating weekly operations review. No video assets were released.
+- [ ] **First external customer acceptance:** Confirm a fresh free member can open live Checkout, complete a real authorized payment, receive verified paid access, and open live Billing Portal; verify member and webhook records using safe masked audit data. Do not manufacture a purchase or silently charge the founder to run the test.
+- [ ] **Seller compliance follow-up:** Keep records for sales-tax and potential out-of-state obligations; Stripe Tax remains active with zero registrations and live Checkout does not automatically collect tax. Product still uses `txcd_10000000` until the actual subscription classification is confirmed. This outstanding item is a compliance follow-up, not a claim of tax exemption.
+- [ ] **Customer support:** Verify actual deliverability of the published support address and timely handling of cancellation/refund inquiries; no email or live billing changes were made in this release.
+
+**The prelaunch lock-off snapshots below are historical and superseded by this production release. Do not restore them without a deliberate rollback.**
+
 ## November 15, 2026 — Latest Stripe read-only account verification
 
 - **Live account state at this read:** `business_type=company`, company structure `single_member_llc`, `charges_enabled=true`, `payouts_enabled=true`, `requirements.past_due=[]`, no disabled reason. This supersedes older November 5 and earlier November 15 `business_type=individual` snapshots below.

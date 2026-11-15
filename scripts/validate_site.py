@@ -460,19 +460,19 @@ def main() -> int:
         if billing_client.exists():
             billing_code = billing_client.read_text(encoding="utf-8")
             if (
-                "const PUBLIC_CHECKOUT_UI_ENABLED = false;" not in billing_code
+                "const PUBLIC_CHECKOUT_UI_ENABLED = true;" not in billing_code
                 or "if (!PUBLIC_CHECKOUT_UI_ENABLED) return;" not in billing_code
             ):
-                errors.append("Premium billing UI cannot be enabled before launch authorization.")
+                errors.append("Premium billing UI release switch or fail-closed fallback is missing.")
             staged_store = (ROOT / "member-store.html").read_text(encoding="utf-8")
             if 'id="member-live-billing" aria-labelledby="member-live-billing-title" hidden' not in staged_store:
                 errors.append("Premium Store checkout panel must remain hidden during prelaunch.")
         staged_server = ROOT / "launch-backend-staging/create-live-checkout-session/index.ts"
         if staged_server.exists():
             server_code = staged_server.read_text(encoding="utf-8")
-            for must in ("const PUBLIC_LIVE_CHECKOUT_ENABLED = false;", "publishedLessons < 7", "NBJB_LIVE_BILLING_MODE"):
+            for must in ("const PUBLIC_LIVE_CHECKOUT_ENABLED = true;", "publishedLessons < 7", "NBJB_LIVE_BILLING_MODE"):
                 if must not in server_code:
-                    errors.append("Live Checkout staged backend must be hard-locked and require published content.")
+                    errors.append("Live Checkout backend must validate published content and subscription authorization.")
         # Unreviewed legacy billing and migrations are excluded from the static site.
         paid_only_paths = {
             "STRIPE_INTEGRATION.md",

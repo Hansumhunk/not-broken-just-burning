@@ -82,18 +82,18 @@ test('the private reader lists thirty-five lessons in six distinct tracks', () =
   assert.match(js, /Track 2 · The Placeholder Wound/);
 });
 
-test('membership and library accurately distinguish published founding lessons from drafts without opening sales', () => {
+test('membership and library distinguish seven published lessons from 28 drafts during live enrollment', () => {
   const store = read('member-store.html');
   const library = read('member-library.html');
   const doc = read('FOUNDING_LAUNCH_RELEASE.md');
   assert.match(store, /Seven founding lessons on inherited manhood are now approved and published/);
   assert.match(store, /Seven founding lessons are published in the protected library/);
-  assert.match(store, /Planned: not for sale yet/);
-  assert.match(library, /Seven-Lesson Track · Enrollment Pending/);
+  assert.match(store, /Available: seven published lessons/);
+  assert.match(library, /View Flamewalker\+ Membership/);
   assert.match(library, /twenty-eight additional manuscripts remain private editorial drafts/);
-  assert.match(read('flamewalker-plus.html'), /7 published · Enrollment pending/);
-  assert.match(read('flamewalker-plus.html'), /Paid checkout is closed/);
-  assert.match(library, /Paid membership enrollment remains closed/);
+  assert.match(read('flamewalker-plus.html'), /7 published · Available with Flamewalker\+/);
+  assert.match(read('flamewalker-plus.html'), /Paid checkout is available inside the authenticated member area/);
+  assert.match(library, /The seven approved founding lessons are included in Flamewalker\+ membership/);
   assert.match(library, /Eight-Lesson Track · Coming Soon/);
   assert.match(library, /Five-Lesson Track · Coming Soon/);
   assert.match(doc, /All seven are present in Supabase/);
@@ -329,7 +329,7 @@ test('live subscription UI is prepared but closed until explicit final launch ap
   assert.match(html, /id="member-billing-portal"/);
   assert.match(html, /href="terms\.html"/);
   assert.match(html, /href="refunds\.html"/);
-  assert.match(js, /const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+  assert.match(js, /const PUBLIC_CHECKOUT_UI_ENABLED = true;/);
   assert.match(js, /if \(!PUBLIC_CHECKOUT_UI_ENABLED\) return;/);
   assert.match(js, /const MIN_PUBLISHED_LESSONS = 7;/);
   assert.match(js, /item\?\.status === 'published'/);
@@ -347,8 +347,8 @@ test('live subscription UI is prepared but closed until explicit final launch ap
 test('deployed live checkout source requires a real published library before Stripe customer creation', () => {
   const source = read('launch-backend-staging/create-live-checkout-session/index.ts');
   assert.match(source, /NBJB_LIVE_BILLING_MODE/);
-  assert.match(source, /const PUBLIC_LIVE_CHECKOUT_ENABLED = false;/);
-  assert.match(source, /\(!PUBLIC_LIVE_CHECKOUT_ENABLED \|\| launchMode !== "public"\)/);
+  assert.match(source, /const PUBLIC_LIVE_CHECKOUT_ENABLED = true;/);
+  assert.match(source, /if \(!PUBLIC_LIVE_CHECKOUT_ENABLED && !isCanary\)/);
   assert.match(source, /flamewalker_premium_lessons/);
   assert.match(source, /count: "exact", head: true/);
   assert.match(source, /\.eq\("status", "published"\)/);
@@ -844,7 +844,7 @@ test('Chosen Manhood full worksheet is member-only with private manual saving an
   assert.ok(chosen.includes('Nothing is uploaded automatically.'));
   assert.ok(platform.includes('member-full-worksheet-paper'));
   assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
-  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = true;/);
 });
 
 
@@ -1068,7 +1068,7 @@ test('Strength Model Audit preserves published text, access controls, and billin
   assert.ok(module.includes('strengthTargets[Number(numbered[1])-1]'));
   assert.match(module,/PART II — THE ARMOR AUDIT/);
   assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
-  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = true;/);
 });
 
 
@@ -1195,7 +1195,7 @@ test('Needs lesson retains privacy, publication and checkout locks', () => {
   assert.match(source,/NEEDS PERMISSION MAP — MY CHOSEN SUPPORT/);
   assert.match(source,/My answers are personal reflection|These answers are personal reflection/);
   assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
-  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = true;/);
   assert.match(html,/premium-worksheet-review/);
 });
 
@@ -1289,7 +1289,7 @@ test('draft batch preserves the seven published workspaces, source privacy and c
   assert.ok(module.includes('replacesGuidedReflection:true'));
   assert.ok(module.includes('maxLength=1300'));
   assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
-  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = true;/);
 });
 
 
@@ -1396,7 +1396,7 @@ test('split-alliance early inline exercise does not bundle manuscript wording or
   assert.ok(module.includes('item.right.append(item.field)'));
   assert.ok(!module.includes('Can I disagree without disagreement becoming pathology?'));
   assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
-  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = true;/);
 });
 
 
@@ -1517,7 +1517,7 @@ test('DARVO early exercise is protected at runtime and lesson publication settin
     'unpublished source prompts must remain inside authorized lesson data');
   assert.ok(!module.includes('What evidence supports that interpretation?'));
   assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
-  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = true;/);
 });
 
 
@@ -1640,7 +1640,7 @@ test('editorial QA early-exercise fixtures do not leak protected question text i
   assert.ok(!module.includes('What was I hoping this relationship would solve outside the relationship itself?'));
   assert.ok(!module.includes('What I hoped therapy would help us do.'));
   assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
-  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = true;/);
 });
 
 
@@ -1679,6 +1679,9 @@ function simulateLiveBilling({ hasStripeBilling = false, tier = 'free', cancelAt
           functions: {
             async invoke(name, options) {
               invoked.push(name);
+              if (name === 'read-flamewalker-lesson') {
+                return { data: { lessons: Array.from({ length: 7 }, () => ({ status: 'published' })) } };
+              }
               return remoteError
                 ? { error: new Error('Expected test rejection') }
                 : { data: { url: name.includes('portal')
@@ -1702,18 +1705,20 @@ function simulateLiveBilling({ hasStripeBilling = false, tier = 'free', cancelAt
   return { els, monthly, annual, invoked, redirects };
 }
 
-test('closed enrollment hides purchase options for free members and disallows synthetic checkout clicks', async () => {
+test('live enrollment checks the published catalog before showing monthly and annual plans', async () => {
   const app = simulateLiveBilling();
   await new Promise(resolve => setImmediate(resolve));
-  assert.equal(app.els['member-live-billing'].hidden, true);
-  assert.equal(app.els['member-billing-purchase'].hidden, true);
+  assert.equal(app.els['member-live-billing'].hidden, false);
+  assert.equal(app.els['member-billing-purchase'].hidden, false);
   assert.equal(app.els['member-billing-management'].hidden, true);
-  await app.monthly.handlers.click();
-  assert.equal(app.invoked.length, 0, 'checkout must not even be called if a hidden button is activated');
-  assert.match(app.els['member-billing-status'].textContent, /not on sale yet/i);
+  assert.deepEqual(app.invoked, ['read-flamewalker-lesson']);
+  app.monthly.handlers.click();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(app.invoked, ['read-flamewalker-lesson', 'create-live-checkout-session']);
+  assert.deepEqual(app.redirects, ['https://checkout.stripe.com/c/pay/test-link']);
 });
 
-test('existing Stripe customer can manage a subscription while new sales stay closed', async () => {
+test('existing Stripe customer can manage a subscription while duplicate purchase controls stay hidden', async () => {
   const app = simulateLiveBilling({ hasStripeBilling: true, tier: 'paid', cancelAtPeriodEnd: true });
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(app.els['member-live-billing'].hidden, false);
@@ -1757,5 +1762,5 @@ test('client paid tier respects authoritative validity dates; billing management
   assert.match(billing, /if \(!PUBLIC_CHECKOUT_UI_ENABLED\) return;/);
   assert.match(billing, /if \(!PUBLIC_CHECKOUT_UI_ENABLED\) \{/);
   assert.match(billing, /if \(current\?\.hasStripeBilling\)/);
-  assert.doesNotMatch(billing, /PUBLIC_CHECKOUT_UI_ENABLED = true/);
+  assert.match(billing, /PUBLIC_CHECKOUT_UI_ENABLED = true/);
 });

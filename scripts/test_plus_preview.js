@@ -28,11 +28,11 @@ test('Flamewalker Plus has a public, indexable, accessible thirty-five-lesson cu
   assert.doesNotMatch(html, /<meta name="robots" content="noindex/);
   assert.match(read('sitemap.xml'), /https:\/\/notbrokenjustburning\.com\/flamewalker-plus\.html/);
 });
-test('the founding-preview copy cannot be mistaken for an active checkout', () => {
+test('the founding-preview identifies the available paid membership', () => {
   const html = read('flamewalker-plus.html');
-  assert.match(html, /Founding lessons published · Enrollment coming soon/);
+  assert.match(html, /Founding lessons published · Membership available/);
   assert.match(html, /Seven approved lessons are published in the protected library/);
-  assert.match(html, /Paid checkout is closed/);
+  assert.match(html, /Paid checkout is available inside the authenticated member area/);
   assert.match(html, /\$14\.99/);
   assert.match(html, /\$149/);
   assert.match(html, /AI Doc Maker voiceovers are not offered/);
@@ -45,7 +45,7 @@ test('site visitors and signed-in members can discover the preview without a bro
     assert.match(read(file), /href="flamewalker-plus\.html"/, file);
   }
   assert.match(read('join.html'), /Create Free Flamewalker Account/);
-  assert.match(read('member-store.html'), /Planned: not for sale yet/);
+  assert.match(read('member-store.html'), /Available: seven published lessons/);
 });
 
 test('thirty-five planned lessons are honestly presented in six distinct tracks', () => {
@@ -61,7 +61,7 @@ test('thirty-five planned lessons are honestly presented in six distinct tracks'
   assert.match(html, /Seven approved lessons are published in the protected library/);
   assert.match(html, /Twenty-eight more remain in editorial review/);
   assert.match(html, /Research references and clinical\/legal boundaries still require editorial verification/);
-  assert.match(html, /No\. Seven founding lessons are approved and published in the protected library/);
+  assert.match(html, /Yes\. Seven founding written lessons are available with Flamewalker\+/);
   assert.match(read('join.html'), /Explore the thirty-five-lesson curriculum preview/);
   assert.match(html, /The Five Sacred Laws of Survival/);
   assert.match(html, /the separate Sacred Laws book is not presented as finished or for sale/);

@@ -1,9 +1,9 @@
 (() => {
   'use strict';
 
-  // Release gate: flip only in the final approved launch PR, never during
-  // ordinary website work. Live Supabase Checkout has an independent gate.
-  const PUBLIC_CHECKOUT_UI_ENABLED = false;
+  // Public launch: enabled by founder-authorized release. The live Supabase
+  // checkout service independently validates subscription, content and customer.
+  const PUBLIC_CHECKOUT_UI_ENABLED = true;
   const MIN_PUBLISHED_LESSONS = 7;
   const region = document.getElementById('member-live-billing');
   if (!region) return;
@@ -60,6 +60,8 @@
 
   for (const button of buttons) {
     button.addEventListener('click', () => {
+      // Never let an invisible or inapplicable purchase control invoke checkout.
+      if (region.hidden || purchase.hidden) return;
       // Defense in depth: disabling new sales is independent of billing management.
       if (!PUBLIC_CHECKOUT_UI_ENABLED) {
         message('New Flamewalker+ subscriptions are not on sale yet.', true);

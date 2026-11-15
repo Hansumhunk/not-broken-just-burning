@@ -3,7 +3,7 @@
 ## November 15, 2026 — Latest Stripe read-only account verification
 
 - **Live account state at this read:** `business_type=company`, company structure `single_member_llc`, `charges_enabled=true`, `payouts_enabled=true`, `requirements.past_due=[]`, no disabled reason. This supersedes older November 5 and earlier November 15 `business_type=individual` snapshots below.
-- **Still outstanding:** Stripe requires owner/identity/business relationship information; `company.owners_provided=false`. `requirements.current_deadline` corresponds to **November 29, 2026** (UTC value returned by Stripe). The secure merchant Dashboard is the appropriate place to supply any required personal details; do not commit secrets or identity data.
+- **Latest update — founder submitted required ownership and representative information:** Stripe now reports `company.owners_provided=true`, `company.executives_provided=true`, `requirements.currently_due=[]`, `requirements.past_due=[]`, and **two items in `pending_verification`**. The Stripe Dashboard shows **Review in progress**, estimated 2–3 days. The previously reported Nov 29 deadline may remain in the API while review proceeds. Do not re-enter private identity information unless Stripe asks; do not commit secrets or documents.
 - **Caution:** An enabled charge/payout capability is not authorization to enable public checkout. Both existing checkout locks stay OFF; tax, support, member access, and founder launch authorization remain outstanding.
 - **Change scope:** Read-only Stripe verification only. No payments, billing settings, credentials, checkout flags, products or live backend were modified.
 
@@ -11,7 +11,7 @@
 
 - [x] **Business formation complete.** Florida LLC filing paid November 5, 2026; founder confirmed Not Broken Just Burning LLC was established and the federal EIN issued by November 10, 2026. Do **not** request another LLC filing or a second EIN.
 - [x] Founder previously stated NBJB is a **single-member LLC with one sole owner**, using default disregarded-entity federal tax treatment (no S-corporation election reported). An EIN was issued. **Never commit, publish, or request its digits in chat.** Use official formation and IRS records securely inside Stripe to complete the appropriate fields.
-- [ ] **Current merchant verification task:** Stripe now reports `business_type=company` and company structure `single_member_llc`. Complete the remaining secure LLC owner/executive identity and relationship information and verify the appropriate tax reporting/TIN treatment, payout ownership, and seller disclosures. Charges and payouts are currently enabled, but outstanding `requirements.currently_due` remain. Do not expose identity documents or tax IDs in GitHub or chat.
+- [ ] **Current merchant verification status:** Stripe reports `business_type=company`, company structure `single_member_llc`, owner and executive declarations received, `requirements.currently_due=[]`, and **two pending verification items**. Founder has completed the active Dashboard identity tasks; await review, correct only if Stripe requests. Separately confirm proper tax reporting/TIN treatment, payout ownership, and seller disclosures before public sales. Do not expose identity documents or tax IDs.
 - [ ] Preserve existing Stripe products, subscription, webhook setup, and historical payouts. No new Stripe account, business incorporation or tax ID application needed.
 
 ## November 15, 2026 — Connected live billing readback and release controls

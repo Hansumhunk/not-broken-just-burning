@@ -1,5 +1,12 @@
 # Flamewalker+ final launch checklist — November 15, 2026
 
+## November 15, 2026 — Founder correction: LLC and EIN already obtained
+
+- [x] **Business formation complete.** Florida LLC filing paid November 5, 2026; founder confirmed Not Broken Just Burning LLC was established and the federal EIN issued by November 10, 2026. Do **not** request another LLC filing or a second EIN.
+- [x] Founder confirmed existence of EIN; **never commit, publish, or request the EIN in chat**. The exact legal name and tax classification should be read directly from the founder's official records when completing Stripe's secure Business Details form.
+- [ ] **Actual remaining merchant task:** reconcile the existing Stripe live account (still reporting `business_type=individual`) with the registered LLC's legal identity, applicable federal tax classification, IRS matching details and payout ownership. An LLC with one owner can have special disregarded-entity tax reporting rules; do not blindly assume its EIN is the right TIN for every Stripe field.
+- [ ] Preserve existing Stripe products, subscription, webhook setup, and historical payouts. No new Stripe account, business incorporation or tax ID application needed.
+
 ## November 15, 2026 — Connected live billing readback and release controls
 
 - [x] Stripe merchant account: `business_type=individual`, charges/payouts enabled, no currently- or past-due verification requirements. This does not establish a separately registered NBJB entity or trade name.
@@ -11,7 +18,7 @@
 - [x] Stripe portal configuration supports invoices, payment-method changes and cancel-at-period-end; authenticated browser portal opening still awaits QA.
 - [x] PR #157 merged a source-controlled live webhook candidate with stronger unfinished-event retry and asynchronous-payment guards, and passed CI. **No production Edge Function was deployed.** Controlled event tests and Stripe endpoint event configuration remain necessary before production promotion.
 - [x] Two independent new-sale locks remain enforced on site and deployed server: `PUBLIC_CHECKOUT_UI_ENABLED=false`, `PUBLIC_LIVE_CHECKOUT_ENABLED=false`.
-- [ ] Founder confirms lawful seller identity and NBJB registration/DBA path and aligns Stripe, terms, receipts, and support identity.
+- [x] Founder confirmed registered Not Broken Just Burning LLC and EIN. [ ] Verify Stripe's legal business/tax classification and align Terms, receipts, and support identity with existing LLC.
 - [ ] Verify relevant product tax treatment and required jurisdictions. Stripe Tax Settings is active, but zero jurisdictions are registered and live Checkout omits `automatic_tax`; do not assume tax is being collected.
 - [ ] Authenticate as the existing paid member to open billing portal and confirm all seven paid lessons load; test ordinary free/guest denial of published lessons and cancellation expiry.
 - [ ] Confirm payment failure, refund/dispute reconciliation and signed webhook retries before public activation.
@@ -47,8 +54,8 @@ No payments, subscriptions, payout configuration, member rights, live sale flags
 
 ## Seller identity and tax configuration — November 5 read-only verification
 
-- **Legal merchant identity still needs founder confirmation.** Stripe live account is verified as `business_type=individual`; charges and payouts are enabled with zero currently or past-due account requirements. The public NBJB terms and refund pages describe billing, but do not presently identify a formally confirmed NBJB legal seller. The founder recently stated that NBJB has not yet been separately registered. The account should **not** be treated as a registered NBJB company on this basis alone.
-- **Florida naming requirement:** A Florida individual conducting business under a name other than their legal name generally must register a fictitious name (DBA); a new LLC under its own legal name has a different formation route. Florida's official source says the DBA registration fee is $50 and requires qualifying prior newspaper publication. [Florida Division of Corporations](https://dos.fl.gov/sunbiz/start-business/efile/fl-fictitious-name-registration/). **Decision:** choose the lawful operator (individual/DBA, separate LLC, or another reviewed arrangement), then ensure Stripe, receipts, terms, and support identity agree.
+- **Historical November 5 seller status, superseded November 15:** Stripe was read as `business_type=individual` with charges/payouts enabled. The founder has since confirmed the LLC was formed and its EIN issued by November 10. **Remaining:** align Stripe and public seller disclosures with the actual LLC and applicable tax classification, while preserving customer/payment history.
+- **Historical planning note superseded:** A sole-proprietor/DBA was previously considered, but the founder has already formed Not Broken Just Burning LLC and obtained an EIN. There is **no instruction to register a second DBA or create another LLC**. Verify legal name and business/tax data against the official formation and IRS confirmation records.
 - **Tax readiness is not established:** Live Stripe Tax Settings report `status=active` and default code `txcd_10000000` (general electronically supplied services). Live Stripe Tax Registrations API returned **zero registered jurisdictions**. The deployed `create-live-checkout-session` function currently omits `automatic_tax: { enabled: true }`. Stripe says collecting tax via Stripe Tax requires an appropriate active registration; turning on tax calculation alone is not a substitute for determining actual obligations. [Stripe tax guidance](https://github.com/stripe/ai/blob/main/providers/grok/plugin/skills/stripe-best-practices/references/tax.md). Determine whether NBJB's membership is taxable in applicable states before changing registrations or checkout behavior. Do **not** register to collect tax blindly.
 - **Product catalog:** The intended recurring plans exist at $14.99/month and $149/year. An **additional active one-time annual product** has a description referencing a year of membership. Verify public purchase links do not present it as automatically renewing, and do not remove or modify it during technical QA.
 - Existing subscription billing, account access and checkout flags were **not changed** by these read-only verifications.
@@ -63,7 +70,7 @@ No payments, subscriptions, payout configuration, member rights, live sale flags
 - [ ] Complete alternate-device/desktop keyboard, screen-reader, no-audio and private-reflection privacy acceptance; check saved works are not automatically uploaded.
 - [x] Verified the live subscription's scheduled December 2 cancellation exactly matches its active Supabase entitlement, and Stripe Customer Portal configuration supports cancel-at-period-end, invoices and card updates.
 - [ ] Confirm the existing paying user can open Stripe Customer Portal from the newly exposed **Manage Billing** option. No new purchase or cancellation is necessary. Recheck paid-to-Free transition after the scheduled expiration.
-- [ ] **Owner decision required:** confirm NBJB's legal operating identity (e.g. individual/DBA or separate entity) and complete applicable registration. Update Stripe/account disclosure, Terms and receipts consistently before sales.
+- [x] **Founder confirmation:** Not Broken Just Burning LLC formed and EIN issued by November 10, 2026. [ ] Update or verify Stripe's legal entity/tax identity, Terms, and receipts consistently before sales; do not file another business formation.
 - [ ] Verify taxability and any required registrations with a qualified tax professional, then test Stripe checkout tax treatment. Current configuration has no tax registrations and no `automatic_tax` in the deployed Checkout function; do not assume it collects required sales taxes.
 - [ ] Confirm the NBJB support inbox can receive and respond to billing/cancellation/refund requests; verify the published 14-day first monthly, 30-day first annual and 7-day unintended renewal policy is operational.
 - [ ] Check that the separate active one-time annual Stripe product is not confused with the recurring annual subscription in public sales links.

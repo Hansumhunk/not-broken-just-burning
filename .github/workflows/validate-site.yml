@@ -26,6 +26,8 @@ on:
       - 'scripts/test_member_workshop.js'
       - 'scripts/test_member_access_guard.js'
       - 'scripts/test_premium_editorial_review.js'
+      - 'scripts/test_live_webhook_hardening.js'
+      - 'launch-backend-staging/stripe-live-webhook/**'
       - 'scripts/validate_supabase_runtime.py'
       - 'supabase/migrations/**'
       - 'PLATFORM_QA_GATE_2026-11-05.md'
@@ -49,6 +51,8 @@ on:
       - 'scripts/test_member_workshop.js'
       - 'scripts/test_member_access_guard.js'
       - 'scripts/test_premium_editorial_review.js'
+      - 'scripts/test_live_webhook_hardening.js'
+      - 'launch-backend-staging/stripe-live-webhook/**'
       - 'scripts/validate_supabase_runtime.py'
       - 'supabase/migrations/**'
       - 'PLATFORM_QA_GATE_2026-11-05.md'
@@ -79,6 +83,8 @@ jobs:
         run: node --test scripts/test_member_access_guard.js
       - name: Test protected Flamewalker Plus editorial review
         run: node --test scripts/test_premium_editorial_review.js
+      - name: Verify staged live webhook signature and payment resilience
+        run: node --test scripts/test_live_webhook_hardening.js
       - name: Verify honest public Flamewalker Plus curriculum preview
         run: node --test scripts/test_plus_preview.js
       - name: Smoke-test live Flamewalker Supabase Auth

@@ -48,12 +48,32 @@
     message('Opening secure Stripe billing…');
     try {
       const response = await auth.client.functions.invoke(fn, { body });
-      if (response.error || response.data?.error) throw new Error('Billing is not available.');
+      if (response.error || response.data?.error) {
+        // Supabase FunctionsHttpError wraps the server's JSON error body.
+        // Identify the sandbox-only rejection without exposing Stripe IDs,
+        // tokens, customer details, or raw exception messages to the member.
+        let code = response.data?.error || '';
+        const errorResponse = response.error?.context;
+        if (!code && errorResponse?.clone && typeof errorResponse.json === 'function') {
+          try {
+            const details = await errorResponse.clone().json();
+            code = typeof details?.error === 'string' ? details.error : '';
+          } catch (_) {
+            // A malformed/unavailable response remains a generic safe failure.
+          }
+        }
+        if (code === 'sandbox_test_account_not_eligible') {
+          throw new Error('sandbox_test_account_not_eligible');
+        }
+        throw new Error('billing_unavailable');
+      }
       const target = stripeRedirectUrl(response.data?.url, purpose);
-      if (!target) throw new Error('Could not confirm the secure Stripe redirect.');
+      if (!target) throw new Error('billing_unavailable');
       window.location.assign(target);
-    } catch (_) {
-      message('We could not open Stripe. No charge was made on this page. Please retry or contact NBJB support.', true);
+    } catch (error) {
+      message(error?.message === 'sandbox_test_account_not_eligible'
+        ? 'This account is reserved for billing tests and cannot open the live Stripe portal. Your subscription was not changed. Contact NBJB support to verify the correct live-billing account.'
+        : 'We could not open Stripe. No charge was made on this page. Please retry or contact NBJB support.', true);
       setBusy(false);
     }
   }

@@ -11,7 +11,7 @@ function respond(data: unknown, status = 200) {
 }
 
 type Block = { type?: string; text?: string };
-type Page = { number: number; title: string; characters: number; words: number; excerpt: string };
+type Page = { number: number; title: string; characters: number; words: number; excerpt: string; narration: string };
 
 function pagesFor(content: unknown, lessonSlug: string): Page[] {
   const input = content && typeof content === "object" && !Array.isArray(content)
@@ -36,7 +36,8 @@ function pagesFor(content: unknown, lessonSlug: string): Page[] {
       title: pageTitle,
       characters: source.length,
       words: (source.match(/\S+/g) || []).length,
-      excerpt: source.replace(/\s+/g, " ").slice(0, 170)
+      excerpt: source.replace(/\s+/g, " ").slice(0, 170),
+      narration: pageTitle + ".\n\n" + text.join("\n\n")
     });
     text = [];
     length = 0;
@@ -74,7 +75,7 @@ export default {
     const userId = ctx.userClaims?.id;
     // Fail closed, including when a secret is absent or not configured.
     if (!userId || !editorId || userId !== editorId) return respond({ error: "editorial_access_required" }, 403);
-    let body: { action?: unknown; slug?: unknown; files?: unknown };
+    let body: { action?: unknown; slug?: unknown; files?: unknown; section?: unknown; consent?: unknown };
     try { body = await req.json(); } catch { return respond({ error: "invalid_json" }, 400); }
 
     if (body.action === "overview") {
@@ -118,7 +119,90 @@ export default {
       }));
     if (body.action === "details") {
       return respond({ lesson: { slug, title: lesson.title, status: lesson.status },
-        pages, uploaded });
+        pages: pages.map(({ narration: _privateText, ...page }) => page), uploaded });
+    }
+
+    // A server-only provider key makes automatic generation possible without
+    // copying private lesson content, downloading MP3s, or repeating uploads.
+    // This is intentionally disabled until both secrets are explicitly set.
+    const ttsKey = Deno.env.get("ELEVENLABS_API_KEY") || "";
+    const voiceId = Deno.env.get("NBJB_ELEVENLABS_VOICE_ID") || "";
+    const configured = Boolean(ttsKey && /^[a-zA-Z0-9]{10,80}$/.test(voiceId));
+    if (body.action === "tts_status") {
+      const existing = new Set(uploaded.map((item) => item.section));
+      return respond({
+        configured, provider: "ElevenLabs", model: "eleven_multilingual_v2",
+        estimate_usd_per_1000_chars: 0.10,
+        pages: pages.map((page) => ({
+          number: page.number, title: page.title,
+          characters: page.narration.length, words: page.words,
+          exists: existing.has(page.number)
+        }))
+      });
+    }
+    if (body.action === "tts_generate") {
+      if (!configured) return respond({ error: "voice_provider_not_configured" }, 503);
+      if (body.consent !== true) return respond({ error: "explicit_paid_generation_consent_required" }, 400);
+      const section = body.section;
+      if (typeof section !== "number" || !Number.isInteger(section) ||
+          section < 1 || section > pages.length) return respond({ error: "invalid_page" }, 400);
+      if (uploaded.some((item) => item.section === section)) {
+        return respond({ error: "recording_already_exists", section }, 409);
+      }
+      const page = pages[section - 1];
+      const narration = page.narration.trim();
+      if (narration.length < 20 || narration.length > 6000) {
+        return respond({ error: "narration_text_out_of_bounds" }, 400);
+      }
+
+      // The browser requests exactly one page per call. It coordinates a
+      // sequential batch, can stop, and never silently retries a charged job.
+      // No audio-provider credentials or premium text enter GitHub Pages assets.
+      let voice: Response;
+      try {
+        voice = await fetch("https://api.elevenlabs.io/v1/text-to-speech/" +
+          encodeURIComponent(voiceId) + "?output_format=mp3_44100_128", {
+          method: "POST",
+          headers: {
+            "xi-api-key": ttsKey,
+            "Content-Type": "application/json",
+            "Accept": "audio/mpeg"
+          },
+          body: JSON.stringify({
+            text: narration,
+            model_id: "eleven_multilingual_v2",
+            voice_settings: { stability: 0.62, similarity_boost: 0.75 }
+          }),
+          signal: AbortSignal.timeout(110_000)
+        });
+      } catch {
+        return respond({ error: "tts_provider_unreachable" }, 503);
+      }
+      if (!voice.ok) {
+        return respond({ error: "tts_provider_rejected_request", provider_status: voice.status }, 502);
+      }
+      const declaredType = voice.headers.get("content-type") || "";
+      if (!declaredType.includes("audio/") && !declaredType.includes("application/octet-stream")) {
+        return respond({ error: "tts_provider_unexpected_response" }, 502);
+      }
+      let bytes: Uint8Array;
+      try { bytes = new Uint8Array(await voice.arrayBuffer()); }
+      catch { return respond({ error: "tts_audio_transfer_failed" }, 502); }
+      if (bytes.length < 1000 || bytes.length > 25 * 1024 * 1024 ||
+          !((bytes[0] === 0x49 && bytes[1] === 0x44 && bytes[2] === 0x33) ||
+            (bytes[0] === 0xff && (bytes[1] & 0xe0) === 0xe0))) {
+        return respond({ error: "tts_provider_invalid_mp3" }, 502);
+      }
+      const path = slug + "/section-" + section + ".mp3";
+      const { error: uploadError } = await storage.upload(path, bytes, {
+        contentType: "audio/mpeg", upsert: false, cacheControl: "3600"
+      });
+      if (uploadError) {
+        // A failed upload may have consumed provider credits. Do not retry
+        // automatically; the editor should inspect private storage first.
+        return respond({ error: "tts_generated_but_storage_upload_failed", section }, 503);
+      }
+      return respond({ saved: true, section, bytes: bytes.length, characters: narration.length });
     }
     if (body.action !== "prepare") return respond({ error: "invalid_action" }, 400);
 

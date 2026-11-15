@@ -85,8 +85,27 @@
 <h3>Already uploaded</h3>
 <ul class="studio-inventory" id="studio-uploaded" aria-label="Current private recordings"><li>Checking…</li></ul>
 </section>
+<section class="studio-panel" id="studio-auto-panel" hidden aria-label="Automatic narration generation">
+<h2>3. Generate narration directly from your lesson</h2>
+<p>One run generates each missing reading page, then saves its MP3 directly to private NBJB storage. No copying text, downloading hundreds of files, or naming them manually. Your existing MP3s are always skipped.</p>
+<p class="studio-note">Uses the paid ElevenLabs text-to-speech API only after its private API key and an approved voice ID have been configured. This is a different provider from the two AI Doc Maker recordings: make <strong>one test page first</strong>, listen in the lesson player, and only then approve a larger range. This feature is not configured to spend money by default.</p>
+<div class="studio-actions"><button class="button button-ghost" id="studio-auto-refresh" type="button">Review missing pages and voice setup</button></div>
+<div class="studio-grid">
+<label class="studio-field" for="studio-auto-start">First page <input id="studio-auto-start" type="number" min="1" step="1" value="3"></label>
+<label class="studio-field" for="studio-auto-end">Last page <input id="studio-auto-end" type="number" min="1" step="1" value="3"></label>
+</div>
+<p role="status" id="studio-auto-info" class="studio-status">Choose a lesson above, then review the voice setup.</p>
+<label class="studio-confirm"><input type="checkbox" id="studio-auto-consent"><span>I reviewed the selected pages and understand that each generated page may consume paid voice-provider credits. I authorize this selected range only. I will check the first sample before a large batch.</span></label>
+<div class="studio-actions">
+<button class="button button-primary" id="studio-auto-go" type="button" disabled>Generate missing pages in this range</button>
+<button class="button button-ghost" id="studio-auto-stop" type="button" disabled>Stop after current page</button>
+<a class="button button-ghost" href="member-premium-lesson.html?lesson=father-wound">Listen to test recording</a>
+</div>
+<progress class="studio-progress" id="studio-auto-progress" max="100" value="0" aria-label="Automatic narration generation progress" hidden></progress>
+<p class="studio-note">Keep this tab open while a batch is running. The server checks every requested page against private storage before calling the provider; runs are sequential and do not auto-retry charged requests. Already generated pages are preserved if you stop.</p>
+</section>
 <section class="studio-panel" id="studio-batch" hidden aria-label="Review and upload batch">
-<h2>3. Review the page-to-file mapping</h2>
+<h2>4. Review the page-to-file mapping (manual uploads only)</h2>
 <p class="studio-note">Each preview plays the local MP3 selected from your computer. Compare it with the expected heading and first words. The tool refuses duplicate page numbers or uploads that would overwrite an existing recording.</p>
 <div class="studio-table-wrapper">
 <table class="studio-table">
@@ -119,4 +138,5 @@
 <script src="js/nbjb-auth.js"></script>
 <script src="js/main.js"></script>
 <script src="js/qa-premium-audio-batch.js?v=1"></script>
+<script src="js/qa-premium-audio-generator.js?v=1"></script>
 </body></html>

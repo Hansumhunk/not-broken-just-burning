@@ -3,8 +3,8 @@
 ## November 15, 2026 — Founder correction: LLC and EIN already obtained
 
 - [x] **Business formation complete.** Florida LLC filing paid November 5, 2026; founder confirmed Not Broken Just Burning LLC was established and the federal EIN issued by November 10, 2026. Do **not** request another LLC filing or a second EIN.
-- [x] Founder confirmed existence of EIN; **never commit, publish, or request the EIN in chat**. The exact legal name and tax classification should be read directly from the founder's official records when completing Stripe's secure Business Details form.
-- [ ] **Actual remaining merchant task:** reconcile the existing Stripe live account (still reporting `business_type=individual`) with the registered LLC's legal identity, applicable federal tax classification, IRS matching details and payout ownership. An LLC with one owner can have special disregarded-entity tax reporting rules; do not blindly assume its EIN is the right TIN for every Stripe field.
+- [x] Founder previously stated NBJB is a **single-member LLC with one sole owner**, using default disregarded-entity federal tax treatment (no S-corporation election reported). An EIN was issued. **Never commit, publish, or request its digits in chat.** Use official formation and IRS records securely inside Stripe to complete the appropriate fields.
+- [ ] **Actual remaining merchant task:** reconcile the existing Stripe live account (still reporting `business_type=individual`) with the registered **single-member LLC** legal identity, applicable disregarded-entity federal tax reporting rules, IRS matching details and payout ownership. An LLC with one owner can have special disregarded-entity tax reporting rules; do not blindly assume its EIN is the right TIN for every Stripe field.
 - [ ] Preserve existing Stripe products, subscription, webhook setup, and historical payouts. No new Stripe account, business incorporation or tax ID application needed.
 
 ## November 15, 2026 — Connected live billing readback and release controls

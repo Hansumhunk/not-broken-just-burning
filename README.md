@@ -138,13 +138,15 @@ Turns a vague sense that something is wrong into behavior, impact, boundary, and
 
 Breaks an overwhelming mountain into one realistic next action and what can intentionally wait.
 
-**Privacy design:** Current reflection entries remain in the visitor's browser session and are not submitted to an NBJB server.
+**Privacy design:** Reflection content is saved locally in the user's browser/device by default; free-account login does not automatically sync sensitive writing to the NBJB backend. Same-device saved work is tied to the signed-in browser profile, not available automatically across devices.
 
-## Flamewalker Free production status (October 2026)
+## Flamewalker Free production status (verified November 15, 2026)
 
-Free account sign-in, member onboarding, Dashboard, My Path, Toolbox, My Work, Progress, Library, and the Start Here lesson were released in October. PR #82 completed member navigation polish and Coming Soon status labeling; PRs #83 and #84 improved search-engine signals for public discovery pages.
+Flamewalker Free is in **Open Early Access**, not a staged beta. Free account sign-in, member onboarding, Dashboard, My Path, Toolbox, My Work, Progress, Library, and the Start Here lesson were released in October. PR #82 completed member navigation polish and Coming Soon status labeling; PRs #83 and #84 improved search-engine signals for public discovery pages.
 
-**Backend recovery:** On October 29, 2026, the Supabase project was found inactive. A restore request was accepted, but account availability still requires verification. See `RELEASE_AUDIT_2026-10-29.md` for the exact operational checks. Paid billing, cloud synchronization of private reflections, community posting, and protected paid delivery remain unreleased.
+**Backend availability:** The connected Supabase project `NBJB Phase Two` reported `ACTIVE_HEALTHY` on November 15, 2026. The earlier October 29 outage and recovery remain documented in `RELEASE_AUDIT_2026-10-29.md` as historical context, not the current project state. Project health alone does not verify each user's sign-in, email confirmation, password reset, or browser Back-button behavior; the remaining real-browser early-access tests are tracked in [issue #115](https://github.com/Hansumhunk/not-broken-just-burning/issues/115).
+
+**Guardrails:** Sensitive reflections stay device-local by default. Paid Flamewalker+ checkout, cloud sync of private reflections, community posting, and protected paid content delivery are **not public launches**. Security Advisor follow-ups are tracked in [issue #160](https://github.com/Hansumhunk/not-broken-just-burning/issues/160), and subscription release gates remain in [issue #36](https://github.com/Hansumhunk/not-broken-just-burning/issues/36).
 
 ## Masculine Restoration production track
 

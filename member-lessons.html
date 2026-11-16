@@ -348,24 +348,109 @@
 <script src="js/member-bootstrap.js?v=lessons-hub-v14"></script>
 <script>
 (() => {
-  function updateCatalog(state) {
-    const paid = state?.tier === 'paid' && state?.source !== 'server_error';
-    const status = document.getElementById('lesson-access-status');
-    if (status) status.textContent = paid
-      ? 'Your Flamewalker+ membership includes these seven published lessons.'
-      : 'Your free Start Here lesson is available above. The seven deeper lessons require Flamewalker+.';
-    document.querySelectorAll('[data-paid-lesson-open]').forEach((link) => { link.hidden = !paid; });
-    document.querySelectorAll('[data-free-lesson-lock]').forEach((label) => { label.hidden = paid; });
+  let memberState = { tier: 'free' };
+  let catalog = null;
+  let loading = null;
+  const previewCards = [...document.querySelectorAll('[data-editorial-preview]')];
+  function paidAccess() {
+    return memberState?.tier === 'paid' && memberState?.source !== 'server_error';
+  }
+  function reflectEntitlement() {
+    const paid = paidAccess();
+    document.querySelectorAll('[data-paid-lesson-open]').forEach(link => {
+      const card = link.closest('[data-editorial-preview]');
+      link.hidden = !paid || (card && card.dataset.publicationStatus !== 'published');
+    });
+    document.querySelectorAll('[data-free-lesson-lock]').forEach(label => {
+      const card = label.closest('[data-editorial-preview]');
+      label.hidden = paid || (card && card.dataset.publicationStatus !== 'published');
+    });
     const upgrade = document.getElementById('lesson-upgrade');
     if (upgrade) upgrade.hidden = paid;
+    const published = catalog ? catalog.filter(item => item.status === 'published').length : 7;
+    const status = document.getElementById('lesson-access-status');
+    if (status) status.textContent = paid
+      ? 'Your Flamewalker+ membership includes ' + published + ' published guided lessons.'
+      : 'Start Here is free. ' + published + ' published guided lessons require Flamewalker+.';
   }
-  window.addEventListener('nbjb:entitlements', (event) => updateCatalog(event.detail));
+  function paintCatalog(items) {
+    catalog = items;
+    const bySlug = new Map(items.map(item => [item.slug, item]));
+    for (const card of previewCards) {
+      const item = bySlug.get(card.dataset.editorialPreview);
+      if (!item || item.status !== 'published') continue;
+      card.dataset.publicationStatus = 'published';
+      card.classList.add('is-live');
+      const label = card.querySelector('.member-lock-label');
+      if (label) label.textContent = 'Lesson ' + item.lesson_number + ' · Published with Flamewalker+';
+      const badge = card.querySelector('.member-lock-badge');
+      if (badge) {
+        badge.textContent = 'Flamewalker+ membership required';
+        badge.dataset.freeLessonLock = '';
+      }
+      if (!card.querySelector('[data-paid-lesson-open]')) {
+        const link = document.createElement('a');
+        link.className = 'button button-primary';
+        link.href = 'member-premium-lesson.html?lesson=' + encodeURIComponent(item.slug);
+        link.textContent = 'Read lesson ' + item.lesson_number;
+        link.hidden = true;
+        link.dataset.paidLessonOpen = '';
+        if (badge) card.insertBefore(link, badge);
+        else card.append(link);
+      }
+    }
+    const published = items.filter(item => item.status === 'published').length;
+    const remaining = items.filter(item => item.status === 'editorial_review').length;
+    if (published < 7 || items.length !== 35) { reflectEntitlement(); return; }
+    const lead = document.querySelector('.lessons-intro');
+    if (lead) lead.textContent = 'Start with the free foundation, then explore ' + published + ' published guided lessons across six tracks with Flamewalker+. Return to any lesson at your own pace.';
+    const founding = document.querySelector('[aria-label="Published Flamewalker Plus lessons"] .eyebrow');
+    if (founding) founding.textContent = 'Flamewalker+ · Track 1 · Seven published written lessons';
+    const intro = document.querySelector('[aria-label="Curriculum under editorial review"]');
+    if (intro) {
+      intro.setAttribute('aria-label', 'Additional Flamewalker Plus tracks');
+      const eyebrow = intro.querySelector(':scope > .eyebrow');
+      const heading = intro.querySelector(':scope > h2');
+      const explanation = intro.querySelector(':scope > p:not(.eyebrow):not(.lesson-catalog-note)');
+      const note = intro.querySelector('.lesson-catalog-note');
+      if (eyebrow) eyebrow.textContent = 'Five additional tracks · ' + (published - 7) + ' published lessons';
+      if (heading) heading.textContent = remaining ? (published - 7) + ' additional lessons available; ' + remaining + ' in review.' : 'All 35 guided lessons are now available.';
+      if (explanation) explanation.textContent = 'Explore five additional self-guided tracks. Published lessons are included with active Flamewalker+ membership; manuscripts still under editorial review are not accessible.';
+      if (note) note.textContent = remaining ? 'Only lessons marked Published are available to paying members. Video lessons remain shelved.' : 'All 35 written lessons are published; video lessons remain shelved. Member reflections are saved only when you choose to save them.';
+      for (const track of intro.querySelectorAll('details.lesson-track-preview')) {
+        const cards = [...track.querySelectorAll('[data-editorial-preview]')];
+        const count = cards.filter(card => card.dataset.publicationStatus === 'published').length;
+        const countLabel = track.querySelector('.lesson-track-count');
+        if (countLabel) countLabel.textContent = count + ' published' + (cards.length > count ? ' · ' + (cards.length - count) + ' in review' : '');
+      }
+    }
+    const upgrade = document.querySelector('#lesson-upgrade p');
+    if (upgrade) upgrade.textContent = 'Start Here is free. Unlock all ' + published + ' published written lessons and guided workbooks for $14.99/month or $149/year. Videos, live coaching and events are not included.';
+    const meta = document.querySelector('meta[property="og:description"]');
+    if (meta) meta.content = 'Free Start Here plus ' + published + ' published Flamewalker+ guided lessons across six tracks.';
+    reflectEntitlement();
+  }
+  function refreshCatalog() {
+    if (loading) return loading;
+    const client = window.NBJBAuth?.client;
+    if (!client || !window.NBJBAuth?.user?.id) return Promise.resolve();
+    loading = client.functions.invoke('read-flamewalker-lesson', { body: { action: 'catalog' } })
+      .then(({ data, error }) => {
+        if (error || !Array.isArray(data?.lessons)) return;
+        const lessons = data.lessons.filter(item => item && typeof item.slug === 'string' &&
+          (item.status === 'published' || item.status === 'editorial_review'));
+        if (lessons.length === 35) paintCatalog(lessons);
+      }).catch(() => {}).finally(() => { loading = null; });
+    return loading;
+  }
+  function acceptState(state) { memberState = state || { tier: 'free' }; reflectEntitlement(); refreshCatalog(); }
+  window.addEventListener('nbjb:entitlements', event => acceptState(event.detail));
   window.addEventListener('pageshow', () => {
-    const entitlements = window.NBJBEntitlements;
-    if (entitlements?.ready) entitlements.ready.then(updateCatalog).catch(() => updateCatalog({ tier:'free' }));
+    const ready = window.NBJBEntitlements?.ready;
+    if (ready) ready.then(acceptState).catch(() => acceptState({ tier: 'free' }));
   });
   if (window.NBJBEntitlements?.ready) {
-    window.NBJBEntitlements.ready.then(updateCatalog).catch(() => updateCatalog({ tier:'free' }));
+    window.NBJBEntitlements.ready.then(acceptState).catch(() => acceptState({ tier: 'free' }));
   }
 })();
 </script>

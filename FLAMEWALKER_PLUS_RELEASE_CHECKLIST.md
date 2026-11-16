@@ -1,5 +1,13 @@
 # Flamewalker+ final launch checklist — November 15, 2026
 
+## Founding 28 teaching-depth threshold — November 15, 2026
+
+- [x] **All 28 private Tracks 2–6 manuscripts meet a minimum of 2,500 teaching words** (paragraph content only, excluding headings and separate worksheet questions). Range: **2502–2648**, mean **2576**. Source-of-record versions and per-lesson counts: [minimum 2,500 audit](FOUNDING_28_MINIMUM_2500_AUDIT_2026-11-15.md).
+- [x] **Content and privacy structure check:** 28/28 remain `editorial_review`; 7 founding lessons remain published. All private manuscripts have complete typed blocks, 7–8 guided questions, Next Honest Action, Smaller Door and safety guidance. No exact duplicated exercise questions; RLS enabled and no direct anon/auth SELECT grant.
+- [ ] **Release is still gated** on founder approval of specific manuscript versions and manual mobile/desktop worksheet, resume and entitlement checks; no new manuscript publication or Stripe changes occurred in this depth pass.
+- [ ] **Separate decision if standard applies to the seven existing founding lessons:** review those published lengths and create a controlled editorial revision rather than silently changing current customers' content.
+
+
 ## Additional lesson-depth pass — November 15, 2026
 
 - [x] **All 28 private manuscripts deepened:** added distinct case studies, counterexamples, decision frameworks, field studies and application guidance. Current private draft paragraph lengths: 1854–2528 words, mean 1998. Precise revision numbers recorded in [28-lesson deepening report](FOUNDING_28_DEEPENING_REPORT_2026-11-15.md).

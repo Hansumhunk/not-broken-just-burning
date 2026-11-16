@@ -1,11 +1,20 @@
 # Flamewalker+ final launch checklist — November 15, 2026
 
+## All 35 teaching depth verified — November 16, 2026
+
+- [x] **35/35 lessons now exceed 2,500 teaching words** (paragraph text only, excluding headings and separate guided questions); range **2502–2929**, mean **2606**. Exact founding lesson versions and word counts: [all-35 depth audit](FLAMEWALKER_ALL_35_DEPTH_AUDIT_2026-11-16.md).
+- [x] The five previously short live founding lessons were substantively deepened and updated in place; their slugs, status, exercises, pricing, entitlement requirements, and underlying member route remain unchanged. The remaining two founding lessons were already compliant.
+- [x] **28 private lessons remain private and in editorial review**. No new video work or publication of unfinished manuscripts.
+- [ ] **Cross-device acceptance**: complete paid/free/lapsed member read, worksheet, local save/resume, keyboard and mobile QA for the newly deepened founding content.
+- [ ] **Founder editorial QA**: approve exact revision versions and check substance, original lesson continuity, repetition, sensitivity and readability before additional curriculum is released.
+
+
 ## Founding 28 teaching-depth threshold — November 15, 2026
 
 - [x] **All 28 private Tracks 2–6 manuscripts meet a minimum of 2,500 teaching words** (paragraph content only, excluding headings and separate worksheet questions). Range: **2502–2648**, mean **2576**. Source-of-record versions and per-lesson counts: [minimum 2,500 audit](FOUNDING_28_MINIMUM_2500_AUDIT_2026-11-15.md).
 - [x] **Content and privacy structure check:** 28/28 remain `editorial_review`; 7 founding lessons remain published. All private manuscripts have complete typed blocks, 7–8 guided questions, Next Honest Action, Smaller Door and safety guidance. No exact duplicated exercise questions; RLS enabled and no direct anon/auth SELECT grant.
 - [ ] **Release is still gated** on founder approval of specific manuscript versions and manual mobile/desktop worksheet, resume and entitlement checks; no new manuscript publication or Stripe changes occurred in this depth pass.
-- [ ] **Separate decision if standard applies to the seven existing founding lessons:** review those published lengths and create a controlled editorial revision rather than silently changing current customers' content.
+- [x] **The seven existing founding lessons have now been revised where needed to meet 2,500 teaching words** (five revisions, two already compliant). See [all-35 depth audit](FLAMEWALKER_ALL_35_DEPTH_AUDIT_2026-11-16.md).
 
 
 ## Additional lesson-depth pass — November 15, 2026

@@ -1,0 +1,52 @@
+name: Flame Marshal Automation Supervisor
+
+# Monitoring only; no code modifications, issues, emails, publication or payments.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '47 10 * * *'
+      timezone: America/New_York
+  workflow_run:
+    workflows:
+      - Flame Spirits Mission Control
+      - Flame Spirit Product Opportunity Scout
+      - Validate static site
+      - pages build and deployment
+    types:
+      - completed
+  pull_request:
+    paths:
+      - '.github/workflows/flame-marshal.yml'
+      - '.github/workflows/validate-site.yml'
+      - 'scripts/flame_marshal.mjs'
+      - 'scripts/test_flame_marshal.mjs'
+      - 'FLAME_SPIRITS.md'
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+
+concurrency:
+  group: flame-marshal-supervisor
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Flame Marshal — status and missed-schedule audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Test the Flame Marshal signal logic
+        run: node --test scripts/test_flame_marshal.mjs
+
+      - name: Summarize workflow status, failures and missing schedules
+        if: github.event_name != 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/flame_marshal.mjs

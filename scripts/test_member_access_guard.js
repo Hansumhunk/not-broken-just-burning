@@ -8,7 +8,7 @@ const root = path.resolve(__dirname, '..');
 const read = (name) => fs.readFileSync(path.join(root, name), 'utf8');
 
 const memberPages = [
-  'member-community.html','member-library.html','member-lessons.html','member-media.html','member-onboarding.html',
+  'member-community.html','member-feedback.html','member-library.html','member-lessons.html','member-media.html','member-onboarding.html',
   'member-path.html','member-premium-lesson.html','member-profile.html','member-progress.html',
   'member-settings.html','member-start-here.html','member-framework.html','member-store.html','member-tools.html',
   'member-work.html','member-workshop.html','members.html'
@@ -172,7 +172,7 @@ test('early-release navigation has explicit sign out and honest planned-feature 
   assert.match(library, /href="member-tools.html">Open the Toolbox/);
   assert.doesNotMatch(library, /href="member-media.html">View paid video layer/);
   const dashboard = read('members.html');
-  assert.match(dashboard, /Flamewalker%20Free%20Early%20Access%20Feedback/);
+  assert.match(dashboard, /member-feedback[.]html[?]page=dashboard/);
   assert.match(dashboard, /Please do not send personal journal entries/);
 });
 
@@ -711,4 +711,70 @@ test('member navigation renders five desktop destinations and reachable secondar
   const signOut=panel.children.find(x=>x.tag==='button');
   assert.equal(signOut.textContent,'Sign Out');
   assert.equal(signOut.attributes['aria-label'],'Sign out of Flamewalker');
+});
+
+
+test('member feedback is authenticated, voluntary, and clearly email-mediated', () => {
+  const html=read('member-feedback.html');
+  const js=read('js/member-feedback.js');
+  const bootstrap=read('js/member-bootstrap.js');
+  const nav=read('js/member-platform.js');
+  const validator=read('scripts/validate_site.py');
+  assert.match(html,/data-member-page="feedback"/);
+  assert.match(html,/id="nbjb-member-access-gate"/);
+  assert.match(html,/noindex,nofollow/);
+  for(const id of ['member-feedback-form','feedback-topic','feedback-page','feedback-device',
+    'feedback-message','feedback-private-check','feedback-copy','feedback-open-email',
+    'feedback-prepared-wrap','feedback-outcome'])
+    assert.ok(html.includes('id="'+id+'"'),id);
+  assert.match(html,/does not submit anything to a website database/);
+  assert.match(html,/press <strong>Send<\/strong> in your email app/);
+  assert.match(html,/Please|passwords, account numbers/);
+  assert.ok(bootstrap.includes('feedback: ["js/member-feedback.js"]'));
+  assert.ok(bootstrap.includes("src === 'js/member-feedback.js'"));
+  assert.ok(nav.includes("['feedback', 'member-feedback.html', 'Send Feedback']"));
+  assert.ok(validator.includes('"member-feedback.html"'));
+  assert.ok(validator.includes('"js/member-feedback.js"'));
+  assert.ok(read('members.html').includes('href="member-feedback.html?page=dashboard"'));
+  assert.ok(js.includes("window.location.href = mailto;"));
+  assert.ok(js.includes("navigator.clipboard?.writeText"));
+  assert.doesNotMatch(js,/localStorage|sessionStorage|fetch\(|XMLHttpRequest|functions[.]invoke|\.insert\(|\.upsert\(/);
+  assert.ok(html.includes('href="support.html"'));
+});
+
+test('feedback prepares a private-by-default email without transmitting until member sends', async () => {
+  const source=read('js/member-feedback.js');
+  const listeners={};
+  const page={value:''};
+  const prepared={value:'',focus(){},select(){}};
+  const wrap={hidden:true};
+  const status={textContent:''};
+  let mailto='';
+  let copied='';
+  const form={reportValidity:()=>true,addEventListener:(key,fn)=>{listeners['form:'+key]=fn;}};
+  const copy={addEventListener:(key,fn)=>{listeners['copy:'+key]=fn;}};
+  const controls={
+    '#member-feedback-form':form,'#feedback-topic':{value:'Broken link or button'},
+    '#feedback-page':page,'#feedback-device':{value:'Phone'},
+    '#feedback-message':{value:'The Lessons button was not visible on my phone.'},
+    '#feedback-private-check':{checked:true},'#feedback-outcome':status,
+    '#feedback-prepared-wrap':wrap,'#feedback-prepared':prepared,'#feedback-copy':copy
+  };
+  const document={querySelector:selector=>controls[selector]||null};
+  const window={location:{set href(value){mailto=value;}}};
+  const navigator={clipboard:{writeText:async text=>{copied=text;}}};
+  vm.runInNewContext(source,{window,document,location:{search:'?page=lessons'},
+    URLSearchParams,navigator});
+  assert.equal(page.value,'Lessons Catalog');
+  assert.equal(mailto,'','no network or email action on page load');
+  await listeners['copy:click']();
+  assert.match(copied,/Issue: Broken link or button/);
+  assert.match(copied,/Page: Lessons Catalog/);
+  assert.match(copied,/Device: Phone/);
+  assert.equal(wrap.hidden,false);
+  assert.equal(mailto,'','copy must not launch email');
+  listeners['form:submit']({preventDefault(){}});
+  assert.ok(mailto.startsWith('mailto:notbrokenjustburning@gmail.com?subject='));
+  assert.ok(mailto.includes('body='));
+  assert.match(status.textContent,/NBJB has not received it yet/);
 });

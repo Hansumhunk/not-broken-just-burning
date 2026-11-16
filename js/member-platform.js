@@ -37,21 +37,52 @@
   function ensureMemberNav() {
     document.querySelectorAll('.member-subnav').forEach((nav) => {
       nav.replaceChildren();
-      memberRoutes.forEach(([key, href, label]) => {
+      const primaryKeys = new Set(['dashboard', 'lessons', 'path', 'tools', 'work']);
+      const compactKeys = new Set(['path', 'tools', 'work']);
+      function makeLink(key, href, label) {
         const link = document.createElement('a');
         link.dataset.memberNav = key;
         link.href = href;
         link.textContent = label;
-        nav.appendChild(link);
+        return link;
+      }
+
+      // Keep the five daily destinations visible at desktop widths. On a
+      // narrow screen, keep Dashboard and Lessons visible and put the other
+      // three inside More, rather than forcing horizontal menu scrolling.
+      memberRoutes.filter(([key]) => primaryKeys.has(key)).forEach(([key, href, label]) => {
+        const link = makeLink(key, href, label);
+        if (compactKeys.has(key)) link.classList.add('member-nav-compact-hide');
+        nav.append(link);
       });
+
+      const more = document.createElement('details');
+      more.className = 'member-nav-more';
+      const moreToggle = document.createElement('summary');
+      moreToggle.textContent = 'More';
+      moreToggle.setAttribute('aria-label', 'More Flamewalker pages and account actions');
+      const menu = document.createElement('div');
+      menu.className = 'member-nav-more-panel';
+
+      // Mobile copies are visible only when the corresponding desktop link is
+      // hidden. Both point to the same authenticated pages and active states.
+      memberRoutes.filter(([key]) => compactKeys.has(key)).forEach(([key, href, label]) => {
+        const link = makeLink(key, href, label);
+        link.className = 'member-nav-mobile-duplicate';
+        menu.append(link);
+      });
+      memberRoutes.filter(([key]) => !primaryKeys.has(key)).forEach(([key, href, label]) => {
+        menu.append(makeLink(key, href, label));
+      });
+
       const exit = document.createElement('a');
       exit.className = 'member-exit';
       exit.href = 'index.html';
       exit.textContent = 'Exit to site';
-      nav.appendChild(exit);
+      menu.append(exit);
 
-      // Exit to site is not a logout. Keep account sign-out explicit and
-      // reachable from every signed-in member screen, including mobile.
+      // Exit to site is not a logout. Keep sign-out a distinct button,
+      // reachable from the More menu on every signed-in page.
       const signOut = document.createElement('button');
       signOut.type = 'button';
       signOut.className = 'member-sign-out';
@@ -71,7 +102,19 @@
           status('Could not sign out. Please try again or open Account Access.');
         }
       });
-      nav.appendChild(signOut);
+      menu.append(signOut);
+      more.append(moreToggle, menu);
+      nav.append(more);
+
+      more.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          more.open = false;
+          moreToggle.focus();
+        }
+      });
+      document.addEventListener('click', (event) => {
+        if (more.open && !more.contains(event.target)) more.open = false;
+      });
     });
   }
 
@@ -105,6 +148,11 @@
       if (selected) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     });
+    const menuToggle = document.querySelector('.member-nav-more > summary');
+    if (menuToggle) {
+      const secondary = memberRoutes.slice(5).some(([key]) => key === page);
+      menuToggle.classList.toggle('active', secondary);
+    }
   }
 
   function copyText(text) {

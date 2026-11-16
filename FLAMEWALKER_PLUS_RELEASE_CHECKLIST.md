@@ -1,11 +1,12 @@
 # Flamewalker+ release and operating checklist — November 16, 2026
 
-**Current founder browser QA steps:** [No-charge membership acceptance and December 2 cancellation checklist](MEMBERSHIP_LAUNCH_ACCEPTANCE_2026-11-16.md). Automated rules and Auth configuration have been verified; a human browser session remains a separate release gate.
+**Founder browser QA status:** 4/4 Free-account tests and 5/5 existing live paid-account tests were founder-reported successful on November 16. See the [full membership acceptance record and open December 2 cancellation checks](MEMBERSHIP_LAUNCH_ACCEPTANCE_2026-11-16.md). These are founder browser reports, not independently observed test runs; independent external customer purchase, broader device/track coverage and paid-to-Free transition remain distinct.
 
 ## Founder-reported Free membership browser acceptance — November 16, 2026
 
 - [x] **No-charge browser check 4/4 (founder reported):** signed-out protection, new Free signup, free lessons with premium locked in Free UI, and sign-out/re-entry protection all passed. Detailed record: [membership browser acceptance](MEMBERSHIP_LAUNCH_ACCEPTANCE_2026-11-16.md).
-- [ ] **Distinct paid/end-to-end gates remain:** real active paying-member lesson + saving checks, direct Free API paid-lesson denial, authorized external checkout/portal trial, editorial proofing, and December 2 payment/access lifecycle verification. These are not implied by the four Free-flow checks.
+- [x] **Paid-member browser acceptance 5/5 (founder reported):** live Flamewalker+ account recognized, published Track 2 lesson opened, test worksheet saved/retrieved, Membership page correct, and Stripe billing portal opened; no errors reported. No charge or member-data mutation made.
+- [ ] **Other distinct end-to-end gates:** direct Free API protected-lesson denial, a genuine independent new customer checkout-to-access test, mobile/keyboard and other premium-track lesson checks, editorial proofing, and December 2–4 cancellation/paid-to-Free transition. These are not established by the founder's successful UI acceptance.
 
 ## CURRENT PRODUCTION STATUS — all 35 guided lessons published
 
@@ -13,7 +14,8 @@
 - [x] **Controlled release gate passed:** the 28 newly released manuscripts had unique slugs, nonempty teaching blocks, 7–8 guided prompts, Next Honest Action and Smaller Door; revisions matched the previously audited November 16 manuscripts before promotion. No manuscript bodies were placed in public GitHub.
 - [x] **Existing entitlement model preserved:** protected lesson reads require current server-side paid membership; ordinary Free and guests do not receive manuscript bodies. Reviewer-only draft handling remains available for future manuscripts.
 - [x] **Website release:** [PR #184](https://github.com/Hansumhunk/not-broken-just-burning/pull/184) merged with static site CI passing. [PR #185](https://github.com/Hansumhunk/not-broken-just-burning/pull/185) fixes all six paid track links, live copy and regression checks. Keep membership pricing and video pause unchanged.
-- [ ] **Founder live browser acceptance still required:** visit one newly published lesson from Tracks 2–6 while signed in as a genuine active paid member; confirm full text, keyboard/mobile worksheet entries, explicit Save to My Work, and returning to the lesson. Repeat a sample from each of the other four new tracks.
+- [x] **Initial paid lesson access/save acceptance (founder reported):** signed in as a genuine active paid member, opened a published Track 2 lesson, saved and retrieved a worksheet in My Work. No issues reported November 16.
+- [ ] **Expanded track and device acceptance:** sample Tracks 3–6 with paid account, keyboard/mobile worksheet editing, Save to My Work and return/resume behavior. Founder reports for the Track 2 test do not cover these.
 - [ ] **Access isolation confirmation:** visit a newly published lesson with a separate genuine Free account and signed out, confirm no protected body is returned. Check paid-to-Free transition when legitimately expired or canceled, without artificially changing billing.
 - [ ] **Final human editorial proofing:** founder should proof the released versions for audience fit, citations, safety, clarity and repetition; promptly revise or temporarily unpublish any lesson with a material issue. The founder's instruction to proceed with launch authorized the operating release; it does not replace a claim-by-claim expert proofread.
 - [ ] **First external customer acceptance:** confirm real customer checkout → entitlement → library → Stripe portal/cancellation after an authorized purchase. Never fabricate a sale.

@@ -10,6 +10,7 @@
   // The scenario-page layout changed, so map older device-only numeric bookmarks once.
   const scenarioLayoutKey = positionKey ? positionKey + '.scenario-layout-v1' : null;
   const caseLayoutKey = positionKey ? positionKey + '.semantic-cases-v1' : null;
+  const exampleLayoutKey = positionKey ? positionKey + '.keep-examples-together-v1' : null;
   const fontKey = 'nbjb.plus.reader-font.v1';
   // A review checklist belongs to the authorized reviewer and this exact draft
   // revision. It is never a publication flag or a server-side entitlement.
@@ -195,7 +196,7 @@
     }
     return { title, body };
   }
-  function sectionize(blocks, { splitScenarios = true } = {}) {
+  function sectionize(blocks, { splitScenarios = true, keepExamplesTogether = true } = {}) {
     // Father Wound's original map/recorded-section indices remain unchanged.
     // Mother Wound's existing shorter subheading behavior is unchanged too.
     const minSplitLength = slug === 'mother-wound' ? 1200 : 900;
@@ -207,6 +208,7 @@
     let length = 0;
     let continuation = 0;
     let inScenario = false;
+    let inExample = false;
     function flush() {
       if (!part.length) return;
       output.push({ title: name, continuation, blocks: part });
@@ -216,7 +218,21 @@
       const partNumber = /^Part\s+(\d+)\b/i.exec(parentName)?.[1];
       return partNumber ? 'Part ' + partNumber + ' · ' + title : title;
     }
-    for (const block of blocks.slice(0, 800)) {
+    const readable = blocks.slice(0, 800);
+    function exampleGroupAt(index) {
+      let characters = 0;
+      let count = 0;
+      for (let i = index; i < readable.length; i++) {
+        const item = readable[i];
+        if (!item || typeof item.text !== 'string') continue;
+        if (i > index && item.type === 'heading') break;
+        characters += item.text.trim().length;
+        count++;
+      }
+      return { characters, count };
+    }
+    for (let index = 0; index < readable.length; index++) {
+      const block = readable[index];
       if (!block || typeof block.text !== 'string' || !block.text.trim()) continue;
       const text = block.text.trim();
       const kind = block.type === 'heading' ? 'heading' : 'paragraph';
@@ -226,6 +242,7 @@
         parentName = name;
         continuation = 0;
         inScenario = false;
+        inExample = false;
         continue;
       }
       if (splitScenarios && kind === 'heading' && namedCaseHeading(text)) {
@@ -233,6 +250,7 @@
         name = caseTitle(prettyHeading(text));
         continuation = 0;
         inScenario = true;
+        inExample = false;
         continue;
       }
       const inlineCase = splitScenarios && kind === 'paragraph' ? inlineScenario(text) : null;
@@ -241,6 +259,7 @@
         name = caseTitle(inlineCase.title);
         continuation = 0;
         inScenario = true;
+        inExample = false;
         if (inlineCase.body) {
           part.push({ kind, text: inlineCase.body });
           length += inlineCase.body.length;
@@ -255,9 +274,25 @@
         continuation = 0;
         inScenario = false;
       }
-      // Normal pages target 1–3 minutes. A case page retains every paragraph
-      // until the next case, the next chapter, or another distinct heading.
-      if (!inScenario && part.length && length > minSplitLength &&
+      // Treat EXAMPLE 1/2/3 plus all of each example's paragraphs as one
+      // atomic reading unit. Start a new page *before* the example rather
+      // than leaving its heading stranded at the end of the previous page.
+      const isExampleHeading = keepExamplesTogether && kind === 'heading' &&
+        /^EXAMPLE\s+\d+\b/i.test(text);
+      if (isExampleHeading) {
+        const group = exampleGroupAt(index);
+        if (part.length && (part.length + group.count > blockLimit ||
+            length + group.characters > 1800 || length > minSplitLength)) flush();
+        inExample = true;
+      } else if (inExample && kind === 'heading') {
+        // Keep each complete example with its own body; unrelated headings
+        // should resume ordinary page layout.
+        flush();
+        inExample = false;
+      }
+      // Normal pages target 1–3 minutes. Scenario/case and Example groups
+      // are protected from automatic paragraph-length splits.
+      if (!inScenario && !inExample && part.length && length > minSplitLength &&
           (length + text.length > 1800 || part.length >= blockLimit)) flush();
       part.push({ kind, text });
       length += text.length;
@@ -265,9 +300,9 @@
     flush();
     return output;
   }
-  function remapScenarioBookmark(blocks, legacyIndex, revisedSteps) {
+  function remapScenarioBookmark(blocks, legacyIndex, revisedSteps, legacyOptions = { splitScenarios: false, keepExamplesTogether: false }) {
     if (!Number.isInteger(legacyIndex) || legacyIndex < 0) return legacyIndex;
-    const oldStep = sectionize(blocks, { splitScenarios: false })[legacyIndex];
+    const oldStep = sectionize(blocks, legacyOptions)[legacyIndex];
     if (!oldStep) return legacyIndex;
     // A legacy length-based page can contain two cases. Prefer the last
     // explicit case marker, since that is where the reader had arrived.
@@ -611,6 +646,7 @@
     const saved = storageWrite(positionKey, String(current));
     if (saved && slug === 'red-flags-and-responsibility') storageWrite(scenarioLayoutKey, 'one-scenario-per-page');
     if (saved) storageWrite(caseLayoutKey, 'semantic-cases-v1');
+    if (saved) storageWrite(exampleLayoutKey, 'complete-examples-v1');
     el('premium-save-status').textContent = saved
       ? 'Reading position saved on this device. Your reflection answers are not saved or uploaded.'
       : 'Reading position cannot be saved in this browser. Reflection answers are not uploaded.';
@@ -714,7 +750,14 @@
     const priorSemanticLayout = storageRead(caseLayoutKey) === 'semantic-cases-v1';
     const priorRedFlagsLayout = slug === 'red-flags-and-responsibility' &&
       storageRead(scenarioLayoutKey) === 'one-scenario-per-page';
-    if (previousPosition !== null && !priorSemanticLayout && !priorRedFlagsLayout) {
+    const priorExampleLayout = storageRead(exampleLayoutKey) === 'complete-examples-v1';
+    if (previousPosition !== null && !priorExampleLayout &&
+        (slug === 'father-wound' || slug === 'mother-wound') && priorSemanticLayout) {
+      // Existing section numbers used to split worked examples mid-page.
+      const oldLayout = { splitScenarios: true, keepExamplesTogether: false };
+      stored = remapScenarioBookmark(blocks, stored, steps, oldLayout);
+      if (direct !== null) direct = remapScenarioBookmark(blocks, direct, steps, oldLayout);
+    } else if (previousPosition !== null && !priorSemanticLayout && !priorRedFlagsLayout) {
       stored = remapScenarioBookmark(blocks, stored, steps);
       if (direct !== null) direct = remapScenarioBookmark(blocks, direct, steps);
     }

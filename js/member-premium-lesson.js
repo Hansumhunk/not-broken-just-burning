@@ -7,6 +7,8 @@
   const userId = auth?.user?.id || '';
   const progressKey = userId ? 'nbjb.plus.lesson-progress.v1.' + userId : null;
   const positionKey = userId ? 'nbjb.plus.reading-position.v1.' + userId + '.' + slug : null;
+  // The scenario-page layout changed, so map older device-only numeric bookmarks once.
+  const scenarioLayoutKey = positionKey ? positionKey + '.scenario-layout-v1' : null;
   const fontKey = 'nbjb.plus.reader-font.v1';
   // A review checklist belongs to the authorized reviewer and this exact draft
   // revision. It is never a publication flag or a server-side entitlement.
@@ -126,7 +128,7 @@
   }
   // Use the author's actual chapter headings, never arbitrary page-number slices.
   const major = /^(?:OPENING|LESSON PURPOSE|PART \d+\b|THE (?:FATHER IMPRINT MAP|MATERNAL IMPRINT MAP|SILENCE INVENTORY|SMALLER DOOR)|NEXT HONEST ACTION|THE NEXT HONEST ACTION|OPTIONAL SPIRITUAL LENS|INTEGRATION|FINAL REFLECTION|PRIVACY NOTE|PROFESSIONAL(?:\s|\/|$))/i;
-  function sectionize(blocks) {
+  function sectionize(blocks, { splitScenarios = true } = {}) {
     // The Mother Wound includes short reflective subheadings. Give those
     // blocks more breathing room before a new page is started, so readers
     // do not land on near-empty continuation screens. Father Wound's section
@@ -138,6 +140,7 @@
     let part = [];
     let length = 0;
     let continuation = 0;
+    let inScenario = false;
     function flush() {
       if (!part.length) return;
       output.push({ title: name, continuation, blocks: part });
@@ -151,15 +154,48 @@
         flush();
         name = prettyHeading(text);
         continuation = 0;
+        inScenario = false;
         continue;
       }
-      // Keep roughly 1–3 minutes of prose per view. Break at an existing text block.
-      if (part.length && length > minSplitLength && (length + text.length > 1800 || part.length >= blockLimit)) flush();
+      // In Red Flags and Responsibility, the four extended examples must each
+      // be one complete reading page. Their headings live in private lesson data.
+      const scenarioHeader = splitScenarios && slug === 'red-flags-and-responsibility' && kind === 'paragraph'
+        ? /^Scenario ([A-D]) — ([^.]+)\./.exec(text) : null;
+      if (scenarioHeader) {
+        flush();
+        name = 'Part 5 · Scenario ' + scenarioHeader[1] + ' — ' + scenarioHeader[2];
+        continuation = 0;
+        inScenario = true;
+        const intro = text.slice(scenarioHeader[0].length).trim();
+        if (intro) { part.push({ kind, text: intro }); length += intro.length; }
+        continue;
+      }
+      // Normal pages remain brief; a scenario keeps all of its paragraphs
+      // together even if the example is longer than an ordinary page.
+      if (!inScenario && part.length && length > minSplitLength &&
+          (length + text.length > 1800 || part.length >= blockLimit)) flush();
       part.push({ kind, text });
       length += text.length;
     }
     flush();
     return output;
+  }
+  function remapScenarioBookmark(blocks, legacyIndex, revisedSteps) {
+    if (slug !== 'red-flags-and-responsibility' || !Number.isInteger(legacyIndex) || legacyIndex < 0) return legacyIndex;
+    const oldStep = sectionize(blocks, { splitScenarios: false })[legacyIndex];
+    // An old length-based page can contain both the end of Scenario A and
+    // the start of Scenario B. Prefer the most recent scenario heading.
+    const scenarioLead = oldStep?.blocks?.slice().reverse().find(block => /^Scenario [A-D] —/.test(block.text));
+    const first = scenarioLead?.text || oldStep?.blocks?.find(block => block.text)?.text;
+    if (!first) return legacyIndex;
+    const scenarioId = /^Scenario ([A-D]) —/.exec(first)?.[1];
+    if (scenarioId) {
+      const named = revisedSteps.findIndex(step => step.title.startsWith('Part 5 · Scenario ' + scenarioId + ' —'));
+      if (named >= 0) return named;
+    }
+    const mapped = revisedSteps.findIndex(step => step.blocks?.some(block =>
+      block.text === first || (first.startsWith('Scenario ') && first.includes(block.text.slice(0, 80)))));
+    return mapped >= 0 ? mapped : legacyIndex;
   }
   function label(step) {
     return step.continuation ? step.title + ' · continued ' + (step.continuation + 1) : step.title;
@@ -418,6 +454,7 @@
     el('premium-next').textContent = current === count - 2 ? 'Final reflection →' :
       current === count - 1 ? 'You reached the end' : 'Next section →';
     const saved = storageWrite(positionKey, String(current));
+    if (saved && slug === 'red-flags-and-responsibility') storageWrite(scenarioLayoutKey, 'one-scenario-per-page');
     el('premium-save-status').textContent = saved
       ? 'Reading position saved on this device. Your reflection answers are not saved or uploaded.'
       : 'Reading position cannot be saved in this browser. Reflection answers are not uploaded.';
@@ -513,7 +550,10 @@
       ? 'Editorial preview · Available only to the nominated internal reviewer, not released to members.'
       : 'Published material · Available only with server-authorized Flamewalker+ access.';
     buildSelector();
-    const stored = Number(storageRead(positionKey));
+    let stored = Number(storageRead(positionKey));
+    if (slug === 'red-flags-and-responsibility' && storageRead(scenarioLayoutKey) !== 'one-scenario-per-page') {
+      stored = remapScenarioBookmark(blocks, stored, steps);
+    }
     const requestedSection = new URLSearchParams(location.search).get('section');
     const direct = requestedSection && /^[1-9][0-9]{0,2}$/.test(requestedSection)
       ? Number(requestedSection) - 1 : null;

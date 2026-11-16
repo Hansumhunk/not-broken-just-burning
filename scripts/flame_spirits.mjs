@@ -1,15 +1,16 @@
 /**
  * Flame Spirits Mission Control — public-data, read-only scouts.
  * No customer data, no production changes, no publishing, no outbound outreach.
- * Run: node scripts/flame_spirits.mjs [all|seo|audience|alliance|revenue|security]
+ * Run: node scripts/flame_spirits.mjs [all|seo|audience|alliance|revenue|security|resources|brand]
  */
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { resourceSpirit, brandSpirit } from "./flame_spirits_guardrails.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const BASE = "https://notbrokenjustburning.com";
-const SPIRITS = ["seo", "audience", "alliance", "revenue", "security"];
+const SPIRITS = ["seo", "audience", "alliance", "revenue", "security", "resources", "brand"];
 const TOPICS = {
   fatherhood: /\b(dad|dads|father|fathers|fatherhood|parenting|custody|children)\b/i,
   separation: /\b(divorce|separated|separation|breakup|betrayal|relationship)\b/i,
@@ -161,7 +162,7 @@ async function main() {
     process.stderr.write("Unknown spirit. Use: " + ["all", ...SPIRITS].join(", ") + "\n");
     process.exitCode = 2; return;
   }
-  const tasks = { seo, audience, alliance, revenue, security };
+  const tasks = { seo, audience, alliance, revenue, security, resources: resourceSpirit, brand: brandSpirit };
   const names = selected === "all" ? SPIRITS : [selected];
   const out = ["# 🔥 Flame Spirits — NBJB Mission Control", "",
     "Generated: " + new Date().toISOString(), "",

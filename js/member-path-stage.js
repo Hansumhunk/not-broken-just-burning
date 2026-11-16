@@ -47,6 +47,20 @@
         {heading:'The Guardian Code is a conduct test',text:'Trust, Honor, Respect, Honesty, and Loyalty are not weapons or loyalty tests. Ask whether your own response earns trust, protects dignity, stays truthful, and serves what is real. Loyalty is not a requirement to surrender safety or self-respect. A Guardian can protect without possessing, disagree without humiliating, and say no without cruelty.'},
         {heading:'Steadiness is part of protection',text:'Before answering a heated message or entering a predictable argument, identify what actually needs a response now. A delay can be responsible when it protects judgment. A limit is useful only if you can carry it out safely and consistently—not if it is a threat you cannot or should not enforce.'}
       ],
+      deepDive:[
+      {
+            "heading": "The difference between a boundary and a threat",
+            "text": "A useful boundary defines what you will do to protect your safety, time, dignity, or responsibilities. A threat tries to force somebody else's behavior by promising punishment. They can sound similar in an argument, but they lead to very different patterns. “I will end this call if insults continue” describes a choice within your control. “You will regret speaking to me that way” escalates the conflict without stating a workable limit.\n\nTry writing the behavior, your line, and the action you can safely take. Then ask if you can actually follow through. If the action depends on controlling someone else, rewrite it until it belongs to you."
+      },
+      {
+            "heading": "The Guardian Code under pressure",
+            "text": "Trust, Honor, Respect, Honesty, and Loyalty matter most when you're activated, not only when life is peaceful. Imagine receiving a message you consider unfair. You might be tempted to respond with every accusation you've held for months. The code offers another standard: preserve the message, address the practical issue, communicate the relevant facts, and decide what really needs a response.\n\nThat is not weakness or pretending the message was acceptable. It is choosing conduct you can still stand beside tomorrow. Loyalty to a person should never require abandoning honesty, safety, or a child's well-being."
+      },
+      {
+            "heading": "Practice protection without permanent armor",
+            "text": "A boundary that protects you can create room for connection; permanent suspicion often closes that room entirely. Choose one setting in which you are over-explaining, over-accommodating, or over-defending. What would a shorter and more respectful limit sound like? What would you do if the limit were ignored? What would you do if the other person respected it?\n\nBoth outcomes give useful information. You are practicing discernment rather than assuming every relationship is dangerous or every request must be granted. The practical result is steadiness: a line you understand, a response you control, and room to reassess when new information arrives."
+      }
+],
       questions:[
         {label:'What specific behavior is crossing one of my limits?',hint:'Describe an observable action, not a judgment about somebody’s character.'},
         {label:'What boundary would describe my own response instead of trying to control theirs?',hint:'Try an “If X happens, I will do Y” statement.'},

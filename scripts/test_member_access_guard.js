@@ -332,7 +332,7 @@ test('Lessons is a direct top-nav destination on authenticated member pages', ()
   assert.ok(platform.includes("['lessons', 'member-lessons.html', 'Lessons']"));
   assert.ok(platform.includes("['start-here', 'framework', 'premium-lesson'].includes(page)"));
   assert.ok(bootstrap.includes("src === 'js/member-platform.js'"));
-  assert.ok(bootstrap.includes("src + '?v=lessons-hub-v14'"));
+  assert.ok(bootstrap.includes("src + '?v=compact-nav-v1'"));
   for (const html of [dashboard, intro, library, premium]) {
     assert.ok(html.includes('href="member-lessons.html"'), 'members should have direct lessons navigation');
     const expected = html === premium ? 'reflection-examples-v20' : 'lessons-hub-v14';
@@ -654,4 +654,61 @@ test('Learning Trail counts only published and deliberately marked lessons', asy
   assert.equal(list.length,1);
   assert.equal(list[0].children[0].textContent,'Published Lesson');
   assert.ok(!JSON.stringify(list).includes('Private Draft'));
+});
+
+
+test('responsive member navigation keeps essentials visible and all secondary pages under More', () => {
+  const js=read('js/member-platform.js');
+  const css=read('css/members.css');
+  assert.ok(js.includes("const primaryKeys = new Set(['dashboard', 'lessons', 'path', 'tools', 'work'])"));
+  assert.ok(js.includes("const compactKeys = new Set(['path', 'tools', 'work'])"));
+  assert.ok(js.includes("document.createElement('details')"));
+  assert.ok(js.includes("document.createElement('summary')"));
+  assert.ok(js.includes("moreToggle.textContent = 'More'"));
+  assert.ok(js.includes("menu.append(signOut)"));
+  assert.ok(js.includes("event.key === 'Escape'"));
+  assert.ok(js.includes("more.open && !more.contains(event.target)"));
+  assert.ok(css.includes('.member-nav-more:not([open]) .member-nav-more-panel { display: none; }'));
+  assert.ok(css.includes('.member-subnav > a.member-nav-compact-hide { display: none; }'));
+  assert.ok(css.includes('.member-nav-mobile-duplicate { display: block !important; }'));
+  assert.ok(css.includes('grid-template-columns: repeat(3, minmax(0, 1fr))'));
+  assert.doesNotMatch(css, /\.member-subnav\s*\{[^}]*overflow-x:\s*auto/s);
+  assert.ok(js.includes("['watch', 'member-media.html', 'Watch · Soon']"));
+  assert.ok(js.includes("['community', 'member-community.html', 'Circle · Soon']"));
+});
+
+test('member navigation renders five desktop destinations and reachable secondary actions', () => {
+  const source=read('js/member-platform.js');
+  const routes=source.slice(source.indexOf('  const memberRoutes ='),source.indexOf('  function status('));
+  const fn=source.slice(source.indexOf('  function ensureMemberNav() {'),source.indexOf('  function progressPercent('));
+  const element=tag=>({
+    tag,children:[],dataset:{},handlers:{},attributes:{},
+    classList:{classes:[],add(value){this.classes.push(value);}},
+    append(...items){this.children.push(...items);},
+    appendChild(item){this.children.push(item);},
+    replaceChildren(){this.children=[];},
+    setAttribute(key,value){this.attributes[key]=value;},
+    addEventListener(key,value){this.handlers[key]=value;}
+  });
+  const nav=element('nav');
+  const document={
+    querySelectorAll:selector=>selector==='.member-subnav'?[nav]:[],
+    createElement:element,
+    addEventListener(){}
+  };
+  vm.runInNewContext(routes+fn+'\nensureMemberNav();',{document});
+  const primary=nav.children.filter(child=>child.tag==='a');
+  assert.deepEqual(primary.map(x=>x.dataset.memberNav),['dashboard','lessons','path','tools','work']);
+  const more=nav.children.find(child=>child.tag==='details');
+  assert.ok(more,'More must remain available');
+  const [toggle,panel]=more.children;
+  assert.equal(toggle.tag,'summary');
+  assert.equal(toggle.textContent,'More');
+  const links=panel.children.filter(x=>x.tag==='a');
+  for(const key of ['path','tools','work','progress','library','watch','store','community','profile','settings'])
+    assert.ok(links.some(link=>link.dataset.memberNav===key),'More must include '+key);
+  assert.ok(links.some(link=>link.href==='index.html' && link.textContent==='Exit to site'));
+  const signOut=panel.children.find(x=>x.tag==='button');
+  assert.equal(signOut.textContent,'Sign Out');
+  assert.equal(signOut.attributes['aria-label'],'Sign out of Flamewalker');
 });

@@ -1807,3 +1807,19 @@ test('membership store and dynamic billing scripts use the same fresh cache revi
   assert.ok(billing.includes("if (current.tier === 'paid')"));
   assert.ok(billing.includes('purchase.hidden = false;'));
 });
+
+
+test('free premium lesson denial points to live membership without exposing protected content', () => {
+  const js = read('js/member-premium-lesson.js');
+  const html = read('member-premium-lesson.html');
+  const bootstrap = read('js/member-bootstrap.js');
+  assert.ok(js.includes('Flamewalker+ membership required'));
+  assert.ok(js.includes('Monthly and annual memberships are available now.'));
+  assert.ok(!js.includes('The paid membership is not for sale yet.'));
+  assert.ok(html.includes('href="member-store.html">Membership options</a>'));
+  assert.ok(html.includes('js/member-bootstrap.js?v=premium-access-v13'));
+  assert.ok(bootstrap.includes("src === 'js/member-premium-lesson.js'"));
+  assert.ok(bootstrap.includes("src + '?v=premium-access-v13'"));
+  assert.match(js, /const denied = error\?\.context\?\.status === 403/);
+  assert.match(js, /renderLesson\(data\.lesson\)/);
+});

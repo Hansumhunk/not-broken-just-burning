@@ -840,9 +840,9 @@
       const { data, error } = await auth.client.functions.invoke('read-flamewalker-lesson', { body: { slug } });
       if (error || !data?.lesson) {
         const denied = error?.context?.status === 403 || data?.error === 'paid_membership_required';
-        noticeState(denied ? 'Flamewalker+ access not available yet' : 'Lesson not available yet',
+        noticeState(denied ? 'Flamewalker+ membership required' : 'Lesson not available yet',
           denied
-            ? 'This content requires active paid access, or the designated editorial-review account. The paid membership is not for sale yet.'
+            ? 'This lesson requires active Flamewalker+ access. Monthly and annual memberships are available now. Unpublished drafts remain restricted to editorial reviewers.'
             : 'This lesson is still in review, or access could not be confirmed. Please try again later.');
         return;
       }

@@ -197,9 +197,9 @@
 
     if (isPaid) {
       title.textContent = focus ? `Go deeper with ${focus}` : 'Continue the deeper member library';
-      copy.textContent = 'Paid Flamewalker access can surface the deeper recurring learning layer here while keeping flagship programs separate.';
-      link.href = 'member-media.html';
-      link.textContent = 'Open Watch & Learn';
+      copy.textContent = 'Seven published guided lessons and exercises are available in your Flamewalker+ lesson catalog. Videos remain coming soon.';
+      link.href = 'member-lessons.html';
+      link.textContent = 'Browse My Lessons';
       return;
     }
 

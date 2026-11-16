@@ -1795,3 +1795,15 @@ test('client paid tier respects authoritative validity dates; billing management
   assert.match(billing, /if \(current\.tier === 'paid'\)/);
   assert.match(billing, /PUBLIC_CHECKOUT_UI_ENABLED = true/);
 });
+
+test('membership store and dynamic billing scripts use the same fresh cache revision', () => {
+  const store = read('member-store.html');
+  const bootstrap = read('js/member-bootstrap.js');
+  const billing = read('js/member-billing.js');
+  assert.ok(store.includes('js/member-bootstrap.js?v=nbjb-return-v12'));
+  assert.ok(bootstrap.includes("src + '?v=nbjb-return-v12'"));
+  assert.ok(!store.includes('qa-billing-v11'));
+  assert.ok(!bootstrap.includes('qa-billing-v11'));
+  assert.ok(billing.includes("if (current.tier === 'paid')"));
+  assert.ok(billing.includes('purchase.hidden = false;'));
+});

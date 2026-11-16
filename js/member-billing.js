@@ -22,6 +22,26 @@
   const manageButton = document.getElementById('member-billing-portal');
   const heading = document.getElementById('member-live-billing-title');
   function elHeading(value) { if (heading) heading.textContent = value; }
+  const paidOverview = document.querySelector('[data-membership-paid-overview]');
+  const upgradeSections = [...document.querySelectorAll('[data-membership-upgrade]')];
+  function showMembershipView(current) {
+    const verified = current?.source === 'server';
+    const activePaid = verified && current?.tier === 'paid';
+    if (paidOverview) paidOverview.hidden = !activePaid;
+    for (const section of upgradeSections) section.hidden = !verified || activePaid;
+    return activePaid;
+  }
+  function paidThroughText(current) {
+    const parsed = current?.validUntil ? new Date(current.validUntil) : null;
+    const date = parsed && Number.isFinite(parsed.getTime()) ?
+      parsed.toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' }) : null;
+    return current?.cancelAtPeriodEnd
+      ? (date
+          ? 'Your membership is scheduled to end on ' + date + '. Review subscription details or invoices in Stripe.'
+          : 'Your subscription is scheduled to end after the current paid period. Review billing details in Stripe.')
+      : 'Your Flamewalker+ membership is active. Manage your subscription and invoices in Stripe.';
+  }
+
 
   function message(text, error = false) {
     status.textContent = text;
@@ -88,23 +108,25 @@
     region.hidden = true;
     purchase.hidden = true;
     management.hidden = true;
+    if (paidOverview) paidOverview.hidden = true;
+    for (const section of upgradeSections) section.hidden = true;
     if (!auth?.user?.id || !entitlements?.refresh) return;
 
     const current = await entitlements.refresh();
+    if (current?.source !== 'server') return;
+    const activePaid = showMembershipView(current);
+    if (activePaid) {
+      region.hidden = false;
+      elHeading('Manage your Flamewalker+ billing');
+      message(current.hasStripeBilling ? paidThroughText(current) :
+        'Your Flamewalker+ access is active. Contact NBJB support for subscription billing assistance.');
+      management.hidden = !current.hasStripeBilling;
+      return;
+    }
     if (current?.hasStripeBilling) {
-      // A Stripe customer record is billing history, not proof of an active
-      // subscription. Keep the portal visible for past invoices and billing.
-      // Only verified paid members are purchase-blocked in the browser.
-      // The server additionally checks Stripe's actual subscription state.
+      // Billing history alone is not proof of current paid access.
       region.hidden = false;
       management.hidden = false;
-      if (current.tier === 'paid') {
-        elHeading('Manage your Flamewalker+ billing');
-        message(current.cancelAtPeriodEnd
-          ? 'Your subscription is scheduled to end after the current paid period. Review invoices or billing in Stripe.'
-          : 'Your Flamewalker+ membership is active. Manage billing in Stripe.');
-        return;
-      }
     }
     // When free after a prior subscription, offer renewal alongside access
     // to old invoices. No paid lesson entitlement is granted by this UI.
@@ -144,5 +166,7 @@
     region.hidden = true;
     purchase.hidden = true;
     management.hidden = true;
+    if (paidOverview) paidOverview.hidden = true;
+    for (const section of upgradeSections) section.hidden = true;
   });
 })();

@@ -57,7 +57,9 @@
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = src === 'js/member-feedback.js'
+      script.src = src === 'js/member-billing.js'
+        ? src + '?v=paid-account-view-v1'
+        : src === 'js/member-feedback.js'
         ? src + '?v=member-feedback-v1'
         : src === 'js/member-learning-progress.js'
         ? src + '?v=learning-trail-v2'

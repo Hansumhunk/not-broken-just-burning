@@ -552,6 +552,46 @@ test('a paid member with a protected reading bookmark is returning, not first-ru
   assert.ok(js.includes('renderFirstRun(state, entries, entitlementState)'));
   assert.ok(js.includes("window.addEventListener('nbjb:entitlements', render)"));
 });
+test('Membership page gives paid subscribers account management instead of another purchase pitch', () => {
+  const html=read('member-store.html');
+  const js=read('js/member-billing.js');
+  const bootstrap=read('js/member-bootstrap.js');
+  assert.equal((html.match(/data-membership-upgrade hidden/g)||[]).length,6);
+  assert.ok(html.includes('data-membership-paid-overview hidden'));
+  assert.ok(html.includes('href="member-lessons.html">Open My 35 Lessons</a>'));
+  assert.ok(html.indexOf('id="member-live-billing"') < html.indexOf('Simple access model'));
+  assert.ok(html.includes('js/member-bootstrap.js?v=paid-account-view-v1'));
+  assert.ok(bootstrap.includes("src === 'js/member-billing.js'"));
+  assert.ok(bootstrap.includes("src + '?v=paid-account-view-v1'"));
+  const start=js.indexOf('  function showMembershipView(current) {');
+  const end=js.indexOf('  function paidThroughText(current) {',start);
+  assert.ok(start>=0 && end>start,'view selector must be present');
+  function scenario(){
+    const overview={hidden:true};
+    const upsells=Array.from({length:6},()=>({hidden:true}));
+    const ctxt={paidOverview:overview,upgradeSections:upsells};
+    const fn=vm.runInNewContext(js.slice(start,end)+'\nshowMembershipView',ctxt,{timeout:1000});
+    return {overview,upsells,fn};
+  }
+  const paid=scenario();
+  assert.equal(paid.fn({tier:'paid',source:'server'}),true);
+  assert.equal(paid.overview.hidden,false);
+  assert.ok(paid.upsells.every(node=>node.hidden));
+  const free=scenario();
+  assert.equal(free.fn({tier:'free',source:'server'}),false);
+  assert.equal(free.overview.hidden,true);
+  assert.ok(free.upsells.every(node=>!node.hidden));
+  const fail=scenario();
+  assert.equal(fail.fn({tier:'paid',source:'server_error'}),false);
+  assert.equal(fail.overview.hidden,true);
+  assert.ok(fail.upsells.every(node=>node.hidden));
+  assert.ok(js.includes('management.hidden = !current.hasStripeBilling'));
+  assert.ok(js.includes('paidThroughText(current)'));
+  assert.ok(html.includes('id="member-billing-portal"'));
+  assert.ok(html.includes('data-live-billing-offer="flamewalker_plus_monthly"'));
+  assert.ok(html.includes('data-live-billing-offer="flamewalker_plus_annual"'));
+});
+
 test('dashboard compass unifies learning, current Path focus and next action without private reflections', () => {
   const html=read('members.html');
   const js=read('js/member-dashboard.js');

@@ -1970,12 +1970,19 @@ function simulateLiveBilling({ hasStripeBilling = false, tier = 'free', cancelAt
     'member-billing-consent': create({ checked: true }),
     'member-billing-portal': create()
   };
+  const paidOverview = create();
+  const marketing = Array.from({length:6},()=>create());
   const monthly = create({ dataset: { liveBillingOffer: 'flamewalker_plus_monthly' } });
   const annual = create({ dataset: { liveBillingOffer: 'flamewalker_plus_annual' } });
   const context = {
     document: {
       getElementById(id) { return els[id] || null; },
-      querySelectorAll(selector) { return selector === '[data-live-billing-offer]' ? [monthly, annual] : []; }
+      querySelector(selector) { return selector === '[data-membership-paid-overview]' ? paidOverview : null; },
+      querySelectorAll(selector) {
+        if (selector === '[data-live-billing-offer]') return [monthly, annual];
+        if (selector === '[data-membership-upgrade]') return marketing;
+        return [];
+      }
     },
     window: {
       NBJBAuth: {
@@ -1997,7 +2004,7 @@ function simulateLiveBilling({ hasStripeBilling = false, tier = 'free', cancelAt
         }
       },
       NBJBEntitlements: {
-        async refresh() { return { hasStripeBilling, tier, cancelAtPeriodEnd }; }
+        async refresh() { return { hasStripeBilling, tier, cancelAtPeriodEnd, source: 'server' }; }
       },
       location: {
         search: locationSearch,
@@ -2007,7 +2014,7 @@ function simulateLiveBilling({ hasStripeBilling = false, tier = 'free', cancelAt
     URL, URLSearchParams, console
   };
   vm.runInNewContext(read('js/member-billing.js'), context);
-  return { els, monthly, annual, invoked, redirects };
+  return { els, monthly, annual, invoked, redirects, paidOverview, marketing };
 }
 
 test('live enrollment checks the published catalog before showing monthly and annual plans', async () => {
@@ -2021,6 +2028,20 @@ test('live enrollment checks the published catalog before showing monthly and an
   await new Promise(resolve => setImmediate(resolve));
   assert.deepEqual(app.invoked, ['read-flamewalker-lesson', 'create-live-checkout-session']);
   assert.deepEqual(app.redirects, ['https://checkout.stripe.com/c/pay/test-link']);
+});
+
+test('paid accounts see the account summary and no plan-marketing blocks', async () => {
+  const active = simulateLiveBilling({hasStripeBilling:true,tier:'paid'});
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(active.paidOverview.hidden,false);
+  assert.ok(active.marketing.every(node=>node.hidden));
+  assert.equal(active.els['member-billing-management'].hidden,false);
+  assert.equal(active.els['member-billing-purchase'].hidden,true);
+  const free = simulateLiveBilling({tier:'free'});
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(free.paidOverview.hidden,true);
+  assert.ok(free.marketing.every(node=>!node.hidden));
+  assert.equal(free.els['member-billing-purchase'].hidden,false);
 });
 
 test('existing Stripe customer can manage a subscription while duplicate purchase controls stay hidden', async () => {
@@ -2087,7 +2108,7 @@ test('client paid tier respects authoritative validity dates; billing management
   assert.match(billing, /if \(!PUBLIC_CHECKOUT_UI_ENABLED\) return;/);
   assert.match(billing, /if \(!PUBLIC_CHECKOUT_UI_ENABLED\) \{/);
   assert.match(billing, /if \(current\?\.hasStripeBilling\)/);
-  assert.match(billing, /if \(current\.tier === 'paid'\)/);
+  assert.match(billing, /if \(activePaid\)/);
   assert.match(billing, /PUBLIC_CHECKOUT_UI_ENABLED = true/);
 });
 
@@ -2095,11 +2116,11 @@ test('membership store and dynamic billing scripts use the same fresh cache revi
   const store = read('member-store.html');
   const bootstrap = read('js/member-bootstrap.js');
   const billing = read('js/member-billing.js');
-  assert.ok(store.includes('js/member-bootstrap.js?v=lessons-hub-v14'));
-  assert.ok(bootstrap.includes("src + '?v=nbjb-return-v12'"));
+  assert.ok(store.includes('js/member-bootstrap.js?v=paid-account-view-v1'));
+  assert.ok(bootstrap.includes("src + '?v=paid-account-view-v1'"));
   assert.ok(!store.includes('qa-billing-v11'));
   assert.ok(!bootstrap.includes('qa-billing-v11'));
-  assert.ok(billing.includes("if (current.tier === 'paid')"));
+  assert.ok(billing.includes("if (activePaid)"));
   assert.ok(billing.includes('purchase.hidden = false;'));
 });
 

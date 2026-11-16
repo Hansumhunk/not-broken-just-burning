@@ -342,48 +342,52 @@ test('Lessons is a direct top-nav destination on authenticated member pages', ()
   assert.ok(premium.includes('All Lessons'));
 });
 
-test('Lessons hub shows one free lesson and seven published premium lessons without leaking protected bodies', () => {
+test('Lessons hub offers one free lesson and 35 gated published lessons without embedding premium bodies', () => {
   const html = read('member-lessons.html');
   const slugs = ['father-wound','mother-wound','learned-silence','bullying-shame-early-armor','what-strength-looked-like','allowed-to-need','inherited-vs-chosen-manhood'];
   assert.ok(html.includes('data-member-page="lessons"'));
   assert.ok(html.includes('id="nbjb-member-access-gate"'));
   assert.ok(html.includes('href="member-start-here.html"'));
-  assert.equal((html.match(/data-paid-lesson-open hidden/g) || []).length, 7);
-  assert.equal((html.match(/data-free-lesson-lock hidden/g) || []).length, 7);
+  assert.equal((html.match(/data-paid-lesson-open hidden/g) || []).length, 35);
+  assert.equal((html.match(/data-free-lesson-lock hidden/g) || []).length, 35);
   for (const slug of slugs) assert.ok(html.includes('href="member-premium-lesson.html?lesson=' + slug + '"'));
-  assert.ok(html.includes('28 more lessons are being prepared'));
+  assert.ok(html.includes('Explore 28 more published lessons'));
   assert.ok(html.includes('Video lessons remain shelved'));
   assert.ok(html.includes("state?.tier === 'paid' && state?.source !== 'server_error'"));
-  assert.ok(html.includes('window.addEventListener(\'nbjb:entitlements\''));
+  assert.ok(html.includes("window.addEventListener('nbjb:entitlements'"));
   assert.ok(html.includes('member-store.html'));
   assert.ok(!html.includes('data-premium-lesson-content'), 'premium manuscripts must never be embedded in index');
 });
 
 test('published Lessons cards have no decorative availability ribbons', () => {
   const catalog = read('member-lessons.html');
-  const cards = catalog.match(/class="member-locked-card is-live" aria-labelledby="lesson-/g) || [];
-  assert.equal(cards.length, 7);
+  const foundingCards = catalog.match(/class="member-locked-card is-live" aria-labelledby="lesson-/g) || [];
+  const otherCards = catalog.match(/class="lesson-draft-card is-live" data-published-lesson=/g) || [];
+  assert.equal(foundingCards.length, 7);
+  assert.equal(otherCards.length, 28);
   assert.ok(catalog.includes('body[data-member-page="lessons"] .member-locked-card::after{display:none!important;content:none!important}'));
-  assert.ok(catalog.includes('28 more lessons are being prepared'));
 });
 
-test('all 28 drafted lessons appear in five expandable tracks without unpublished content access', () => {
+test('all 28 additional lessons have unique gated reader links in five expandable tracks', () => {
   const catalog = read('member-lessons.html');
-  assert.equal((catalog.match(/data-editorial-preview=/g) || []).length, 28);
+  assert.equal((catalog.match(/data-editorial-preview=/g) || []).length, 0);
+  const cards = [...catalog.matchAll(/data-published-lesson="([a-z0-9-]+)"/g)].map(m => m[1]);
+  assert.equal(cards.length, 28);
+  assert.equal(new Set(cards).size, 28);
   assert.equal((catalog.match(/class="lesson-track-preview"/g) || []).length, 5);
-  for (const [track, count] of [
-    ['The Placeholder Wound', 8],
-    ['When the Safe Room Becomes the Courtroom', 5],
-    ['Steadiness &amp; Emotional Command', 5],
-    ['Rebuilding a Life That Holds', 5],
-    ['The Five Sacred Laws of Survival', 5],
-  ]) {
-    assert.ok(catalog.includes(track), 'missing draft track: ' + track);
+  for (const track of [
+    'The Placeholder Wound',
+    'When the Safe Room Becomes the Courtroom',
+    'Steadiness &amp; Emotional Command',
+    'Rebuilding a Life That Holds',
+    'The Five Sacred Laws of Survival'
+  ]) assert.ok(catalog.includes(track), 'missing additional track: ' + track);
+  for (const slug of cards) {
+    assert.ok(catalog.includes('href="member-premium-lesson.html?lesson=' + slug + '"'), 'missing gated reader route: ' + slug);
   }
-  assert.equal((catalog.match(/data-paid-lesson-open hidden/g) || []).length, 7);
-  assert.ok(catalog.includes('not included in today'));
+  assert.equal((catalog.match(/data-paid-lesson-open hidden/g) || []).length, 35);
   assert.ok(catalog.includes('Video lessons remain shelved'));
-  assert.ok(!catalog.includes('href="member-premium-lesson.html?lesson=being-needed-vs-chosen"'));
+  assert.ok(!catalog.includes('data-premium-lesson-content'), 'the public page cannot embed protected lesson bodies');
 });
 
 test('paid dashboard learning continues into published written lessons, not unreleased video area', () => {

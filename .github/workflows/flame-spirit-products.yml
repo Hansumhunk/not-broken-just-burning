@@ -1,0 +1,40 @@
+name: Flame Spirit Product Opportunity Scout
+
+# Weekly product research without a ChatGPT scheduled task, paid APIs, or sensitive data.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 10 * * 2'
+      timezone: America/New_York
+  pull_request:
+    paths:
+      - '.github/workflows/flame-spirit-products.yml'
+      - 'scripts/flame_spirit_products.mjs'
+      - 'scripts/flame_spirits.mjs'
+      - 'scripts/test_flame_spirit_products.mjs'
+      - 'FLAME_SPIRITS.md'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: flame-spirit-products
+  cancel-in-progress: false
+
+jobs:
+  scout:
+    name: Spirit of the Forge — product research
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - name: Checkout public NBJB site and brand source
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Validate product scout logic and privacy guardrails
+        run: node --test scripts/test_flame_spirit_products.mjs
+
+      - name: Research public product opportunities
+        if: github.event_name != 'pull_request'
+        run: node scripts/flame_spirits.mjs products

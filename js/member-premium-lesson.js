@@ -9,6 +9,7 @@
   const positionKey = userId ? 'nbjb.plus.reading-position.v1.' + userId + '.' + slug : null;
   // The scenario-page layout changed, so map older device-only numeric bookmarks once.
   const scenarioLayoutKey = positionKey ? positionKey + '.scenario-layout-v1' : null;
+  const caseLayoutKey = positionKey ? positionKey + '.semantic-cases-v1' : null;
   const fontKey = 'nbjb.plus.reader-font.v1';
   // A review checklist belongs to the authorized reviewer and this exact draft
   // revision. It is never a publication flag or a server-side entitlement.
@@ -128,15 +129,37 @@
   }
   // Use the author's actual chapter headings, never arbitrary page-number slices.
   const major = /^(?:OPENING|LESSON PURPOSE|PART \d+\b|THE (?:FATHER IMPRINT MAP|MATERNAL IMPRINT MAP|SILENCE INVENTORY|SMALLER DOOR)|NEXT HONEST ACTION|THE NEXT HONEST ACTION|OPTIONAL SPIRITUAL LENS|INTEGRATION|FINAL REFLECTION|PRIVACY NOTE|PROFESSIONAL(?:\s|\/|$))/i;
+  // Preserve narrative integrity: a scenario or case-study is a complete
+  // learning page, not a fragment of the surrounding paragraph-length page.
+  // These patterns inspect private lesson blocks only after server authorization.
+  function namedCaseHeading(text) {
+    return /^(?:SCENARIO|WORKED SCENARIO|CASE STUDY)\s*[:—–-]\s*\S/i.test(text);
+  }
+  function inlineScenario(text) {
+    const match = /^Scenario\s+([A-Z]|\d{1,2})\s*([:—–-])\s*/i.exec(text);
+    if (!match) return null;
+    const remainder = text.slice(match[0].length).trim();
+    let title = 'Scenario ' + match[1].toUpperCase();
+    let body = remainder;
+    // An em-dash often introduces a short case title; a colon normally
+    // introduces the beginning of the actual teaching paragraph.
+    if (match[2] !== ':') {
+      const subject = /^([^.!?]{3,115})\.\s*(.*)$/s.exec(remainder);
+      if (subject) {
+        title += ' — ' + subject[1].trim();
+        body = subject[2];
+      }
+    }
+    return { title, body };
+  }
   function sectionize(blocks, { splitScenarios = true } = {}) {
-    // The Mother Wound includes short reflective subheadings. Give those
-    // blocks more breathing room before a new page is started, so readers
-    // do not land on near-empty continuation screens. Father Wound's section
-    // indices are fixed because its recorded narration already uses them.
+    // Father Wound's original map/recorded-section indices remain unchanged.
+    // Mother Wound's existing shorter subheading behavior is unchanged too.
     const minSplitLength = slug === 'mother-wound' ? 1200 : 900;
     const blockLimit = slug === 'mother-wound' ? 22 : 11;
     const output = [];
     let name = 'Opening';
+    let parentName = 'Opening';
     let part = [];
     let length = 0;
     let continuation = 0;
@@ -146,6 +169,10 @@
       output.push({ title: name, continuation, blocks: part });
       part = []; length = 0; continuation++;
     }
+    function caseTitle(title) {
+      const partNumber = /^Part\s+(\d+)\b/i.exec(parentName)?.[1];
+      return partNumber ? 'Part ' + partNumber + ' · ' + title : title;
+    }
     for (const block of blocks.slice(0, 800)) {
       if (!block || typeof block.text !== 'string' || !block.text.trim()) continue;
       const text = block.text.trim();
@@ -153,25 +180,40 @@
       if (kind === 'heading' && major.test(text)) {
         flush();
         name = prettyHeading(text);
+        parentName = name;
         continuation = 0;
         inScenario = false;
         continue;
       }
-      // In Red Flags and Responsibility, the four extended examples must each
-      // be one complete reading page. Their headings live in private lesson data.
-      const scenarioHeader = splitScenarios && slug === 'red-flags-and-responsibility' && kind === 'paragraph'
-        ? /^Scenario ([A-D]) — ([^.]+)\./.exec(text) : null;
-      if (scenarioHeader) {
+      if (splitScenarios && kind === 'heading' && namedCaseHeading(text)) {
         flush();
-        name = 'Part 5 · Scenario ' + scenarioHeader[1] + ' — ' + scenarioHeader[2];
+        name = caseTitle(prettyHeading(text));
         continuation = 0;
         inScenario = true;
-        const intro = text.slice(scenarioHeader[0].length).trim();
-        if (intro) { part.push({ kind, text: intro }); length += intro.length; }
         continue;
       }
-      // Normal pages remain brief; a scenario keeps all of its paragraphs
-      // together even if the example is longer than an ordinary page.
+      const inlineCase = splitScenarios && kind === 'paragraph' ? inlineScenario(text) : null;
+      if (inlineCase) {
+        flush();
+        name = caseTitle(inlineCase.title);
+        continuation = 0;
+        inScenario = true;
+        if (inlineCase.body) {
+          part.push({ kind, text: inlineCase.body });
+          length += inlineCase.body.length;
+        }
+        continue;
+      }
+      // A following non-case heading ends the case page. Keep that heading
+      // in its original teaching block so worksheets can still detect it.
+      if (inScenario && kind === 'heading') {
+        flush();
+        name = parentName;
+        continuation = 0;
+        inScenario = false;
+      }
+      // Normal pages target 1–3 minutes. A case page retains every paragraph
+      // until the next case, the next chapter, or another distinct heading.
       if (!inScenario && part.length && length > minSplitLength &&
           (length + text.length > 1800 || part.length >= blockLimit)) flush();
       part.push({ kind, text });
@@ -181,21 +223,29 @@
     return output;
   }
   function remapScenarioBookmark(blocks, legacyIndex, revisedSteps) {
-    if (slug !== 'red-flags-and-responsibility' || !Number.isInteger(legacyIndex) || legacyIndex < 0) return legacyIndex;
+    if (!Number.isInteger(legacyIndex) || legacyIndex < 0) return legacyIndex;
     const oldStep = sectionize(blocks, { splitScenarios: false })[legacyIndex];
-    // An old length-based page can contain both the end of Scenario A and
-    // the start of Scenario B. Prefer the most recent scenario heading.
-    const scenarioLead = oldStep?.blocks?.slice().reverse().find(block => /^Scenario [A-D] —/.test(block.text));
-    const first = scenarioLead?.text || oldStep?.blocks?.find(block => block.text)?.text;
-    if (!first) return legacyIndex;
-    const scenarioId = /^Scenario ([A-D]) —/.exec(first)?.[1];
-    if (scenarioId) {
-      const named = revisedSteps.findIndex(step => step.title.startsWith('Part 5 · Scenario ' + scenarioId + ' —'));
+    if (!oldStep) return legacyIndex;
+    // A legacy length-based page can contain two cases. Prefer the last
+    // explicit case marker, since that is where the reader had arrived.
+    const marker = oldStep.blocks.slice().reverse().find(block =>
+      (block.kind === 'heading' && namedCaseHeading(block.text)) ||
+      (block.kind === 'paragraph' && inlineScenario(block.text)));
+    if (marker) {
+      const title = marker.kind === 'heading'
+        ? prettyHeading(marker.text)
+        : inlineScenario(marker.text).title;
+      const named = revisedSteps.findIndex(step =>
+        step.title === title || step.title.endsWith(' · ' + title));
       if (named >= 0) return named;
     }
-    const mapped = revisedSteps.findIndex(step => step.blocks?.some(block =>
-      block.text === first || (first.startsWith('Scenario ') && first.includes(block.text.slice(0, 80)))));
-    return mapped >= 0 ? mapped : legacyIndex;
+    // Most old pages begin with a paragraph preserved verbatim. Resolve by
+    // content, not the fragile numeric index that shifts when cases split.
+    const first = oldStep.blocks.find(block => block.text)?.text;
+    if (!first) return legacyIndex;
+    const byText = revisedSteps.findIndex(step =>
+      step.blocks?.some(block => block.text === first));
+    return byText >= 0 ? byText : legacyIndex;
   }
   function label(step) {
     return step.continuation ? step.title + ' · continued ' + (step.continuation + 1) : step.title;
@@ -455,6 +505,7 @@
       current === count - 1 ? 'You reached the end' : 'Next section →';
     const saved = storageWrite(positionKey, String(current));
     if (saved && slug === 'red-flags-and-responsibility') storageWrite(scenarioLayoutKey, 'one-scenario-per-page');
+    if (saved) storageWrite(caseLayoutKey, 'semantic-cases-v1');
     el('premium-save-status').textContent = saved
       ? 'Reading position saved on this device. Your reflection answers are not saved or uploaded.'
       : 'Reading position cannot be saved in this browser. Reflection answers are not uploaded.';
@@ -550,13 +601,18 @@
       ? 'Editorial preview · Available only to the nominated internal reviewer, not released to members.'
       : 'Published material · Available only with server-authorized Flamewalker+ access.';
     buildSelector();
-    let stored = Number(storageRead(positionKey));
-    if (slug === 'red-flags-and-responsibility' && storageRead(scenarioLayoutKey) !== 'one-scenario-per-page') {
-      stored = remapScenarioBookmark(blocks, stored, steps);
-    }
+    const previousPosition = storageRead(positionKey);
+    let stored = Number(previousPosition);
     const requestedSection = new URLSearchParams(location.search).get('section');
-    const direct = requestedSection && /^[1-9][0-9]{0,2}$/.test(requestedSection)
+    let direct = requestedSection && /^[1-9][0-9]{0,2}$/.test(requestedSection)
       ? Number(requestedSection) - 1 : null;
+    const priorSemanticLayout = storageRead(caseLayoutKey) === 'semantic-cases-v1';
+    const priorRedFlagsLayout = slug === 'red-flags-and-responsibility' &&
+      storageRead(scenarioLayoutKey) === 'one-scenario-per-page';
+    if (previousPosition !== null && !priorSemanticLayout && !priorRedFlagsLayout) {
+      stored = remapScenarioBookmark(blocks, stored, steps);
+      if (direct !== null) direct = remapScenarioBookmark(blocks, direct, steps);
+    }
     // A return link can name a section directly. The lesson body is still
     // fetched through server-side membership authorization first.
     current = direct !== null && direct >= 0 && direct < steps.length

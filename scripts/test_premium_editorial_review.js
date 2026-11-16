@@ -344,7 +344,7 @@ test('live subscription UI is prepared but closed until explicit final launch ap
   assert.doesNotMatch(js, /sk_live_|rk_live_|STRIPE_LIVE_SECRET_KEY/);
 });
 
-test('live checkout checks a returning Stripe customer's actual subscription status before creating another session', () => {
+test('live checkout checks returning customer Stripe subscription status before opening a new session', () => {
   const source = read('launch-backend-staging/create-live-checkout-session/index.ts');
   assert.match(source, /stripe\.subscriptions\.list\(/);
   assert.match(source, /status: "all"/);

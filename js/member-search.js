@@ -91,6 +91,13 @@
   const auth = window.NBJBAuth;
   const entitlements = window.NBJBEntitlements;
   if (!auth?.user?.id || !entitlements?.load) return;
+  if (!document.querySelector('link[data-member-search-style]')) {
+    const stylesheet=document.createElement('link');
+    stylesheet.rel='stylesheet';
+    stylesheet.href='css/member-search.css?v=1';
+    stylesheet.dataset.memberSearchStyle='';
+    document.head.append(stylesheet);
+  }
   let catalog = [];
   let catalogRequested = false;
   let catalogAvailable = false;

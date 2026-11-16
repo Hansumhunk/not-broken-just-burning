@@ -56,7 +56,9 @@
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = src === 'js/member-platform.js'
+      script.src = src === 'js/member-dashboard.js'
+        ? src + '?v=journey-compass-v1'
+        : src === 'js/member-platform.js'
         ? src + '?v=lessons-hub-v14'
         : src === 'js/member-premium-lesson.js'
         ? src + '?v=reflection-examples-v19'

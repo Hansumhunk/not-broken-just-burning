@@ -14,6 +14,16 @@
     'in-progress': 'In progress',
     practicing: 'Practicing'
   });
+  // These are existing published teaching pages. Opening one does not
+  // silently change the member's selected focus or progress status.
+  const stageRoutes = Object.freeze({
+    'Fire Reclamation': 'path-fire-reclamation.html',
+    "The Guardian's Path": 'path-guardian.html',
+    'Sacred Mirror Work': 'path-sacred-mirror.html',
+    'Masculine Restoration': 'path-masculine-restoration.html',
+    'Voice of Fire': 'path-voice-of-fire.html',
+    'Circle of the Flame': 'path-circle-of-the-flame.html'
+  });
   const practicedKey = 'nbjb.plus.lesson-progress.v1.' + userId;
   const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
   const node = selector => document.querySelector(selector);
@@ -48,11 +58,28 @@
       const li = document.createElement('li');
       li.dataset.currentFocus = String(name === focus);
       const title = document.createElement('strong');
-      title.textContent = name;
+      const route = stageRoutes[name];
+      if (route) {
+        const link = document.createElement('a');
+        link.className = 'learning-trail-stage-link';
+        link.href = route;
+        link.textContent = name;
+        link.setAttribute('aria-label', 'Explore ' + name);
+        title.append(link);
+      } else {
+        title.textContent = name;
+      }
       const status = document.createElement('span');
       status.textContent = (stageStates[current[name]] || 'Not started') +
         (name === focus ? ' · Current focus' : '');
       li.append(title, status);
+      if (route) {
+        const hint = document.createElement('span');
+        hint.className = 'learning-trail-stage-hint';
+        hint.textContent = 'Explore stage →';
+        hint.setAttribute('aria-hidden', 'true');
+        li.append(hint);
+      }
       stages.append(li);
     }
   }

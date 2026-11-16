@@ -785,8 +785,12 @@ test('member navigation renders five desktop destinations and reachable secondar
   vm.runInNewContext(routes+fn+'\nensureMemberNav();',{document});
   const primary=nav.children.filter(child=>child.tag==='a');
   assert.deepEqual(primary.map(x=>x.dataset.memberNav),['dashboard','lessons','path','tools','work']);
-  const more=nav.children.find(child=>child.tag==='details');
-  assert.ok(more,'More must remain available');
+  // Search and More now live in the same right-aligned navigation group.
+  const actions=nav.children.find(child=>child.tag==='div');
+  assert.ok(actions,'Search / More group must be available');
+  assert.equal(actions.className,'member-nav-actions');
+  const more=actions.children.find(child=>child.tag==='details');
+  assert.ok(more,'More must remain available beside Search');
   const [toggle,panel]=more.children;
   assert.equal(toggle.tag,'summary');
   assert.equal(toggle.textContent,'More');

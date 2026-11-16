@@ -525,3 +525,55 @@ test('Start Here offers free deep dive, not a protected lesson URL, without a pa
   assert.equal(next.href,'member-framework.html#chaos');
   assert.match(next.textContent,/Chaos/);
 });
+
+test('dashboard compass unifies learning, current Path focus and next action without private reflections', () => {
+  const html=read('members.html');
+  const js=read('js/member-dashboard.js');
+  const css=read('css/member-dashboard.css');
+  const loader=read('js/member-bootstrap.js');
+  for (const token of ['member-journey-compass','data-dashboard-reading-name','data-dashboard-reading-state','data-dashboard-reading-link',
+    'data-dashboard-focus-name','data-dashboard-focus-state','data-dashboard-action-state','data-dashboard-continue-tool',
+    'id="member-quick-action"','id="save-quick-action"']) assert.ok(html.includes(token),token);
+  assert.ok(html.includes('css/member-dashboard.css?v=journey-compass-v1'));
+  assert.ok(loader.includes("src === 'js/member-dashboard.js'"));
+  assert.ok(loader.includes("src + '?v=journey-compass-v1'"));
+  assert.ok(js.includes('window.NBJBLearningContinuity?.get?.()'));
+  assert.ok(js.includes("entitlementState?.tier === 'paid' && entitlementState?.source === 'server'"));
+  assert.ok(js.includes("link.href = 'member-lessons.html'"));
+  assert.ok(js.includes("link.href = 'member-start-here.html'"));
+  assert.ok(js.includes("renderReading(entitlementState);"));
+  assert.ok(js.includes("renderNextAction(state);"));
+  assert.ok(!js.includes('entry.data?.facts'), 'dashboard must not display private journal details');
+  assert.ok(!js.includes('entry.data?.feelings'), 'dashboard must not display private journal details');
+  assert.ok(css.includes('.member-journey-compass .member-today-grid'));
+  assert.ok(css.includes('@media(max-width:1040px)'));
+  assert.ok(js.includes('35 published guided lessons'));
+});
+
+test('dashboard reader link is paid-only and resumes the device bookmark', () => {
+  const js=read('js/member-dashboard.js');
+  const from=js.indexOf('  function renderReading(entitlementState) {');
+  const to=js.indexOf('  function renderFocus(state)',from);
+  assert.ok(from>=0&&to>from);
+  const elems={};
+  for(const key of ['[data-dashboard-reading-name]','[data-dashboard-reading-state]','[data-dashboard-reading-link]','[data-dashboard-action-title]','[data-dashboard-action-state]'])
+    elems[key]={textContent:'',href:''};
+  let getCalls=0;
+  const ctxt={
+    document:{querySelector:key=>elems[key]||null},
+    window:{NBJBLearningContinuity:{get:()=>{getCalls++;return{slug:'father-wound',title:'The Father Wound',section:5,total:17};}}},
+  };
+  const functions=vm.runInNewContext(
+    'function setText(selector,value){const n=document.querySelector(selector);if(n)n.textContent=value;}\n'+
+    js.slice(from,to)+'\n({renderReading,renderNextAction})',ctxt);
+  functions.renderReading({tier:'free',source:'server'});
+  assert.equal(elems['[data-dashboard-reading-link]'].href,'member-start-here.html');
+  assert.equal(getCalls,0,'free accounts must never consult paid reading metadata');
+  functions.renderReading({tier:'paid',source:'server_error'});
+  assert.equal(getCalls,0,'unverified paid display must not grant a protected reading link');
+  functions.renderReading({tier:'paid',source:'server'});
+  assert.equal(elems['[data-dashboard-reading-link]'].href,'member-premium-lesson.html?lesson=father-wound&section=5');
+  assert.match(elems['[data-dashboard-reading-state]'].textContent,/Section 5 of 17/);
+  functions.renderNextAction({journey:{nextAction:'Prepare the school bag tonight'}});
+  assert.equal(elems['[data-dashboard-action-state]'].textContent,'Prepare the school bag tonight');
+});

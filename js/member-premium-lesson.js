@@ -72,6 +72,7 @@
       if (!items.length) return;
       reviewCatalog = items;
       renderReviewQueue();
+      updateNextLesson();
       const nav = document.querySelector('.premium-track-nav');
       if (!nav) return;
       nav.replaceChildren();
@@ -110,6 +111,48 @@
         nav.append(li);
       }
     } catch (_) { /* Static lesson links remain. */ }
+  }
+
+  // The next lesson is a suggestion, not a required gate or completion award.
+  // Use only server-returned, explicitly published catalog entries after the
+  // current protected lesson body has been authorized.
+  function nextPublishedLesson(items, currentSlug) {
+    if (!Array.isArray(items)) return null;
+    const published = items.filter(item => item?.status === 'published' &&
+      typeof item.slug === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.slug));
+    const index = published.findIndex(item => item.slug === currentSlug);
+    if (index === -1 || index >= published.length - 1) return null;
+    const next = published[index + 1];
+    return { slug: next.slug, title: String(next.title || 'Next guided lesson').slice(0, 140),
+      newTrack: next.track_slug !== published[index].track_slug };
+  }
+
+  function updateNextLesson() {
+    const panel = el('premium-next-lesson-panel');
+    if (!panel) return;
+    // The panel is not visible on a reading section or when a draft is under
+    // editorial review. It is shown only after the final reflection is reached.
+    const final = Boolean(lesson?.status === 'published' && steps.length &&
+      current === steps.length - 1);
+    panel.hidden = !final;
+    if (!final) return;
+    const next = nextPublishedLesson(reviewCatalog, slug);
+    const heading = el('premium-next-lesson-title');
+    const description = el('premium-next-lesson-description');
+    const link = el('premium-next-lesson-link');
+    if (next) {
+      heading.textContent = next.newTrack ? 'Ready for a new learning track?' : 'Ready for your next lesson?';
+      description.textContent = 'Up next: ' + next.title +
+        '. You can pause here, or save and copy any reflections you want to keep before leaving.';
+      link.href = 'member-premium-lesson.html?lesson=' + encodeURIComponent(next.slug);
+      link.textContent = 'Continue to ' + next.title + ' →';
+    } else {
+      heading.textContent = 'You reached the end of this lesson.';
+      description.textContent = 'Return to the published catalog when you feel ready. ' +
+        'Save or copy anything you want to keep before leaving this page.';
+      link.href = 'member-lessons.html';
+      link.textContent = 'Browse All Published Lessons →';
+    }
   }
 
   function noticeState(title, message) {
@@ -503,6 +546,7 @@
     el('premium-next').disabled = current === count - 1;
     el('premium-next').textContent = current === count - 2 ? 'Final reflection →' :
       current === count - 1 ? 'You reached the end' : 'Next section →';
+    updateNextLesson();
     const saved = storageWrite(positionKey, String(current));
     if (saved && slug === 'red-flags-and-responsibility') storageWrite(scenarioLayoutKey, 'one-scenario-per-page');
     if (saved) storageWrite(caseLayoutKey, 'semantic-cases-v1');

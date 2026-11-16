@@ -38,6 +38,9 @@ on:
       - 'scripts/flame_spirits.mjs'
       - 'scripts/test_flame_spirits.mjs'
       - 'scripts/flame_spirits_guardrails.mjs'
+      - '.github/workflows/flame-spirit-products.yml'
+      - 'scripts/flame_spirit_products.mjs'
+      - 'scripts/test_flame_spirit_products.mjs'
       - 'FLAME_SPIRITS.md'
   pull_request:
     paths:
@@ -68,6 +71,9 @@ on:
       - 'scripts/flame_spirits.mjs'
       - 'scripts/test_flame_spirits.mjs'
       - 'scripts/flame_spirits_guardrails.mjs'
+      - '.github/workflows/flame-spirit-products.yml'
+      - 'scripts/flame_spirit_products.mjs'
+      - 'scripts/test_flame_spirit_products.mjs'
       - 'FLAME_SPIRITS.md'
 
 permissions:
@@ -99,6 +105,8 @@ jobs:
         run: node --test scripts/test_plus_preview.js
       - name: Test Flame Spirits read-only scouting engine
         run: node --test scripts/test_flame_spirits.mjs
+      - name: Test product research integrity and market signal separation
+        run: node --test scripts/test_flame_spirit_products.mjs
       - name: Smoke-test live Flamewalker Supabase Auth
         if: ${{ github.base_ref == 'main' || github.ref_name == 'main' || startsWith(github.ref_name, 'release/') }}
         run: python scripts/validate_supabase_runtime.py

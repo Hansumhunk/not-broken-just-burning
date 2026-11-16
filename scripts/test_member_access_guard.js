@@ -330,7 +330,7 @@ test('Lessons is a direct top-nav destination on authenticated member pages', ()
   const library = read('member-library.html');
   const premium = read('member-premium-lesson.html');
   assert.ok(platform.includes("['lessons', 'member-lessons.html', 'Lessons']"));
-  assert.ok(platform.includes("['start-here', 'premium-lesson'].includes(page)"));
+  assert.ok(platform.includes("['start-here', 'framework', 'premium-lesson'].includes(page)"));
   assert.ok(bootstrap.includes("src === 'js/member-platform.js'"));
   assert.ok(bootstrap.includes("src + '?v=lessons-hub-v14'"));
   for (const html of [dashboard, intro, library, premium]) {

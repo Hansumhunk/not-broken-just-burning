@@ -24,6 +24,23 @@ Flame Spirits are small, independently understandable tasks, not unsupervised em
 
 These two spirits run on the existing Flame Spirits Monday/Wednesday/Friday GitHub schedule. The new module is `scripts/flame_spirits_guardrails.mjs`. Individual CLI checks: `node scripts/flame_spirits.mjs resources` and `node scripts/flame_spirits.mjs brand`. The workflow runs both with the other spirits using `all`. No additional ChatGPT scheduled-task slots or paid APIs are required.
 
+## #16 — Spirit of the Forge: Digital Product Opportunity Scout
+
+This spirit researches possible **workbooks, guided journals, fatherhood planning kits, and self-trust tools** using only public material, and it reports **ranked hypotheses**, not validated paying demand.
+
+**Independent GitHub schedule:** Tuesdays around 10:23 AM America/New_York, in \`.github/workflows/flame-spirit-products.yml\` (GitHub may delay scheduled jobs). It uses the existing site's GitHub Actions infrastructure, not an additional ChatGPT task slot.
+
+**Three separate evidence classes:**
+1. **NBJB fit:** inspect public \`index.html\`, \`resources.html\`, \`lessons.html\`, and \`books-projects.html\` for established themes and existing public products/works-in-development. Do not read private manuscripts or claim unfinished projects are for sale.
+2. **Audience topic signals:** aggregate only the topical titles of publicly accessible RSS/Atom feeds from Daddit and MensLib; never output usernames, exact titles, stories, post URLs, private messages, or quotes. Product-format requests are counted separately from general discussion. If feeds are unavailable, record **unverified** rather than a negative demand finding.
+3. **Adjacent book supply:** make four low-rate, read-only Open Library Search API requests for broad bibliographic matches, with a contact-identified User-Agent and explicit selected fields. Public catalog hit counts are *fuzzy catalog supply*, **not** sales, customer willingness to pay, prices, profit, or definitive competitors. Respect the API's current usage guidelines and discontinue it if the provider no longer permits this use.
+
+**Output:** four concepts ordered for further exploration, foundation page references, only aggregate topical counts, broad public catalog reference links, confidence limits, one tiny founder-reviewable sample-product exercise for each, and a recommendation to validate usefulness before launch. No growth forecasts or invented prices.
+
+**Founder approval gates remain absolute:** no checkout, product publication, preorders, advertising spend, revenue changes, paid subscriptions, content creation that edits the curriculum, outreach, data collection, video work, or sharing member details. The spirit cannot write to the repository; its workflow uses \`contents: read\`.
+
+**Execution:** \`node --test scripts/test_flame_spirit_products.mjs\` verifies offline scenarios and privacy; \`node scripts/flame_spirits.mjs products\` executes one read-only research pass. Reports appear under GitHub Actions → **Flame Spirit Product Opportunity Scout** → selected run → Summary. The existing Monday/Wednesday/Friday \`all\` command deliberately skips this new spirit, avoiding redundant frequent calls.
+
 The Library Spirit fetches only explicitly allowlisted external support domains; unexpected domains are identified for founder review rather than fetched. Its HTTP signals do **not** establish whether a telephone service remains accurate or available. A blocked/redirected response should be checked manually using the official provider. The Brand Spirit reports missing configured phrases or cues; it does not read or rewrite protected lesson manuscripts, infer meaning beyond the checks, verify legal statements, or approve copy.
 
 The full weekly member/Stripe/Supabase monitoring functions configured in ChatGPT remain separate. This GitHub system does not require a ChatGPT plan upgrade.

@@ -1,0 +1,44 @@
+/* Signed-in Flamewalker Path exercises. Member answers remain device-local. */
+.path-stage-shell{max-width:1100px;padding-bottom:45px}
+.path-stage-breadcrumb{display:flex;align-items:center;flex-wrap:wrap;gap:10px 20px;margin:7px 0 22px}
+.path-stage-breadcrumb a,.path-stage-bridge a{color:var(--ember-pale);font-weight:700;text-decoration:none}
+.path-stage-breadcrumb a:hover,.path-stage-bridge a:hover{text-decoration:underline}
+.path-stage-shell .member-panel{margin-bottom:19px}
+.path-stage-shell .member-panel h2{line-height:1.3}
+.path-stage-shell .member-panel p{line-height:1.75}
+.path-stage-intro{border-color:var(--line-hot);background:linear-gradient(140deg,rgba(237,113,48,.065),rgba(255,255,255,.01))}
+.path-stage-intro-head{display:flex;align-items:start;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.path-stage-intro-head>div:first-child{flex:1 1 350px}
+.path-stage-status{display:flex;flex-direction:column;gap:9px;min-width:200px}
+.path-stage-status label,.path-stage-small-action>label:first-child{font-weight:750;font-size:.88rem;color:var(--text)}
+.path-stage-status select{border:1px solid var(--line);border-radius:10px;padding:10px;background:#111115;color:var(--text);font:inherit}
+.path-stage-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:20px}
+#path-stage-focus-caption{color:var(--muted);font-size:.88rem}
+.path-stage-teaching-block{padding:15px 0;border-top:1px solid var(--line)}
+.path-stage-teaching-block:first-child{border-top:0}
+.path-stage-teaching-block h3{font-size:clamp(1.1rem,2.3vw,1.35rem);line-height:1.45;margin:0 0 12px}
+.path-stage-teaching-block p{margin:0;max-width:82ch;color:var(--muted)}
+.path-stage-bridge{margin-top:17px;padding:14px 17px;border-left:3px solid var(--ember-deep);background:rgba(255,255,255,.02);font-size:.88rem;color:var(--muted)}
+.path-stage-question{display:grid;gap:8px;padding:17px 0;border-top:1px solid var(--line)}
+.path-stage-question:first-child{border-top:0}
+.path-stage-question label{display:block;font-weight:750;line-height:1.6;font-size:.94rem}
+.path-stage-question p{margin:0 0 7px;color:var(--muted);font-size:.85rem}
+.path-stage-question textarea,.path-stage-small-action textarea{width:100%;min-height:88px;min-width:0;max-height:350px;box-sizing:border-box;border:1px solid var(--line);border-radius:11px;background:#0f0f13;color:var(--text);padding:12px 14px;font:inherit;line-height:1.65;resize:vertical}
+.path-stage-question textarea:focus-visible,.path-stage-small-action textarea:focus-visible,.path-stage-status select:focus-visible{outline:2px solid var(--ember-pale);outline-offset:2px;border-color:var(--line-hot)}
+.path-stage-small-action{padding:21px;border:1px solid var(--line-hot);border-radius:13px;background:rgba(240,125,61,.037);display:grid;gap:12px;margin:14px 0}
+.path-stage-optin{display:flex;align-items:start;gap:10px;color:var(--muted);font-size:.86rem;line-height:1.5}
+.path-stage-optin input{min-width:19px;min-height:19px;accent-color:#ef752f;margin:3px 0 0}
+.path-stage-buttons,.path-stage-next-links{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.path-stage-buttons .button,.path-stage-next-links .button{max-width:100%;white-space:normal}
+.path-stage-result{min-height:26px;color:var(--ember-pale);font-weight:650}
+.path-stage-note{font-size:.86rem;color:var(--muted)}
+#path-stage-open-work{display:inline-block;margin-top:12px;color:var(--ember-pale);font-weight:800}
+#path-stage-error{border:1px solid var(--line-hot);padding:16px 18px;border-radius:12px}
+#path-stage-error a{color:var(--ember-pale)}
+@media(max-width:720px){
+  .path-stage-shell .member-panel{padding:clamp(15px,4vw,23px)}
+  .path-stage-status{width:100%}
+  .path-stage-buttons,.path-stage-next-links{display:grid;grid-template-columns:1fr}
+  .path-stage-buttons .button,.path-stage-next-links .button{text-align:center;justify-content:center;width:100%;box-sizing:border-box}
+  .path-stage-question textarea{min-height:94px}
+}

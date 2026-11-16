@@ -11,7 +11,20 @@
 - [x] **Step 3 — free lesson and paid boundary:** free lesson reachable; premium lesson content not accessible from ordinary Free member UI.
 - [x] **Step 4 — sign-out and return:** dashboard access requires authentication again after sign-out.
 
-**Still separate and open:** real paid-member lesson/workbook/save acceptance, a direct server-side paid-lesson denial test under ordinary Free credentials, first independent customer purchase/portal acceptance, final lesson editorial QA, and the December 2 live cancellation/paid-to-Free transition. No charges, member status edits or access changes were made to record this result.
+**The distinct paid-member lesson/workbook/save and billing-portal acceptance was founder-confirmed 5/5 on November 16 (recorded below).** Still open: direct server-side paid-lesson denial under ordinary Free credentials, first independent external customer checkout-to-entitlement test, broader track/mobile/keyboard coverage, editorial QA, and the December 2 paid-to-Free transition. No charges, member status edits or access changes were made to record either founder confirmation.
+
+## Founder-confirmed live paid-member browser acceptance — November 16, 2026
+
+**Result: 5 of 5 paid-member browser checks passed, reported directly by the founder in ChatGPT on November 16, 2026.** Founder reported no errors or unexpected behavior. These are founder-observed results, not independent browser recordings, extra purchases, or automatically verified real-customer transactions.
+
+- [x] **Paid account recognized:** signed-in account displayed Flamewalker+ membership.
+- [x] **Protected teaching opened:** a published Track 2 premium lesson loaded for the paid account.
+- [x] **Worksheet retention:** an innocuous lesson test entry was explicitly saved to My Work and retrieved.
+- [x] **Membership page:** recognized existing paid membership and displayed correctly instead of forcing a new purchase.
+- [x] **Stripe portal:** existing account's Manage Billing control opened the Stripe billing portal.
+- [x] **Founder reported no issues.**
+
+**Still separate and open:** independent first external paying-customer checkout-to-entitlement acceptance (no new payment was initiated for these tests); direct backend denial of premium lesson body to an ordinary Free account, where appropriate with authorized credentials; further Tracks 3–6 and mobile/keyboard worksheet coverage; editorial proofing; and scheduled December 2–4 real cancellation/payment-to-access transition. The prior 4/4 Free-user UI checks remain passed. This record contains no customer IDs, emails, passwords, payment details, reflections or billing action.
 
 ## What has already been verified
 

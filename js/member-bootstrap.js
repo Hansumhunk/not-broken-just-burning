@@ -62,7 +62,7 @@
         : src === 'js/member-learning-progress.js'
         ? src + '?v=learning-trail-v1'
         : src === 'js/member-dashboard.js'
-        ? src + '?v=journey-compass-v1'
+        ? src + '?v=dashboard-returning-v2'
         : src === 'js/member-platform.js'
         ? src + '?v=compact-nav-v1'
         : src === 'js/member-premium-lesson.js'

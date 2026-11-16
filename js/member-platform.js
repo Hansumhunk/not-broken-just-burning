@@ -17,7 +17,8 @@
     ['store', 'member-store.html', 'Membership'],
     ['community', 'member-community.html', 'Circle · Soon'],
     ['profile', 'member-profile.html', 'Profile'],
-    ['settings', 'member-settings.html', 'Settings']
+    ['settings', 'member-settings.html', 'Settings'],
+    ['feedback', 'member-feedback.html', 'Send Feedback']
   ];
 
   function status(message, target = document.querySelector('[data-member-status]')) {

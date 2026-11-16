@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Send voluntary website usability feedback about Flamewalker and Not Broken Just Burning without sharing private reflections.">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#09090b">
+<title>Member Feedback | Flamewalker Hub</title>
+<link rel="canonical" href="https://notbrokenjustburning.com/member-feedback.html">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/brand.css"><link rel="stylesheet" href="css/experience.css"><link rel="stylesheet" href="css/members.css?v=compact-feedback-v1"><link rel="stylesheet" href="css/member-expansion.css?v=clean-ribbons-v17">
+<style>
+.member-feedback-panel{max-width:900px;margin:0 auto 40px}
+.member-feedback-form{display:grid;gap:20px;margin-top:22px}
+.member-feedback-form label{display:grid;gap:9px;font-weight:700;line-height:1.5}
+.member-feedback-form select,.member-feedback-form textarea{
+  min-width:0;width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid var(--line);border-radius:12px;
+  background:#111115;color:var(--text);font:inherit;font-weight:400;line-height:1.6}
+.member-feedback-form textarea{resize:vertical;min-height:148px}
+.member-feedback-form select:focus-visible,.member-feedback-form textarea:focus-visible,
+.member-feedback-form input:focus-visible{outline:2px solid var(--ember-pale);outline-offset:2px}
+.member-feedback-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.member-feedback-form .feedback-safety{display:flex;align-items:flex-start;gap:11px;font-weight:500;color:var(--muted)}
+.member-feedback-form .feedback-safety input{margin-top:5px;accent-color:#e46b2b;min-width:18px;min-height:18px}
+.member-feedback-form .feedback-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.feedback-outcome{min-height:26px;line-height:1.6;color:var(--ember-pale)}
+.feedback-prepared-label{display:block;font-size:.88rem;font-weight:800;margin-top:20px}
+#feedback-prepared{display:block;width:100%;min-height:150px;box-sizing:border-box;margin-top:8px;padding:14px;
+  border:1px solid var(--line);border-radius:12px;background:#101014;color:var(--text);font:inherit;line-height:1.55;resize:vertical}
+.feedback-disclosure{line-height:1.65;color:var(--muted);font-size:.9rem}
+@media(max-width:680px){.member-feedback-fields{grid-template-columns:1fr}.member-feedback-form .feedback-actions .button{width:100%;justify-content:center;text-align:center}}
+</style>
+<style id="nbjb-member-access-gate">body[data-member-page]:not([data-member-access="granted"]) main{display:none!important}</style></head>
+<body data-member-page="feedback">
+<a class="skip-link" href="#main-content">Skip to content</a><div class="ember-field" aria-hidden="true"></div>
+<header class="site-header"><a class="brand" href="index.html" aria-label="Not Broken Just Burning home"><span class="brand-mark" aria-hidden="true"></span><span class="brand-name">Not Broken <span>Just Burning</span></span></a>
+<button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation"><span></span><span></span><span></span></button>
+<nav class="site-nav" id="site-nav" aria-label="Primary navigation"><a href="path.html">The Path</a><a href="forge.html">The Forge</a><a href="fire.html">The Fire</a><a href="movement.html">The Movement</a><a href="resources.html">Resources</a><a class="nav-join" href="join.html">Join</a></nav></header>
+<main id="main-content">
+<section class="page-hero section-shell member-page-head reveal"><p class="eyebrow">Flamewalker Hub · Member voice</p>
+<h1>Help us make this<br><span>easier to use.</span></h1>
+<p class="hero-lead">Report a broken button, confusing lesson, difficult navigation or an idea that would make the member experience better. Share only what is necessary to describe the website issue.</p></section>
+<section class="member-shell" aria-label="Member platform navigation"><div class="member-shell-copy"><strong>Flamewalker Hub</strong><span>Voluntary feedback · No journal upload</span></div><nav class="member-subnav"><a data-member-nav="dashboard" href="members.html">Dashboard</a><a data-member-nav="lessons" href="member-lessons.html">Lessons</a><a data-member-nav="feedback" href="member-feedback.html">Feedback</a><a class="member-exit" href="index.html">Exit to site</a></nav></section>
+<section class="section-shell member-panel reveal member-feedback-panel" aria-labelledby="feedback-heading">
+<p class="eyebrow">Website feedback</p><h2 id="feedback-heading">One issue at a time.</h2>
+<p class="feedback-disclosure"><strong>How this works:</strong> This page prepares a message in your own email app or lets you copy it. It does not submit anything to a website database, upload your reflection answers, or send email automatically. You must review and press <strong>Send</strong> in your email app. If an email app does not open, use Copy Feedback.</p>
+<form class="member-feedback-form" id="member-feedback-form">
+<div class="member-feedback-fields">
+<label for="feedback-topic">What kind of issue?
+<select id="feedback-topic" required>
+<option value="">Choose a topic</option>
+<option value="Broken link or button">Broken link or button</option>
+<option value="Confusing instructions">Confusing instructions</option>
+<option value="Lesson or workbook problem">Lesson or workbook problem</option>
+<option value="Saving or progress issue">Saving or progress issue</option>
+<option value="Login or membership access">Login or membership access</option>
+<option value="Phone or accessibility problem">Phone or accessibility problem</option>
+<option value="Suggestion or idea">Suggestion or idea</option>
+</select></label>
+<label for="feedback-page">Which page?
+<select id="feedback-page" required>
+<option value="">Choose a page</option>
+<option value="Dashboard">Dashboard</option>
+<option value="Start Here">Start Here</option>
+<option value="Five-Step Framework">Five-Step Framework</option>
+<option value="Lessons Catalog">Lessons Catalog</option>
+<option value="Guided Lesson Reader">Guided Lesson Reader</option>
+<option value="My Path">My Path</option>
+<option value="Toolbox">Toolbox</option>
+<option value="My Work">My Work</option>
+<option value="Progress">Progress</option>
+<option value="Library">Library</option>
+<option value="Membership">Membership</option>
+<option value="Feedback">Feedback</option>
+<option value="Other page">Other page</option>
+</select></label>
+</div>
+<label for="feedback-device">What were you using?
+<select id="feedback-device"><option value="Not specified">Rather not say</option><option value="Computer">Computer</option><option value="Phone">Phone</option><option value="Tablet">Tablet</option></select></label>
+<label for="feedback-message">What happened, and what should have happened?
+<textarea id="feedback-message" rows="6" minlength="10" maxlength="1200" required placeholder="Example: On the Lessons page on my phone, the Next section button was hidden by the keyboard. I expected it to stay usable. Please do not include private personal stories or account details."></textarea></label>
+<label class="feedback-safety" for="feedback-private-check"><input id="feedback-private-check" type="checkbox" required><span>I've removed passwords, account numbers, medical or legal details, private journal entries, and sensitive reflection answers.</span></label>
+<div class="feedback-actions"><button class="button button-primary" type="submit" id="feedback-open-email">Open My Email App →</button><button class="button button-ghost" type="button" id="feedback-copy">Copy Feedback Instead</button></div>
+<p class="feedback-outcome" id="feedback-outcome" role="status" aria-live="polite"></p>
+<div id="feedback-prepared-wrap" hidden><label class="feedback-prepared-label" for="feedback-prepared">Your prepared message (copy manually if needed)</label><textarea id="feedback-prepared" readonly rows="7"></textarea></div>
+</form>
+<p class="feedback-disclosure"><strong>For immediate danger, emergencies or crisis support:</strong> do not use website feedback. <a href="support.html">Open Support &amp; Safety</a>. For other inquiries, <a href="contact.html">contact NBJB</a>.</p>
+</section>
+</main><footer class="site-footer section-shell"><div><strong>NOT BROKEN JUST BURNING</strong><p>Feedback should improve the tool, not expose your story.</p></div>
+<div class="footer-meta"><p class="footer-links"><a href="contact.html">Contact</a> · <a href="support.html">Support &amp; Safety</a> · <a href="privacy.html">Privacy &amp; Data Use</a></p></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script><script src="js/nbjb-config.js"></script><script src="js/nbjb-auth.js"></script><script src="js/main.js"></script><script src="js/member-bootstrap.js?v=member-feedback-v1"></script>
+</body></html>

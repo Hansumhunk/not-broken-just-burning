@@ -1062,3 +1062,17 @@ test('Path member practice saves only by explicit choice, with local structured 
   assert.ok(read('member-work.html').includes('data-work-tool="Path Reflection"'));
   assert.doesNotMatch(source,/fetch\(|functions[.]invoke|sessionStorage|\.insert\(|\.upsert\(/);
 });
+
+
+test('lessons catalog accurately advertises 35 published lessons without implying only seven exist', () => {
+  const html=read('member-lessons.html');
+  assert.match(html, /35 published premium guided lessons across six tracks/);
+  assert.match(html, /Track 1 of 6 · Seven founding lessons/);
+  assert.match(html, /all 35 published written lessons across six tracks/);
+  assert.match(html, /Five more tracks · 28 published lessons/);
+  assert.doesNotMatch(html, /Flamewalker\+ · Seven published written lessons/);
+  assert.doesNotMatch(html, /One free foundation lesson and seven published premium guided lessons/);
+  for (let i=1;i<=7;i++) {
+    assert.ok(html.includes('Flamewalker+ · Track 1 · Lesson '+i+' of 7'), 'Track 1 badge '+i);
+  }
+});

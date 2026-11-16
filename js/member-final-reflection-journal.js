@@ -125,7 +125,7 @@
         const text = documentText();
         if (!text) { status.textContent = 'Answer at least one statement before saving.'; return; }
         const ok = saveJournal({
-          text, answered: filled().length, total: fields.length
+          text, answered: filled().length, total: fields.length, answers: filled()
         }, status);
         myWorkLink.hidden = ok !== true;
       });

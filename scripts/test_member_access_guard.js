@@ -577,3 +577,81 @@ test('dashboard reader link is paid-only and resumes the device bookmark', () =>
   functions.renderNextAction({journey:{nextAction:'Prepare the school bag tonight'}});
   assert.equal(elems['[data-dashboard-action-state]'].textContent,'Prepare the school bag tonight');
 });
+
+
+test('Progress Learning Trail tracks voluntary Path/practice metadata but not private writing', () => {
+  const html=read('member-progress.html');
+  const js=read('js/member-learning-progress.js');
+  const bootstrap=read('js/member-bootstrap.js');
+  const validator=read('scripts/validate_site.py');
+  assert.ok(html.includes('id="learning-trail-heading"'));
+  for(const token of ['data-learning-trail-focus','data-learning-trail-reading','data-learning-trail-reading-link',
+    'data-learning-trail-count','data-learning-trail-stages','data-learning-trail-practiced','data-learning-trail-status'])
+      assert.ok(html.includes(token),token);
+  assert.ok(bootstrap.includes('progress: ["js/member-history-insights.js", "js/member-learning-progress.js"]'));
+  assert.ok(bootstrap.includes("src + '?v=learning-trail-v1'"));
+  assert.ok(validator.includes('"js/member-learning-progress.js"'));
+  assert.ok(js.includes("entitlement?.tier === 'paid' && entitlement?.source === 'server'"));
+  assert.ok(js.includes("item?.status === 'published'"));
+  assert.ok(js.includes("nbjb.plus.lesson-progress.v1."));
+  assert.ok(js.includes("body: { action: 'catalog' }"));
+  assert.ok(js.includes("auth?.user?.id !== userId"));
+  assert.ok(js.includes('Reading alone does not mark a lesson.'));
+  assert.ok(js.includes("No automatic completion or healing score."));
+  assert.doesNotMatch(js,/\.from\(['"]flamewalker_premium_lessons['"]\)/);
+  assert.doesNotMatch(js,/\.insert\(|\.upsert\(|\.update\(/);
+  assert.doesNotMatch(js,/data\.(facts|feelings|notes|responses|journal)/);
+});
+
+test('Learning Trail does not fetch paid lesson catalog for free members', async () => {
+  const source=read('js/member-learning-progress.js');
+  const selectors={};
+  const element=()=>({textContent:'',href:'',dataset:{},children:[],
+    replaceChildren(){this.children=[];},
+    append(...items){this.children.push(...items);}});
+  const document={querySelector:key=>selectors[key]||(selectors[key]=element()),createElement:()=>element()};
+  let fetches=0;
+  const window={
+    NBJBMemberService:{load:()=>({journey:{focus:'Fire Reclamation',progress:{'Fire Reclamation':'practicing'}}}),
+      stages:['Fire Reclamation','Voice of Fire']},
+    NBJBAuth:{user:{id:'u-one'},client:{functions:{invoke:async()=>{fetches++;return{data:{lessons:[]}};}}}},
+    NBJBEntitlements:{ready:Promise.resolve(),load:()=>({tier:'free',source:'server'})},
+    NBJBLearningContinuity:{get:()=>{throw new Error('free membership must not read paid metadata');}}
+  };
+  vm.runInNewContext(source,{window,document,localStorage:{getItem:()=>null},Date,Promise});
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(fetches,0);
+  assert.equal(selectors['[data-learning-trail-focus]'].textContent,'Fire Reclamation');
+  assert.equal(selectors['[data-learning-trail-reading-link]'].href,'member-start-here.html');
+  assert.equal(selectors['[data-learning-trail-count]'].textContent,'Flamewalker Free');
+  const stages=selectors['[data-learning-trail-stages]'].children;
+  assert.equal(stages.length,2);
+  assert.equal(stages[0].dataset.currentFocus,'true');
+  assert.match(stages[0].children[1].textContent,/Practicing/);
+});
+
+test('Learning Trail counts only published and deliberately marked lessons', async () => {
+  const source=read('js/member-learning-progress.js');
+  const selectors={};
+  const element=()=>({textContent:'',href:'',dataset:{},children:[],
+    replaceChildren(){this.children=[];},append(...items){this.children.push(...items);}});
+  const document={querySelector:key=>selectors[key]||(selectors[key]=element()),createElement:()=>element()};
+  const window={
+    NBJBMemberService:{load:()=>({journey:{focus:'',progress:{}}}),stages:['Fire Reclamation']},
+    NBJBAuth:{user:{id:'u-two'},client:{functions:{invoke:async()=>({data:{lessons:[
+      {slug:'published-one',title:'Published Lesson',status:'published'},
+      {slug:'private-draft',title:'Private Draft',status:'editorial_review'}
+    ]}})}}},
+    NBJBEntitlements:{ready:Promise.resolve(),load:()=>({tier:'paid',source:'server'})},
+    NBJBLearningContinuity:{get:()=>({slug:'published-one',title:'Published Lesson',section:2,total:8})}
+  };
+  const data={'published-one':'2026-11-16T10:00:00Z','private-draft':'2026-11-16T12:00:00Z'};
+  vm.runInNewContext(source,{window,document,localStorage:{getItem:()=>JSON.stringify(data)},Date,Promise});
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(selectors['[data-learning-trail-count]'].textContent,'1 deliberately marked');
+  assert.equal(selectors['[data-learning-trail-reading-link]'].href,'member-premium-lesson.html?lesson=published-one&section=2');
+  const list=selectors['[data-learning-trail-practiced]'].children;
+  assert.equal(list.length,1);
+  assert.equal(list[0].children[0].textContent,'Published Lesson');
+  assert.ok(!JSON.stringify(list).includes('Private Draft'));
+});

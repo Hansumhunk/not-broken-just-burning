@@ -50,8 +50,17 @@
     if (node) node.hidden = Boolean(hidden);
   }
 
-  function isFirstRun(state, entries) {
-    return !state.journey.onboardingComplete
+  function isFirstRun(state, entries, entitlementState) {
+    // A member actively reading the protected curriculum is returning to
+    // their journey, even if they haven't completed optional Path onboarding.
+    // Only server-confirmed paid access permits consulting the protected
+    // reading bookmark; a forged browser tier never grants access.
+    const verifiedPaid = entitlementState?.tier === 'paid' &&
+      entitlementState?.source === 'server';
+    const hasReadingHistory = verifiedPaid &&
+      Boolean(window.NBJBLearningContinuity?.get?.());
+    return !hasReadingHistory
+      && !state.journey.onboardingComplete
       && !state.journey.focus
       && !state.journey.nextAction
       && !state.journey.lastTool
@@ -248,8 +257,8 @@
     link.textContent = 'Open Start Here';
   }
 
-  function renderFirstRun(state, entries) {
-    const firstRun = isFirstRun(state, entries);
+  function renderFirstRun(state, entries, entitlementState) {
+    const firstRun = isFirstRun(state, entries, entitlementState);
     setHidden('[data-dashboard-first-run]', !firstRun);
     setHidden('[data-dashboard-returning]', firstRun);
   }
@@ -260,7 +269,7 @@
     const entitlementState = entitlements?.load?.() || { tier: 'free' };
     const isPaid = entitlements?.hasTier?.('paid', entitlementState) || false;
 
-    renderFirstRun(state, entries);
+    renderFirstRun(state, entries, entitlementState);
     renderReading(entitlementState);
     renderNextAction(state);
     renderContinue(state);
@@ -277,6 +286,9 @@
   });
 
   window.addEventListener('pageshow', render);
+  // Refresh the first-run versus returning view after a genuine entitlement
+  // refresh, without requiring the member to revisit the page manually.
+  window.addEventListener('nbjb:entitlements', render);
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', render, { once: true });

@@ -335,7 +335,7 @@ test('Lessons is a direct top-nav destination on authenticated member pages', ()
   assert.ok(bootstrap.includes("src + '?v=compact-nav-v1'"));
   for (const html of [dashboard, intro, library, premium]) {
     assert.ok(html.includes('href="member-lessons.html"'), 'members should have direct lessons navigation');
-    const expected = html === premium ? 'reflection-examples-v20' : 'lessons-hub-v14';
+    const expected = html === premium ? 'reflection-examples-v20' : html === dashboard ? 'dashboard-returning-v2' : 'lessons-hub-v14';
     assert.ok(html.includes('js/member-bootstrap.js?v=' + expected), 'member nav script must use fresh revision');
   }
   assert.ok(dashboard.includes('Browse All Lessons'));
@@ -526,6 +526,32 @@ test('Start Here offers free deep dive, not a protected lesson URL, without a pa
   assert.match(next.textContent,/Chaos/);
 });
 
+test('a paid member with a protected reading bookmark is returning, not first-run', () => {
+  const js=read('js/member-dashboard.js');
+  const start=js.indexOf('  function isFirstRun(state, entries, entitlementState) {');
+  const end=js.indexOf('  function renderContinue(state) {',start);
+  assert.ok(start>=0 && end>start);
+  let bookmarkCalls=0;
+  const sandbox={window:{NBJBLearningContinuity:{get:()=>{bookmarkCalls++;return {
+    slug:'father-wound',title:'The Father Wound',section:12,total:23
+  };}}}};
+  const isFirstRun=vm.runInNewContext(js.slice(start,end)+'\nisFirstRun',sandbox,{timeout:1000});
+  const newMember={journey:{onboardingComplete:false,focus:'',nextAction:'',lastTool:''}};
+  assert.equal(isFirstRun(newMember,[],{tier:'paid',source:'server'}),false,
+    'an already-reading paid member must see the returning journey, not onboarding');
+  assert.equal(bookmarkCalls,1);
+  assert.equal(isFirstRun(newMember,[],{tier:'free',source:'server'}),true,
+    'a free member with no journey data still sees first-run setup');
+  assert.equal(isFirstRun(newMember,[],{tier:'paid',source:'server_error'}),true,
+    'unverified browser tier cannot unlock paid reading history');
+  assert.equal(bookmarkCalls,1,'the free/error cases must not inspect paid reading metadata');
+  assert.equal(isFirstRun({journey:{...newMember.journey,focus:'Fire Reclamation'}},[],{tier:'free',source:'server'}),false);
+  sandbox.window.NBJBLearningContinuity.get=()=>null;
+  assert.equal(isFirstRun(newMember,[],{tier:'paid',source:'server'}),true,
+    'genuinely new paid members without saved activity can still receive orientation');
+  assert.ok(js.includes('renderFirstRun(state, entries, entitlementState)'));
+  assert.ok(js.includes("window.addEventListener('nbjb:entitlements', render)"));
+});
 test('dashboard compass unifies learning, current Path focus and next action without private reflections', () => {
   const html=read('members.html');
   const js=read('js/member-dashboard.js');
@@ -536,7 +562,7 @@ test('dashboard compass unifies learning, current Path focus and next action wit
     'id="member-quick-action"','id="save-quick-action"']) assert.ok(html.includes(token),token);
   assert.ok(html.includes('css/member-dashboard.css?v=journey-compass-v1'));
   assert.ok(loader.includes("src === 'js/member-dashboard.js'"));
-  assert.ok(loader.includes("src + '?v=journey-compass-v1'"));
+  assert.ok(loader.includes("src + '?v=dashboard-returning-v2'"));
   assert.ok(js.includes('window.NBJBLearningContinuity?.get?.()'));
   assert.ok(js.includes("entitlementState?.tier === 'paid' && entitlementState?.source === 'server'"));
   assert.ok(js.includes("link.href = 'member-lessons.html'"));

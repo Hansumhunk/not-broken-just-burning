@@ -288,6 +288,7 @@ def main() -> int:
         approved_member_artifacts = {
             "member-auth.html",
             "member-community.html",
+            "member-framework.html",
             "member-library.html",
             "member-lessons.html",
             "member-media.html",

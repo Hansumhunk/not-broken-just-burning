@@ -127,6 +127,12 @@
     // A sign-out might have occurred while scripts were loading.
     if (!auth.user?.id || auth.user.id !== user.id) return redirectToLogin();
     body.dataset.memberAccess = "granted";
+    // Honor a deep-link only after the protected member page becomes visible.
+    if ((page === 'framework' || page === 'path') &&
+        /^#(?:chaos|clarity|agency|action|integration|path-focus-[a-z-]+)$/.test(location.hash || '')) {
+      const target = document.getElementById(location.hash.slice(1));
+      window.requestAnimationFrame?.(() => target?.scrollIntoView({ block: 'start' }));
+    }
   }
 
   start().catch((error) => {

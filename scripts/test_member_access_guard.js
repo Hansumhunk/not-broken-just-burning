@@ -10,7 +10,7 @@ const read = (name) => fs.readFileSync(path.join(root, name), 'utf8');
 const memberPages = [
   'member-community.html','member-library.html','member-lessons.html','member-media.html','member-onboarding.html',
   'member-path.html','member-premium-lesson.html','member-profile.html','member-progress.html',
-  'member-settings.html','member-start-here.html','member-store.html','member-tools.html',
+  'member-settings.html','member-start-here.html','member-framework.html','member-store.html','member-tools.html',
   'member-work.html','member-workshop.html','members.html'
 ];
 
@@ -330,7 +330,7 @@ test('Lessons is a direct top-nav destination on authenticated member pages', ()
   const library = read('member-library.html');
   const premium = read('member-premium-lesson.html');
   assert.ok(platform.includes("['lessons', 'member-lessons.html', 'Lessons']"));
-  assert.ok(platform.includes("['start-here', 'premium-lesson'].includes(page)"));
+  assert.ok(platform.includes("['start-here', 'framework', 'premium-lesson'].includes(page)"));
   assert.ok(bootstrap.includes("src === 'js/member-platform.js'"));
   assert.ok(bootstrap.includes("src + '?v=lessons-hub-v14'"));
   for (const html of [dashboard, intro, library, premium]) {
@@ -427,4 +427,101 @@ test('founding editorial gate reports current seven published and 28 private dra
   assert.ok(doc.includes('Current production status'));
   assert.ok(doc.includes('7 published, 28 in editorial review'));
   assert.ok(doc.includes('founder signoff tied to each final manuscript revision'));
+});
+
+
+test('Start Here makes the five decision stages and all six Path choices actually navigable', () => {
+  const intro = read('member-start-here.html');
+  const framework = read('member-framework.html');
+  const pathPage = read('member-path.html');
+  const startScript = read('js/member-start-here.js');
+  const platform = read('js/member-platform.js');
+  const bootstrap = read('js/member-bootstrap.js');
+  const css = read('css/member-expansion.css');
+
+  for (const stage of ['chaos','clarity','agency','action','integration']) {
+    assert.ok(intro.includes('href="member-framework.html#' + stage + '"'), stage + ' must open a real deep dive');
+    assert.match(framework, new RegExp('id="' + stage + '"'), stage + ' must have an on-page destination');
+    assert.match(framework, new RegExp('framework-title-' + stage), stage + ' must contain teaching');
+  }
+  assert.match(framework, /data-member-page="framework"/);
+  assert.match(framework, /id="nbjb-member-access-gate"/);
+  assert.ok(framework.includes('js/member-bootstrap.js?v=lessons-hub-v14'));
+  assert.ok(platform.includes("['start-here', 'framework', 'premium-lesson'].includes(page)"));
+  assert.match(css, /\.member-lesson-flow a\s*\{/);
+
+  const stages = [
+    ['Fire Reclamation', 'fire-reclamation'],
+    ["The Guardian's Path", 'guardian'],
+    ['Sacred Mirror Work', 'sacred-mirror'],
+    ['Masculine Restoration', 'masculine-restoration'],
+    ['Voice of Fire', 'voice-of-fire'],
+    ['Circle of the Flame', 'circle-of-flame']
+  ];
+  for (const [name, anchor] of stages) {
+    assert.ok(intro.includes('name="start-here-focus" value="' + name + '"'), name + ' must be selectable');
+    assert.ok(pathPage.includes('id="path-focus-' + anchor + '"'), name + ' must have a landing target');
+    assert.ok(startScript.includes("'path-focus-" + anchor + "'"), name + ' must link to target');
+  }
+  assert.ok(intro.includes('id="start-here-choose-focus"'));
+  assert.ok(intro.includes('id="start-here-focus-status"'));
+  assert.ok(startScript.includes('service.setFocus(choice.value)'));
+  assert.ok(startScript.includes("window.location.assign('member-path.html#' + pathIds[choice.value])"));
+  assert.ok(pathPage.includes('id="member-focus-deep-dive"'));
+  assert.ok(platform.includes('deepDive.href = deepDiveHref'));
+  assert.ok(bootstrap.includes('target?.scrollIntoView'));
+  assert.ok(intro.includes('id="start-here-next-lesson"'));
+  assert.ok(startScript.includes("entitlement?.tier === 'paid' && entitlement?.source === 'server'"));
+  assert.ok(startScript.includes("nextLesson.href = 'member-premium-lesson.html?lesson=father-wound'"));
+  assert.ok(intro.includes('Continue to the Next Lesson: Understanding Chaos'));
+  assert.ok(intro.includes('Browse All Lessons'));
+});
+
+test('Start Here focus selection saves only on explicit continue and routes to selected Path card', () => {
+  const source = read('js/member-start-here.js');
+  const listeners = {};
+  const choices = ['Fire Reclamation',"The Guardian's Path",'Sacred Mirror Work','Masculine Restoration','Voice of Fire','Circle of the Flame'].map(value => ({
+    value, checked:false, addEventListener(kind,cb){listeners[value+':'+kind]=cb;}, focus() {}
+  }));
+  const state={journey:{focus:''}};
+  const saves=[], navigations=[];
+  const focusStatus={textContent:'',dataset:{}};
+  const next={href:'member-framework.html#chaos',textContent:'Continue to the Next Lesson: Understanding Chaos →'};
+  const elements={
+    '#start-here-form':null,'#start-here-facts':null,'#start-here-feelings':null,
+    '#start-here-control':null,'#start-here-status':null,'#start-here-clear':null,
+    '#start-here-focus-status':focusStatus,
+    '#start-here-choose-focus':{addEventListener(kind,cb){listeners['choose:'+kind]=cb;}},
+    '#start-here-next-lesson':next
+  };
+  const context={
+    window:{location:{assign:url=>navigations.push(url)},
+      NBJBMemberService:{load:()=>state,setFocus:value=>{saves.push(value);state.journey.focus=value;return{ok:true,data:state};}},
+      NBJBEntitlements:{load:()=>({tier:'paid',source:'server'})}},
+    document:{
+      querySelector:key=>elements[key]||null,
+      querySelectorAll:key=>key==='input[name="start-here-focus"]'?choices:[]
+    }
+  };
+  vm.runInNewContext(source,context);
+  assert.equal(saves.length,0,'rendering must not silently set the focus');
+  assert.equal(navigations.length,0);
+  assert.equal(next.href,'member-premium-lesson.html?lesson=father-wound');
+  listeners['choose:click']();
+  assert.equal(saves.length,0,'clicking without a choice must not save');
+  assert.equal(navigations.length,0,'clicking without a choice must stay on page');
+  choices[4].checked=true;
+  listeners['choose:click']();
+  assert.deepEqual(saves,['Voice of Fire']);
+  assert.deepEqual(navigations,['member-path.html#path-focus-voice-of-fire']);
+});
+
+test('Start Here offers free deep dive, not a protected lesson URL, without a paid entitlement', () => {
+  const source=read('js/member-start-here.js');
+  const next={href:'member-framework.html#chaos',textContent:'Continue to the Next Lesson: Understanding Chaos →'};
+  const context={window:{NBJBMemberService:{load:()=>({journey:{focus:''}})},NBJBEntitlements:{load:()=>({tier:'free',source:'server'})}},
+    document:{querySelector:key=>key==='#start-here-next-lesson'?next:null,querySelectorAll:()=>[]}};
+  vm.runInNewContext(source,context);
+  assert.equal(next.href,'member-framework.html#chaos');
+  assert.match(next.textContent,/Chaos/);
 });

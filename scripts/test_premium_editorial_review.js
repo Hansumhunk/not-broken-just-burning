@@ -286,7 +286,7 @@ test('every protected founding lesson link is unique across six tracks', () => {
   assert.match(script, /Track 3 · When the Safe Room Becomes the Courtroom/);
 });
 
-test('new practical tracks appear in private reader and editorial queue without checkout access', () => {
+test('new practical tracks appear in the protected reader and reviewer queue', () => {
   const html = read('member-premium-lesson.html');
   const js = read('js/member-premium-lesson.js');
   for (const slug of ['body-as-ally','name-the-emotion-choose-action','the-space-between-trigger-and-response','boundaries-without-cruelty','discipline-without-self-punishment','provision-without-proving-worth','fatherhood-what-children-watch','brotherhood-without-dependency','lead-yourself-first','the-integrated-man-thirty-day-map']) {
@@ -295,10 +295,10 @@ test('new practical tracks appear in private reader and editorial queue without 
   assert.match(js, /Track 4 · Steadiness & Emotional Command/);
   assert.match(js, /Track 5 · Rebuilding a Life That Holds/);
   assert.match(html, /Thirty-five-lesson editorial review queue/);
-  assert.match(read('member-store.html'), /Seven founding lessons are published in the protected library/);
+  assert.match(read('member-store.html'), /All thirty-five guided lessons are published and included in Flamewalker\+/);
 });
 
-test('the recovered Sacred Laws remain private, correctly ordered, and awaiting founder approval', () => {
+test('the recovered Sacred Laws are correctly ordered with historical editorial records preserved', () => {
   const html = read('member-premium-lesson.html');
   const js = read('js/member-premium-lesson.js');
   const doc = read('FOUNDING_35_EDITORIAL_GATE.md');
@@ -306,7 +306,7 @@ test('the recovered Sacred Laws remain private, correctly ordered, and awaiting 
   for (const slug of slugs) assert.match(html, new RegExp('data-premium-lesson-link="'+slug+'"'));
   assert.match(js, /Track 6 · The Five Sacred Laws of Survival/);
   assert.match(html, /Thirty-five-lesson editorial review queue/);
-  assert.match(read('member-store.html'), /Seven founding lessons are published in the protected library/);
+  assert.match(read('member-store.html'), /All thirty-five guided lessons are published and included in Flamewalker\+/);
   assert.match(doc, /35 drafts · 6 tracks · 0 published/);
   assert.match(doc, /Founding content scope is frozen/);
 });

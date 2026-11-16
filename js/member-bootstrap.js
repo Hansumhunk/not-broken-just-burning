@@ -60,7 +60,7 @@
       script.src = src === 'js/member-feedback.js'
         ? src + '?v=member-feedback-v1'
         : src === 'js/member-learning-progress.js'
-        ? src + '?v=learning-trail-v1'
+        ? src + '?v=learning-trail-v2'
         : src === 'js/member-dashboard.js'
         ? src + '?v=dashboard-returning-v2'
         : src === 'js/member-platform.js'

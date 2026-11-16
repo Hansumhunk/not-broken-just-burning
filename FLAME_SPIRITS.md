@@ -88,6 +88,26 @@ The full weekly member/Stripe/Supabase monitoring functions configured in ChatGP
 
 **Files:** \`scripts/flame_marshal.mjs\`, \`scripts/test_flame_marshal.mjs\`, \`.github/workflows/flame-marshal.yml\`. Run the offline test suite with \`node --test scripts/test_flame_marshal.mjs\`.
 
+## #29 — Spirit of Reach: Audience Acquisition Briefs
+
+**Purpose:** Generate a concrete, ethical backlog of public educational text opportunities. This spirit works from published NBJB site material and anonymous aggregate public discussion topics. It does not write or publish content to the site, Metricool or private curriculum.
+
+**Cadence:** Thursday around **11:13 AM America/New_York**, in standalone GitHub Actions workflow .github/workflows/flame-spirit-reach.yml. The Flame Marshal monitors it too. GitHub scheduling may be late. No extra ChatGPT task slot or paid AI key needed.
+
+**How it works:**
+1. Read indexable site URLs from sitemap.xml and analyze only public HTML title, visible H1 and meta description. Do not access member-only/noindex pages, private manuscripts, journals or account data.
+2. Aggregate broad topics in accessible public community feed headlines. Never show usernames, direct quotes, personal stories, post URLs or private data. Inaccessible feed means **unverified**, not zero demand.
+3. Rank six pre-reviewed NBJB educational topics: boundaries, fatherhood, overwhelm, self-trust, shame/accountability, rebuilding direction.
+4. Compare with published pages and prefer **expand existing page** when relevant material already exists, to prevent duplicate articles.
+5. Produce three **review-ready editorial briefs** with reader question, hypothetical search phrase, outline, concrete exercise, original proposed **TEXT** social hook, internal link, page-overlap links and approval gates.
+6. Suggest appropriate later measurement from existing anonymous PostHog summaries without claiming live traffic figures or conversion data; it cannot inspect Metricool scheduled posts and requires the existing authorized calendar process to check duplications.
+
+**Read report:** GitHub Actions → **Spirit of Reach Growth Briefs** → selected run → **Summary**. Draft briefs are not approved public messages. The founder decides whether to update existing content, develop a new public article or reject it.
+
+**Restrictions:** Read-only contents permission, no persistent GitHub credentials, no paid ads, automated PRs, website edits, content publishing or scheduling, customer contact, Stripe/Metricool/API secrets, member enrollment, private records or videos. No clinical promises or gender warfare. Existing editorial control and complete video freeze remain unchanged.
+
+**CLI:** node --test scripts/test_flame_spirit_reach.mjs (offline deterministic tests); node scripts/flame_spirit_reach.mjs (public-source research and report).
+
 ## Next evolutionary steps
 
 - Add founder-approved free sources and data quality checks to the Audience Spirit.

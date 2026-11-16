@@ -27,9 +27,8 @@ permissions:
   actions: read
   pull-requests: read
 
-concurrency:
-  group: flame-marshal-supervisor
-  cancel-in-progress: true
+# Do not globally cancel simultaneous child-workflow audits:
+# cancellation itself shows as a red/gray run and obscures useful findings.
 
 jobs:
   audit:

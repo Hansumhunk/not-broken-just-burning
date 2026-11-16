@@ -32,59 +32,112 @@ test('unpublished manuscript review controls remain hidden by default and never 
   assert.doesNotMatch(js, /\.from\(['"]flamewalker_premium_lessons['"]\).*\.update\(/s);
 });
 
-test('Red Flags Part 5 shows one complete scenario per reader page and preserves old bookmark location', () => {
+test('semantic pagination keeps every distinct scenario and case study on its own page', () => {
   const source = read('js/member-premium-lesson.js');
-  // Exercise the actual sectionizer with synthetic prose only. Protected
-  // curriculum manuscript bodies are never committed into the public repo.
+  // Synthetic examples only: protected manuscript bodies stay in Supabase.
   const sectionCode = source.slice(source.indexOf('  const major ='), source.indexOf('  function label(step)'));
-  assert.ok(sectionCode.includes('function sectionize('));
-  function createReaderFor(lessonSlug) {
+  function makeReader(slug) {
     return vm.runInNewContext(
-      'const slug = ' + JSON.stringify(lessonSlug) +
-        '; const prettyHeading = s => s;' + sectionCode +
-        '\n({ sectionize, remapScenarioBookmark })',
-      {}, { timeout: 1000 });
+      'const slug = ' + JSON.stringify(slug) +
+      '; const prettyHeading = s => s;' + sectionCode +
+      '\n({ sectionize, remapScenarioBookmark })', {}, {timeout:1000});
   }
-  const lessonReader = createReaderFor('red-flags-and-responsibility');
   const blocks = [
-    { type: 'heading', text: 'PART 4 — CONTEXT' },
-    { type: 'paragraph', text: 'Brief earlier lesson context.' },
-    { type: 'heading', text: 'PART 5 — FOUR SCENARIOS THAT TEST YOUR JUDGMENT' },
+    {type:'heading',text:'PART 4 — CONTEXT'},
+    {type:'paragraph',text:'A shorter teaching introduction.'},
+    {type:'heading',text:'PART 5 — FOUR SCENARIOS THAT TEST YOUR JUDGMENT'}
   ];
-  for (const letter of ['A','B','C','D']) {
+  for(const letter of ['A','B','C','D']) {
     blocks.push(
-      { type:'paragraph', text:'Scenario ' + letter + ' — Example ' + letter + '. ' + 'Illustrative situation. '.repeat(36) },
-      { type:'paragraph', text:'Why the decision is difficult. '.repeat(29) },
-      { type:'paragraph', text:'A grounded response and a decision principle. '.repeat(26) }
+      {type:'paragraph',text:'Scenario ' + letter + ' — Example ' + letter + '. ' + 'A practical situation. '.repeat(34)},
+      {type:'paragraph',text:'Why a decision is difficult. '.repeat(30)},
+      {type:'paragraph',text:'What a thoughtful response might look like. '.repeat(28)}
     );
   }
-  blocks.push({ type: 'paragraph', text: 'These examples illustrate careful decisions rather than diagnoses.' });
-  blocks.push({ type: 'heading', text: 'PART 6 — A DECISION CHECK' });
-  blocks.push({ type: 'paragraph', text: 'Continue to the next lesson skill.' });
-
-  const pages = lessonReader.sectionize(blocks);
+  blocks.push({type:'paragraph',text:'These cases illustrate decisions, not diagnoses.'});
+  blocks.push({type:'heading',text:'PART 6 — A DECISION CHECK'});
+  blocks.push({type:'paragraph',text:'Apply what you learned.'});
+  const reader = makeReader('red-flags-and-responsibility');
+  const pages = reader.sectionize(blocks);
   const scenarios = pages.filter(page => /Part 5 · Scenario [A-D] —/.test(page.title));
-  assert.equal(scenarios.length, 4, 'each case should be its own reader page');
-  for (let i = 0; i < scenarios.length; i++) {
-    assert.equal(scenarios[i].title, 'Part 5 · Scenario ' + ['A','B','C','D'][i] + ' — Example ' + ['A','B','C','D'][i]);
-    assert.equal(scenarios[i].continuation, 0, 'no scenario continuation screens');
-    assert.equal(scenarios[i].blocks.length, i === 3 ? 4 : 3, 'all three paragraphs remain together');
-    assert.ok(!scenarios[i].blocks[0].text.startsWith('Scenario '), 'do not duplicate the scenario title in body');
+  assert.deepEqual([...scenarios].map(page=>page.title),
+    ['A','B','C','D'].map(letter=>'Part 5 · Scenario ' + letter + ' — Example ' + letter));
+  assert.equal(scenarios.length,4);
+  for(let i=0;i<scenarios.length;i++) {
+    assert.equal(scenarios[i].continuation,0);
+    assert.equal(scenarios[i].blocks.length,i===3?4:3);
+    assert.ok(scenarios[i].blocks.every(block=>!/^Scenario [A-D] —/.test(block.text)));
   }
-  assert.ok(pages.findIndex(page => page.title.includes('Scenario A')) <
-            pages.findIndex(page => page.title.includes('PART 6')), 'existing progression stays in order');
+  const legacy = reader.sectionize(blocks,{splitScenarios:false});
+  const oldB = legacy.findIndex(page=>page.blocks.some(block=>block.text.startsWith('Scenario B —')));
+  assert.ok(oldB>=0);
+  assert.equal(pages[reader.remapScenarioBookmark(blocks,oldB,pages)].title,scenarios[1].title);
 
-  const oldPages = lessonReader.sectionize(blocks, { splitScenarios: false });
-  const oldB = oldPages.findIndex(page => page.blocks.some(block => block.text.startsWith('Scenario B —')));
-  assert.ok(oldB >= 0, 'legacy bookmark case should exist');
-  assert.equal(pages[lessonReader.remapScenarioBookmark(blocks,oldB,pages)].title,scenarios[1].title,
-    'an older saved position should reopen the correct scenario');
+  const second = makeReader('the-love-bargain');
+  const shortCases = [
+    {type:'heading',text:'PART 3 — DIFFERENT PATTERNS'},
+    {type:'paragraph',text:'Scenario A — the assumed bargain. A large sacrifice was made.'},
+    {type:'paragraph',text:'Scenario B — an agreed exchange. Both partners share a plan.'},
+    {type:'paragraph',text:'Scenario C — protective restraint. A parent seeks good advice.'},
+    {type:'paragraph',text:'The conclusion applies all three examples.'},
+    {type:'heading',text:'PART 4 — WHAT COMES NEXT'},
+    {type:'paragraph',text:'The following practice.'}
+  ];
+  const shortPages=second.sectionize(shortCases);
+  const titles=shortPages.map(page=>page.title);
+  assert.equal(titles.filter(title=>/^Part 3 · Scenario [A-C]/.test(title)).length,3);
+  assert.ok(titles.indexOf('Part 3 · Scenario A — the assumed bargain') <
+            titles.indexOf('Part 3 · Scenario B — an agreed exchange'));
+  assert.ok(titles.indexOf('Part 3 · Scenario B — an agreed exchange') <
+            titles.indexOf('Part 3 · Scenario C — protective restraint'));
+  assert.ok(shortPages.filter(page=>/^Part 3 · Scenario/.test(page.title))
+    .every(page=>page.blocks.length>=1));
 
-  const unrelated = createReaderFor('mother-wound');
-  const untouched = unrelated.sectionize(blocks);
-  assert.equal(untouched.some(page => /Part 5 · Scenario/.test(page.title)), false,
-    'lesson-specific pagination must not change other courses');
-  assert.match(source, /storageWrite\(scenarioLayoutKey, 'one-scenario-per-page'\)/);
+  const third = makeReader('body-as-ally');
+  const headed = [
+    {type:'heading',text:'PART 2 — LEARNING THE SKILL'},
+    {type:'paragraph',text:'An explanation of the skill.'},
+    {type:'heading',text:'SCENARIO: THE OVERWORKED PROVIDER'},
+    {type:'paragraph',text:'The setting. '.repeat(120)},
+    {type:'paragraph',text:'The applied response. '.repeat(105)},
+    {type:'heading',text:'FIELD STUDY — WHAT TO PRACTICE'},
+    {type:'paragraph',text:'This practical exercise is after the case.'},
+    {type:'heading',text:'PART 3 — MOVING FORWARD'},
+    {type:'paragraph',text:'Next concept.'},
+    {type:'heading',text:'WORKED SCENARIO — A SECOND CHOICE'},
+    {type:'paragraph',text:'The second setting. '.repeat(68)},
+    {type:'paragraph',text:'The resulting action. '.repeat(63)},
+    {type:'heading',text:'PART 4 — THE NEXT STEP'},
+    {type:'paragraph',text:'Next topic.'}
+  ];
+  const headedPages=third.sectionize(headed);
+  const firstCase=headedPages.find(page=>page.title.endsWith('SCENARIO: THE OVERWORKED PROVIDER'));
+  const secondCase=headedPages.find(page=>page.title.endsWith('WORKED SCENARIO — A SECOND CHOICE'));
+  assert.ok(firstCase && secondCase);
+  assert.equal(firstCase.blocks.length,2,'even long scenarios remain on one reading page');
+  assert.equal(secondCase.blocks.length,2);
+  assert.ok(!firstCase.blocks.some(block=>block.text.includes('FIELD STUDY')));
+  const oldHeaded=third.sectionize(headed,{splitScenarios:false});
+  const oldCaseIndex=oldHeaded.findIndex(page=>page.blocks.some(block=>block.text==='SCENARIO: THE OVERWORKED PROVIDER'));
+  assert.ok(oldCaseIndex>=0);
+  assert.equal(headedPages[third.remapScenarioBookmark(headed,oldCaseIndex,headedPages)].title,firstCase.title);
+  const fieldPage=headedPages.find(page=>page.blocks.some(block=>block.text.includes('FIELD STUDY')));
+  assert.ok(fieldPage && fieldPage !== firstCase);
+
+  // Preserve the original seven founding-reader structures, including their
+  // special map layouts and chapter indexes.
+  const original=makeReader('father-wound');
+  const legacyMap=[
+    {type:'heading',text:'PART 2 — FATHER IMPRINT MAP'},
+    {type:'heading',text:'EXAMPLE 1'},
+    {type:'paragraph',text:'A worked worksheet example.'},
+    {type:'heading',text:'EXAMPLE 2'},
+    {type:'paragraph',text:'Second worksheet example.'}
+  ];
+  assert.deepEqual(original.sectionize(legacyMap),original.sectionize(legacyMap,{splitScenarios:false}));
+  assert.equal(original.sectionize(legacyMap).length,1);
+  assert.ok(source.includes("storageWrite(caseLayoutKey, 'semantic-cases-v1')"));
+  assert.ok(source.includes("storageWrite(scenarioLayoutKey, 'one-scenario-per-page')"));
 });
 
 test('the server only returns premium content to paid accounts or a nominated reviewer', () => {
@@ -1874,7 +1927,7 @@ test('free premium lesson denial points to live membership without exposing prot
   assert.ok(html.includes('href="member-store.html">Membership options</a>'));
   assert.ok(html.includes('js/member-bootstrap.js?v=lessons-hub-v14'));
   assert.ok(bootstrap.includes("src === 'js/member-premium-lesson.js'"));
-  assert.ok(bootstrap.includes("src + '?v=premium-access-v14'"));
+  assert.ok(bootstrap.includes("src + '?v=premium-access-v15'"));
   assert.match(js, /const denied = error\?\.context\?\.status === 403/);
   assert.match(js, /renderLesson\(data\.lesson\)/);
 });

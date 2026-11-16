@@ -615,7 +615,7 @@ test('Progress Learning Trail tracks voluntary Path/practice metadata but not pr
     'data-learning-trail-count','data-learning-trail-stages','data-learning-trail-practiced','data-learning-trail-status'])
       assert.ok(html.includes(token),token);
   assert.ok(bootstrap.includes('progress: ["js/member-history-insights.js", "js/member-learning-progress.js"]'));
-  assert.ok(bootstrap.includes("src + '?v=learning-trail-v1'"));
+  assert.ok(bootstrap.includes("src + '?v=learning-trail-v2'"));
   assert.ok(validator.includes('"js/member-learning-progress.js"'));
   assert.ok(js.includes("entitlement?.tier === 'paid' && entitlement?.source === 'server'"));
   assert.ok(js.includes("item?.status === 'published'"));
@@ -803,4 +803,29 @@ test('feedback prepares a private-by-default email without transmitting until me
   assert.ok(mailto.startsWith('mailto:notbrokenjustburning@gmail.com?subject='));
   assert.ok(mailto.includes('body='));
   assert.match(status.textContent,/NBJB has not received it yet/);
+});
+
+
+test('all six Learning Trail cards open existing Path teaching without changing the selected focus', () => {
+  const script=read('js/member-learning-progress.js');
+  const html=read('member-progress.html');
+  const paths={
+    'Fire Reclamation':'path-fire-reclamation.html',
+    "The Guardian's Path":'path-guardian.html',
+    'Sacred Mirror Work':'path-sacred-mirror.html',
+    'Masculine Restoration':'path-masculine-restoration.html',
+    'Voice of Fire':'path-voice-of-fire.html',
+    'Circle of the Flame':'path-circle-of-the-flame.html'
+  };
+  for (const [name,href] of Object.entries(paths)) {
+    assert.ok(script.includes("'" + href + "'"), name + ' needs a direct teaching link');
+    assert.ok(read(href).includes('<main'), href + ' must be a real page');
+  }
+  assert.ok(script.includes("link.className = 'learning-trail-stage-link'"));
+  assert.ok(script.includes("link.setAttribute('aria-label', 'Explore ' + name)"));
+  assert.ok(script.includes("hint.textContent = 'Explore stage →'"));
+  assert.ok(html.includes('.learning-trail-stage-link::after'));
+  assert.ok(html.includes('.learning-trail-stages li:focus-within'));
+  assert.ok(!script.includes('service.setFocus'), 'opening a stage must not change current focus');
+  assert.ok(!script.includes('service.setProgress'), 'opening a stage must not change progress status');
 });

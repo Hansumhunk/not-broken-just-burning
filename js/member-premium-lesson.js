@@ -693,8 +693,10 @@
         add(text.slice(where));
       }
     }
-    return entries.length ? {instruction:entries.join('\n\n'),kind:hasQuestionCue?'questions':'assignment'} :
-      contextualReflectionCue(step, blocks);
+    const meaningful = entries.filter(text => !/^(?:Choose one|Finish these|Answer these)\.?$/i.test(text.trim()));
+    return meaningful.length
+      ? {instruction:meaningful.join('\n\n'),kind:hasQuestionCue?'questions':'assignment'}
+      : contextualReflectionCue(step, blocks);
   }
   function applySectionReflection(step) {
     const cue=sectionReflectionCue(step);

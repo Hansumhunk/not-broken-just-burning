@@ -156,7 +156,7 @@ export function welcomeReport(audit){
  "- No member accounts, credentials, personal reflections, payments, messages, phone numbers, emails, private lessons, videos or unpublished content accessed.",
  "- No code, site copy, pricing, subscriber settings or analytics instrumentation changed by this scheduled audit.",
  "- Any proposed changes require founder review and the site's ordinary tested pull-request workflow.",
- ""];
+ "");
  return lines.join("\n");
 }
 export async function runWelcome({root=ROOT}={}){

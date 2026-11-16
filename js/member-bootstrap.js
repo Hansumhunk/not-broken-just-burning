@@ -61,7 +61,7 @@
         : src === 'js/member-platform.js'
         ? src + '?v=lessons-hub-v14'
         : src === 'js/member-premium-lesson.js'
-        ? src + '?v=premium-next-lesson-v17'
+        ? src + '?v=reflection-examples-v19'
         : ['js/member-editorial-workbooks.js', 'js/member-chosen-code.js', 'js/member-premium-lesson.js', 'js/member-lesson-workspaces.js', 'js/member-history-insights.js', 'js/member-platform.js', 'js/member-billing.js', 'js/member-entitlements.js'].includes(src)
         ? src + '?v=nbjb-return-v12'
         : src;

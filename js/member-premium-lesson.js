@@ -10,6 +10,7 @@
   // The scenario-page layout changed, so map older device-only numeric bookmarks once.
   const scenarioLayoutKey = positionKey ? positionKey + '.scenario-layout-v1' : null;
   const caseLayoutKey = positionKey ? positionKey + '.semantic-cases-v1' : null;
+  const exampleLayoutKey = positionKey ? positionKey + '.keep-examples-together-v1' : null;
   const fontKey = 'nbjb.plus.reader-font.v1';
   // A review checklist belongs to the authorized reviewer and this exact draft
   // revision. It is never a publication flag or a server-side entitlement.
@@ -195,7 +196,7 @@
     }
     return { title, body };
   }
-  function sectionize(blocks, { splitScenarios = true } = {}) {
+  function sectionize(blocks, { splitScenarios = true, keepExamplesTogether = true } = {}) {
     // Father Wound's original map/recorded-section indices remain unchanged.
     // Mother Wound's existing shorter subheading behavior is unchanged too.
     const minSplitLength = slug === 'mother-wound' ? 1200 : 900;
@@ -207,6 +208,7 @@
     let length = 0;
     let continuation = 0;
     let inScenario = false;
+    let inExample = false;
     function flush() {
       if (!part.length) return;
       output.push({ title: name, continuation, blocks: part });
@@ -216,7 +218,21 @@
       const partNumber = /^Part\s+(\d+)\b/i.exec(parentName)?.[1];
       return partNumber ? 'Part ' + partNumber + ' · ' + title : title;
     }
-    for (const block of blocks.slice(0, 800)) {
+    const readable = blocks.slice(0, 800);
+    function exampleGroupAt(index) {
+      let characters = 0;
+      let count = 0;
+      for (let i = index; i < readable.length; i++) {
+        const item = readable[i];
+        if (!item || typeof item.text !== 'string') continue;
+        if (i > index && item.type === 'heading') break;
+        characters += item.text.trim().length;
+        count++;
+      }
+      return { characters, count };
+    }
+    for (let index = 0; index < readable.length; index++) {
+      const block = readable[index];
       if (!block || typeof block.text !== 'string' || !block.text.trim()) continue;
       const text = block.text.trim();
       const kind = block.type === 'heading' ? 'heading' : 'paragraph';
@@ -226,6 +242,7 @@
         parentName = name;
         continuation = 0;
         inScenario = false;
+        inExample = false;
         continue;
       }
       if (splitScenarios && kind === 'heading' && namedCaseHeading(text)) {
@@ -233,6 +250,7 @@
         name = caseTitle(prettyHeading(text));
         continuation = 0;
         inScenario = true;
+        inExample = false;
         continue;
       }
       const inlineCase = splitScenarios && kind === 'paragraph' ? inlineScenario(text) : null;
@@ -241,6 +259,7 @@
         name = caseTitle(inlineCase.title);
         continuation = 0;
         inScenario = true;
+        inExample = false;
         if (inlineCase.body) {
           part.push({ kind, text: inlineCase.body });
           length += inlineCase.body.length;
@@ -255,9 +274,25 @@
         continuation = 0;
         inScenario = false;
       }
-      // Normal pages target 1–3 minutes. A case page retains every paragraph
-      // until the next case, the next chapter, or another distinct heading.
-      if (!inScenario && part.length && length > minSplitLength &&
+      // Treat EXAMPLE 1/2/3 plus all of each example's paragraphs as one
+      // atomic reading unit. Start a new page *before* the example rather
+      // than leaving its heading stranded at the end of the previous page.
+      const isExampleHeading = keepExamplesTogether && kind === 'heading' &&
+        /^EXAMPLE\s+\d+\b/i.test(text);
+      if (isExampleHeading) {
+        const group = exampleGroupAt(index);
+        if (part.length && (part.length + group.count > blockLimit ||
+            length + group.characters > 1800 || length > minSplitLength)) flush();
+        inExample = true;
+      } else if (inExample && kind === 'heading') {
+        // Keep each complete example with its own body; unrelated headings
+        // should resume ordinary page layout.
+        flush();
+        inExample = false;
+      }
+      // Normal pages target 1–3 minutes. Scenario/case and Example groups
+      // are protected from automatic paragraph-length splits.
+      if (!inScenario && !inExample && part.length && length > minSplitLength &&
           (length + text.length > 1800 || part.length >= blockLimit)) flush();
       part.push({ kind, text });
       length += text.length;
@@ -265,16 +300,24 @@
     flush();
     return output;
   }
-  function remapScenarioBookmark(blocks, legacyIndex, revisedSteps) {
+  function remapScenarioBookmark(blocks, legacyIndex, revisedSteps, legacyOptions = { splitScenarios: false, keepExamplesTogether: false }) {
     if (!Number.isInteger(legacyIndex) || legacyIndex < 0) return legacyIndex;
-    const oldStep = sectionize(blocks, { splitScenarios: false })[legacyIndex];
+    const oldStep = sectionize(blocks, legacyOptions)[legacyIndex];
     if (!oldStep) return legacyIndex;
     // A legacy length-based page can contain two cases. Prefer the last
     // explicit case marker, since that is where the reader had arrived.
     const marker = oldStep.blocks.slice().reverse().find(block =>
-      (block.kind === 'heading' && namedCaseHeading(block.text)) ||
+      (block.kind === 'heading' && (namedCaseHeading(block.text) ||
+        /^EXAMPLE\s+\d+\b/i.test(block.text))) ||
       (block.kind === 'paragraph' && inlineScenario(block.text)));
     if (marker) {
+      // A numbered example may stay within its parent chapter title, so its
+      // heading is a block instead of the step title. Match either location.
+      if (marker.kind === 'heading' && /^EXAMPLE\s+\d+\b/i.test(marker.text)) {
+        const sameHeading = revisedSteps.findIndex(step => step.blocks?.some(block =>
+          block.kind === 'heading' && block.text.trim() === marker.text.trim()));
+        if (sameHeading >= 0) return sameHeading;
+      }
       const title = marker.kind === 'heading'
         ? prettyHeading(marker.text)
         : inlineScenario(marker.text).title;
@@ -497,42 +540,89 @@
   // Use the writing task actually delivered by the protected lesson, rather
   // than repeating an unrelated, generic reflection question on every page.
   function sectionReflectionCue(step) {
-    const paragraphs=(step?.blocks || []).filter(block=>block?.kind==='paragraph' &&
-      typeof block.text==='string' && block.text.trim()).map(block=>block.text.trim());
-    const explicit=paragraphs.findIndex(text=>/^REFLECTION(?:\s*\n|$)/i.test(text));
-    if(explicit>=0) {
-      const original=paragraphs[explicit].replace(/^REFLECTION\s*(?:\n|$)/i,'').trim();
-      const parts=original?[original]:[];
-      for(let i=explicit+1;i<Math.min(paragraphs.length,explicit+4);i++) {
-        const follow=paragraphs[i];
-        if(follow.length>300 || /^(?:ASK:|THEN ASK:|PART \d+|REFLECTION)/i.test(follow)) break;
-        parts.push(follow);
-        if(parts.length>=3) break;
+    // Work only with already-authorized lesson blocks. The actual task, not a
+    // stock prompt, must be shown beside the member's response area.
+    const blocks=(step?.blocks||[]).filter(block=>block &&
+      typeof block.text==='string' && block.text.trim()).map(block=>({
+      kind:block.kind==='heading'?'heading':'paragraph',text:block.text.trim()
+    }));
+    if(!blocks.length)return null;
+    const reflectionIndex=blocks.findIndex(block =>
+      (block.kind==='heading' && /^REFLECTION$/i.test(block.text)) ||
+      (block.kind==='paragraph' && /^REFLECTION(?:\s*\n|$)/i.test(block.text)));
+    // Explicit REFLECTION sections often give a starter phrase followed by
+    // “or:” and a second option. Never stop after only two prompt lines.
+    if(reflectionIndex>=0){
+      const first=blocks[reflectionIndex];
+      const parts=[];
+      const inline=first.kind==='paragraph' ?
+        first.text.replace(/^REFLECTION\s*(?:\n|$)/i,'').trim() : '';
+      if(inline)parts.push(inline);
+      for(let i=reflectionIndex+1;i<blocks.length && parts.length<7;i++){
+        const next=blocks[i];
+        if(next.kind==='heading' || /^(?:ASK:|THEN ASK:|PART \d+)/i.test(next.text))break;
+        if(parts.join('\n\n').length+next.text.length>1800)break;
+        // This is the reflection instruction, not later unrelated chapter prose.
+        parts.push(next.text);
       }
-      if(parts.length) return {instruction:parts.join('\n\n'),kind:'assignment'};
+      if(parts.length)return {instruction:parts.join('\n\n'),kind:'assignment'};
     }
-    const headingIndex=(step?.blocks||[]).findIndex(block=>block?.kind==='heading' &&
-      /^REFLECTION\b/i.test(block.text||''));
-    if(headingIndex>=0) {
-      const following=(step.blocks||[]).slice(headingIndex+1).filter(block=>block?.kind==='paragraph')
-        .map(block=>String(block.text||'').trim()).filter(Boolean).slice(0,3);
-      if(following.length) return {instruction:following.join('\n\n'),kind:'assignment'};
-    }
-    const questions=[];
-    for(let i=0;i<paragraphs.length;i++) {
-      const text=paragraphs[i];
-      if(!/^(?:(?:THEN\s+)?ASK:)\s*(?:\n|$)/i.test(text)) continue;
-      let questionText=text;
-      if(/^((?:THEN\s+)?ASK:)\s*$/i.test(text)) {
-        const more=paragraphs[i+1];
-        if(more && !/^(?:REFLECTION|ASK:|THEN ASK:)/i.test(more)) questionText+='\n'+more;
+    const entries=[];
+    let hasQuestionCue=false;
+    const add=text=>{
+      const clean=String(text||'').trim();
+      if(clean && !entries.includes(clean) &&
+         entries.join('\n\n').length+clean.length<3000)entries.push(clean);
+    };
+    const isQuestion=text=>/^(?:[-•]\s+|\d{1,2}[.)]\s+).+\?/s.test(text) ||
+      /^(?:What|Who|How|Why|When|Where|Which|Did|Do|Does|Can|Could|Would|Should|Is|Are|Was|Were|Am|If)\b[^.]{3,260}\?/i.test(text);
+    const action=/^(?:Write|List|Name|Record|Identify|Describe|Answer|Complete|Compare|Map|Choose|Reflect\s+on)\b/i;
+    const isLabel=text=>/^(?:or:|and:|what i |what the |my |“|")/i.test(text);
+    for(let i=0;i<blocks.length;i++){
+      const block=blocks[i];
+      if(block.kind==='heading')continue;
+      const text=block.text;
+      if(/^(?:(?:THEN\s+)?ASK|PROMPTS?):/i.test(text)){
+        hasQuestionCue=true;
+        const parts=[text];
+        if(/^(?:(?:THEN\s+)?ASK|PROMPTS?):\s*$/i.test(text)){
+          for(let j=i+1;j<blocks.length && j<i+18;j++){
+            const next=blocks[j];
+            if(next.kind==='heading' || !isQuestion(next.text))break;
+            parts.push(next.text);
+          }
+        }
+        add(parts.join('\n'));
+      }else if(action.test(text)){
+        // “Write two columns:” is followed by their actual labels. Retain
+        // the labels instead of making the member guess what to write.
+        const parts=[text];
+        const needsFollowing=/:\s*$/.test(text) ||
+          /^(?:Write|List|Name)\s+(?:a few|\d+(?:[–-]\d+)?|two|three|four|five)\b/i.test(text);
+        if(needsFollowing){
+          for(let j=i+1;j<blocks.length && j<i+8 && parts.length<6;j++){
+            const next=blocks[j];
+            if(next.kind==='heading' || next.text.length>240 ||
+               /^(?:(?:THEN\s+)?ASK|PROMPTS?|REFLECTION):/i.test(next.text))break;
+            if(next.text==='or:' || isLabel(next.text) ||
+               /^[A-Z][^.?!]{4,130}[.?!]?$/.test(next.text))parts.push(next.text);
+            else break;
+          }
+        }
+        add(parts.join('\n\n'));
+      }else if(/^(?:Practice:|Your turn:)\s*\S/i.test(text)){
+        add(text);
       }
-      questions.push(questionText);
+      // A distinct “Six Questions” section can introduce its prompts
+      // inside a longer teaching paragraph rather than at its start.
+      if(!entries.length && /\bAsk:\s+\S/i.test(text) &&
+          blocks.some(b=>b.kind==='heading' && /\bQUESTIONS?\b/i.test(b.text))){
+        const where=text.search(/\bAsk:\s+\S/i);
+        hasQuestionCue=true;
+        add(text.slice(where));
+      }
     }
-    if(questions.length) return {instruction:questions.join('\n\n'),kind:'questions'};
-    const assignments=paragraphs.filter(text=>/^(?:WRITE|LIST|DESCRIBE|ANSWER|IDENTIFY|RECORD|NAME)\s+(?!to\b)/i.test(text));
-    if(assignments.length) return {instruction:assignments.slice(0,2).join('\n\n'),kind:'assignment'};
-    return null;
+    return entries.length ? {instruction:entries.join('\n\n'),kind:hasQuestionCue?'questions':'assignment'} : null;
   }
   function applySectionReflection(step) {
     const cue=sectionReflectionCue(step);
@@ -611,6 +701,7 @@
     const saved = storageWrite(positionKey, String(current));
     if (saved && slug === 'red-flags-and-responsibility') storageWrite(scenarioLayoutKey, 'one-scenario-per-page');
     if (saved) storageWrite(caseLayoutKey, 'semantic-cases-v1');
+    if (saved) storageWrite(exampleLayoutKey, 'complete-examples-v1');
     el('premium-save-status').textContent = saved
       ? 'Reading position saved on this device. Your reflection answers are not saved or uploaded.'
       : 'Reading position cannot be saved in this browser. Reflection answers are not uploaded.';
@@ -714,7 +805,14 @@
     const priorSemanticLayout = storageRead(caseLayoutKey) === 'semantic-cases-v1';
     const priorRedFlagsLayout = slug === 'red-flags-and-responsibility' &&
       storageRead(scenarioLayoutKey) === 'one-scenario-per-page';
-    if (previousPosition !== null && !priorSemanticLayout && !priorRedFlagsLayout) {
+    const priorExampleLayout = storageRead(exampleLayoutKey) === 'complete-examples-v1';
+    if (previousPosition !== null && !priorExampleLayout &&
+        (slug === 'father-wound' || slug === 'mother-wound') && priorSemanticLayout) {
+      // Existing section numbers used to split worked examples mid-page.
+      const oldLayout = { splitScenarios: true, keepExamplesTogether: false };
+      stored = remapScenarioBookmark(blocks, stored, steps, oldLayout);
+      if (direct !== null) direct = remapScenarioBookmark(blocks, direct, steps, oldLayout);
+    } else if (previousPosition !== null && !priorSemanticLayout && !priorRedFlagsLayout) {
       stored = remapScenarioBookmark(blocks, stored, steps);
       if (direct !== null) direct = remapScenarioBookmark(blocks, direct, steps);
     }

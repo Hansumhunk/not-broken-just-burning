@@ -982,7 +982,7 @@ test('member stages include full public foundations and substantially deeper aut
   const member = read('js/member-path-stage.js');
   const depthSection = member.slice(member.indexOf("slug:'fire-reclamation'"),member.indexOf("slug:'guardian'"));
   assert.equal((depthSection.match(/"heading":/g)||[]).length,12,'Fire Reclamation should have twelve expanded member chapters');
-  assert.equal((member.match(/deepDive:/g)||[]).length,6,'every Path stage should have member-only depth');
+  assert.equal((member.match(/^\s*deepDive:\[/gm)||[]).length,6,'every Path stage should have member-only depth');
   for (const term of ['timeline', 'survival', 'Case study:','Integration:']) {
     assert.ok(depthSection.includes(term), 'Fire is missing substantive '+term+' teaching');
   }

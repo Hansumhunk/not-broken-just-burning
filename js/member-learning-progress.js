@@ -17,12 +17,12 @@
   // These are existing published teaching pages. Opening one does not
   // silently change the member's selected focus or progress status.
   const stageRoutes = Object.freeze({
-    'Fire Reclamation': 'path-fire-reclamation.html',
-    "The Guardian's Path": 'path-guardian.html',
-    'Sacred Mirror Work': 'path-sacred-mirror.html',
-    'Masculine Restoration': 'path-masculine-restoration.html',
-    'Voice of Fire': 'path-voice-of-fire.html',
-    'Circle of the Flame': 'path-circle-of-the-flame.html'
+    'Fire Reclamation': 'member-path-stage.html?stage=fire-reclamation',
+    "The Guardian's Path": 'member-path-stage.html?stage=guardian',
+    'Sacred Mirror Work': 'member-path-stage.html?stage=sacred-mirror',
+    'Masculine Restoration': 'member-path-stage.html?stage=masculine-restoration',
+    'Voice of Fire': 'member-path-stage.html?stage=voice-of-fire',
+    'Circle of the Flame': 'member-path-stage.html?stage=circle-of-flame'
   });
   const practicedKey = 'nbjb.plus.lesson-progress.v1.' + userId;
   const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;

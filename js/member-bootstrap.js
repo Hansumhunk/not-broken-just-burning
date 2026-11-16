@@ -56,7 +56,9 @@
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = src === 'js/member-premium-lesson.js'
+      script.src = src === 'js/member-platform.js'
+        ? src + '?v=lessons-hub-v14'
+        : src === 'js/member-premium-lesson.js'
         ? src + '?v=premium-access-v13'
         : ['js/member-editorial-workbooks.js', 'js/member-chosen-code.js', 'js/member-premium-lesson.js', 'js/member-lesson-workspaces.js', 'js/member-history-insights.js', 'js/member-platform.js', 'js/member-billing.js', 'js/member-entitlements.js'].includes(src)
         ? src + '?v=nbjb-return-v12'

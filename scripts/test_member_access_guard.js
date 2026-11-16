@@ -8,7 +8,7 @@ const root = path.resolve(__dirname, '..');
 const read = (name) => fs.readFileSync(path.join(root, name), 'utf8');
 
 const memberPages = [
-  'member-community.html','member-library.html','member-media.html','member-onboarding.html',
+  'member-community.html','member-library.html','member-lessons.html','member-media.html','member-onboarding.html',
   'member-path.html','member-premium-lesson.html','member-profile.html','member-progress.html',
   'member-settings.html','member-start-here.html','member-store.html','member-tools.html',
   'member-work.html','member-workshop.html','members.html'
@@ -319,4 +319,49 @@ test('member dashboard accurately reflects paid or free authenticated tier after
   assert.ok(dashboard.includes('View Membership Plans'));
   assert.ok(entitlements.includes("document.querySelectorAll('[data-member-tier-label]')"));
   assert.ok(entitlements.includes('tierLabel(current.tier)'));
+});
+
+
+test('Lessons is a direct top-nav destination on authenticated member pages', () => {
+  const platform = read('js/member-platform.js');
+  const bootstrap = read('js/member-bootstrap.js');
+  const dashboard = read('members.html');
+  const intro = read('member-start-here.html');
+  const library = read('member-library.html');
+  const premium = read('member-premium-lesson.html');
+  assert.ok(platform.includes("['lessons', 'member-lessons.html', 'Lessons']"));
+  assert.ok(platform.includes("['start-here', 'premium-lesson'].includes(page)"));
+  assert.ok(bootstrap.includes("src === 'js/member-platform.js'"));
+  assert.ok(bootstrap.includes("src + '?v=lessons-hub-v14'"));
+  for (const html of [dashboard, intro, library, premium]) {
+    assert.ok(html.includes('href="member-lessons.html"'), 'members should have direct lessons navigation');
+    assert.ok(html.includes('js/member-bootstrap.js?v=lessons-hub-v14'), 'member nav script must use fresh revision');
+  }
+  assert.ok(dashboard.includes('Browse All Lessons'));
+  assert.ok(intro.includes('Browse All Lessons'));
+  assert.ok(premium.includes('All Lessons'));
+});
+
+test('Lessons hub shows one free lesson and seven published premium lessons without leaking protected bodies', () => {
+  const html = read('member-lessons.html');
+  const slugs = ['father-wound','mother-wound','learned-silence','bullying-shame-early-armor','what-strength-looked-like','allowed-to-need','inherited-vs-chosen-manhood'];
+  assert.ok(html.includes('data-member-page="lessons"'));
+  assert.ok(html.includes('id="nbjb-member-access-gate"'));
+  assert.ok(html.includes('href="member-start-here.html"'));
+  assert.equal((html.match(/data-paid-lesson-open hidden/g) || []).length, 7);
+  assert.equal((html.match(/data-free-lesson-lock hidden/g) || []).length, 7);
+  for (const slug of slugs) assert.ok(html.includes('href="member-premium-lesson.html?lesson=' + slug + '"'));
+  assert.ok(html.includes('28 more lessons are being prepared'));
+  assert.ok(html.includes('Video lessons remain shelved'));
+  assert.ok(html.includes("state?.tier === 'paid' && state?.source !== 'server_error'"));
+  assert.ok(html.includes('window.addEventListener(\'nbjb:entitlements\''));
+  assert.ok(html.includes('member-store.html'));
+  assert.ok(!html.includes('data-premium-lesson-content'), 'premium manuscripts must never be embedded in index');
+});
+
+test('paid dashboard learning continues into published written lessons, not unreleased video area', () => {
+  const code = read('js/member-dashboard.js');
+  assert.ok(code.includes("link.href = 'member-lessons.html'"));
+  assert.ok(code.includes("link.textContent = 'Browse My Lessons'"));
+  assert.ok(!code.includes("link.textContent = 'Open Watch & Learn'"));
 });

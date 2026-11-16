@@ -289,6 +289,7 @@ def main() -> int:
             "member-auth.html",
             "member-community.html",
             "member-library.html",
+            "member-lessons.html",
             "member-media.html",
             "member-onboarding.html",
             "member-path.html",
@@ -373,7 +374,7 @@ def main() -> int:
             "forge-tool", "checkin-tool", "pattern-tool",
             "boundary-builder", "one-stone", "six-question-tool"
         )
-        if 'data-member-page="workshop"' not in workshop_text or 'src="js/member-bootstrap.js"' not in workshop_text:
+        if 'data-member-page="workshop"' not in workshop_text or not re.search(r'src="js/member-bootstrap[.]js(?:[?][^"]*)?"', workshop_text):
             errors.append("member-workshop.html: authenticated member bootstrap is required.")
         if 'name="robots" content="noindex,nofollow"' not in workshop_text:
             errors.append("member-workshop.html: member workspace must be noindex,nofollow.")
@@ -554,7 +555,7 @@ def main() -> int:
         dashboard_text = (ROOT / "members.html").read_text(encoding="utf-8") if (ROOT / "members.html").exists() else ""
         dashboard_js = (ROOT / "js" / "member-dashboard.js").read_text(encoding="utf-8") if (ROOT / "js" / "member-dashboard.js").exists() else ""
 
-        if 'data-member-page="start-here"' not in start_here_text or 'src="js/member-bootstrap.js"' not in start_here_text:
+        if 'data-member-page="start-here"' not in start_here_text or not re.search(r'src="js/member-bootstrap[.]js(?:[?][^"]*)?"', start_here_text):
             errors.append("member-start-here.html: lesson must remain inside the authenticated member bootstrap.")
         if 'name="robots" content="noindex,nofollow"' not in start_here_text:
             errors.append("member-start-here.html: member lesson must remain noindex,nofollow.")

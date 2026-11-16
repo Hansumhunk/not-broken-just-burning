@@ -45,7 +45,7 @@
 
   const pageScripts = {
     dashboard: ["js/member-dashboard.js"],
-    "path-stage": ["js/member-path-stage.js"],
+    "path-stage": ["js/member-path-foundations.js", "js/member-path-stage.js"],
     progress: ["js/member-history-insights.js", "js/member-learning-progress.js"],
     work: ["js/member-history-insights.js"],
     workshop: ["js/tool-member-history.js", "js/member-workshop.js"],
@@ -60,8 +60,8 @@
       const script = document.createElement("script");
       script.src = src === 'js/member-search.js'
         ? src + '?v=find-resume-v1'
-        : src === 'js/member-path-stage.js'
-        ? src + '?v=member-path-v1'
+        : src === 'js/member-path-foundations.js' || src === 'js/member-path-stage.js'
+        ? src + '?v=member-depth-v2'
         : src === 'js/member-billing.js'
         ? src + '?v=paid-account-view-v1'
         : src === 'js/member-feedback.js'

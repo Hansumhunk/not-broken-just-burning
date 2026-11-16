@@ -82,20 +82,20 @@ test('the private reader lists thirty-five lessons in six distinct tracks', () =
   assert.match(js, /Track 2 · The Placeholder Wound/);
 });
 
-test('membership and library distinguish seven published lessons from 28 drafts during live enrollment', () => {
+test('membership and library accurately present all 35 released written lessons', () => {
   const store = read('member-store.html');
   const library = read('member-library.html');
   const doc = read('FOUNDING_LAUNCH_RELEASE.md');
-  assert.match(store, /Seven founding lessons on inherited manhood are now approved and published/);
-  assert.match(store, /Seven founding lessons are published in the protected library/);
-  assert.match(store, /Available: seven published lessons/);
+  assert.match(store, /All thirty-five guided lessons are now published/);
+  assert.match(store, /All thirty-five guided lessons are published in the protected member library/);
+  assert.match(store, /Available: 35 published lessons/);
   assert.match(library, /View Flamewalker\+ Membership/);
-  assert.match(library, /twenty-eight additional manuscripts remain private editorial drafts/);
+  assert.match(library, /All 35 guided lessons are published and available/);
   assert.match(read('flamewalker-plus.html'), /7 published · Available with Flamewalker\+/);
   assert.match(read('flamewalker-plus.html'), /Paid checkout is available inside the authenticated member area/);
-  assert.match(library, /The seven approved founding lessons are included in Flamewalker\+ membership/);
-  assert.match(library, /Eight-Lesson Track · Coming Soon/);
-  assert.match(library, /Five-Lesson Track · Coming Soon/);
+  assert.match(library, /All 35 guided lessons are published and available/);
+  assert.match(library, /Open Published Track/);
+  assert.match(library, /Open Published Track/);
   assert.match(doc, /All seven are present in Supabase/);
   assert.match(doc, /status = editorial_review/);
   assert.match(doc, /No source manuscript bodies were added to public GitHub/);
@@ -113,7 +113,7 @@ test('expanded relationship modules deliver additional guided value without gati
   assert.doesNotMatch(release, /any of the seven are published/);
 });
 
-test('Track 2 copy describes expanded exercises accurately without suggesting publication', () => {
+test('Track 2 copy describes expanded exercises in the released track', () => {
   const store = read('member-store.html');
   const library = read('member-library.html');
   const release = read('FOUNDING_LAUNCH_RELEASE.md');
@@ -292,7 +292,7 @@ test('new practical tracks appear in private reader and editorial queue without 
   assert.match(js, /Track 4 · Steadiness & Emotional Command/);
   assert.match(js, /Track 5 · Rebuilding a Life That Holds/);
   assert.match(html, /Thirty-five-lesson editorial review queue/);
-  assert.match(read('member-store.html'), /Seven founding lessons are published in the protected library/);
+  assert.match(read('member-store.html'), /All thirty-five guided lessons are published in the protected member library/);
 });
 
 test('the recovered Sacred Laws remain private, correctly ordered, and awaiting founder approval', () => {
@@ -303,7 +303,7 @@ test('the recovered Sacred Laws remain private, correctly ordered, and awaiting 
   for (const slug of slugs) assert.match(html, new RegExp('data-premium-lesson-link="'+slug+'"'));
   assert.match(js, /Track 6 · The Five Sacred Laws of Survival/);
   assert.match(html, /Thirty-five-lesson editorial review queue/);
-  assert.match(read('member-store.html'), /Seven founding lessons are published in the protected library/);
+  assert.match(read('member-store.html'), /All thirty-five guided lessons are published in the protected member library/);
   assert.match(doc, /35 drafts · 6 tracks · 0 published/);
   assert.match(doc, /Founding content scope is frozen/);
 });

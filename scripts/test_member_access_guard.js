@@ -342,7 +342,7 @@ test('Lessons is a direct top-nav destination on authenticated member pages', ()
   assert.ok(premium.includes('All Lessons'));
 });
 
-test('Lessons hub shows one free lesson and seven published premium lessons without leaking protected bodies', () => {
+test('Lessons hub shows free entry and dynamically grants published lessons only after server catalog confirmation', () => {
   const html = read('member-lessons.html');
   const slugs = ['father-wound','mother-wound','learned-silence','bullying-shame-early-armor','what-strength-looked-like','allowed-to-need','inherited-vs-chosen-manhood'];
   assert.ok(html.includes('data-member-page="lessons"'));
@@ -353,7 +353,11 @@ test('Lessons hub shows one free lesson and seven published premium lessons with
   for (const slug of slugs) assert.ok(html.includes('href="member-premium-lesson.html?lesson=' + slug + '"'));
   assert.ok(html.includes('28 more lessons are being prepared'));
   assert.ok(html.includes('Video lessons remain shelved'));
-  assert.ok(html.includes("state?.tier === 'paid' && state?.source !== 'server_error'"));
+  assert.ok(html.includes("memberState?.tier === 'paid' && memberState?.source !== 'server_error'"));
+  assert.ok(html.includes("item.status !== 'published'"));
+  assert.ok(html.includes("card.dataset.publicationStatus = 'published'"));
+  assert.ok(html.includes("link.hidden = !paid || (card && card.dataset.publicationStatus !== 'published')"));
+  assert.ok(html.includes("functions.invoke('read-flamewalker-lesson'"));
   assert.ok(html.includes('window.addEventListener(\'nbjb:entitlements\''));
   assert.ok(html.includes('member-store.html'));
   assert.ok(!html.includes('data-premium-lesson-content'), 'premium manuscripts must never be embedded in index');
@@ -367,7 +371,7 @@ test('published Lessons cards have no decorative availability ribbons', () => {
   assert.ok(catalog.includes('28 more lessons are being prepared'));
 });
 
-test('all 28 drafted lessons appear in five expandable tracks without unpublished content access', () => {
+test('all 28 additional lessons appear in five tracks and only unlock after protected publication', () => {
   const catalog = read('member-lessons.html');
   assert.equal((catalog.match(/data-editorial-preview=/g) || []).length, 28);
   assert.equal((catalog.match(/class="lesson-track-preview"/g) || []).length, 5);
@@ -381,9 +385,10 @@ test('all 28 drafted lessons appear in five expandable tracks without unpublishe
     assert.ok(catalog.includes(track), 'missing draft track: ' + track);
   }
   assert.equal((catalog.match(/data-paid-lesson-open hidden/g) || []).length, 7);
-  assert.ok(catalog.includes('not included in today'));
+  assert.ok(catalog.includes("item.status === 'published'"));
   assert.ok(catalog.includes('Video lessons remain shelved'));
-  assert.ok(!catalog.includes('href="member-premium-lesson.html?lesson=being-needed-vs-chosen"'));
+  assert.ok(catalog.includes("link.href = 'member-premium-lesson.html?lesson=' + encodeURIComponent(item.slug)"));
+  assert.ok(catalog.includes("card.dataset.publicationStatus = 'published'"));
 });
 
 test('paid dashboard learning continues into published written lessons, not unreleased video area', () => {

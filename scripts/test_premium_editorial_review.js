@@ -1972,9 +1972,52 @@ test('free premium lesson denial points to live membership without exposing prot
   assert.ok(js.includes('Monthly and annual memberships are available now.'));
   assert.ok(!js.includes('The paid membership is not for sale yet.'));
   assert.ok(html.includes('href="member-store.html">Membership options</a>'));
-  assert.ok(html.includes('js/member-bootstrap.js?v=context-reflections-v17'));
+  assert.ok(html.includes('js/member-bootstrap.js?v=next-lesson-v18'));
   assert.ok(bootstrap.includes("src === 'js/member-premium-lesson.js'"));
-  assert.ok(bootstrap.includes("src + '?v=premium-access-v16'"));
+  assert.ok(bootstrap.includes("src + '?v=premium-next-lesson-v17'"));
   assert.match(js, /const denied = error\?\.context\?\.status === 403/);
   assert.match(js, /renderLesson\(data\.lesson\)/);
+});
+
+test('published premium lessons provide a safe next-lesson action only on the final page', () => {
+  const html=read('member-premium-lesson.html');
+  const js=read('js/member-premium-lesson.js');
+  const css=read('css/member-premium-lesson.css');
+  assert.match(html, /id="premium-next-lesson-panel"[^>]*hidden/);
+  assert.match(html, /id="premium-next-lesson-link" href="member-lessons.html"/);
+  assert.match(html, /href="member-work.html">My Saved Work/);
+  assert.match(html, /member-premium-lesson[.]css[?]v=next-lesson-v18/);
+  assert.match(css, /[.]premium-next-lesson-panel/);
+  assert.ok(js.includes("lesson?.status === 'published' && steps.length"), 'unpublished drafts must not show member continuation');
+  assert.ok(js.includes('current === steps.length - 1'), 'only show action after final reflection');
+  assert.ok(js.includes("items.filter(item => item?.status === 'published'"), 'never suggest unpublished lessons');
+  assert.ok(js.includes("reviewCatalog = items;\n      renderReviewQueue();\n      updateNextLesson();"));
+  assert.ok(js.includes("updateNextLesson();\n    const saved = storageWrite(positionKey"), 'section changes must hide/show next lesson');
+  assert.ok(js.includes("link.href = 'member-lessons.html'"), 'last published lesson must have a valid catalog fallback');
+});
+
+test('premium continuation selects the next published lesson and safely crosses tracks', () => {
+  const source=read('js/member-premium-lesson.js');
+  const first=source.indexOf('  function nextPublishedLesson(items, currentSlug)');
+  const end=source.indexOf('  function noticeState(', first);
+  assert.ok(first>=0 && end>first);
+  const helpers=source.slice(first,end);
+  const next=vm.runInNewContext(helpers + '\nnextPublishedLesson', {});
+  const rows=[
+    {slug:'alpha',status:'published',track_slug:'first',title:'First'},
+    {slug:'beta',status:'editorial_review',track_slug:'first',title:'Draft'},
+    {slug:'gamma',status:'published',track_slug:'first',title:'Second'},
+    {slug:'delta',status:'published',track_slug:'second',title:'New Track'}
+  ];
+  const one=next(rows,'alpha');
+  assert.equal(one.slug,'gamma');
+  assert.equal(one.title,'Second');
+  assert.equal(one.newTrack,false);
+  const two=next(rows,'gamma');
+  assert.equal(two.slug,'delta');
+  assert.equal(two.newTrack,true);
+  assert.equal(next(rows,'delta'),null);
+  assert.equal(next(rows,'missing'),null);
+  assert.equal(next(rows,'beta'),null,'an unpublished current lesson is not part of the member sequence');
+  assert.equal(next([], 'alpha'),null);
 });

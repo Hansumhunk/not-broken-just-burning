@@ -11,6 +11,7 @@ on:
       - '.github/workflows/flame-spirits.yml'
       - 'scripts/flame_spirits.mjs'
       - 'scripts/test_flame_spirits.mjs'
+      - 'scripts/flame_spirits_guardrails.mjs'
       - 'FLAME_SPIRITS.md'
 
 permissions:

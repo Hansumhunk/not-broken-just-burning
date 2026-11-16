@@ -611,7 +611,7 @@
     }
     // The final fallback names the actual section. It is a reflection question,
     // not the misleading "Write a private note about..." template.
-    const topic = displayTitle(String(step?.title || 'this section').replace(/\s+/g, ' ').trim()).slice(0, 110);
+    const topic = String(step?.title || 'this section').replace(/^Part\s+\d+\s*(?:[—–·:\-]\s*)?/i, '').replace(/\s+/g, ' ').trim().slice(0, 110);
     return {
       instruction: 'As I consider ' + topic + ', what connects with my own experience, and what would I like to keep or change?',
       kind: 'contextual'

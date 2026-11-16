@@ -188,6 +188,11 @@
     const scenarioLead = oldStep?.blocks?.slice().reverse().find(block => /^Scenario [A-D] —/.test(block.text));
     const first = scenarioLead?.text || oldStep?.blocks?.find(block => block.text)?.text;
     if (!first) return legacyIndex;
+    const scenarioId = /^Scenario ([A-D]) —/.exec(first)?.[1];
+    if (scenarioId) {
+      const named = revisedSteps.findIndex(step => step.title.startsWith('Part 5 · Scenario ' + scenarioId + ' —'));
+      if (named >= 0) return named;
+    }
     const mapped = revisedSteps.findIndex(step => step.blocks?.some(block =>
       block.text === first || (first.startsWith('Scenario ') && first.includes(block.text.slice(0, 80)))));
     return mapped >= 0 ? mapped : legacyIndex;

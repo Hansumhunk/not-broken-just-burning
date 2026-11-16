@@ -49,6 +49,7 @@
     work: ["js/member-history-insights.js"],
     workshop: ["js/tool-member-history.js", "js/member-workshop.js"],
     "start-here": ["js/member-start-here.js"],
+    feedback: ["js/member-feedback.js"],
     "premium-lesson": ["js/member-chosen-code.js", "js/member-editorial-workbooks.js", "js/member-lesson-workspaces.js", "js/member-premium-lesson.js"],
     store: ["js/member-billing.js"]
   };
@@ -56,7 +57,9 @@
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = src === 'js/member-learning-progress.js'
+      script.src = src === 'js/member-feedback.js'
+        ? src + '?v=member-feedback-v1'
+        : src === 'js/member-learning-progress.js'
         ? src + '?v=learning-trail-v1'
         : src === 'js/member-dashboard.js'
         ? src + '?v=journey-compass-v1'

@@ -359,6 +359,16 @@ test('Lessons hub shows one free lesson and seven published premium lessons with
   assert.ok(!html.includes('data-premium-lesson-content'), 'premium manuscripts must never be embedded in index');
 });
 
+test('published lesson cards show AVAILABLE NOW instead of the generic COMING SOON ribbon', () => {
+  const catalog = read('member-lessons.html');
+  const liveStyles = read('css/member-expansion.css');
+  const cards = catalog.match(/class="member-locked-card is-live" aria-labelledby="lesson-/g) || [];
+  assert.equal(cards.length, 7);
+  assert.ok(liveStyles.includes(".member-locked-card.is-live::after"));
+  assert.ok(liveStyles.includes("content: 'AVAILABLE NOW'"));
+  assert.ok(catalog.includes('28 more lessons are being prepared'));
+});
+
 test('paid dashboard learning continues into published written lessons, not unreleased video area', () => {
   const code = read('js/member-dashboard.js');
   assert.ok(code.includes("link.href = 'member-lessons.html'"));

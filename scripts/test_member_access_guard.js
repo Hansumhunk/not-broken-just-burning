@@ -9,7 +9,7 @@ const read = (name) => fs.readFileSync(path.join(root, name), 'utf8');
 
 const memberPages = [
   'member-community.html','member-feedback.html','member-library.html','member-lessons.html','member-media.html','member-onboarding.html',
-  'member-path.html','member-premium-lesson.html','member-profile.html','member-progress.html',
+  'member-path.html','member-path-stage.html','member-premium-lesson.html','member-profile.html','member-progress.html',
   'member-settings.html','member-start-here.html','member-framework.html','member-store.html','member-tools.html',
   'member-work.html','member-workshop.html','members.html'
 ];
@@ -332,7 +332,7 @@ test('Lessons is a direct top-nav destination on authenticated member pages', ()
   assert.ok(platform.includes("['lessons', 'member-lessons.html', 'Lessons']"));
   assert.ok(platform.includes("['start-here', 'framework', 'premium-lesson'].includes(page)"));
   assert.ok(bootstrap.includes("src === 'js/member-platform.js'"));
-  assert.ok(bootstrap.includes("src + '?v=member-journal-v1'"));
+  assert.ok(bootstrap.includes("src + '?v=member-path-v1'"));
   for (const html of [dashboard, intro, library, premium]) {
     assert.ok(html.includes('href="member-lessons.html"'), 'members should have direct lessons navigation');
     const expected = html === premium ? 'grounded-cues-v24' : html === dashboard ? 'dashboard-returning-v2' : 'lessons-hub-v14';
@@ -675,7 +675,7 @@ test('Progress Learning Trail tracks voluntary Path/practice metadata but not pr
     'data-learning-trail-count','data-learning-trail-stages','data-learning-trail-practiced','data-learning-trail-status'])
       assert.ok(html.includes(token),token);
   assert.ok(bootstrap.includes('progress: ["js/member-history-insights.js", "js/member-learning-progress.js"]'));
-  assert.ok(bootstrap.includes("src + '?v=learning-trail-v2'"));
+  assert.ok(bootstrap.includes("src + '?v=member-path-v1'"));
   assert.ok(validator.includes('"js/member-learning-progress.js"'));
   assert.ok(js.includes("entitlement?.tier === 'paid' && entitlement?.source === 'server'"));
   assert.ok(js.includes("item?.status === 'published'"));
@@ -870,16 +870,16 @@ test('all six Learning Trail cards open existing Path teaching without changing 
   const script=read('js/member-learning-progress.js');
   const html=read('member-progress.html');
   const paths={
-    'Fire Reclamation':'path-fire-reclamation.html',
-    "The Guardian's Path":'path-guardian.html',
-    'Sacred Mirror Work':'path-sacred-mirror.html',
-    'Masculine Restoration':'path-masculine-restoration.html',
-    'Voice of Fire':'path-voice-of-fire.html',
-    'Circle of the Flame':'path-circle-of-the-flame.html'
+    'Fire Reclamation':'member-path-stage.html?stage=fire-reclamation',
+    "The Guardian's Path":'member-path-stage.html?stage=guardian',
+    'Sacred Mirror Work':'member-path-stage.html?stage=sacred-mirror',
+    'Masculine Restoration':'member-path-stage.html?stage=masculine-restoration',
+    'Voice of Fire':'member-path-stage.html?stage=voice-of-fire',
+    'Circle of the Flame':'member-path-stage.html?stage=circle-of-flame'
   };
   for (const [name,href] of Object.entries(paths)) {
     assert.ok(script.includes("'" + href + "'"), name + ' needs a direct teaching link');
-    assert.ok(read(href).includes('<main'), href + ' must be a real page');
+    assert.ok(read(href.split('?')[0]).includes('<main'), href + ' must be a real member page');
   }
   assert.ok(script.includes("link.className = 'learning-trail-stage-link'"));
   assert.ok(script.includes("link.setAttribute('aria-label', 'Explore ' + name)"));
@@ -888,4 +888,104 @@ test('all six Learning Trail cards open existing Path teaching without changing 
   assert.ok(html.includes('.learning-trail-stages li:focus-within'));
   assert.ok(!script.includes('service.setFocus'), 'opening a stage must not change current focus');
   assert.ok(!script.includes('service.setProgress'), 'opening a stage must not change progress status');
+});
+
+
+test('My Path opens six authenticated member practices, not public marketing overviews', () => {
+  const html=read('member-path.html');
+  const member=read('member-path-stage.html');
+  const css=read('css/member-path-stage.css');
+  const js=read('js/member-path-stage.js');
+  const platform=read('js/member-platform.js');
+  const bootstrap=read('js/member-bootstrap.js');
+  const progress=read('js/member-learning-progress.js');
+  const validator=read('scripts/validate_site.py');
+  const paths=['fire-reclamation','guardian','sacred-mirror','masculine-restoration','voice-of-fire','circle-of-flame'];
+  for (const stage of paths) {
+    assert.ok(html.includes('href="member-path-stage.html?stage='+stage+'"'),stage);
+    assert.ok(progress.includes("'member-path-stage.html?stage="+stage+"'"),'learning trail: '+stage);
+    assert.ok(js.includes("slug:'"+stage+"'"),'stage teaching: '+stage);
+  }
+  assert.equal((html.match(/Open member practice →/g)||[]).length,6);
+  assert.doesNotMatch(html,/href="path-(?:fire-reclamation|guardian|sacred-mirror|masculine-restoration|voice-of-fire|circle-of-the-flame)[.]html"/);
+  assert.ok(platform.includes("card.querySelector('a[href^=\"member-path-stage.html\"]')"));
+  assert.ok(platform.includes("page === 'path-stage' && link.dataset.memberNav === 'path'"));
+  assert.ok(member.includes('data-member-page="path-stage"'));
+  assert.ok(member.includes('id="nbjb-member-access-gate"'));
+  assert.ok(member.includes('href="members.html"'));
+  assert.ok(member.includes('href="member-work.html"'));
+  assert.ok(member.includes('href="member-path.html"'));
+  assert.ok(member.includes('id="path-stage-open-work"'));
+  assert.ok(css.includes('@media(max-width:720px)'));
+  assert.ok(bootstrap.includes('"path-stage": ["js/member-path-stage.js"]'));
+  assert.ok(bootstrap.includes("src + '?v=member-path-v1'"));
+  assert.ok(validator.includes('"member-path-stage.html"'));
+  assert.ok(validator.includes('"js/member-path-stage.js"'));
+  assert.ok(validator.includes('"css/member-path-stage.css"'));
+});
+
+test('Path member practice saves only by explicit choice, with local structured My Work entry', () => {
+  const source=read('js/member-path-stage.js');
+  const elements={};
+  const node=tag=>({
+    tag,children:[],textContent:'',hidden:true,value:'',checked:false,disabled:false,
+    dataset:{},attributes:{},events:{},className:'',
+    append(...items){this.children.push(...items);},
+    setAttribute(name,value){this.attributes[name]=value;},
+    addEventListener(type,handler){this.events[type]=handler;}
+  });
+  const document={
+    createElement:node,
+    getElementById:id=>elements[id]||(elements[id]=node('div'))
+  };
+  const state={journey:{focus:'',progress:{'Fire Reclamation':'not-started'},nextAction:''}};
+  let saved=0, focusChanged=0, progressChanged=0, actionChanged=0, last=null;
+  const service={
+    load:()=>state,
+    listEntries:()=>[],
+    setFocus:focus=>{focusChanged++;state.journey.focus=focus;return{ok:true,data:state};},
+    setStageProgress:(focus,status)=>{progressChanged++;state.journey.progress[focus]=status;return{ok:true,data:state};},
+    update:patch=>{actionChanged++;state.journey.nextAction=patch.journey.nextAction;return{ok:true,data:state};},
+    recordToolEntry:(kind,payload)=>{saved++;last={kind,payload};return{ok:true};}
+  };
+  const window={NBJBMemberService:service,NBJBAuth:{user:{id:'one'}}};
+  const location={search:'?stage=fire-reclamation'};
+  vm.runInNewContext(source,{window,document,location,URLSearchParams,navigator:{clipboard:{writeText:async()=>{}}}});
+  assert.equal(saved,0,'loading the page must not save anything');
+  assert.equal(focusChanged,0);
+  assert.equal(progressChanged,0);
+  assert.equal(actionChanged,0);
+  assert.equal(elements['path-stage-content'].hidden,false);
+  assert.equal(elements['path-stage-heading'].textContent,'Fire Reclamation. Your work starts here.');
+  assert.equal(elements['path-stage-questions'].children.length,3);
+  const row=elements['path-stage-questions'].children[0];
+  const answer=row.children[2];
+  assert.equal(answer.tag,'textarea');
+  answer.value='I want the past to stop deciding my future relationships.';
+  assert.equal(saved,0,'typing must not save');
+  elements['path-stage-form'].events.submit({preventDefault(){}});
+  assert.equal(saved,1);
+  assert.equal(last.kind,'Path Reflection');
+  assert.equal(last.payload.data.stageKey,'fire-reclamation');
+  assert.equal(last.payload.data.journalEntries.length,1);
+  assert.match(last.payload.data.journalEntries[0].response,/past to stop deciding/);
+  assert.equal(actionChanged,0,'Next Honest Action changes require an explicit opt in');
+  assert.equal(elements['path-stage-open-work'].hidden,false);
+  elements['path-stage-next-action'].value='I will write a one-sentence boundary.';
+  elements['path-stage-update-next-action'].checked=true;
+  elements['path-stage-form'].events.submit({preventDefault(){}});
+  assert.equal(saved,2);
+  assert.equal(actionChanged,1);
+  assert.equal(state.journey.nextAction,'I will write a one-sentence boundary.');
+  assert.ok(last.payload.data.journalEntries.some(x=>x.prompt==='One small action I can control next'));
+  elements['path-stage-set-focus'].events.click();
+  assert.equal(focusChanged,1);
+  elements['path-stage-progress'].value='practicing';
+  elements['path-stage-progress'].events.change();
+  assert.equal(progressChanged,1);
+  assert.equal(state.journey.progress['Fire Reclamation'],'practicing');
+  assert.ok(read('js/member-platform.js').includes("['Lesson Journal','Path Reflection'].includes(entry.tool)"));
+  assert.ok(read('member-work.html').includes('<option>Path Reflection</option>'));
+  assert.ok(read('member-work.html').includes('data-work-tool="Path Reflection"'));
+  assert.doesNotMatch(source,/fetch\(|functions[.]invoke|sessionStorage|\.insert\(|\.upsert\(/);
 });

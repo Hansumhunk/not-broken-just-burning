@@ -99,7 +99,7 @@
 
     document.querySelectorAll('[data-member-nav]').forEach((link) => {
       const selected = link.dataset.memberNav === page ||
-        (['start-here', 'premium-lesson'].includes(page) && link.dataset.memberNav === 'lessons') ||
+        (['start-here', 'framework', 'premium-lesson'].includes(page) && link.dataset.memberNav === 'lessons') ||
         (page === 'workshop' && link.dataset.memberNav === 'tools');
       link.classList.toggle('active', selected);
       if (selected) link.setAttribute('aria-current', 'page');
@@ -348,12 +348,21 @@
   });
 
   function paintFocus(data = service.load()) {
+    const deepDive = document.querySelector('#member-focus-deep-dive');
+    let deepDiveHref = '';
     document.querySelectorAll('[data-focus-card]').forEach((card) => {
       const current = card.dataset.focusCard === data.journey.focus;
       card.classList.toggle('is-focus', current);
+      if (current) {
+        deepDiveHref = card.querySelector('a[href^="path-"]')?.getAttribute('href') || '';
+      }
       const button = card.querySelector('[data-set-focus]');
       if (button) button.textContent = current ? 'Current focus' : 'Set as my focus';
     });
+    if (deepDive) {
+      deepDive.hidden = !deepDiveHref;
+      if (deepDiveHref) deepDive.href = deepDiveHref;
+    }
   }
 
   document.querySelectorAll('[data-stage-progress]').forEach((select) => {

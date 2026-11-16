@@ -140,6 +140,53 @@ test('semantic pagination keeps every distinct scenario and case study on its ow
   assert.ok(source.includes("storageWrite(scenarioLayoutKey, 'one-scenario-per-page')"));
 });
 
+test('section reflection prompts follow actual teaching tasks rather than a generic question', () => {
+  const source=read('js/member-premium-lesson.js');
+  const html=read('member-premium-lesson.html');
+  const css=read('css/member-premium-lesson.css');
+  const helper=source.slice(source.indexOf('  function sectionReflectionCue(step)'),source.indexOf('  function render({ focus = false }'));
+  assert.ok(helper.startsWith('  function sectionReflectionCue'));
+  const getCue=vm.runInNewContext(helper+'\nsectionReflectionCue',{},{timeout:1000});
+  const page=blocks=>({title:'Part 1 — Name What Was Actually There',blocks:blocks.map(text=>({kind:'paragraph',text}))});
+  const father=getCue(page([
+    'Start with observable reality.',
+    'REFLECTION\nWrite 5–10 statements beginning with:',
+    '“My father / father figure…”',
+    'Keep each statement as observable as you reasonably can.'
+  ]));
+  assert.equal(father.kind,'assignment');
+  assert.match(father.instruction,/Write 5–10 statements beginning with:/);
+  assert.match(father.instruction,/My father \/ father figure/);
+  assert.match(father.instruction,/Keep each statement as observable/);
+  assert.doesNotMatch(father.instruction,/What stood out/);
+  const approval=getCue(page([
+    'For many boys, approval feels conditional.',
+    'Ask:\n- What made him proud of me?\n- Was effort valued, or only results?'
+  ]));
+  assert.equal(approval.kind,'questions');
+  assert.match(approval.instruction,/What made him proud/);
+  assert.match(approval.instruction,/Was effort valued/);
+  const failure=getCue(page([
+    'Ask:\n- What happened when my father made a mistake?\n- Did he admit it?',
+    'Then ask:\n- What happened when I made a mistake?\n- Was I corrected?'
+  ]));
+  assert.equal(failure.kind,'questions');
+  assert.match(failure.instruction,/What happened when my father made a mistake/);
+  assert.match(failure.instruction,/What happened when I made a mistake/);
+  const other=getCue(page(['A longer lesson explanation.','Write two concrete boundaries you can enforce without threatening someone.']));
+  assert.equal(other.kind,'assignment');
+  assert.match(other.instruction,/Write two concrete boundaries/);
+  assert.equal(getCue(page(['An informational paragraph without an exercise.'])),null);
+  assert.match(html,/id="premium-pause-label"/);
+  assert.match(html,/id="premium-pause-heading"/);
+  assert.match(html,/id="premium-pause-hint"/);
+  assert.match(html,/maxlength="12000"/);
+  assert.match(css,/white-space:pre-line/);
+  assert.match(source,/if\(body\.length > 2400\) return saveCompleteWorksheetToWork\(body, context, resultNode\)/);
+  assert.match(source,/applySectionReflection\(step\)/);
+  assert.doesNotMatch(html,/What stood out, or what would you do differently after reading this part/);
+});
+
 test('the server only returns premium content to paid accounts or a nominated reviewer', () => {
   const backend = read('supabase/functions/read-flamewalker-lesson/index.ts');
   assert.match(backend, /withSupabase\(\{ auth: "user" \}/);
@@ -1925,9 +1972,9 @@ test('free premium lesson denial points to live membership without exposing prot
   assert.ok(js.includes('Monthly and annual memberships are available now.'));
   assert.ok(!js.includes('The paid membership is not for sale yet.'));
   assert.ok(html.includes('href="member-store.html">Membership options</a>'));
-  assert.ok(html.includes('js/member-bootstrap.js?v=semantic-pages-v16'));
+  assert.ok(html.includes('js/member-bootstrap.js?v=context-reflections-v17'));
   assert.ok(bootstrap.includes("src === 'js/member-premium-lesson.js'"));
-  assert.ok(bootstrap.includes("src + '?v=premium-access-v15'"));
+  assert.ok(bootstrap.includes("src + '?v=premium-access-v16'"));
   assert.match(js, /const denied = error\?\.context\?\.status === 403/);
   assert.match(js, /renderLesson\(data\.lesson\)/);
 });

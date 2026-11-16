@@ -1,5 +1,15 @@
 # Flamewalker+ final launch checklist — November 15, 2026
 
+## Founding 28 manuscripts — substantive editorial pass, November 15, 2026
+
+- [x] **25 shorter manuscript revisions saved privately in Supabase.** Expanded applied examples, differentiated decision tools, safer scenario framing, concrete practice and follow-through. Three longer original Placeholder Wound drafts already contained substantial guided teaching and were preserved.
+- [x] **Five Safe Room manuscripts research-checked and qualified.** Added traceable DOI references to therapeutic alliance, philosophical epistemic injustice, and DARVO experimental vignette research; terms are used educationally, not as proof concerning any individual.
+- [x] **20 reader-facing introductions polished** to remove internal 'draft/v0.1' language; two standalone foundation labels removed. Original source attribution remains in protected manuscript metadata.
+- [x] **Read-only QA clean:** 28/28 private draft manuscripts have valid nonempty teaching blocks, 7–8 nonempty guided questions, a Next Honest Action, a Smaller Door, a safety boundary, and distinct exercise title. No exact repeated guided questions detected. Protected RLS remains enabled; anon/auth roles have no direct table SELECT permission. **7 published / 28 editorial_review**, unchanged.
+- [x] **Non-sensitive revision manifest:** [Founding 28 editorial readiness report](FOUNDING_28_EDITORIAL_READINESS_2026-11-15.md). Protected manuscript bodies were not copied to GitHub.
+- [ ] **Before publishing the remaining 28:** founder editorial signoff tied to the exact revised lesson versions, final private browser UX checks (including guided worksheet saving, mobile and keyboard), and controlled access/entitlement verification. Do not represent all 35 as currently available or bulk-promote 28 drafts from a structural test alone.
+
+
 ## Production sales release — November 15, 2026
 
 - [x] **Founder's explicit launch instruction executed.** PR #166 merged to `main` at `473cb1d64040fa804aee38ccc310cf82a1c2886f`; GitHub Pages build and site validation both completed successfully. `js/member-billing.js` now has `PUBLIC_CHECKOUT_UI_ENABLED=true`. Member Store shows live monthly ($14.99) and annual ($149) offers only after authenticated entitlement/catalog checks; public syllabus and Join copy reflect seven **published** lessons and 28 private drafts.

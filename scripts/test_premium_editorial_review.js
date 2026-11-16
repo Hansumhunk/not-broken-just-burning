@@ -1800,7 +1800,7 @@ test('membership store and dynamic billing scripts use the same fresh cache revi
   const store = read('member-store.html');
   const bootstrap = read('js/member-bootstrap.js');
   const billing = read('js/member-billing.js');
-  assert.ok(store.includes('js/member-bootstrap.js?v=nbjb-return-v12'));
+  assert.ok(store.includes('js/member-bootstrap.js?v=lessons-hub-v14'));
   assert.ok(bootstrap.includes("src + '?v=nbjb-return-v12'"));
   assert.ok(!store.includes('qa-billing-v11'));
   assert.ok(!bootstrap.includes('qa-billing-v11'));
@@ -1817,7 +1817,7 @@ test('free premium lesson denial points to live membership without exposing prot
   assert.ok(js.includes('Monthly and annual memberships are available now.'));
   assert.ok(!js.includes('The paid membership is not for sale yet.'));
   assert.ok(html.includes('href="member-store.html">Membership options</a>'));
-  assert.ok(html.includes('js/member-bootstrap.js?v=premium-access-v13'));
+  assert.ok(html.includes('js/member-bootstrap.js?v=lessons-hub-v14'));
   assert.ok(bootstrap.includes("src === 'js/member-premium-lesson.js'"));
   assert.ok(bootstrap.includes("src + '?v=premium-access-v13'"));
   assert.match(js, /const denied = error\?\.context\?\.status === 403/);

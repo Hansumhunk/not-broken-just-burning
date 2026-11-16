@@ -18,6 +18,9 @@
         {heading:'Survival habits can become expensive',text:'Staying hyper-alert, working harder, shutting down, or trying to control the next surprise may have helped you get through a difficult stretch. You can respect why a response developed and still ask whether it helps you now. You are not required to forgive, forget, or decide that the experience was somehow good.'},
         {heading:'Reclaim one piece of authority',text:'Your goal is not to solve the whole past. Choose one present decision that does not need to be handed over to the old event: where you put your attention, how you rest, what boundary you practice, or who gets access to your time. One observable action is more useful than a perfect explanation.'}
       ],
+      deepDive:[
+        /* FIRE_MEMBER_DEEP_DIVE_INSERT */
+      ],
       questions:[
         {label:'What happened that I am ready to describe plainly?',hint:'Start with observable events and consequences. You do not have to write every detail.'},
         {label:'What did it cost me, and what conclusion about myself may I have attached to that cost?',hint:'For example, losing trust is different from being incapable of trusting.'},
@@ -127,10 +130,25 @@
     if (className) node.className=className;
     return node;
   }
+  // Mirror only the public, already published stage foundations. Bringing
+  // those chapters into the Hub avoids downgrading the member experience.
+  // This static source does not include private lesson manuscripts or answers.
+  const foundation=window.NBJBPathFoundations?.[slug]?.blocks || [];
+  const foundationsNode=byId('path-stage-foundation-blocks');
+  foundation.forEach(block=>{
+    const node=make(block.kind==='heading'?'h3':block.kind==='quote'?'blockquote':'p',
+      block.text,block.kind==='heading'?'path-stage-foundation-heading':
+        block.kind==='quote'?'path-stage-foundation-quote':'path-stage-foundation-prose');
+    foundationsNode.append(node);
+  });
+  const depth=Array.isArray(chapter.deepDive)?chapter.deepDive:[];
   const teaching=byId('path-stage-teaching-blocks');
-  chapter.teaching.forEach(section=>{
+  [...chapter.teaching, ...depth].forEach((section,index)=>{
     const block=make('section',undefined,'path-stage-teaching-block');
-    block.append(make('h3',section.heading),make('p',section.text));
+    block.id='path-stage-teaching-'+(index+1);
+    block.append(make('h3',section.heading));
+    String(section.text||'').split(/\\n\\s*\\n/).filter(Boolean).forEach(text=>
+      block.append(make('p',text)));
     teaching.append(block);
   });
   const questions=byId('path-stage-questions');

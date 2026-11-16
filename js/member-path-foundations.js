@@ -357,6 +357,86 @@
       },
       {
         "kind": "heading",
+        "text": "Six anchors. One rebuilding framework."
+      },
+      {
+        "kind": "paragraph",
+        "text": "These are not personality types, clinical categories, or a masculinity score. They are six practical areas a man can examine when life gets chaotic. The aim is not perfection. It is enough clarity to choose the next useful action."
+      },
+      {
+        "kind": "heading",
+        "text": "Keep your footing."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Create enough space between activation and action to choose your response."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Areas to explore: Anger and overload; Shutdown and hypervigilance; Reset and regulation."
+      },
+      {
+        "kind": "heading",
+        "text": "Know what you are building toward."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Rebuild purpose and priorities when a role, relationship, career, or old identity no longer holds."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Areas to explore: Purpose after disruption; Identity beyond crisis; Priorities and mission."
+      },
+      {
+        "kind": "heading",
+        "text": "Use power with restraint."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Build courage, discipline, resilience, emotional range, and control over force rather than worship of force."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Areas to explore: Anger as information; Discipline and restraint; Vulnerability with backbone."
+      },
+      {
+        "kind": "heading",
+        "text": "Guard without controlling."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Protect children, time, values, energy, and peace while respecting what belongs to another adult."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Areas to explore: Boundaries; Fatherhood; Protection vs. possession."
+      },
+      {
+        "kind": "heading",
+        "text": "Carry what is actually yours."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Practice accountability without shame, repair mistakes, keep commitments, and stop carrying blame that does not belong to you."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Areas to explore: Repair and accountability; Provider identity; Self-respect."
+      },
+      {
+        "kind": "heading",
+        "text": "Build connection without dependency."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Rebuild trustworthy connection after betrayal, isolation, divorce, combat stress, rejection, or major life change."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Areas to explore: Male friendship; Mentors and teams; Asking for help without surrender."
+      },
+      {
+        "kind": "heading",
         "text": "Life does not arrive organized by module"
       },
       {
@@ -366,6 +446,110 @@
       {
         "kind": "paragraph",
         "text": "That is why Masculine Restoration also uses specialized branches : routes through the same six anchors for specific kinds of pressure."
+      },
+      {
+        "kind": "heading",
+        "text": "Different fires. Same operating system."
+      },
+      {
+        "kind": "paragraph",
+        "text": "These routes keep the framework relevant to the life a man is actually living instead of asking him to translate generic advice while his world is on fire."
+      },
+      {
+        "kind": "heading",
+        "text": "Fatherhood Under Pressure"
+      },
+      {
+        "kind": "paragraph",
+        "text": "Co-parenting stress, changed schedules, consistency, repair, modeling emotional regulation, and protecting children without making them messengers or referees."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Primary anchors: Steadiness · Protection · Responsibility · Brotherhood"
+      },
+      {
+        "kind": "heading",
+        "text": "Breakdown and Betrayal"
+      },
+      {
+        "kind": "paragraph",
+        "text": "Grief, rejection, rumination, trust injury, boundaries, self-respect, fatherhood under pressure, and rebuilding a future that does not require the old relationship to return."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Primary anchors: Steadiness · Direction · Strength · Protection · Responsibility"
+      },
+      {
+        "kind": "heading",
+        "text": "Court / Custody Without Losing Yourself"
+      },
+      {
+        "kind": "paragraph",
+        "text": "Documentation, clean communication, uncertainty, child focus, social-media discipline, qualified legal help, and separating facts, evidence, assumptions, interpretations, and unknowns."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Primary anchors: Steadiness · Protection · Responsibility · Direction"
+      },
+      {
+        "kind": "heading",
+        "text": "Institutional Betrayal & Weaponized Systems"
+      },
+      {
+        "kind": "paragraph",
+        "text": "What happens when help becomes another pressure source, a complaint or report becomes leverage, or a man's visible reaction is judged apart from the sequence that produced it."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Primary anchors: Steadiness · Protection · Responsibility · Direction"
+      },
+      {
+        "kind": "heading",
+        "text": "Provider Identity and Work Loss"
+      },
+      {
+        "kind": "paragraph",
+        "text": "Unemployment, business failure, burnout, disability, money shame, skill inventory, retraining, contribution, and rebuilding worth without pretending finances do not matter."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Primary anchors: Direction · Strength · Responsibility · Brotherhood"
+      },
+      {
+        "kind": "heading",
+        "text": "Military / First Responder Transition"
+      },
+      {
+        "kind": "paragraph",
+        "text": "Threat scanning, compartmentalization, mission identity, exhaustion tolerance, extreme self-reliance, team loss, and learning when survival skills need an off switch."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Primary anchors: Steadiness · Direction · Strength · Brotherhood"
+      },
+      {
+        "kind": "heading",
+        "text": "PTSD / CPTSD and Survival-Mode Masculinity"
+      },
+      {
+        "kind": "paragraph",
+        "text": "Language and structure for men living with trauma-related survival patterns while diagnosis and treatment remain with qualified professionals."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Primary anchors: all six"
+      },
+      {
+        "kind": "heading",
+        "text": "Loneliness and Rebuilding Brotherhood"
+      },
+      {
+        "kind": "paragraph",
+        "text": "Isolation after betrayal, divorce, shame, service transition, or public failure; rebuilding trust through friendship, shared activity, mentorship, and practical support."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Primary anchors: Brotherhood · Steadiness · Direction"
       },
       {
         "kind": "heading",
@@ -442,118 +626,6 @@
       {
         "kind": "paragraph",
         "text": "Use the Pattern Map to separate repetition from certainty →"
-      },
-      {
-        "kind": "heading",
-        "text": "Keep your footing."
-      },
-      {
-        "kind": "paragraph",
-        "text": "Create enough space between activation and action to choose your response."
-      },
-      {
-        "kind": "heading",
-        "text": "Know what you are building toward."
-      },
-      {
-        "kind": "paragraph",
-        "text": "Rebuild purpose and priorities when a role, relationship, career, or old identity no longer holds."
-      },
-      {
-        "kind": "heading",
-        "text": "Use power with restraint."
-      },
-      {
-        "kind": "paragraph",
-        "text": "Build courage, discipline, resilience, emotional range, and control over force rather than worship of force."
-      },
-      {
-        "kind": "heading",
-        "text": "Guard without controlling."
-      },
-      {
-        "kind": "paragraph",
-        "text": "Protect children, time, values, energy, and peace while respecting what belongs to another adult."
-      },
-      {
-        "kind": "heading",
-        "text": "Carry what is actually yours."
-      },
-      {
-        "kind": "paragraph",
-        "text": "Practice accountability without shame, repair mistakes, keep commitments, and stop carrying blame that does not belong to you."
-      },
-      {
-        "kind": "heading",
-        "text": "Build connection without dependency."
-      },
-      {
-        "kind": "paragraph",
-        "text": "Rebuild trustworthy connection after betrayal, isolation, divorce, combat stress, rejection, or major life change."
-      },
-      {
-        "kind": "heading",
-        "text": "Fatherhood Under Pressure"
-      },
-      {
-        "kind": "paragraph",
-        "text": "Co-parenting stress, changed schedules, consistency, repair, modeling emotional regulation, and protecting children without making them messengers or referees."
-      },
-      {
-        "kind": "heading",
-        "text": "Breakdown and Betrayal"
-      },
-      {
-        "kind": "paragraph",
-        "text": "Grief, rejection, rumination, trust injury, boundaries, self-respect, fatherhood under pressure, and rebuilding a future that does not require the old relationship to return."
-      },
-      {
-        "kind": "heading",
-        "text": "Court / Custody Without Losing Yourself"
-      },
-      {
-        "kind": "paragraph",
-        "text": "Documentation, clean communication, uncertainty, child focus, social-media discipline, qualified legal help, and separating facts, evidence, assumptions, interpretations, and unknowns."
-      },
-      {
-        "kind": "heading",
-        "text": "Institutional Betrayal & Weaponized Systems"
-      },
-      {
-        "kind": "paragraph",
-        "text": "What happens when help becomes another pressure source, a complaint or report becomes leverage, or a man's visible reaction is judged apart from the sequence that produced it."
-      },
-      {
-        "kind": "heading",
-        "text": "Provider Identity and Work Loss"
-      },
-      {
-        "kind": "paragraph",
-        "text": "Unemployment, business failure, burnout, disability, money shame, skill inventory, retraining, contribution, and rebuilding worth without pretending finances do not matter."
-      },
-      {
-        "kind": "heading",
-        "text": "Military / First Responder Transition"
-      },
-      {
-        "kind": "paragraph",
-        "text": "Threat scanning, compartmentalization, mission identity, exhaustion tolerance, extreme self-reliance, team loss, and learning when survival skills need an off switch."
-      },
-      {
-        "kind": "heading",
-        "text": "PTSD / CPTSD and Survival-Mode Masculinity"
-      },
-      {
-        "kind": "paragraph",
-        "text": "Language and structure for men living with trauma-related survival patterns while diagnosis and treatment remain with qualified professionals."
-      },
-      {
-        "kind": "heading",
-        "text": "Loneliness and Rebuilding Brotherhood"
-      },
-      {
-        "kind": "paragraph",
-        "text": "Isolation after betrayal, divorce, shame, service transition, or public failure; rebuilding trust through friendship, shared activity, mentorship, and practical support."
       }
     ]
   },

@@ -1925,7 +1925,7 @@ test('free premium lesson denial points to live membership without exposing prot
   assert.ok(js.includes('Monthly and annual memberships are available now.'));
   assert.ok(!js.includes('The paid membership is not for sale yet.'));
   assert.ok(html.includes('href="member-store.html">Membership options</a>'));
-  assert.ok(html.includes('js/member-bootstrap.js?v=lessons-hub-v14'));
+  assert.ok(html.includes('js/member-bootstrap.js?v=semantic-pages-v16'));
   assert.ok(bootstrap.includes("src === 'js/member-premium-lesson.js'"));
   assert.ok(bootstrap.includes("src + '?v=premium-access-v15'"));
   assert.match(js, /const denied = error\?\.context\?\.status === 403/);

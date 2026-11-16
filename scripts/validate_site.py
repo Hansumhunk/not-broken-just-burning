@@ -316,6 +316,7 @@ def main() -> int:
             "js/member-workshop.js",
             "js/member-entitlements.js",
             "js/member-history-insights.js",
+            "js/member-learning-progress.js",
             "js/member-platform.js",
             "js/member-premium-lesson.js",
             "js/member-lesson-workspaces.js",

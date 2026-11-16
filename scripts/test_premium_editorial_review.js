@@ -195,9 +195,9 @@ test('section reflection prompts follow actual teaching tasks rather than a gene
   const source=read('js/member-premium-lesson.js');
   const html=read('member-premium-lesson.html');
   const css=read('css/member-premium-lesson.css');
-  const helper=source.slice(source.indexOf('  function sectionReflectionCue(step)'),source.indexOf('  function render({ focus = false }'));
-  assert.ok(helper.startsWith('  function sectionReflectionCue'));
-  const getCue=vm.runInNewContext(helper+'\nsectionReflectionCue',{},{timeout:1000});
+  const helper=source.slice(source.indexOf('  function contextualReflectionCue(step, blocks)'),source.indexOf('  function render({ focus = false }'));
+  assert.ok(helper.startsWith('  function contextualReflectionCue'));
+  const getCue=vm.runInNewContext(helper+'\nsectionReflectionCue',{slug:'father-wound'},{timeout:1000});
   const page=blocks=>({title:'Part 1 — Name What Was Actually There',blocks:blocks.map(text=>({kind:'paragraph',text}))});
   const father=getCue(page([
     'Start with observable reality.',
@@ -227,7 +227,10 @@ test('section reflection prompts follow actual teaching tasks rather than a gene
   const other=getCue(page(['A longer lesson explanation.','Write two concrete boundaries you can enforce without threatening someone.']));
   assert.equal(other.kind,'assignment');
   assert.match(other.instruction,/Write two concrete boundaries/);
-  assert.equal(getCue(page(['An informational paragraph without an exercise.'])),null);
+  const general=getCue(page(['An informational paragraph without an exercise.']));
+  assert.equal(general.kind,'contextual');
+  assert.match(general.instruction,/Part 1.*own experience/);
+  assert.doesNotMatch(general.instruction,/Write a private note about/);
   const bareAsk=getCue(page([
     'Ask:',
     '- Was I permitted to ask for support?',
@@ -271,6 +274,47 @@ test('section reflection prompts follow actual teaching tasks rather than a gene
   });
   assert.match(embedded.instruction,/What repeated/);
   assert.match(embedded.instruction,/What supports the pattern/);
+
+
+  // Synthetic private-section fixtures: lesson text remains in Supabase.
+  const smaller=getCue({
+    title:'The Smaller Door',blocks:[
+      {kind:'paragraph',text:'If this is too much, answer only:'},
+      {kind:'paragraph',text:'“One thing I learned about courage growing up was ______.”'},
+      {kind:'paragraph',text:'Then stop.'}
+    ]
+  });
+  assert.equal(smaller.kind,'direct');
+  assert.equal(smaller.instruction,'One thing I learned about courage growing up was ______.');
+  const spiritual=getCue({
+    title:'Optional Spiritual Lens',blocks:[
+      {kind:'paragraph',text:'A grounded spiritual question is:'},
+      {kind:'paragraph',text:'“What kind of care will I bring forward, and what ends with me?”'}
+    ]
+  });
+  assert.equal(spiritual.kind,'direct');
+  assert.equal(spiritual.instruction,'What kind of care will I bring forward, and what ends with me?');
+  const motherCue=vm.runInNewContext(helper+'\nsectionReflectionCue',{slug:'mother-wound'},{timeout:1000});
+  const maternalOpen=motherCue({
+    title:'Opening',blocks:[
+      {kind:'paragraph',text:'We learn rules about care, connection, and independence.'},
+      {kind:'paragraph',text:'The adult question is which rule still shows up in your behavior.'}
+    ]
+  });
+  assert.equal(maternalOpen.kind,'contextual');
+  assert.match(maternalOpen.instruction,/rule about love or closeness/);
+  assert.match(maternalOpen.instruction,/my behavior or relationships today/);
+  const maternalSmaller=motherCue({
+    title:'The Smaller Door',blocks:[
+      {kind:'paragraph',text:'If this feels like too much, answer only:'},
+      {kind:'paragraph',text:'“One thing I learned about closeness from a caregiver was _____.”'}
+    ]
+  });
+  assert.match(maternalSmaller.instruction,/One thing I learned about closeness/);
+  const readerApply=source.slice(source.indexOf('  function applySectionReflection(step) {'),source.indexOf('  function render({ focus = false }'));
+  assert.ok(readerApply.includes('prompt.textContent=cue.instruction'));
+  assert.ok(readerApply.includes('Answer the reflection above in your own words'));
+  assert.doesNotMatch(readerApply,/Write a private note about/);
 
   assert.match(html,/id="premium-pause-label"/);
   assert.match(html,/id="premium-pause-heading"/);

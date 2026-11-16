@@ -8,7 +8,7 @@ const root = path.resolve(__dirname, '..');
 const read = (name) => fs.readFileSync(path.join(root, name), 'utf8');
 
 const memberPages = [
-  'member-community.html','member-library.html','member-media.html','member-onboarding.html',
+  'member-community.html','member-library.html','member-lessons.html','member-media.html','member-onboarding.html',
   'member-path.html','member-premium-lesson.html','member-profile.html','member-progress.html',
   'member-settings.html','member-start-here.html','member-store.html','member-tools.html',
   'member-work.html','member-workshop.html','members.html'

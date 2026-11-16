@@ -82,20 +82,23 @@ test('the private reader lists thirty-five lessons in six distinct tracks', () =
   assert.match(js, /Track 2 · The Placeholder Wound/);
 });
 
-test('membership and library distinguish seven published lessons from 28 drafts during live enrollment', () => {
+test('release-candidate membership and library accurately describe 35 published lessons and paid access', () => {
   const store = read('member-store.html');
   const library = read('member-library.html');
-  const doc = read('FOUNDING_LAUNCH_RELEASE.md');
-  assert.match(store, /Seven founding lessons on inherited manhood are now approved and published/);
-  assert.match(store, /Seven founding lessons are published in the protected library/);
-  assert.match(store, /Available: seven published lessons/);
+  const plus = read('flamewalker-plus.html');
+  const doc = read('FOUNDING_LAUNCH_RELEASE.md'); // historical record of earlier seven-lesson release
+  assert.match(store, /Thirty-five guided lessons across six tracks are published/);
+  assert.match(store, /Available: thirty-five published lessons/);
+  assert.match(store, /All thirty-five guided lessons are published and included in Flamewalker\+/);
+  assert.match(library, /Thirty-five guided lessons published across six tracks/);
+  assert.match(library, /All thirty-five guided written lessons are published and included in Flamewalker\+/);
   assert.match(library, /View Flamewalker\+ Membership/);
-  assert.match(library, /twenty-eight additional manuscripts remain private editorial drafts/);
-  assert.match(read('flamewalker-plus.html'), /7 published · Available with Flamewalker\+/);
-  assert.match(read('flamewalker-plus.html'), /Paid checkout is available inside the authenticated member area/);
-  assert.match(library, /The seven approved founding lessons are included in Flamewalker\+ membership/);
-  assert.match(library, /Eight-Lesson Track · Coming Soon/);
-  assert.match(library, /Five-Lesson Track · Coming Soon/);
+  assert.match(plus, /7 published · Available with Flamewalker\+/);
+  assert.match(plus, /8 published · Available with Flamewalker\+/);
+  assert.match(plus, /Paid checkout is available inside the authenticated member area/);
+  assert.match(library, /Browse Track Lessons/);
+  assert.doesNotMatch(library, /Eight-Lesson Track · Coming Soon/);
+  assert.doesNotMatch(library, /Five-Lesson Track · Coming Soon/);
   assert.match(doc, /All seven are present in Supabase/);
   assert.match(doc, /status = editorial_review/);
   assert.match(doc, /No source manuscript bodies were added to public GitHub/);

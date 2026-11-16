@@ -2266,7 +2266,7 @@ test('reader presentation removes internal Part labels while preserving actual c
   assert.ok(html.includes('css/member-premium-lesson.css?v=journal-reader-v23'));
   assert.ok(css.includes('.premium-journal-row'));
   assert.ok(work.includes('member-journal-entry'));
-  assert.ok(work.includes("entry.tool === 'Lesson Journal'"));
+  assert.ok(work.includes("['Lesson Journal','Path Reflection'].includes(entry.tool)"));
   assert.ok(work.includes("key !== 'journalEntries'"));
   assert.ok(myWork.includes('data-work-tool="Lesson Journal"'));
   assert.ok(myWork.includes('<option>Lesson Journal</option>'));

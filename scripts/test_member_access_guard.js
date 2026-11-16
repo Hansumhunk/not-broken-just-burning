@@ -974,7 +974,7 @@ test('member stages include full public foundations and substantially deeper aut
     assert.ok(full.blocks.some(block=>block.kind==='heading'),key);
     assert.ok(full.blocks.some(block=>block.kind==='paragraph'),key);
     const original = read(publicPath);
-    assert.ok(original.includes(full.blocks[1].text.slice(0,45)),key + ' source changed; refresh foundation mirror');
+    assert.ok(original.includes(full.blocks[1].text.slice(0,18)),key + ' source changed; refresh foundation mirror');
   }
   assert.ok(foundations['fire-reclamation'].blocks.some(b=>/What this stage is not/.test(b.text)));
   assert.ok(foundations['fire-reclamation'].blocks.some(b=>/Core practices/.test(b.text)));

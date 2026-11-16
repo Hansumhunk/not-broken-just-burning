@@ -526,6 +526,24 @@ test('Start Here offers free deep dive, not a protected lesson URL, without a pa
   assert.match(next.textContent,/Chaos/);
 });
 
+test('public acquisition entry points are live and report anonymous signup interest', () => {
+  const home=read('index.html');
+  const join=read('join.html');
+  const main=read('js/main.js');
+  assert.ok(home.includes('data-growth-cta="home_hero"'));
+  assert.ok(home.includes('data-growth-cta="home_lessons"'));
+  assert.ok(join.includes('data-growth-cta="join_signup"'));
+  assert.ok(home.includes('35 published written lessons') || home.includes('35 guided lessons'));
+  assert.ok(home.includes('href="join.html"'));
+  assert.ok(join.includes('href="member-auth.html"'));
+  assert.ok(!home.includes('Flamewalker accounts, Flamewalker+, expanded curriculum'));
+  assert.ok(!home.includes('<span>BEING BUILT</span>'));
+  assert.ok(main.includes("nbjb_free_membership_cta_clicked"));
+  assert.ok(main.includes("window.posthog?.capture?."));
+  assert.ok(main.includes("!privacySignalEnabled"));
+  assert.ok(main.includes("autocapture: false"));
+  assert.ok(main.includes("cookieless_mode: 'always'"));
+});
 test('a paid member with a protected reading bookmark is returning, not first-run', () => {
   const js=read('js/member-dashboard.js');
   const start=js.indexOf('  function isFirstRun(state, entries, entitlementState) {');

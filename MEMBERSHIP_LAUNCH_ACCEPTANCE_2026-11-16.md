@@ -2,6 +2,17 @@
 
 **Prepared November 16, 2026.** This is a privacy-safe, founder-run acceptance check. The automated CI suite verifies source rules and safe mock membership expiration; it **cannot create a real login, verify an email, complete checkout, or inspect a paid lesson**.
 
+## Founder-confirmed browser acceptance — November 16, 2026
+
+**Result: 4 of 4 original no-charge browser checks passed, as reported directly by the founder in ChatGPT on November 16, 2026.** This is founder-reported acceptance, not an independently recorded browser test.
+
+- [x] **Step 1 — signed-out gate:** no protected member workspace shown when visiting Start Here while signed out.
+- [x] **Step 2 — free registration:** successful free-account entry and sign-in/onboarding flow.
+- [x] **Step 3 — free lesson and paid boundary:** free lesson reachable; premium lesson content not accessible from ordinary Free member UI.
+- [x] **Step 4 — sign-out and return:** dashboard access requires authentication again after sign-out.
+
+**Still separate and open:** real paid-member lesson/workbook/save acceptance, a direct server-side paid-lesson denial test under ordinary Free credentials, first independent customer purchase/portal acceptance, final lesson editorial QA, and the December 2 live cancellation/paid-to-Free transition. No charges, member status edits or access changes were made to record this result.
+
 ## What has already been verified
 
 - The configured production Supabase Auth endpoint responds; email signup is enabled; the site URL and member-auth callback are accepted. The latest GitHub `Validate static site` job passed those live smoke tests.

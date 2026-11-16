@@ -564,10 +564,10 @@ test('live Terms and Refund pages describe currently available paid membership w
     assert.ok(page.includes('14'),name);
     assert.ok(page.includes('30'),name);
   }
-  assert.match(terms,/\\$14\.99 USD per month/);
-  assert.match(terms,/\\$149 USD per year/);
-  assert.match(refunds,/\\$14\.99\\/month/);
-  assert.match(refunds,/\\$149\\/year/);
+  assert.ok(terms.includes('$14.99 USD per month'));
+  assert.ok(terms.includes('$149 USD per year'));
+  assert.ok(refunds.includes('$14.99/month'));
+  assert.ok(refunds.includes('$149/year'));
   assert.match(refunds,/7 calendar days after the renewal charge/);
   assert.match(terms,/your free account to cancel a paid subscription/);
   assert.match(refunds,/Stripe's Customer Portal/);

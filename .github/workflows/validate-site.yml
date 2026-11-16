@@ -44,6 +44,9 @@ on:
       - '.github/workflows/flame-marshal.yml'
       - 'scripts/flame_marshal.mjs'
       - 'scripts/test_flame_marshal.mjs'
+      - '.github/workflows/flame-spirit-reach.yml'
+      - 'scripts/flame_spirit_reach.mjs'
+      - 'scripts/test_flame_spirit_reach.mjs'
       - 'FLAME_SPIRITS.md'
   pull_request:
     paths:
@@ -80,6 +83,9 @@ on:
       - '.github/workflows/flame-marshal.yml'
       - 'scripts/flame_marshal.mjs'
       - 'scripts/test_flame_marshal.mjs'
+      - '.github/workflows/flame-spirit-reach.yml'
+      - 'scripts/flame_spirit_reach.mjs'
+      - 'scripts/test_flame_spirit_reach.mjs'
       - 'FLAME_SPIRITS.md'
 
 permissions:
@@ -115,6 +121,8 @@ jobs:
         run: node --test scripts/test_flame_spirit_products.mjs
       - name: Test Flame Marshal supervisor status and cadence checks
         run: node --test scripts/test_flame_marshal.mjs
+      - name: Test Spirit of Reach ethical content research
+        run: node --test scripts/test_flame_spirit_reach.mjs
       - name: Smoke-test live Flamewalker Supabase Auth
         if: ${{ github.base_ref == 'main' || github.ref_name == 'main' || startsWith(github.ref_name, 'release/') }}
         run: python scripts/validate_supabase_runtime.py

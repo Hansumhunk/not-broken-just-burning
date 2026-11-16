@@ -13,7 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/brand.css"><link rel="stylesheet" href="css/experience.css">
 <link rel="stylesheet" href="css/members.css?v=member-path-v1"><link rel="stylesheet" href="css/member-expansion.css?v=clean-ribbons-v17">
-<link rel="stylesheet" href="css/member-path-stage.css?v=member-path-v1">
+<link rel="stylesheet" href="css/member-path-stage.css?v=member-depth-v2">
 <style id="nbjb-member-access-gate">body[data-member-page]:not([data-member-access="granted"]) main{display:none!important}</style>
 </head>
 <body data-member-page="path-stage">
@@ -42,15 +42,26 @@
         <label for="path-stage-progress">My practice status</label>
         <select id="path-stage-progress"><option value="not-started">Not started</option><option value="in-progress">In progress</option><option value="practicing">Practicing</option></select>
       </div></div>
-      <p id="path-stage-lead"></p>
+      <p id="path-stage-lead"></p><p class="path-stage-course-meta" id="path-stage-course-meta"></p>
       <div class="path-stage-actions"><button class="button button-ghost" type="button" id="path-stage-set-focus">Set as my current focus</button><span id="path-stage-focus-caption"></span></div>
    </section>
-   <section class="member-panel path-stage-teaching" aria-labelledby="path-stage-teaching-heading">
-     <p class="eyebrow">Understand the work</p><h2 id="path-stage-teaching-heading">Before you write, understand the pattern.</h2>
+   <nav class="path-stage-course-jump" aria-label="Jump within the Path stage">
+     <a href="#path-stage-foundation">Complete foundation</a>
+     <a href="#path-stage-deeper">Member deep dive</a>
+     <a href="#path-stage-reflection">Make the lesson yours</a>
+   </nav>
+   <section class="member-panel path-stage-foundation" id="path-stage-foundation" aria-labelledby="path-stage-foundation-heading">
+     <p class="eyebrow">Complete foundation · Read the full teaching</p>
+     <h2 id="path-stage-foundation-heading">Understand the entire stage—not a summary.</h2>
+     <p>This includes the complete public stage teaching, here inside your member workspace. Read it first, or move straight into the deeper member course and guided reflection below.</p>
+     <div id="path-stage-foundation-blocks"></div>
+   </section>
+   <section class="member-panel path-stage-teaching" id="path-stage-deeper" aria-labelledby="path-stage-teaching-heading">
+     <p class="eyebrow">Member deep dive · Put the ideas to work</p><h2 id="path-stage-teaching-heading">Go beyond understanding. Practice the judgment.</h2>
      <div id="path-stage-teaching-blocks"></div>
      <p class="path-stage-bridge"><strong>Two different experiences:</strong> <a id="path-stage-public-link" href="path-fire-reclamation.html">Public overview</a> explains the framework. This member page gives you somewhere to put it into practice and keep your own work. The public page remains available, but it is not your member worksheet.</p>
    </section>
-   <section class="member-panel path-stage-reflection" aria-labelledby="path-stage-reflection-heading">
+   <section class="member-panel path-stage-reflection" id="path-stage-reflection" aria-labelledby="path-stage-reflection-heading">
      <p class="eyebrow">Guided reflection · Optional</p><h2 id="path-stage-reflection-heading">Make the lesson yours.</h2>
      <p>Answer the questions that are useful today. They are tied to this Path stage. Your responses stay on this page until you explicitly save or copy them; they are never uploaded automatically.</p>
      <form id="path-stage-form">
@@ -76,5 +87,5 @@
 </section>
 </main>
 <footer class="site-footer section-shell"><div><strong>NOT BROKEN JUST BURNING</strong><p>Clarity, agency, action. Carry a lantern, not a leash.</p></div><div class="footer-meta"><p>Self-guided education, not psychotherapy or legal advice.</p><p class="footer-links"><a href="support.html">Support &amp; Safety</a> · <a href="privacy.html">Privacy &amp; Data Use</a></p></div></footer>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script><script src="js/nbjb-config.js"></script><script src="js/nbjb-auth.js"></script><script src="js/main.js"></script><script src="js/member-bootstrap.js?v=member-path-v1"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script><script src="js/nbjb-config.js"></script><script src="js/nbjb-auth.js"></script><script src="js/main.js"></script><script src="js/member-bootstrap.js?v=member-depth-v2"></script>
 </body></html>

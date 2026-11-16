@@ -42,3 +42,29 @@
   .path-stage-buttons .button,.path-stage-next-links .button{text-align:center;justify-content:center;width:100%;box-sizing:border-box}
   .path-stage-question textarea{min-height:94px}
 }
+
+/* Full foundational teaching plus extended member-only chapters. */
+.path-stage-course-jump{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:21px}
+.path-stage-course-jump a{display:inline-flex;padding:10px 13px;border:1px solid var(--line);border-radius:999px;
+  color:var(--ember-pale);font-size:.85rem;font-weight:750;text-decoration:none;min-height:44px;align-items:center}
+.path-stage-course-jump a:hover,.path-stage-course-jump a:focus-visible{border-color:var(--line-hot);outline-offset:2px}
+.path-stage-shell [id^="path-stage-"]{scroll-margin-top:170px}
+.path-stage-foundation{border-color:rgba(255,255,255,.12)}
+.path-stage-foundation-blocks{max-width:88ch}
+#path-stage-foundation-blocks .path-stage-foundation-heading{font-size:clamp(1.14rem,2vw,1.4rem);
+  line-height:1.4;margin:30px 0 13px;color:var(--text)}
+#path-stage-foundation-blocks .path-stage-foundation-prose{margin:0 0 15px;color:var(--muted);line-height:1.85;max-width:83ch}
+#path-stage-foundation-blocks .path-stage-foundation-quote{margin:25px 0;padding:16px 20px;
+  border-left:3px solid var(--ember-deep);font-style:italic;color:var(--text);background:rgba(255,122,45,.045)}
+.path-stage-teaching-block{padding:26px 0}
+.path-stage-teaching-block p{margin:0 0 14px;line-height:1.85;color:var(--muted)}
+.path-stage-teaching-block p:last-child{margin-bottom:0}
+.path-stage-teaching-block.is-case-study{padding:22px;margin:12px 0;border:1px solid rgba(255,122,45,.25);
+  border-radius:13px;background:rgba(255,122,45,.035)}
+.path-stage-teaching-block.is-case-study h3{color:var(--ember-pale)}
+.path-stage-course-meta{font-size:.83rem;color:var(--muted);margin:8px 0 0;line-height:1.6}
+@media(max-width:720px){
+  .path-stage-course-jump{display:grid;grid-template-columns:1fr}
+  .path-stage-course-jump a{width:100%;justify-content:center}
+  .path-stage-teaching-block.is-case-study{margin:10px 0;padding:17px}
+}

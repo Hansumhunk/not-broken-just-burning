@@ -939,11 +939,56 @@ test('My Path opens six authenticated member practices, not public marketing ove
   assert.ok(member.includes('href="member-path.html"'));
   assert.ok(member.includes('id="path-stage-open-work"'));
   assert.ok(css.includes('@media(max-width:720px)'));
-  assert.ok(bootstrap.includes('"path-stage": ["js/member-path-stage.js"]'));
+  assert.ok(bootstrap.includes('"path-stage": ["js/member-path-foundations.js", "js/member-path-stage.js"]'));
   assert.ok(bootstrap.includes("src + '?v=member-path-v1'"));
   assert.ok(validator.includes('"member-path-stage.html"'));
   assert.ok(validator.includes('"js/member-path-stage.js"'));
+  assert.ok(validator.includes('"js/member-path-foundations.js"'));
+  assert.ok(member.includes('id="path-stage-foundation-blocks"'));
+  assert.ok(member.includes('id="path-stage-deeper"'));
+  assert.ok(member.includes('href="#path-stage-reflection"'));
+  assert.ok(bootstrap.includes("src + '?v=member-depth-v2'"));
+  assert.ok(member.includes('js/member-bootstrap.js?v=member-depth-v2'));
+  assert.ok(css.includes('.path-stage-course-jump'));
   assert.ok(validator.includes('"css/member-path-stage.css"'));
+});
+
+test('member stages include full public foundations and substantially deeper authored teaching', () => {
+  const source = read('js/member-path-foundations.js');
+  const context = {window:{}};
+  vm.runInNewContext(source,context);
+  const foundations = context.window.NBJBPathFoundations;
+  const mapping = {
+    'fire-reclamation':'path-fire-reclamation.html',
+    'guardian':'path-guardian.html',
+    'sacred-mirror':'path-sacred-mirror.html',
+    'masculine-restoration':'path-masculine-restoration.html',
+    'voice-of-fire':'path-voice-of-fire.html',
+    'circle-of-flame':'path-circle-of-the-flame.html'
+  };
+  for (const [key,publicPath] of Object.entries(mapping)) {
+    const full = foundations[key];
+    assert.ok(full, key + ' has no complete foundation');
+    assert.equal(full.source,publicPath);
+    assert.ok(full.blocks.length >= 17,key + ' is missing public teaching blocks');
+    assert.ok(full.blocks.some(block=>block.kind==='heading'),key);
+    assert.ok(full.blocks.some(block=>block.kind==='paragraph'),key);
+    const original = read(publicPath);
+    assert.ok(original.includes(full.blocks[1].text.slice(0,18)),key + ' source changed; refresh foundation mirror');
+  }
+  assert.ok(foundations['fire-reclamation'].blocks.some(b=>/What this stage is not/.test(b.text)));
+  assert.ok(foundations['fire-reclamation'].blocks.some(b=>/Core practices/.test(b.text)));
+  assert.ok(foundations['fire-reclamation'].blocks.some(b=>/Reflection questions/.test(b.text)));
+  const member = read('js/member-path-stage.js');
+  const depthSection = member.slice(member.indexOf("slug:'fire-reclamation'"),member.indexOf("slug:'guardian'"));
+  assert.equal((depthSection.match(/"heading":/g)||[]).length,12,'Fire Reclamation should have twelve expanded member chapters');
+  assert.equal((member.match(/^\s*deepDive:\[/gm)||[]).length,6,'every Path stage should have member-only depth');
+  for (const term of ['timeline', 'survival', 'Case study:','Integration:']) {
+    assert.ok(depthSection.includes(term), 'Fire is missing substantive '+term+' teaching');
+  }
+  assert.ok(member.includes('window.NBJBPathFoundations?.[slug]?.blocks'));
+  assert.ok(member.includes("String(section.text||'').split("));
+  assert.ok(member.includes("'path-stage-course-meta'"));
 });
 
 test('Path member practice saves only by explicit choice, with local structured My Work entry', () => {
@@ -972,6 +1017,7 @@ test('Path member practice saves only by explicit choice, with local structured 
   };
   const window={NBJBMemberService:service,NBJBAuth:{user:{id:'one'}}};
   const location={search:'?stage=fire-reclamation'};
+  vm.runInNewContext(read('js/member-path-foundations.js'),{window});
   vm.runInNewContext(source,{window,document,location,URLSearchParams,navigator:{clipboard:{writeText:async()=>{}}}});
   assert.equal(saved,0,'loading the page must not save anything');
   assert.equal(focusChanged,0);
@@ -980,6 +1026,11 @@ test('Path member practice saves only by explicit choice, with local structured 
   assert.equal(elements['path-stage-content'].hidden,false);
   assert.equal(elements['path-stage-heading'].textContent,'Fire Reclamation. Your work starts here.');
   assert.equal(elements['path-stage-questions'].children.length,3);
+  assert.equal(elements['path-stage-foundation-blocks'].children.length,19,
+    'the whole public foundation must render inside the member page');
+  assert.equal(elements['path-stage-teaching-blocks'].children.length,15,
+    'three member core teachings plus twelve expanded Fire chapters');
+  assert.match(elements['path-stage-course-meta'].textContent,/approximately \d+ minutes to read/);
   const row=elements['path-stage-questions'].children[0];
   const answer=row.children[2];
   assert.equal(answer.tag,'textarea');

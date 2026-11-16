@@ -53,9 +53,17 @@
 // The member entitlement state is loaded only after authenticated session checks.
 // This is navigation convenience, not content authorization: the lesson endpoint
 // independently checks each authenticated user's current paid entitlement.
-window.addEventListener('nbjb:entitlements', (event) => {
-  const link = document.querySelector('[data-paid-lessons-link]');
-  if (link) link.hidden = event.detail?.tier !== 'paid';
+function applyPaidTrackLinks(state) {
+  const paid = state?.tier === 'paid' && state?.source !== 'server_error';
+  document.querySelectorAll('[data-paid-lessons-link]').forEach(link => { link.hidden = !paid; });
+}
+window.addEventListener('nbjb:entitlements', event => applyPaidTrackLinks(event.detail));
+window.addEventListener('pageshow', () => {
+  const ready = window.NBJBEntitlements?.ready;
+  if (ready) ready.then(applyPaidTrackLinks).catch(() => applyPaidTrackLinks({ tier: 'free' }));
 });
+if (window.NBJBEntitlements?.ready) {
+  window.NBJBEntitlements.ready.then(applyPaidTrackLinks).catch(() => applyPaidTrackLinks({ tier: 'free' }));
+}
 </script>
 </body></html>

@@ -346,7 +346,7 @@ test('the reviewer checklist stores no manuscript content and can never grant en
   assert.match(snippet, /This does not approve or publish the lesson/);
 });
 
-test('the private reader lists thirty-five lessons in six distinct tracks', () => {
+test('the private reader lists premium lessons in six distinct tracks', () => {
   const html = read('member-premium-lesson.html');
   const slugs = [
     'father-wound', 'mother-wound', 'learned-silence',
@@ -357,6 +357,7 @@ test('the private reader lists thirty-five lessons in six distinct tracks', () =
     'grieving-future-never-happened', 'other-person-not-your-measure',
     'promise-of-the-room', 'split-alliance-therapy-triangle', 'professional-authority-multiplier',
     'when-you-stop-trusting-own-account', 'double-bind-darvo-reaction',
+    'psychological-abuse-therapy-feedback-loop', 'what-comes-after-survival-adaptations', 'men-vulnerability-never-again-rule', 'document-fire-not-live-evidence-locker', 'when-therapy-enters-court-records', 'when-distress-looks-like-deception', 'the-credibility-cascade', 'challenge-bias-and-repair', 'rebuilding-ability-to-seek-help',
     'body-as-ally', 'name-the-emotion-choose-action', 'the-space-between-trigger-and-response',
     'boundaries-without-cruelty', 'discipline-without-self-punishment',
     'provision-without-proving-worth', 'fatherhood-what-children-watch',
@@ -377,18 +378,18 @@ test('the private reader lists thirty-five lessons in six distinct tracks', () =
   assert.match(js, /Track 2 · The Placeholder Wound/);
 });
 
-test('membership and library accurately present all 35 released written lessons', () => {
+test('membership and library accurately present all 44 released written lessons', () => {
   const store = read('member-store.html');
   const library = read('member-library.html');
   const doc = read('FOUNDING_LAUNCH_RELEASE.md');
-  assert.match(store, /All thirty-five guided lessons are now published/);
-  assert.match(store, /All thirty-five guided lessons are published in the protected member library/);
-  assert.match(store, /Available: 35 published lessons/);
+  assert.match(store, /All forty-four guided lessons are now published/);
+  assert.match(store, /All forty-four guided lessons are published in the protected member library/);
+  assert.match(store, /Available: 44 published lessons/);
   assert.match(library, /View Flamewalker\+ Membership/);
-  assert.match(library, /All 35 guided lessons are published and available/);
+  assert.match(library, /All 44 guided lessons are published and available/);
   assert.match(read('flamewalker-plus.html'), /7 published · Available with Flamewalker\+/);
   assert.match(read('flamewalker-plus.html'), /Paid checkout is available inside the authenticated member area/);
-  assert.match(library, /All 35 guided lessons are published and available/);
+  assert.match(library, /All 44 guided lessons are published and available/);
   assert.match(library, /Open Published Track/);
   assert.match(library, /Open Published Track/);
   assert.match(doc, /All seven are present in Supabase/);
@@ -400,7 +401,7 @@ test('expanded relationship modules deliver additional guided value without gati
   const store = read('member-store.html');
   const library = read('member-library.html');
   const release = read('FOUNDING_LAUNCH_RELEASE.md');
-  assert.match(store, /seven on inherited manhood, eight on relationships, five on professional trust and credibility, five on emotional command, five on rebuilding life, and five on the Sacred Laws of Survival/);
+  assert.match(store, /seven on inherited manhood, eight on relationships, fourteen on professional trust and credibility, five on emotional command, five on rebuilding life, and five on the Sacred Laws of Survival/);
   assert.match(store, /original shorter public educational articles remain available for future free use/i);
   assert.match(library, /Original shorter educational articles can remain free/);
   assert.match(release, /7 original full-length \+ 3 newly expanded = 10 substantial guided lessons/);
@@ -416,7 +417,7 @@ test('Track 2 copy describes expanded exercises in the released track', () => {
   assert.match(store, /original shorter public educational articles remain available for future free use/i);
   assert.match(library, /eight expanded relationship modules/);
   assert.match(library, /eight guided modules now form the relationship/);
-  assert.match(library, /five lessons about trust and helping processes/);
+  assert.match(library, /fourteen lessons about therapeutic alliances, trust, records, credible assessment, accountability, and rebuilding support/);
   assert.match(release, /content.version = 2/);
   assert.match(release, /status = editorial_review/);
   assert.match(release, /no Stripe checkout was enabled/);
@@ -567,12 +568,25 @@ test('AI Doc Maker recordings cannot be served by the premium lesson API', () =>
   assert.match(html, /id="premium-speak"/);
 });
 
-test('every protected founding lesson link is unique across six tracks', () => {
+test('new Safe Room lessons have preview entries but are never embedded in public HTML', () => {
+  const hub = read('member-lessons.html');
+  const reader = read('member-premium-lesson.html');
+  const slugs = ['psychological-abuse-therapy-feedback-loop','what-comes-after-survival-adaptations','men-vulnerability-never-again-rule','document-fire-not-live-evidence-locker','when-therapy-enters-court-records','when-distress-looks-like-deception','the-credibility-cascade','challenge-bias-and-repair','rebuilding-ability-to-seek-help'];
+  for (const slug of slugs) {
+    assert.ok(hub.includes('data-editorial-preview="' + slug + '"'), 'missing preview ' + slug);
+    assert.ok(reader.includes('data-premium-lesson-link="' + slug + '"'), 'missing protected reader link ' + slug);
+  }
+  assert.ok(hub.includes('if (lessons.length >= 44) paintCatalog(lessons);'));
+  assert.ok(hub.includes("item.status !== 'published'"));
+  assert.ok(!hub.includes('data-premium-lesson-content'));
+});
+
+test('every protected premium lesson link is unique across six tracks', () => {
   const html = read('member-premium-lesson.html');
   const links = [...html.matchAll(/data-premium-lesson-link="([^"]+)"/g)].map(m => m[1]);
-  assert.equal(links.length, 35);
-  assert.equal(new Set(links).size, 35);
-  assert.match(html, /Review the thirty-five founding lessons/);
+  assert.equal(links.length, 44);
+  assert.equal(new Set(links).size, 44);
+  assert.match(html, /Review the guided lesson catalog/);
   const script = read('js/member-premium-lesson.js');
   assert.match(script, /'safe-room-courtroom'/);
   assert.match(script, /Track 3 · When the Safe Room Becomes the Courtroom/);
@@ -586,8 +600,8 @@ test('new practical tracks appear in private reader and editorial queue without 
   }
   assert.match(js, /Track 4 · Steadiness & Emotional Command/);
   assert.match(js, /Track 5 · Rebuilding a Life That Holds/);
-  assert.match(html, /Thirty-five-lesson editorial review queue/);
-  assert.match(read('member-store.html'), /All thirty-five guided lessons are published in the protected member library/);
+  assert.match(html, /Premium lesson editorial review queue/);
+  assert.match(read('member-store.html'), /All forty-four guided lessons are published in the protected member library/);
 });
 
 test('the recovered Sacred Laws remain private, correctly ordered, and awaiting founder approval', () => {
@@ -597,8 +611,8 @@ test('the recovered Sacred Laws remain private, correctly ordered, and awaiting 
   const slugs = ['sacred-law-emotional-boundaries','sacred-law-pattern-recognition','sacred-law-self-worth','sacred-law-strategic-retreat','sacred-law-authentic-voice'];
   for (const slug of slugs) assert.match(html, new RegExp('data-premium-lesson-link="'+slug+'"'));
   assert.match(js, /Track 6 · The Five Sacred Laws of Survival/);
-  assert.match(html, /Thirty-five-lesson editorial review queue/);
-  assert.match(read('member-store.html'), /All thirty-five guided lessons are published in the protected member library/);
+  assert.match(html, /Premium lesson editorial review queue/);
+  assert.match(read('member-store.html'), /All forty-four guided lessons are published in the protected member library/);
   assert.match(doc, /35 drafts · 6 tracks · 0 published/);
   assert.match(doc, /Founding content scope is frozen/);
 });
@@ -824,8 +838,11 @@ test('exercise usability audit covers the 35-lesson library and preserves privat
   const doc = read('FLAMEWALKER_EXERCISE_USABILITY_AUDIT.md');
   const html = read('member-premium-lesson.html');
   const slugs = [...html.matchAll(/data-premium-lesson-link="([^"]+)"/g)].map(match => match[1]);
-  assert.equal(slugs.length, 35);
-  for (const slug of slugs) assert.ok(doc.includes('`' + slug + '`'), 'missing audit entry: ' + slug);
+  assert.equal(slugs.length, 44);
+  const founding = slugs.filter(slug => doc.includes('`' + slug + '`'));
+  assert.equal(founding.length, 35, 'historical founding audit must still cover all 35 original lessons');
+  const nineNew = ['psychological-abuse-therapy-feedback-loop','what-comes-after-survival-adaptations','men-vulnerability-never-again-rule','document-fire-not-live-evidence-locker','when-therapy-enters-court-records','when-distress-looks-like-deception','the-credibility-cascade','challenge-bias-and-repair','rebuilding-ability-to-seek-help'];
+  for (const slug of nineNew) assert.ok(slugs.includes(slug), 'missing new Safe Room lesson: ' + slug);
   assert.match(doc, /All seven now have inline workspaces/);
   assert.match(doc, /editorial_review/);
   assert.match(doc, /No changes to Stripe launch gates or disabled Read to Me/);

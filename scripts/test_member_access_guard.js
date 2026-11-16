@@ -352,7 +352,7 @@ test('Lessons hub shows free entry and dynamically grants published lessons only
   assert.equal((html.match(/data-paid-lesson-open hidden/g) || []).length, 7);
   assert.equal((html.match(/data-free-lesson-lock hidden/g) || []).length, 7);
   for (const slug of slugs) assert.ok(html.includes('href="member-premium-lesson.html?lesson=' + slug + '"'));
-  assert.ok(html.includes('All 35 guided lessons are now available.'));
+  assert.ok(html.includes('All 44 guided lessons are now available.'));
   assert.ok(html.includes('Video lessons remain shelved'));
   assert.ok(html.includes("memberState?.tier === 'paid' && memberState?.source !== 'server_error'"));
   assert.ok(html.includes("item.status !== 'published'"));
@@ -379,16 +379,16 @@ test('published Lessons cards have no decorative availability ribbons', () => {
   const cards = catalog.match(/class="member-locked-card is-live" aria-labelledby="lesson-/g) || [];
   assert.equal(cards.length, 7);
   assert.ok(catalog.includes('body[data-member-page="lessons"] .member-locked-card::after{display:none!important;content:none!important}'));
-  assert.ok(catalog.includes('All 35 guided lessons are now available.'));
+  assert.ok(catalog.includes('All 44 guided lessons are now available.'));
 });
 
-test('all 28 additional lessons appear in five tracks and only unlock after protected publication', () => {
+test('all 37 additional lessons appear in five tracks and only unlock after protected publication', () => {
   const catalog = read('member-lessons.html');
-  assert.equal((catalog.match(/data-editorial-preview=/g) || []).length, 28);
+  assert.equal((catalog.match(/data-editorial-preview=/g) || []).length, 37);
   assert.equal((catalog.match(/class="lesson-track-preview"/g) || []).length, 5);
   for (const [track, count] of [
     ['The Placeholder Wound', 8],
-    ['When the Safe Room Becomes the Courtroom', 5],
+    ['When the Safe Room Becomes the Courtroom', 14],
     ['Steadiness &amp; Emotional Command', 5],
     ['Rebuilding a Life That Holds', 5],
     ['The Five Sacred Laws of Survival', 5],
@@ -533,7 +533,7 @@ test('public acquisition entry points are live and report anonymous signup inter
   assert.ok(home.includes('data-growth-cta="home_hero"'));
   assert.ok(home.includes('data-growth-cta="home_lessons"'));
   assert.ok(join.includes('data-growth-cta="join_signup"'));
-  assert.ok(home.includes('35 published written lessons') || home.includes('35 guided lessons'));
+  assert.ok(home.includes('44 published written lessons') || home.includes('44 guided lessons'));
   assert.ok(home.includes('href="join.html"'));
   assert.ok(join.includes('href="member-auth.html"'));
   assert.ok(!home.includes('Flamewalker accounts, Flamewalker+, expanded curriculum'));
@@ -575,7 +575,7 @@ test('live Terms and Refund pages describe currently available paid membership w
   const refunds=read('refunds.html');
   for(const [name,page] of [['terms',terms],['refunds',refunds]]) {
     assert.ok(page.includes('Flamewalker+ paid subscriptions are available now.'),name);
-    assert.ok(page.includes('35 currently published written lessons'),name);
+    assert.ok(page.includes('44 currently published written lessons'),name);
     assert.ok(!page.includes('paid subscriptions are not yet available for purchase'),name);
     assert.ok(!page.includes('Applies to paid memberships when offered'),name);
     assert.ok(page.includes('notbrokenjustburning@gmail.com'),name);
@@ -596,7 +596,7 @@ test('Membership page gives paid subscribers account management instead of anoth
   const bootstrap=read('js/member-bootstrap.js');
   assert.equal((html.match(/data-membership-upgrade hidden/g)||[]).length,6);
   assert.ok(html.includes('data-membership-paid-overview hidden'));
-  assert.ok(html.includes('href="member-lessons.html">Open My 35 Lessons</a>'));
+  assert.ok(html.includes('href="member-lessons.html">Open My 44 Lessons</a>'));
   assert.ok(html.indexOf('id="member-live-billing"') < html.indexOf('Simple access model'));
   assert.ok(html.includes('js/member-bootstrap.js?v=paid-account-view-v1'));
   assert.ok(bootstrap.includes("src === 'js/member-billing.js'"));
@@ -651,7 +651,7 @@ test('dashboard compass unifies learning, current Path focus and next action wit
   assert.ok(!js.includes('entry.data?.feelings'), 'dashboard must not display private journal details');
   assert.ok(css.includes('.member-journey-compass .member-today-grid'));
   assert.ok(css.includes('@media(max-width:1040px)'));
-  assert.ok(js.includes('35 published guided lessons'));
+  assert.ok(js.includes('44 published guided lessons'));
 });
 
 test('dashboard reader link is paid-only and resumes the device bookmark', () => {
@@ -1064,12 +1064,12 @@ test('Path member practice saves only by explicit choice, with local structured 
 });
 
 
-test('lessons catalog accurately advertises 35 published lessons without implying only seven exist', () => {
+test('lessons catalog accurately advertises 44 published lessons without implying only seven exist', () => {
   const html=read('member-lessons.html');
-  assert.match(html, /35 published premium guided lessons across six tracks/);
+  assert.match(html, /44 published premium guided lessons across six tracks/);
   assert.match(html, /Track 1 of 6 · Seven founding lessons/);
-  assert.match(html, /all 35 published written lessons across six tracks/);
-  assert.match(html, /Five more tracks · 28 published lessons/);
+  assert.match(html, /all 44 published written lessons across six tracks/);
+  assert.match(html, /Five more tracks · 37 published lessons/);
   assert.doesNotMatch(html, /Flamewalker\+ · Seven published written lessons/);
   assert.doesNotMatch(html, /One free foundation lesson and seven published premium guided lessons/);
   for (let i=1;i<=7;i++) {

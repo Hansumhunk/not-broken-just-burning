@@ -140,6 +140,57 @@ test('semantic pagination keeps every distinct scenario and case study on its ow
   assert.ok(source.includes("storageWrite(scenarioLayoutKey, 'one-scenario-per-page')"));
 });
 
+test('numbered examples stay with their explanation in Father and Mother Wound', () => {
+  const source=read('js/member-premium-lesson.js');
+  const sectionCode=source.slice(source.indexOf('  const major ='),source.indexOf('  function label(step)'));
+  const reader=slug=>vm.runInNewContext(
+    'const slug = '+JSON.stringify(slug)+'; const prettyHeading = s => s;'+sectionCode+
+    '\n({sectionize,remapScenarioBookmark})',{}, {timeout:1200}
+  );
+  for(const slug of ['father-wound','mother-wound']){
+    const ctx=reader(slug);
+    const blocks=[
+      {type:'heading',text:slug==='father-wound'?'THE FATHER IMPRINT MAP':'THE MATERNAL IMPRINT MAP'},
+      {type:'heading',text:'COLUMN 1 — WHAT I RECEIVED'},
+      {type:'paragraph',text:'Start with what you received. '+ 'Realistic detail. '.repeat(31)},
+      {type:'heading',text:'COLUMN 2 — WHAT I MISSED'},
+      {type:'paragraph',text:'Notice what you needed. '+ 'Relevant details. '.repeat(24)},
+      {type:'heading',text:'COLUMN 3 — WHAT I LEARNED'},
+      {type:'paragraph',text:'Identify the inherited rule. '+ 'Further detail. '.repeat(25)},
+      {type:'heading',text:'COLUMN 4 — WHAT I CHOOSE NOW'},
+      {type:'paragraph',text:'Describe your new rule. '+ 'More detail. '.repeat(16)}
+    ];
+    for(let n=1;n<=3;n++){
+      blocks.push({type:'heading',text:'EXAMPLE '+n});
+      for(let k=1;k<=5;k++)blocks.push({
+        type:'paragraph',text:'Example '+n+' response '+k+': '+ 'Practical worked answer. '.repeat(5)
+      });
+    }
+    const updated=ctx.sectionize(blocks);
+    for(let n=1;n<=3;n++){
+      const heading='EXAMPLE '+n;
+      const pages=updated.filter(step=>step.blocks.some(b=>b.kind==='heading'&&b.text===heading));
+      assert.equal(pages.length,1,slug+': each example heading occurs on one page');
+      const page=pages[0];
+      const start=page.blocks.findIndex(b=>b.kind==='heading'&&b.text===heading);
+      assert.ok(start>=0&&start<page.blocks.length-1,slug+': never orphan a heading');
+      for(let k=1;k<=5;k++){
+        assert.ok(page.blocks.some(b=>b.text.startsWith('Example '+n+' response '+k+':')),
+          slug+': keep all five responses on the same page as Example '+n);
+      }
+    }
+    const previous=ctx.sectionize(blocks,{splitScenarios:true,keepExamplesTogether:false});
+    const oldIndex=previous.findIndex(step=>step.blocks.some(b=>b.kind==='heading'&&b.text==='EXAMPLE 3'));
+    assert.ok(oldIndex>=0);
+    const remapped=ctx.remapScenarioBookmark(blocks,oldIndex,updated,
+      {splitScenarios:true,keepExamplesTogether:false});
+    assert.ok(updated[remapped]?.blocks.some(b=>b.text==='EXAMPLE 3'),
+      slug+': the old Example 3 bookmark resumes at the complete example');
+  }
+  assert.match(source,/storageWrite\(exampleLayoutKey, 'complete-examples-v1'\)/);
+  assert.match(source,/priorExampleLayout/);
+});
+
 test('section reflection prompts follow actual teaching tasks rather than a generic question', () => {
   const source=read('js/member-premium-lesson.js');
   const html=read('member-premium-lesson.html');
@@ -177,6 +228,50 @@ test('section reflection prompts follow actual teaching tasks rather than a gene
   assert.equal(other.kind,'assignment');
   assert.match(other.instruction,/Write two concrete boundaries/);
   assert.equal(getCue(page(['An informational paragraph without an exercise.'])),null);
+  const bareAsk=getCue(page([
+    'Ask:',
+    '- Was I permitted to ask for support?',
+    '- Did I feel heard when I asked?',
+    'An explanatory paragraph that should not be mistaken for a question.'
+  ]));
+  assert.equal(bareAsk.kind,'questions');
+  assert.match(bareAsk.instruction,/Was I permitted to ask for support/);
+  assert.match(bareAsk.instruction,/Did I feel heard/);
+  assert.doesNotMatch(bareAsk.instruction,/An explanatory paragraph/);
+  const twoColumns=getCue({
+    title:'A practical process',blocks:[
+      {kind:'heading',text:'Exercise'},
+      {kind:'paragraph',text:'Write two columns:'},
+      {kind:'paragraph',text:'What I hoped the conversation would accomplish.'},
+      {kind:'paragraph',text:'What the conversation actually focused on.'},
+      {kind:'paragraph',text:'Do not assign motive yet.'}
+    ]
+  });
+  assert.match(twoColumns.instruction,/Write two columns/);
+  assert.match(twoColumns.instruction,/What I hoped/);
+  assert.match(twoColumns.instruction,/What the conversation actually/);
+  const silence=getCue({
+    title:'Making silence observable',blocks:[
+      {kind:'heading',text:'REFLECTION'},
+      {kind:'paragraph',text:'Write 5–10 statements beginning with:'},
+      {kind:'paragraph',text:'“When I spoke…”'},
+      {kind:'paragraph',text:'or:'},
+      {kind:'paragraph',text:'“When I stayed quiet…”'},
+      {kind:'paragraph',text:'Keep each statement observable.'}
+    ]
+  });
+  assert.equal(silence.kind,'assignment');
+  assert.match(silence.instruction,/When I spoke/);
+  assert.match(silence.instruction,/When I stayed quiet/);
+  const embedded=getCue({
+    title:'The pattern check',blocks:[
+      {kind:'heading',text:'THE PATTERN CHECK: SIX QUESTIONS'},
+      {kind:'paragraph',text:'The exercise has six parts. Ask: What repeated? What changed? What supports the pattern? Record each answer in a sentence.'}
+    ]
+  });
+  assert.match(embedded.instruction,/What repeated/);
+  assert.match(embedded.instruction,/What supports the pattern/);
+
   assert.match(html,/id="premium-pause-label"/);
   assert.match(html,/id="premium-pause-heading"/);
   assert.match(html,/id="premium-pause-hint"/);

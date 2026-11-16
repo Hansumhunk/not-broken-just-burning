@@ -133,7 +133,7 @@ async function fetchPublic(url, timeout = 7500) {
 }
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-export async function productSpirit() {
+export async function productSpirit({ request = fetchPublic, sleepFn = sleep } = {}) {
   const lines = [
     "## 🛠️ Spirit of the Forge — Digital Product Opportunity Scout (#16)", "",
     "A research queue, **not** evidence of sales, price acceptance, or permission to launch a product.", ""
@@ -145,7 +145,7 @@ export async function productSpirit() {
   const publicTitles = [];
   let feedsAvailable = 0;
   for (const feed of COMMUNITY_FEEDS) {
-    const result = await fetchPublic(feed.url);
+    const result = await request(feed.url);
     if (result.ok && /<(?:entry|item)\b/i.test(result.raw)) {
       const titles = extractDiscussionTitles(result.raw);
       feedsAvailable++;
@@ -163,12 +163,12 @@ export async function productSpirit() {
   // bibliographic SUPPLY, not purchase/demand evidence. 1+ second between calls.
   for (let i=0; i<PRODUCT_CONCEPTS.length; i++) {
     const c = PRODUCT_CONCEPTS[i];
-    if (i) await sleep(1150);
+    if (i) await sleepFn(1150);
     const query = new URL("https://openlibrary.org/search.json");
     query.searchParams.set("q",c.query);
     query.searchParams.set("fields","key,title,first_publish_year");
     query.searchParams.set("limit","3");
-    const res = await fetchPublic(query.href);
+    const res = await request(query.href);
     if (!res.ok) {
       catalog.set(c.id, { status:"unverified ("+res.status+")", url:query.href });
       continue;

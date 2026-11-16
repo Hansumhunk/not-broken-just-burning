@@ -1,0 +1,19 @@
+/* Visitor-to-member clarity: scoped additions, original NBJB styling remains authoritative. */
+.nbjb-journey { padding-top: 36px; padding-bottom: 62px; }
+.nbjb-journey-steps { list-style: none; margin: 24px 0 14px; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.nbjb-journey-steps li { padding: 25px; min-width: 0; border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(140deg,rgba(255,122,45,.055),rgba(255,255,255,.013)); }
+.nbjb-journey-steps li:nth-child(2) { border-color: var(--line-hot); }
+.nbjb-journey-steps span { color: var(--ember-bright); font-weight: 800; letter-spacing: .1em; font-size: .72rem; }
+.nbjb-journey-steps h3 { margin: 12px 0; font-size: clamp(1.28rem,2vw,1.65rem); }
+.nbjb-journey-steps p { color: var(--muted); line-height: 1.65; margin-bottom: 0; }
+.nbjb-join-hero .hero-actions { margin-top: 22px; }
+.nbjb-join-hero .section-note { max-width: 760px; }
+.nbjb-optional-setup { margin: 20px 0; padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px; }
+.nbjb-optional-setup summary { cursor: pointer; color: var(--text); font-weight: 700; padding: 5px 0; }
+.nbjb-optional-setup summary:focus-visible { outline: 2px solid var(--ember-bright); outline-offset: 3px; }
+.nbjb-optional-setup[open] .member-form { margin-top: 18px; }
+.member-signup-card { border-color: var(--line-hot); background: linear-gradient(145deg,rgba(255,122,45,.09),rgba(255,255,255,.014)); }
+.member-signup-card:target, #sign-up-form:target { outline: 2px solid var(--ember-bright); outline-offset: 4px; }
+.nbjb-join-hero .button, .member-onboarding .button { min-height: 44px; }
+@media (max-width: 850px) { .nbjb-journey-steps { grid-template-columns: 1fr; } .nbjb-journey-steps li { padding: 21px; } }
+@media (max-width: 620px) { .nbjb-journey { padding-top: 20px; padding-bottom: 35px; } .nbjb-join-hero .hero-actions .button { width: 100%; text-align: center; } .member-onboarding .member-actions { align-items: stretch; } .member-onboarding .member-actions .button { width: 100%; text-align: center; } }

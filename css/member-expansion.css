@@ -325,7 +325,8 @@
   gap: 8px;
   margin: 20px 0;
 }
-.member-lesson-flow span {
+.member-lesson-flow a {
+  display: block;
   padding: 12px 10px;
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -333,6 +334,14 @@
   color: var(--ember-pale);
   font-weight: 800;
   text-align: center;
+  text-decoration: none;
+}
+.member-lesson-flow a:hover,
+.member-lesson-flow a:focus-visible {
+  border-color: var(--line-hot);
+  background: rgba(255,122,45,.1);
+  color: var(--text);
+  outline-offset: 3px;
 }
 
 .member-lesson-grid {
@@ -378,13 +387,34 @@
   gap: 10px;
 }
 .member-lesson-path li {
-  display: grid;
-  gap: 4px;
-  padding: 13px 14px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: rgba(255,255,255,.014);
 }
+.member-path-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.member-path-choice input {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin: 3px 0 0;
+  accent-color: #ff7a2d;
+}
+.member-path-choice-text { display: grid; gap: 4px; min-width: 0; }
+.member-lesson-path li:has(input:checked) {
+  border-color: var(--line-hot);
+  background: rgba(255,122,45,.09);
+}
+.member-lesson-path li:focus-within { outline: 2px solid var(--ember-pale); outline-offset: 2px; }
+.member-focus-hint { font-size: .84rem; line-height: 1.5; color: var(--muted); margin: 10px 0; }
+#start-here-focus-status[data-state="error"] { color: #ff9a86; }
+.member-path-card[id] { scroll-margin-top: 160px; }
 .member-lesson-path strong { color: var(--ember-pale); }
 .member-lesson-path span { color: var(--muted); font-size: .86rem; line-height: 1.45; }
 
@@ -402,7 +432,7 @@
   .member-lesson-grid,
   .member-lesson-side { grid-template-columns: 1fr; }
   .member-lesson-side > :first-child { grid-column: auto; }
-  .member-lesson-flow span { text-align: left; }
+  .member-lesson-flow a { text-align: left; }
 }
 
 /* Public tool archive: keep the actual Save action visible before optional metadata. */

@@ -1,5 +1,15 @@
 # Flamewalker+ — Founding 35 Editorial Gate
 
+## Latest production update — November 16, 2026
+
+**35 of 35 protected written lessons are now published and included with active Flamewalker+ membership.** The protected Supabase database was verified after a conditional, 28-row status promotion. Six tracks contain 7 + 8 + 5 + 5 + 5 + 5 lessons, with 0 manuscripts left in editorial review as of this release.
+
+The private manuscript bodies remain server-authorized, no public GitHub content copies were created, and videos remain paused. [Release PR #184](https://github.com/Hansumhunk/not-broken-just-burning/pull/184) and [navigation follow-up PR #185](https://github.com/Hansumhunk/not-broken-just-burning/pull/185) update the member experience. Production browser QA and final founder content proofing remain active post-release acceptance items; a structural/word count audit is not a substitute for that work.
+
+**The November 15 and November 4 sections below are historical snapshots and are superseded for production availability.**
+
+---
+
 ## Current production status — November 15, 2026
 
 **35 protected guided-lesson manuscripts exist across six tracks: 7 published, 28 in editorial review.** The November 4 snapshot below recorded the original all-draft state and is retained as historical context, not current production availability.

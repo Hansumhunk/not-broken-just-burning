@@ -351,7 +351,7 @@ test('Lessons hub shows free entry and dynamically grants published lessons only
   assert.equal((html.match(/data-paid-lesson-open hidden/g) || []).length, 7);
   assert.equal((html.match(/data-free-lesson-lock hidden/g) || []).length, 7);
   for (const slug of slugs) assert.ok(html.includes('href="member-premium-lesson.html?lesson=' + slug + '"'));
-  assert.ok(html.includes('28 more lessons are being prepared'));
+  assert.ok(html.includes('All 35 guided lessons are now available.'));
   assert.ok(html.includes('Video lessons remain shelved'));
   assert.ok(html.includes("memberState?.tier === 'paid' && memberState?.source !== 'server_error'"));
   assert.ok(html.includes("item.status !== 'published'"));
@@ -363,12 +363,22 @@ test('Lessons hub shows free entry and dynamically grants published lessons only
   assert.ok(!html.includes('data-premium-lesson-content'), 'premium manuscripts must never be embedded in index');
 });
 
+test('paid member Library exposes all six published track links, free members none', () => {
+  const library = read('member-library.html');
+  assert.equal((library.match(/data-paid-lessons-link hidden/g) || []).length, 6);
+  assert.ok(library.includes("document.querySelectorAll('[data-paid-lessons-link]').forEach"));
+  assert.ok(library.includes("state?.tier === 'paid' && state?.source !== 'server_error'"));
+  for (const slug of ['being-needed-vs-chosen','promise-of-the-room','body-as-ally','provision-without-proving-worth','sacred-law-emotional-boundaries']) {
+    assert.ok(library.includes('member-premium-lesson.html?lesson=' + slug + '"'));
+  }
+});
+
 test('published Lessons cards have no decorative availability ribbons', () => {
   const catalog = read('member-lessons.html');
   const cards = catalog.match(/class="member-locked-card is-live" aria-labelledby="lesson-/g) || [];
   assert.equal(cards.length, 7);
   assert.ok(catalog.includes('body[data-member-page="lessons"] .member-locked-card::after{display:none!important;content:none!important}'));
-  assert.ok(catalog.includes('28 more lessons are being prepared'));
+  assert.ok(catalog.includes('All 35 guided lessons are now available.'));
 });
 
 test('all 28 additional lessons appear in five tracks and only unlock after protected publication', () => {

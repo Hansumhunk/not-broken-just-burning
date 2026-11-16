@@ -982,6 +982,7 @@ test('member stages include full public foundations and substantially deeper aut
   const member = read('js/member-path-stage.js');
   const depthSection = member.slice(member.indexOf("slug:'fire-reclamation'"),member.indexOf("slug:'guardian'"));
   assert.equal((depthSection.match(/"heading":/g)||[]).length,12,'Fire Reclamation should have twelve expanded member chapters');
+  assert.equal((member.match(/deepDive:/g)||[]).length,6,'every Path stage should have member-only depth');
   for (const term of ['timeline', 'survival', 'Case study:','Integration:']) {
     assert.ok(depthSection.includes(term), 'Fire is missing substantive '+term+' teaching');
   }
@@ -1016,6 +1017,7 @@ test('Path member practice saves only by explicit choice, with local structured 
   };
   const window={NBJBMemberService:service,NBJBAuth:{user:{id:'one'}}};
   const location={search:'?stage=fire-reclamation'};
+  vm.runInNewContext(read('js/member-path-foundations.js'),{window});
   vm.runInNewContext(source,{window,document,location,URLSearchParams,navigator:{clipboard:{writeText:async()=>{}}}});
   assert.equal(saved,0,'loading the page must not save anything');
   assert.equal(focusChanged,0);
@@ -1024,6 +1026,11 @@ test('Path member practice saves only by explicit choice, with local structured 
   assert.equal(elements['path-stage-content'].hidden,false);
   assert.equal(elements['path-stage-heading'].textContent,'Fire Reclamation. Your work starts here.');
   assert.equal(elements['path-stage-questions'].children.length,3);
+  assert.equal(elements['path-stage-foundation-blocks'].children.length,19,
+    'the whole public foundation must render inside the member page');
+  assert.equal(elements['path-stage-teaching-blocks'].children.length,15,
+    'three member core teachings plus twelve expanded Fire chapters');
+  assert.match(elements['path-stage-course-meta'].textContent,/approximately \d+ minutes to read/);
   const row=elements['path-stage-questions'].children[0];
   const answer=row.children[2];
   assert.equal(answer.tag,'textarea');

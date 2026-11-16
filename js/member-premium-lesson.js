@@ -637,7 +637,7 @@
         'When shame shows up, what story do I start telling about myself? What responsibility is actually mine, and what judgment can I put down?'],
       [/silence|stayed quiet|speak up|using (?:your|my) voice/i,
         'When have I stayed quiet to keep the peace, and what did it cost me? What is one honest thing I could say without turning the conversation into a fight?'],
-      [/trust|betrayal|repair trust/i,
+      [/\btrust\b|betrayal|repair trust/i,
         'What specific behavior has affected my trust, and what observable action—not a promise or assumption—would help me decide whether trust can be rebuilt?'],
       [/father|mother|caregiver|parenting|fatherhood/i,
         'Which rule or habit did I learn from the adults who raised me, where do I notice it now, and what do I want to carry forward or change?'],

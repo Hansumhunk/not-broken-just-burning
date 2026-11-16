@@ -92,20 +92,22 @@
 
     const current = await entitlements.refresh();
     if (current?.hasStripeBilling) {
-      // Billing management remains available for a customer with a Stripe
-      // billing record even if the paid lesson entitlement has ended.
+      // A Stripe customer record is billing history, not proof of an active
+      // subscription. Keep the portal visible for past invoices and billing.
+      // Only verified paid members are purchase-blocked in the browser.
+      // The server additionally checks Stripe's actual subscription state.
       region.hidden = false;
       management.hidden = false;
-      elHeading('Manage your Flamewalker+ billing');
-      message(current.cancelAtPeriodEnd
-        ? 'Your subscription is scheduled to end after the current paid period. Review invoices or billing in Stripe.'
-        : current.tier === 'paid'
-          ? 'Your Flamewalker+ membership is active. Manage billing in Stripe.'
-          : 'Review past payments and billing in Stripe. Paid lesson access is not currently active.');
-      return;
+      if (current.tier === 'paid') {
+        elHeading('Manage your Flamewalker+ billing');
+        message(current.cancelAtPeriodEnd
+          ? 'Your subscription is scheduled to end after the current paid period. Review invoices or billing in Stripe.'
+          : 'Your Flamewalker+ membership is active. Manage billing in Stripe.');
+        return;
+      }
     }
-    // Free members cannot start a new subscription until the separate,
-    // explicit launch approval enables both checkout gates.
+    // When free after a prior subscription, offer renewal alongside access
+    // to old invoices. No paid lesson entitlement is granted by this UI.
     if (!PUBLIC_CHECKOUT_UI_ENABLED) return;
     region.hidden = false;
     elHeading('Choose your guided learning membership');

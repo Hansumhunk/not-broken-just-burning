@@ -308,3 +308,15 @@ test('account sign-in, signup and recovery preserve password whitespace exactly'
     ['updatePassword', ' new pass ']
   ]);
 });
+
+test('member dashboard accurately reflects paid or free authenticated tier after release', () => {
+  const dashboard = read('members.html');
+  const entitlements = read('js/member-entitlements.js');
+  assert.ok(dashboard.includes('Current access · <span data-member-tier-label>'));
+  assert.ok(dashboard.includes('<div class="member-status"><span data-member-tier-label>'));
+  assert.ok(!dashboard.includes('<span>Free Account</span>'));
+  assert.ok(!dashboard.includes('Flamewalker+ comes later'));
+  assert.ok(dashboard.includes('View Membership Plans'));
+  assert.ok(entitlements.includes("document.querySelectorAll('[data-member-tier-label]')"));
+  assert.ok(entitlements.includes('tierLabel(current.tier)'));
+});

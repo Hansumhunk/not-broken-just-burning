@@ -450,6 +450,66 @@
     body.append(el('premium-map-actions'), el('premium-map-status'));
   }
 
+
+  // Use the writing task actually delivered by the protected lesson, rather
+  // than repeating an unrelated, generic reflection question on every page.
+  function sectionReflectionCue(step) {
+    const paragraphs=(step?.blocks || []).filter(block=>block?.kind==='paragraph' &&
+      typeof block.text==='string' && block.text.trim()).map(block=>block.text.trim());
+    const explicit=paragraphs.findIndex(text=>/^REFLECTION(?:\s*\n|$)/i.test(text));
+    if(explicit>=0) {
+      const original=paragraphs[explicit].replace(/^REFLECTION\s*(?:\n|$)/i,'').trim();
+      const parts=original?[original]:[];
+      for(let i=explicit+1;i<Math.min(paragraphs.length,explicit+4);i++) {
+        const follow=paragraphs[i];
+        if(follow.length>300 || /^(?:ASK:|THEN ASK:|PART \d+|REFLECTION)/i.test(follow)) break;
+        parts.push(follow);
+        if(parts.length>=3) break;
+      }
+      if(parts.length) return {instruction:parts.join('\n\n'),kind:'assignment'};
+    }
+    const headingIndex=(step?.blocks||[]).findIndex(block=>block?.kind==='heading' &&
+      /^REFLECTION\b/i.test(block.text||''));
+    if(headingIndex>=0) {
+      const following=(step.blocks||[]).slice(headingIndex+1).filter(block=>block?.kind==='paragraph')
+        .map(block=>String(block.text||'').trim()).filter(Boolean).slice(0,3);
+      if(following.length) return {instruction:following.join('\n\n'),kind:'assignment'};
+    }
+    const questions=[];
+    for(let i=0;i<paragraphs.length;i++) {
+      const text=paragraphs[i];
+      if(!/^(?:(?:THEN\s+)?ASK:)\s*(?:\n|$)/i.test(text)) continue;
+      let questionText=text;
+      if(/^((?:THEN\s+)?ASK:)\s*$/i.test(text)) {
+        const more=paragraphs[i+1];
+        if(more && !/^(?:REFLECTION|ASK:|THEN ASK:)/i.test(more)) questionText+='\n'+more;
+      }
+      questions.push(questionText);
+    }
+    if(questions.length) return {instruction:questions.join('\n\n'),kind:'questions'};
+    const assignments=paragraphs.filter(text=>/^(?:WRITE|LIST|DESCRIBE|ANSWER|IDENTIFY|RECORD|NAME)\s+(?!to\b)/i.test(text));
+    if(assignments.length) return {instruction:assignments.slice(0,2).join('\n\n'),kind:'assignment'};
+    return null;
+  }
+  function applySectionReflection(step) {
+    const cue=sectionReflectionCue(step);
+    const panel=el('premium-pause-reflection');
+    const heading=el('premium-pause-heading');
+    const hint=el('premium-pause-hint');
+    const prompt=el('premium-pause-label');
+    const response=el('premium-pause-note');
+    if(!panel || !heading || !hint || !prompt || !response) return;
+    heading.textContent=cue ? 'Complete this section’s reflection' : 'Private reading note';
+    hint.textContent=cue ? 'Follow the lesson’s actual questions · your choice to save' :
+      'Optional · use this space for your own notes';
+    prompt.textContent=cue ? cue.instruction :
+      'Write a private note about “'+step.title+'”, or leave this section blank.';
+    response.rows=cue ? 9 : 4;
+    response.placeholder=cue ? 'Write your answers here. Nothing is uploaded automatically.' :
+      'Your optional note. Nothing is uploaded automatically.';
+    panel.open=Boolean(cue);
+  }
+
   function render({ focus = false } = {}) {
     if (!steps.length) return;
     stopSpeech('Read from here to listen to the rest of the lesson using your device voice.');
@@ -489,7 +549,8 @@
         b.kind === 'paragraph' && /^(?:and|or):?$/i.test(b.text.trim()) ? 'premium-prose-connector' : ''));
       el('premium-pause-note').value = notes.get(current) || '';
       el('premium-pause-status').textContent = '';
-      el('premium-pause-reflection').open = false;
+      if(!isFatherPractice && !isStructuredPractice) applySectionReflection(step);
+      else el('premium-pause-reflection').open = false;
     }
     const count = steps.length;
     el('premium-step-count').textContent = 'Section ' + (current + 1) + ' of ' + count;
@@ -744,6 +805,8 @@
   function saveReflectionToWork(text, context, resultNode) {
     const body = String(text || '').trim();
     if (!body) { resultNode.textContent = 'Write a reflection before saving.'; return; }
+    // Store long responses as complete local worksheets, never clipped notes.
+    if(body.length > 2400) return saveCompleteWorksheetToWork(body, context, resultNode);
     const service = window.NBJBMemberService;
     if (!service?.recordToolEntry) { resultNode.textContent = 'My Work is unavailable on this device.'; return; }
     const clipped = body.slice(0, 2400);

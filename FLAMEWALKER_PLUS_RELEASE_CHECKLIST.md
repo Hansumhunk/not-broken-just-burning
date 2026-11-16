@@ -1,26 +1,45 @@
 # Flamewalker+ final launch checklist — November 15, 2026
 
+## Production sales release — November 15, 2026
+
+- [x] **Founder's explicit launch instruction executed.** PR #166 merged to `main` at `473cb1d64040fa804aee38ccc310cf82a1c2886f`; GitHub Pages build and site validation both completed successfully. `js/member-billing.js` now has `PUBLIC_CHECKOUT_UI_ENABLED=true`. Member Store shows live monthly ($14.99) and annual ($149) offers only after authenticated entitlement/catalog checks; public syllabus and Join copy reflect seven **published** lessons and 28 private drafts.
+- [x] **Production checkout backend deployed:** `create-live-checkout-session` Edge Function version 8 `ACTIVE`, `verify_jwt=true`; `PUBLIC_LIVE_CHECKOUT_ENABLED=true`. Existing restrictions remain: authenticated user, seven published manuscripts, specific recurring lookup keys and amounts, already-subscribed rejection, sandbox test-account exclusion, Stripe live-customer ownership mapping.
+- [x] **Production webhook hardened:** `stripe-live-webhook` v6 `ACTIVE` with signature validation, paid Checkout gating, async-paid handling, and retryable processing receipt responses. Seven published manuscripts, 28 drafts, previously processed live subscription events and Stripe merchant KYC/currently_due=0 verified before launch.
+- [x] **Monitoring:** a separate NBJB Checkout Launch Watch was enabled, daily for 14 initial-launch checks beginning November 16, without duplicating weekly operations review. No video assets were released.
+- [ ] **First external customer acceptance:** Confirm a fresh free member can open live Checkout, complete a real authorized payment, receive verified paid access, and open live Billing Portal; verify member and webhook records using safe masked audit data. Do not manufacture a purchase or silently charge the founder to run the test.
+- [ ] **Seller compliance follow-up:** Keep records for sales-tax and potential out-of-state obligations; Stripe Tax remains active with zero registrations and live Checkout does not automatically collect tax. Product still uses `txcd_10000000` until the actual subscription classification is confirmed. This outstanding item is a compliance follow-up, not a claim of tax exemption.
+- [ ] **Customer support:** Verify actual deliverability of the published support address and timely handling of cancellation/refund inquiries; no email or live billing changes were made in this release.
+
+**The prelaunch lock-off snapshots below are historical and superseded by this production release. Do not restore them without a deliberate rollback.**
+
+## November 15, 2026 — Latest Stripe read-only account verification
+
+- **Live account state at this read:** `business_type=company`, company structure `single_member_llc`, `charges_enabled=true`, `payouts_enabled=true`, `requirements.past_due=[]`, no disabled reason. This supersedes older November 5 and earlier November 15 `business_type=individual` snapshots below.
+- **Latest live readback (after founder submission):** Stripe reports `company.owners_provided=true`, `company.executives_provided=true`, `requirements.currently_due=[]`, `requirements.past_due=[]`, and **zero `pending_verification` items**. Charges and payouts remain enabled, with no verification errors. This supersedes the earlier same-day two-items-pending snapshot. Monitor for any newly requested verification; no more personal information is currently due.
+- **Caution:** An enabled charge/payout capability is not authorization to enable public checkout. Both existing checkout locks stay OFF; tax, support, member access, and founder launch authorization remain outstanding.
+- **Change scope:** Read-only Stripe verification only. No payments, billing settings, credentials, checkout flags, products or live backend were modified.
+
 ## November 15, 2026 — Founder correction: LLC and EIN already obtained
 
 - [x] **Business formation complete.** Florida LLC filing paid November 5, 2026; founder confirmed Not Broken Just Burning LLC was established and the federal EIN issued by November 10, 2026. Do **not** request another LLC filing or a second EIN.
 - [x] Founder previously stated NBJB is a **single-member LLC with one sole owner**, using default disregarded-entity federal tax treatment (no S-corporation election reported). An EIN was issued. **Never commit, publish, or request its digits in chat.** Use official formation and IRS records securely inside Stripe to complete the appropriate fields.
-- [ ] **Actual remaining merchant task:** reconcile the existing Stripe live account (still reporting `business_type=individual`) with the registered **single-member LLC** legal identity, applicable disregarded-entity federal tax reporting rules, IRS matching details and payout ownership. An LLC with one owner can have special disregarded-entity tax reporting rules; do not blindly assume its EIN is the right TIN for every Stripe field.
+- [x] **Stripe merchant KYC readback:** Stripe reports `business_type=company`, company structure `single_member_llc`, owner and executive declarations provided, `requirements.currently_due=[]`, `requirements.past_due=[]`, `requirements.pending_verification=[]`, with charges and payouts enabled. No current Stripe information request is outstanding. **Separate remaining gate:** confirm tax reporting/TIN treatment, payout ownership and seller disclosures before public sale. Do not expose identity documents or tax IDs.
 - [ ] Preserve existing Stripe products, subscription, webhook setup, and historical payouts. No new Stripe account, business incorporation or tax ID application needed.
 
 ## November 15, 2026 — Connected live billing readback and release controls
 
-- [x] Stripe merchant account: `business_type=individual`, charges/payouts enabled, no currently- or past-due verification requirements. This does not establish a separately registered NBJB entity or trade name.
+- [x] **Earlier Nov 15 readback (superseded by the update below):** Stripe previously reported `business_type=individual`, charges/payouts enabled, and no currently- or past-due requirements. Do not use this historical read as the present account status.
 - [x] Monthly $14.99 and annual $149 recurring prices are active and have expected lookup keys. A distinct $149 one-time annual-looking product remains active and must not be confused with the recurring subscription.
 - [x] One completed live Checkout and active monthly subscription from the internal test flow. Its cancellation remains scheduled for December 2, 2026; no charge or cancellation changes during this readback.
 - [x] Stripe payout: $13.96 status `paid`, with November 9 arrival date. This is not evidence of independent external customer demand.
 - [x] Live Stripe webhook endpoint is enabled and configured to deliver subscription and invoice lifecycle events; five live and six sandbox event receipts are marked `processed`.
 - [x] Supabase `ACTIVE_HEALTHY`; 7 published lessons, 28 editorial reviews, 2 paid and 2 free entitlements at query time.
-- [x] Stripe portal configuration supports invoices, payment-method changes and cancel-at-period-end; authenticated browser portal opening still awaits QA.
+- [x] Stripe portal configuration supports invoices, payment-method changes and cancel-at-period-end. **Sandbox Customer Portal opened successfully in founder browser Nov 15** with test subscription, invoice, payment method and scheduled cancellation shown. A distinct **live-paying-customer browser portal test** remains outstanding: designated sandbox account is intentionally blocked from live portal with `sandbox_test_account_not_eligible`.
 - [x] PR #157 merged a source-controlled live webhook candidate with stronger unfinished-event retry and asynchronous-payment guards, and passed CI. **No production Edge Function was deployed.** Controlled event tests and Stripe endpoint event configuration remain necessary before production promotion.
 - [x] Two independent new-sale locks remain enforced on site and deployed server: `PUBLIC_CHECKOUT_UI_ENABLED=false`, `PUBLIC_LIVE_CHECKOUT_ENABLED=false`.
 - [x] Founder confirmed registered Not Broken Just Burning LLC and EIN. [ ] Verify Stripe's legal business/tax classification and align Terms, receipts, and support identity with existing LLC.
-- [ ] Verify relevant product tax treatment and required jurisdictions. Stripe Tax Settings is active, but zero jurisdictions are registered and live Checkout omits `automatic_tax`; do not assume tax is being collected.
-- [ ] Authenticate as the existing paid member to open billing portal and confirm all seven paid lessons load; test ordinary free/guest denial of published lessons and cancellation expiry.
+- [ ] **Tax treatment/registration decision outstanding:** Stripe Tax is active but has **zero registered jurisdictions** and live Checkout omits `automatic_tax`, so do not assume tax is collected. The recurring Flamewalker+ product currently uses `txcd_10000000` (General - Electronically Supplied Services). Stripe's catalog identifies the more specific candidate `txcd_20060358` (On demand Online Courses - written material content); **do not change tax code or tax settings until classification is validated for the actual membership offer**. Florida DOR's past advisements treat certain fully digital course/subscription sales differently from taxable tangible goods; other jurisdictions may vary. Determine actual taxable nexus, applicable states, registration obligations and appropriate product category before enabling a public tax flow.
+- [ ] **Membership acceptance remaining:** existing paid/QA account opened *The Father Wound* protected lesson with its interactive workbook; six additional published lessons, free/guest denial of a **published** lesson, real live-paying-customer portal access, and cancellation/expiration transition still need validation. Sandbox billing portal passed; no new charge required.
 - [ ] Confirm payment failure, refund/dispute reconciliation and signed webhook retries before public activation.
 - [ ] Obtain separate explicit public-sale launch approval before changing either checkout lock.
 

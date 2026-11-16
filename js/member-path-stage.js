@@ -105,6 +105,20 @@
         {heading:'Six practical anchors',text:'Steadiness, direction, strength with restraint, protection with boundaries, responsibility with self-respect, and brotherhood with connection are behaviors to practice—not a masculinity score. You do not have to master all six today. Identify the anchor under greatest strain and one everyday action that would make it more reliable.'},
         {heading:'Choose responsibility without self-punishment',text:'An honest rebuilding plan leaves room for limits, rest, and help. Providing is meaningful, but it is not the price of belonging. Leadership involves owning your actions and asking for what is necessary, not hiding every need behind an image of toughness.'}
       ],
+      deepDive:[
+      {
+            "heading": "Rebuilding after the provider identity cracks",
+            "text": "A man can lose work, a relationship, or the daily routine that once made him feel useful. It may seem that his identity has disappeared with the role. Restoration begins by separating what he contributed from what he is worth. His skills, judgment, loyalty, ability to learn, and capacity for care are not erased by a change in circumstances.\n\nWrite down one role that has changed, one value that remains, and one practical contribution you can make this week. The third item need not be impressive. Reliability in an ordinary task is often a stronger foundation than an ambitious promise made to escape shame."
+      },
+      {
+            "heading": "The six anchors in ordinary behavior",
+            "text": "Steadiness is the pause between activation and response. Direction is knowing what deserves attention rather than chasing every crisis. Strength with restraint is being capable of force without needing to display it. Protection with boundaries is caring for what matters without taking ownership of another adult. Responsibility with self-respect means making repair without humiliation. Brotherhood is being able to give and receive support.\n\nThese anchors should produce observable conduct. Instead of telling yourself to be more disciplined, name a repeatable behavior: check the calendar before agreeing, call a friend once a week, take a walk before replying, or ask for one clear adjustment to a schedule."
+      },
+      {
+            "heading": "From old armor to useful strength",
+            "text": "Armor has a place. Emotional shutdown, nonstop work, and extreme self-reliance may have helped a man keep functioning in hard conditions. But habits designed for survival do not always belong in every relationship, home, or conversation. You can be a protector and still need rest. You can lead and still admit that you lack information.\n\nPick one situation in which your strongest habit becomes costly. What does it protect? What does it prevent? Then choose an alternative response you can practice safely. Restoration is not a return to an old performance of masculinity. It is building a more flexible, responsible version that can carry real weight without losing connection."
+      }
+],
       questions:[
         {label:'Which role or identity has felt unstable, and what value of mine remains even if that role changes?',hint:'Separate the role from the person doing it.'},
         {label:'Which of the six anchors most needs attention now, and how is that showing up in my daily behavior?',hint:'Choose just one anchor rather than grading the whole person.'},

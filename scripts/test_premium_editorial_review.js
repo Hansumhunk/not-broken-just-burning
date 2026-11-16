@@ -1143,7 +1143,7 @@ test('Chosen Manhood full worksheet is member-only with private manual saving an
   const chosen=read('js/member-chosen-code.js');
   const platform=read('js/member-platform.js');
   const billing=read('js/member-billing.js');
-  assert.ok(loader.includes('"premium-lesson": ["js/member-chosen-code.js", "js/member-editorial-workbooks.js", "js/member-lesson-workspaces.js", "js/member-premium-lesson.js"]'));
+  assert.ok(loader.includes('"premium-lesson": ["js/member-chosen-code.js", "js/member-editorial-workbooks.js", "js/member-lesson-workspaces.js", "js/member-final-reflection-journal.js", "js/member-premium-lesson.js"]'));
   assert.ok(chosen.includes('saveWholeToWork(full,'));
   assert.ok(chosen.includes('Nothing is uploaded automatically.'));
   assert.ok(platform.includes('member-full-worksheet-paper'));
@@ -2111,9 +2111,9 @@ test('free premium lesson denial points to live membership without exposing prot
   assert.ok(js.includes('Monthly and annual memberships are available now.'));
   assert.ok(!js.includes('The paid membership is not for sale yet.'));
   assert.ok(html.includes('href="member-store.html">Membership options</a>'));
-  assert.ok(html.includes('js/member-bootstrap.js?v=context-reflection-v22'));
+  assert.ok(html.includes('js/member-bootstrap.js?v=journal-reader-v23'));
   assert.ok(bootstrap.includes("src === 'js/member-premium-lesson.js'"));
-  assert.ok(bootstrap.includes("src + '?v=context-reflection-v22'"));
+  assert.ok(bootstrap.includes("src + '?v=journal-reader-v23'"));
   assert.match(js, /const denied = error\?\.context\?\.status === 403/);
   assert.match(js, /renderLesson\(data\.lesson\)/);
 });

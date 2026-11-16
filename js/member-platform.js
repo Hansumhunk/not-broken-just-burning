@@ -499,7 +499,7 @@
     if (result.data.journey.focus && result.data.journey.progress[result.data.journey.focus] === 'not-started') {
       service.setStageProgress(result.data.journey.focus, 'in-progress');
     }
-    window.location.href = 'members.html';
+    window.location.href = 'member-start-here.html';
   });
 
   const syncNext = document.querySelector('#setting-sync-next');

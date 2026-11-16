@@ -105,7 +105,12 @@
       });
       menu.append(signOut);
       more.append(moreToggle, menu);
-      nav.append(more);
+      // Search and More share one compact right-aligned navigation group.
+      // The search module adds its button immediately before More.
+      const actions = document.createElement('div');
+      actions.className = 'member-nav-actions';
+      actions.append(more);
+      nav.append(actions);
 
       more.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {

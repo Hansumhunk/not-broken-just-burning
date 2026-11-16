@@ -334,8 +334,15 @@
       step.blocks?.some(block => block.text === first));
     return byText >= 0 ? byText : legacyIndex;
   }
+  function displayTitle(title) {
+    // Keep authoring and chapter-split metadata intact, but never show
+    // "Part 2 / Part 3" numbering in a member-facing reading title.
+    const clean=String(title || 'Continue reading').replace(/^Part\s+\d+\s*(?:[—–·:\-]\s*)?/i,'').trim();
+    return clean || 'Continue reading';
+  }
   function label(step) {
-    return step.continuation ? step.title + ' · continued ' + (step.continuation + 1) : step.title;
+    const name = displayTitle(step.title);
+    return step.continuation ? name + ' · continued ' + (step.continuation + 1) : name;
   }
   function wordCount(step) {
     const text = step.exercise ? (lesson?.content?.exercise?.prompts || []).join(' ') : step.blocks.map(b => b.text).join(' ');
@@ -745,7 +752,7 @@
       el('premium-exercise-form').hidden = Boolean(inlineWorkspace?.replacesGuidedReflection);
       inlineWorkspace?.renderCompletion?.(worksheetReview);
     } else {
-      el('premium-step-kicker').textContent = 'Part ' + (current + 1) + ' · ' + estimate(step);
+      el('premium-step-kicker').textContent = 'Reading · ' + estimate(step);
       el('premium-step-title').textContent = label(step);
       const body = el('premium-reader-body');
       body.classList.toggle('premium-map-layout', isFatherPractice || isStructuredPractice);
@@ -755,8 +762,14 @@
       if (isFatherPractice) renderFatherMapInline(step, body, onPositiveInheritance);
       else if (isStructuredPractice) inlineWorkspace.render(step, body, appendText);
       else if (isFinalJournal) finalJournal.render(step, body, appendText);
-      else step.blocks.forEach(b => appendText(body, b.kind === 'heading' ? 'h3' : 'p', b.text,
-        b.kind === 'paragraph' && /^(?:and|or):?$/i.test(b.text.trim()) ? 'premium-prose-connector' : ''));
+      else step.blocks.forEach(b => {
+        // Multiple thoughts inside one authorized paragraph (for example,
+        // scenario → explanation → question) should display as real paragraphs.
+        const segments = b.kind === 'paragraph' ? b.text.split(/\n\s*\n/) : [b.text];
+        segments.forEach(text => appendText(body, b.kind === 'heading' ? 'h3' : 'p',
+          b.kind === 'heading' ? displayTitle(text) : text,
+          b.kind === 'paragraph' && /^(?:and|or):?$/i.test(text.trim()) ? 'premium-prose-connector' : ''));
+      });
       el('premium-pause-note').value = notes.get(current) || '';
       el('premium-pause-status').textContent = '';
       if(!isFatherPractice && !isStructuredPractice && !isFinalJournal) applySectionReflection(step);
@@ -1071,7 +1084,11 @@
       summary: 'Final reflection journal · ' + answered + ' of ' + total +
         ' statements answered. Open this entry to read your organized responses.',
       tags: ['Flamewalker+', 'Personal journal', 'Final reflection'],
-      data: { lessonSlug: slug, section: current + 1, worksheet: text }
+      data: { lessonSlug: slug, section: current + 1, worksheet: text,
+        journalEntries: Array.isArray(entry.answers) ? entry.answers.slice(0,20).map(item => ({
+          prompt: String(item.prompt || '').slice(0,260),
+          response: String(item.response || '').slice(0,800)
+        })) : [] }
     });
     resultNode.textContent = saved.ok
       ? 'Saved ' + answered + ' answers as one journal entry in My Work on this device. You can open it below.'

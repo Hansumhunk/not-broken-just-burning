@@ -134,6 +134,20 @@
         {heading:'Truth should survive the next morning',text:'The strongest communication is often shorter, calmer, and more precise than emotional discharge. Ask what belongs to you to say, what is fair and accurate, and what audience needs to hear it. Privacy can protect integrity. Not every story should become a public post, and not every conflict requires another confrontation.'},
         {heading:'Practice a sentence you can stand beside',text:'A usable statement often includes an observation, a feeling or need, and a specific request or limit. If sharing would create danger, practice privately or seek appropriate support instead. Reclaiming voice includes the right to pause, write, or decide not to engage.'}
       ],
+      deepDive:[
+      {
+            "heading": "Choose whether the goal is expression, agreement, or relief",
+            "text": "You may rehearse a conversation because you want to be understood. You may want the other person to admit something, or you may simply want the pressure inside you to stop. Those are different goals. Before speaking, identify which one is driving your words. The other person may disagree even when your statement is accurate, and you cannot make agreement a condition of your self-respect.\n\nTry beginning with a description and a request rather than a verdict: “I noticed we have not discussed this concern. I would like us to choose a time to do that.” This keeps your voice connected to an action you can influence."
+      },
+      {
+            "heading": "Truth and timing belong in the same decision",
+            "text": "An accurate statement can still be delivered at a time, place, or volume that makes the outcome worse. Posting publicly during an argument may create lasting consequences unrelated to the issue you wanted addressed. Speaking in front of children, during an unsafe confrontation, or while intensely activated can also turn a valid need into an unproductive fight.\n\nAsk whether the truth is yours to tell, whether the audience needs it, and whether your delivery matches your values. Sometimes the strongest use of a reclaimed voice is writing privately, documenting cleanly, delaying a response, or saying a short boundary without an explanation tour."
+      },
+      {
+            "heading": "The two-sentence practice",
+            "text": "Write the full version of what you want to say, then underline the concrete observation and the actual request. Reduce those to two sentences. Sentence one names what you experienced without assuming motive. Sentence two describes what you need or will do next. The rest can stay in your private notebook if it is not necessary for the conversation.\n\nFor example: “When our plans changed without discussion, I felt unprepared.” “For future changes that affect me, I need a message before the deadline whenever possible.” You can remain firm without rehearsing every injury. Voice of Fire is not about winning the loudest argument. It is about speaking with enough accuracy and restraint to protect what you mean."
+      }
+],
       questions:[
         {label:'What is something important I have wanted to say but have not said clearly?',hint:'Name your experience or need without assigning a hidden motive to someone else.'},
         {label:'Am I trying to express myself, persuade someone, or release pressure—and how does that change my words?',hint:'A clear intention makes a stronger statement.'},

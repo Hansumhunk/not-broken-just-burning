@@ -163,6 +163,20 @@
         {heading:'Trust grows in layers',text:'You do not need to give a new person every private detail to be honest. Notice whether they respect a small no, handle disagreement without humiliation, keep ordinary commitments, and allow you to have other relationships. Consistency over time provides better information than quick declarations of loyalty.'},
         {heading:'Participation is not rescuing',text:'Helping friends and community can be meaningful. Yet if every conversation makes you the fixer, referee, or emotional container, you may be repeating an old role. Choose a small act of connection where you can offer something authentic without taking ownership of another adult’s life.'}
       ],
+      deepDive:[
+      {
+            "heading": "Belonging without becoming useful on demand",
+            "text": "When loneliness follows a major change, a person may start earning belonging through constant help. They become the one who fixes every problem, listens at every hour, or volunteers before anyone asks. Being generous can build trust. But when you cannot say no without fearing abandonment, the connection may be resting on performance rather than mutual respect.\n\nAsk what role you automatically take when somebody is struggling. Is that role freely chosen, or does it feel required for you to remain welcome? Try offering one honest, limited form of help rather than taking ownership of the entire problem. Healthy belonging leaves room for both generosity and personal limits."
+      },
+      {
+            "heading": "Let trust grow through ordinary evidence",
+            "text": "After hurt, two extremes can feel tempting: trust no one or trust someone completely because the connection feels reassuring. Neither offers much room for discernment. Watch how people handle ordinary commitments, a small disagreement, a respectful no, or a request for privacy. Consistent conduct over time is more useful information than dramatic promises of loyalty.\n\nYou do not have to tell someone your entire history to be authentic. Share in layers that match the trust actually earned. Give yourself permission to adjust closeness when new information appears. Connection is strongest when both people can maintain separate opinions and responsibilities without treating every difference as betrayal."
+      },
+      {
+            "heading": "A practical invitation back into community",
+            "text": "Choose one low-pressure space where people gather around a shared activity rather than a demand for immediate vulnerability: a workshop, a walking group, a hobby, a volunteer project, or a conversation with someone you already trust. Your goal is not to become the center of the room or earn an invitation through heroic usefulness. It is simply to participate as yourself.\n\nAfterward, ask: Did I feel able to speak honestly? Did I respect my own capacity? Was there room for disagreement or boundaries? You may discover the connection was useful, limited, or not a fit. All three outcomes provide information. Rebuilding community is not a loyalty test; it is a series of ordinary, chosen relationships."
+      }
+],
       questions:[
         {label:'Where do I feel most able to be myself without performing or earning my place?',hint:'Consider a person, group, or situation and what makes it feel different.'},
         {label:'What signals would tell me that trust is growing at a healthy pace?',hint:'Look for observable conduct and respect for limits.'},

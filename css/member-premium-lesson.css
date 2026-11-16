@@ -262,3 +262,16 @@
 @media(max-width:800px){
  .premium-worksheet-completion .button{width:100%;justify-content:center}
 }
+
+/* Lesson-end continuation uses only the authenticated published catalog.
+   No automatic reflection save or forced reading sequence. */
+.premium-next-lesson-panel{max-width:75ch;margin:22px 0 30px;padding:clamp(18px,3vw,28px);
+  border:1px solid rgba(255,122,45,.32);border-radius:16px;
+  background:linear-gradient(135deg,rgba(255,122,45,.07),rgba(255,255,255,.015))}
+.premium-next-lesson-panel h2{font-family:'Cinzel',serif;font-size:clamp(1.2rem,2.3vw,1.7rem);
+  margin:10px 0 12px;line-height:1.45}
+.premium-next-lesson-panel p:not(.eyebrow){font-size:.91rem;line-height:1.7;color:var(--muted)}
+.premium-next-lesson-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.premium-next-lesson-actions .button{white-space:normal;overflow-wrap:anywhere}
+@media(max-width:680px){.premium-next-lesson-actions{display:grid;grid-template-columns:1fr}
+  .premium-next-lesson-actions .button{width:100%;text-align:center;justify-content:center}}

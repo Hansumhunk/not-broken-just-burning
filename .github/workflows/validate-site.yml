@@ -27,6 +27,8 @@ on:
       - 'scripts/test_member_access_guard.js'
       - 'scripts/test_premium_editorial_review.js'
       - 'scripts/test_live_webhook_hardening.js'
+      - 'scripts/test_membership_lifecycle.js'
+      - 'MEMBERSHIP_LAUNCH_ACCEPTANCE_2026-11-16.md'
       - 'launch-backend-staging/stripe-live-webhook/**'
       - 'scripts/validate_supabase_runtime.py'
       - 'supabase/migrations/**'
@@ -69,6 +71,8 @@ on:
       - 'scripts/test_member_access_guard.js'
       - 'scripts/test_premium_editorial_review.js'
       - 'scripts/test_live_webhook_hardening.js'
+      - 'scripts/test_membership_lifecycle.js'
+      - 'MEMBERSHIP_LAUNCH_ACCEPTANCE_2026-11-16.md'
       - 'launch-backend-staging/stripe-live-webhook/**'
       - 'scripts/validate_supabase_runtime.py'
       - 'supabase/migrations/**'
@@ -119,6 +123,8 @@ jobs:
         run: node --test scripts/test_premium_editorial_review.js
       - name: Verify staged live webhook signature and payment resilience
         run: node --test scripts/test_live_webhook_hardening.js
+      - name: Verify signup routing, expiring paid access and sandbox isolation
+        run: node --test scripts/test_membership_lifecycle.js
       - name: Verify honest public Flamewalker Plus curriculum preview
         run: node --test scripts/test_plus_preview.js
       - name: Test Flame Spirits read-only scouting engine

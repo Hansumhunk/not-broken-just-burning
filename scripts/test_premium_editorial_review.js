@@ -684,7 +684,7 @@ test('the inline Imprint Map supplies four editable columns in the correct lesso
   assert.ok(js.includes('function renderFatherMapInline(step, body, positiveInheritance)'));
   assert.ok(js.includes('if (isFatherPractice) renderFatherMapInline(step, body, onPositiveInheritance)'));
   assert.ok(js.includes("el('premium-father-map').hidden = true;"));
-  assert.ok(js.includes("el('premium-pause-reflection').hidden = isFatherPractice || isStructuredPractice || final;"));
+  assert.ok(js.includes("el('premium-pause-reflection').hidden = isFatherPractice || isStructuredPractice || isFinalJournal || final;"));
   assert.ok(html.includes('id="premium-map-grid"'));
   assert.ok(html.includes('id="premium-map-actions"'));
   assert.ok(html.includes('Read a column. Fill in its box. Then continue.'));
@@ -2125,7 +2125,7 @@ test('published premium lessons provide a safe next-lesson action only on the fi
   assert.match(html, /id="premium-next-lesson-panel"[^>]*hidden/);
   assert.match(html, /id="premium-next-lesson-link" href="member-lessons.html"/);
   assert.match(html, /href="member-work.html">My Saved Work/);
-  assert.match(html, /member-premium-lesson[.]css[?]v=reflection-examples-v20/);
+  assert.match(html, /member-premium-lesson[.]css[?]v=journal-reader-v23/);
   assert.match(css, /[.]premium-next-lesson-panel/);
   assert.ok(js.includes("lesson?.status === 'published' && steps.length"), 'unpublished drafts must not show member continuation');
   assert.ok(js.includes('current === steps.length - 1'), 'only show action after final reflection');
@@ -2177,7 +2177,7 @@ test('final reflection journal places a compact answer box beside every authored
   const api=ctx.window.NBJBFinalReflectionJournal;
   const step={title:'Final Reflection',blocks:[
     {kind:'paragraph',text:'Finish these:'},
-    {kind:'paragraph',text:'I respect my mother for…\\nWhat I want to keep is…\\nHealthy closeness now means…'}
+    {kind:'paragraph',text:'I respect my mother for…\nWhat I want to keep is…\nHealthy closeness now means…'}
   ]};
   const parsed=api.parse(step);
   assert.ok(parsed);
@@ -2215,8 +2215,8 @@ test('final reflection journal places a compact answer box beside every authored
   assert.equal(saveCalls[0].answered,2);
   assert.equal(saveCalls[0].total,3);
   assert.equal(saveCalls[0].answers.length,2);
-  assert.match(saveCalls[0].text,/1\\. I respect my mother for…\\nShe taught me/);
-  assert.match(saveCalls[0].text,/3\\. Healthy closeness now means…\\nWarmth and an honest boundary/);
+  assert.match(saveCalls[0].text,/1\. I respect my mother for…\nShe taught me/);
+  assert.match(saveCalls[0].text,/3\. Healthy closeness now means…\nWarmth and an honest boundary/);
   assert.ok(!saveCalls[0].text.includes('What I want to keep is…'),'unanswered fields are omitted');
   assert.equal(sheet.children.at(-1).hidden,false,'My Work link appears only after successful save');
 });
@@ -2229,7 +2229,7 @@ test('reader presentation removes internal Part labels while preserving actual c
   const work=read('js/member-platform.js');
   const myWork=read('member-work.html');
   const helper=reader.slice(reader.indexOf('  function displayTitle(title)'),reader.indexOf('  function wordCount(step)'));
-  const display=vm.runInNewContext(helper+'\\n({displayTitle,label})',{});
+  const display=vm.runInNewContext(helper+'\n({displayTitle,label})',{});
   assert.equal(display.displayTitle('Part 4 — Three Scenarios, Three Different Readings'),'Three Scenarios, Three Different Readings');
   assert.equal(display.displayTitle('Part 9 · Scenario A'),'Scenario A');
   assert.equal(display.label({title:'Part 3 — Trust',continuation:0}),'Trust');

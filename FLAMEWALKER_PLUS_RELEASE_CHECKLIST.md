@@ -1,3 +1,22 @@
+# Flamewalker+ release and operating checklist — November 16, 2026
+
+## CURRENT PRODUCTION STATUS — all 35 guided lessons published
+
+- [x] **35 protected written lessons now have `status='published'`** in the production `flamewalker_premium_lessons` table: Tracks 1–6 = 7 + 8 + 5 + 5 + 5 + 5.
+- [x] **Controlled release gate passed:** the 28 newly released manuscripts had unique slugs, nonempty teaching blocks, 7–8 guided prompts, Next Honest Action and Smaller Door; revisions matched the previously audited November 16 manuscripts before promotion. No manuscript bodies were placed in public GitHub.
+- [x] **Existing entitlement model preserved:** protected lesson reads require current server-side paid membership; ordinary Free and guests do not receive manuscript bodies. Reviewer-only draft handling remains available for future manuscripts.
+- [x] **Website release:** [PR #184](https://github.com/Hansumhunk/not-broken-just-burning/pull/184) merged with static site CI passing. [PR #185](https://github.com/Hansumhunk/not-broken-just-burning/pull/185) fixes all six paid track links, live copy and regression checks. Keep membership pricing and video pause unchanged.
+- [ ] **Founder live browser acceptance still required:** visit one newly published lesson from Tracks 2–6 while signed in as a genuine active paid member; confirm full text, keyboard/mobile worksheet entries, explicit Save to My Work, and returning to the lesson. Repeat a sample from each of the other four new tracks.
+- [ ] **Access isolation confirmation:** visit a newly published lesson with a separate genuine Free account and signed out, confirm no protected body is returned. Check paid-to-Free transition when legitimately expired or canceled, without artificially changing billing.
+- [ ] **Final human editorial proofing:** founder should proof the released versions for audience fit, citations, safety, clarity and repetition; promptly revise or temporarily unpublish any lesson with a material issue. The founder's instruction to proceed with launch authorized the operating release; it does not replace a claim-by-claim expert proofread.
+- [ ] **First external customer acceptance:** confirm real customer checkout → entitlement → library → Stripe portal/cancellation after an authorized purchase. Never fabricate a sale.
+- [ ] **Support/tax follow-up:** confirm support inbox and applicable digital education tax treatment, keep records. No tax registration or Stripe settings changed with curriculum publication.
+- [ ] **No videos:** all video publication and production stay paused by founder instruction.
+
+> The sections below are dated historical release-stage snapshots, not the current lesson status.
+
+---
+
 # Flamewalker+ final launch checklist — November 15, 2026
 
 ## Approved future curriculum standard — Tracks 7–8 (November 16, 2026)

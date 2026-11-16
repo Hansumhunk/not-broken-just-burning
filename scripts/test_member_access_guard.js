@@ -392,3 +392,23 @@ test('paid dashboard learning continues into published written lessons, not unre
   assert.ok(code.includes("link.textContent = 'Browse My Lessons'"));
   assert.ok(!code.includes("link.textContent = 'Open Watch & Learn'"));
 });
+
+
+test('available member cards use plain labels without diagonal ribbons', () => {
+  const css = read('css/member-expansion.css');
+  const library = read('member-library.html');
+  const lessons = read('member-lessons.html');
+  assert.ok(css.includes('.member-locked-card.is-live::after'));
+  assert.ok(css.includes('content: none;'));
+  assert.ok(css.includes('display: none;'));
+  assert.ok(library.includes('class="member-locked-card is-live"><span class="member-lock-label">Flamewalker+ · Published'));
+  assert.ok(lessons.includes('css/member-expansion.css?v=clean-ribbons-v17'));
+  assert.ok(library.includes('css/member-expansion.css?v=clean-ribbons-v17'));
+});
+
+test('founding editorial gate reports current seven published and 28 private drafts', () => {
+  const doc = read('FOUNDING_35_EDITORIAL_GATE.md');
+  assert.ok(doc.includes('Current production status'));
+  assert.ok(doc.includes('7 published, 28 in editorial review'));
+  assert.ok(doc.includes('founder signoff tied to each final manuscript revision'));
+});

@@ -2,6 +2,11 @@
 
 **Current founder browser QA steps:** [No-charge membership acceptance and December 2 cancellation checklist](MEMBERSHIP_LAUNCH_ACCEPTANCE_2026-11-16.md). Automated rules and Auth configuration have been verified; a human browser session remains a separate release gate.
 
+## Founder-reported Free membership browser acceptance — November 16, 2026
+
+- [x] **No-charge browser check 4/4 (founder reported):** signed-out protection, new Free signup, free lessons with premium locked in Free UI, and sign-out/re-entry protection all passed. Detailed record: [membership browser acceptance](MEMBERSHIP_LAUNCH_ACCEPTANCE_2026-11-16.md).
+- [ ] **Distinct paid/end-to-end gates remain:** real active paying-member lesson + saving checks, direct Free API paid-lesson denial, authorized external checkout/portal trial, editorial proofing, and December 2 payment/access lifecycle verification. These are not implied by the four Free-flow checks.
+
 ## CURRENT PRODUCTION STATUS — all 35 guided lessons published
 
 - [x] **35 protected written lessons now have `status='published'`** in the production `flamewalker_premium_lessons` table: Tracks 1–6 = 7 + 8 + 5 + 5 + 5 + 5.

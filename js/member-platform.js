@@ -7,6 +7,7 @@
 
   const memberRoutes = [
     ['dashboard', 'members.html', 'Dashboard'],
+    ['lessons', 'member-lessons.html', 'Lessons'],
     ['path', 'member-path.html', 'My Path'],
     ['tools', 'member-tools.html', 'Toolbox'],
     ['work', 'member-work.html', 'My Work'],
@@ -97,7 +98,9 @@
     });
 
     document.querySelectorAll('[data-member-nav]').forEach((link) => {
-      const selected = link.dataset.memberNav === page || (page === 'workshop' && link.dataset.memberNav === 'tools');
+      const selected = link.dataset.memberNav === page ||
+        (['start-here', 'premium-lesson'].includes(page) && link.dataset.memberNav === 'lessons') ||
+        (page === 'workshop' && link.dataset.memberNav === 'tools');
       link.classList.toggle('active', selected);
       if (selected) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');

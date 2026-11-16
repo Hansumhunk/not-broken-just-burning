@@ -14,7 +14,8 @@ const WORKFLOWS = Object.freeze([
   { key:"site", name:"Validate static site", file:"validate-site.yml", cadence:null },
   { key:"pages", name:"pages build and deployment", file:null, cadence:null },
   { key:"spirits", name:"Flame Spirits Mission Control", file:"flame-spirits.yml", cadence:5 },
-  { key:"products", name:"Flame Spirit Product Opportunity Scout", file:"flame-spirit-products.yml", cadence:9 }
+  { key:"products", name:"Flame Spirit Product Opportunity Scout", file:"flame-spirit-products.yml", cadence:9 },
+  { key:"reach", name:"Spirit of Reach Growth Briefs", file:"flame-spirit-reach.yml", cadence:9 }
 ]);
 const LOOKBACK_MS=48*3600*1000;
 const STALL_MS=120*60*1000;

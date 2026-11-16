@@ -1,5 +1,13 @@
 # Flamewalker+ final launch checklist — November 15, 2026
 
+## Additional lesson-depth pass — November 15, 2026
+
+- [x] **All 28 private manuscripts deepened:** added distinct case studies, counterexamples, decision frameworks, field studies and application guidance. Current private draft paragraph lengths: 1854–2528 words, mean 1998. Precise revision numbers recorded in [28-lesson deepening report](FOUNDING_28_DEEPENING_REPORT_2026-11-15.md).
+- [x] **Lesson-order polish:** five shorter Placeholder Wound lessons now close with One action, Take this with you, and a safety note after the substantive teaching.
+- [x] **Live data structure/access check:** 35 total; 7 published, 28 private `editorial_review`; all 28 have intact guided prompts, actions, Smaller Door, safety headings. Cross-library exact duplicate questions 0, exercise titles 35 unique; table RLS enabled with no direct anon/auth SELECT grant.
+- [ ] **Founder signoff and manual cross-device testing still required** before releasing any of the 28 revised private lessons. This change is editorial only: no live checkout, membership entitlement or site navigation changes.
+
+
 ## Founding 28 manuscripts — substantive editorial pass, November 15, 2026
 
 - [x] **25 shorter manuscript revisions saved privately in Supabase.** Expanded applied examples, differentiated decision tools, safer scenario framing, concrete practice and follow-through. Three longer original Placeholder Wound drafts already contained substantial guided teaching and were preserved.

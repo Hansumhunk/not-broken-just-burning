@@ -31,7 +31,7 @@ test('Flamewalker Plus has a public, indexable, accessible thirty-five-lesson cu
 test('the founding-preview identifies the available paid membership', () => {
   const html = read('flamewalker-plus.html');
   assert.match(html, /Founding lessons published · Membership available/);
-  assert.match(html, /Seven approved lessons are published in the protected library/);
+  assert.match(html, /All thirty-five guided written lessons are published in the protected library/);
   assert.match(html, /Paid checkout is available inside the authenticated member area/);
   assert.match(html, /\$14\.99/);
   assert.match(html, /\$149/);
@@ -45,10 +45,10 @@ test('site visitors and signed-in members can discover the preview without a bro
     assert.match(read(file), /href="flamewalker-plus\.html"/, file);
   }
   assert.match(read('join.html'), /Create Free Flamewalker Account/);
-  assert.match(read('member-store.html'), /Available: seven published lessons/);
+  assert.match(read('member-store.html'), /Available: thirty-five published lessons/);
 });
 
-test('thirty-five planned lessons are honestly presented in six distinct tracks', () => {
+test('thirty-five published lessons are honestly presented in six distinct tracks', () => {
   const html = read('flamewalker-plus.html');
   const cards = [...html.matchAll(/data-plus-lesson data-plus-track="([^"]+)"/g)].map(m=>m[1]);
   assert.deepEqual(cards.filter(v=>v==="wounded-boy").length,7);
@@ -58,11 +58,11 @@ test('thirty-five planned lessons are honestly presented in six distinct tracks'
   assert.equal(cards.filter(v=>v==="life-rebuilt").length,5);
   assert.equal(cards.filter(v=>v==="sacred-laws").length,5);
   assert.equal(cards.length,35);
-  assert.match(html, /Seven approved lessons are published in the protected library/);
-  assert.match(html, /Twenty-eight more remain in editorial review/);
-  assert.match(html, /Research references and clinical\/legal boundaries still require editorial verification/);
-  assert.match(html, /Yes\. Seven founding written lessons are available with Flamewalker\+/);
-  assert.match(read('join.html'), /Explore the thirty-five-lesson curriculum preview/);
+  assert.match(html, /All thirty-five guided written lessons are published in the protected library/);
+  assert.match(html, /All thirty-five guided written lessons below are published in the protected member library/);
+  assert.match(html, /These five educational lessons were developed from NBJB research-oriented curriculum foundations/);
+  assert.match(html, /Yes\. All thirty-five published guided written lessons are available with Flamewalker\+/);
+  assert.match(read('join.html'), /Explore the thirty-five-lesson curriculum/);
   assert.match(html, /The Five Sacred Laws of Survival/);
   assert.match(html, /the separate Sacred Laws book is not presented as finished or for sale/);
 });

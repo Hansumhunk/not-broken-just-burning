@@ -183,7 +183,10 @@
   function remapScenarioBookmark(blocks, legacyIndex, revisedSteps) {
     if (slug !== 'red-flags-and-responsibility' || !Number.isInteger(legacyIndex) || legacyIndex < 0) return legacyIndex;
     const oldStep = sectionize(blocks, { splitScenarios: false })[legacyIndex];
-    const first = oldStep?.blocks?.find(block => block.text)?.text;
+    // An old length-based page can begin with the tail of Scenario A and
+    // introduce Scenario B later. Prefer that explicit new scenario marker.
+    const scenarioLead = oldStep?.blocks?.find(block => /^Scenario [A-D] —/.test(block.text));
+    const first = scenarioLead?.text || oldStep?.blocks?.find(block => block.text)?.text;
     if (!first) return legacyIndex;
     const mapped = revisedSteps.findIndex(step => step.blocks?.some(block =>
       block.text === first || (first.startsWith('Scenario ') && first.includes(block.text.slice(0, 80)))));

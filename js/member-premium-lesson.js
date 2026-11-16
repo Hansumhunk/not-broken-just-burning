@@ -30,6 +30,7 @@
   let current = 0;
   let lesson = null;
   let inlineWorkspace = null;
+  let finalJournal = null;
   let reviewCatalog = [];
   let reading = false;
   let speechMode = 'all';
@@ -725,14 +726,16 @@
     // replacing section prose; typed values remain in the same DOM nodes.
     parkFatherMap();
     inlineWorkspace?.park();
+    finalJournal?.park();
     const onFatherMap = slug === 'father-wound' && /father imprint map/i.test(step.title) && !final;
     const onPositiveInheritance = slug === 'father-wound' && /^part 8\b/i.test(step.title) && !final;
     const isFatherPractice = onFatherMap || onPositiveInheritance;
     const isStructuredPractice = Boolean(inlineWorkspace?.matches(step));
+    const isFinalJournal = Boolean(finalJournal?.matches(step)) && !isStructuredPractice;
     el('premium-father-map-guide').hidden = !onFatherMap;
     el('premium-father-positive-guide').hidden = !onPositiveInheritance;
     el('premium-father-map').hidden = true;
-    el('premium-pause-reflection').hidden = isFatherPractice || isStructuredPractice || final;
+    el('premium-pause-reflection').hidden = isFatherPractice || isStructuredPractice || isFinalJournal || final;
     el('premium-current-step').hidden = final;
     el('premium-exercise').hidden = !final;
     const worksheetReview = el('premium-worksheet-review');
@@ -751,11 +754,12 @@
       // of its column, not at the very bottom or on a separate reflection page.
       if (isFatherPractice) renderFatherMapInline(step, body, onPositiveInheritance);
       else if (isStructuredPractice) inlineWorkspace.render(step, body, appendText);
+      else if (isFinalJournal) finalJournal.render(step, body, appendText);
       else step.blocks.forEach(b => appendText(body, b.kind === 'heading' ? 'h3' : 'p', b.text,
         b.kind === 'paragraph' && /^(?:and|or):?$/i.test(b.text.trim()) ? 'premium-prose-connector' : ''));
       el('premium-pause-note').value = notes.get(current) || '';
       el('premium-pause-status').textContent = '';
-      if(!isFatherPractice && !isStructuredPractice) applySectionReflection(step);
+      if(!isFatherPractice && !isStructuredPractice && !isFinalJournal) applySectionReflection(step);
       else el('premium-pause-reflection').open = false;
     }
     const count = steps.length;
@@ -829,6 +833,14 @@
     steps = [...sectionize(blocks), { title: 'Guided reflection', exercise: true, blocks: [] }];
     // Protected draft prompts are supplied only after authenticated access to
     // this lesson succeeds. No editorial text is bundled in public scripts.
+    // Final Reflection paragraphs that say "Finish these:" are rendered as
+    // small prompt/answer pairs. Save builds a single private journal entry;
+    // the source prompts arrive only with the authorized protected lesson.
+    finalJournal = window.NBJBFinalReflectionJournal?.create?.({
+      parking: el('premium-workspace-parking'),
+      lessonTitle: lesson.title,
+      saveJournal: (entry, status) => saveFinalReflectionJournal(entry, status)
+    }) || null;
     inlineWorkspace = window.NBJBEditorialWorkbooks?.create?.({
       slug,
       parking: el('premium-workspace-parking'),
@@ -1034,6 +1046,37 @@
     resultNode.textContent = saved.ok
       ? 'Saved to My Work on this device.' + (clipped.length < body.length ? ' Only the first 2,400 characters were saved; use Copy for the full answer.' : ' You can find it from the Hub.')
       : 'This device could not save the reflection. Use Copy to keep it privately.';
+  }
+  function saveFinalReflectionJournal(entry, resultNode) {
+    // Separate journal identity and accurate partial-answer count. Only the
+    // user's explicit Save action invokes this device-local member service.
+    const text = String(entry?.text || '').trim();
+    const answered = Number(entry?.answered || 0);
+    const total = Number(entry?.total || 0);
+    if (!text || !answered) {
+      resultNode.textContent = 'Answer at least one statement before saving.';
+      return false;
+    }
+    if (text.length > 20000) {
+      resultNode.textContent = 'This journal exceeds one local entry. Use Copy My Journal to keep all your answers.';
+      return false;
+    }
+    const service = window.NBJBMemberService;
+    if (!service?.recordToolEntry) {
+      resultNode.textContent = 'My Work is unavailable on this device. Use Copy My Journal to keep your answers.';
+      return false;
+    }
+    const saved = service.recordToolEntry('Lesson Journal', {
+      title: (lesson?.title || 'Flamewalker+') + ' · Final Reflection',
+      summary: 'Final reflection journal · ' + answered + ' of ' + total +
+        ' statements answered. Open this entry to read your organized responses.',
+      tags: ['Flamewalker+', 'Personal journal', 'Final reflection'],
+      data: { lessonSlug: slug, section: current + 1, worksheet: text }
+    });
+    resultNode.textContent = saved.ok
+      ? 'Saved ' + answered + ' answers as one journal entry in My Work on this device. You can open it below.'
+      : 'Your device could not save this journal. Use Copy My Journal to keep the complete entry.';
+    return Boolean(saved.ok);
   }
   function saveCompleteWorksheetToWork(text, context, resultNode) {
     // Complete worksheets are larger than ordinary 2,400-char notes. Store the

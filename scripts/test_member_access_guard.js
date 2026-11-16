@@ -634,7 +634,7 @@ test('Learning Trail does not fetch paid lesson catalog for free members', async
   const selectors={};
   const element=()=>({textContent:'',href:'',dataset:{},children:[],
     replaceChildren(){this.children=[];},
-    append(...items){this.children.push(...items);}});
+    append(...items){this.children.push(...items);},setAttribute(k,v){this[k]=v;}});
   const document={querySelector:key=>selectors[key]||(selectors[key]=element()),createElement:()=>element()};
   let fetches=0;
   const window={
@@ -660,7 +660,7 @@ test('Learning Trail counts only published and deliberately marked lessons', asy
   const source=read('js/member-learning-progress.js');
   const selectors={};
   const element=()=>({textContent:'',href:'',dataset:{},children:[],
-    replaceChildren(){this.children=[];},append(...items){this.children.push(...items);}});
+    replaceChildren(){this.children=[];},append(...items){this.children.push(...items);},setAttribute(k,v){this[k]=v;}});
   const document={querySelector:key=>selectors[key]||(selectors[key]=element()),createElement:()=>element()};
   const window={
     NBJBMemberService:{load:()=>({journey:{focus:'',progress:{}}}),stages:['Fire Reclamation']},

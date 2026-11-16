@@ -45,6 +45,7 @@
 
   const pageScripts = {
     dashboard: ["js/member-dashboard.js"],
+    "path-stage": ["js/member-path-stage.js"],
     progress: ["js/member-history-insights.js", "js/member-learning-progress.js"],
     work: ["js/member-history-insights.js"],
     workshop: ["js/tool-member-history.js", "js/member-workshop.js"],
@@ -57,16 +58,18 @@
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = src === 'js/member-billing.js'
+      script.src = src === 'js/member-path-stage.js'
+        ? src + '?v=member-path-v1'
+        : src === 'js/member-billing.js'
         ? src + '?v=paid-account-view-v1'
         : src === 'js/member-feedback.js'
         ? src + '?v=member-feedback-v1'
         : src === 'js/member-learning-progress.js'
-        ? src + '?v=learning-trail-v2'
+        ? src + '?v=member-path-v1'
         : src === 'js/member-dashboard.js'
         ? src + '?v=dashboard-returning-v2'
         : src === 'js/member-platform.js'
-        ? src + '?v=member-journal-v1'
+        ? src + '?v=member-path-v1'
         : src === 'js/member-final-reflection-journal.js'
         ? src + '?v=journal-reader-v23'
         : src === 'js/member-premium-lesson.js'

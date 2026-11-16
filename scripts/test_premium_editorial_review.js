@@ -357,6 +357,7 @@ test('the private reader lists premium lessons in six distinct tracks', () => {
     'grieving-future-never-happened', 'other-person-not-your-measure',
     'promise-of-the-room', 'split-alliance-therapy-triangle', 'professional-authority-multiplier',
     'when-you-stop-trusting-own-account', 'double-bind-darvo-reaction',
+    'psychological-abuse-therapy-feedback-loop', 'what-comes-after-survival-adaptations', 'men-vulnerability-never-again-rule', 'document-fire-not-live-evidence-locker', 'when-therapy-enters-court-records', 'when-distress-looks-like-deception', 'the-credibility-cascade', 'challenge-bias-and-repair', 'rebuilding-ability-to-seek-help',
     'body-as-ally', 'name-the-emotion-choose-action', 'the-space-between-trigger-and-response',
     'boundaries-without-cruelty', 'discipline-without-self-punishment',
     'provision-without-proving-worth', 'fatherhood-what-children-watch',

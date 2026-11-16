@@ -58,7 +58,9 @@
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = src === 'js/member-path-stage.js'
+      script.src = src === 'js/member-search.js'
+        ? src + '?v=find-resume-v1'
+        : src === 'js/member-path-stage.js'
         ? src + '?v=member-path-v1'
         : src === 'js/member-billing.js'
         ? src + '?v=paid-account-view-v1'
@@ -133,6 +135,7 @@
     }
     await loadScript("js/learning-continuity.js");
     await loadScript("js/member-platform.js");
+    await loadScript("js/member-search.js");
     window.NBJBLearningContinuity?.render?.();
 
     const page = body.dataset.memberPage || "";

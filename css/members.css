@@ -48,13 +48,9 @@
   min-width: 0;
   max-width: 100%;
   flex-wrap: nowrap;
-  justify-content: flex-start;
-  gap: 6px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  overscroll-behavior-inline: contain;
-  scrollbar-width: thin;
-  -webkit-overflow-scrolling: touch;
+  align-items: center;
+  gap: 7px;
+  overflow: visible;
 }
 .member-subnav a,
 .member-subnav button.member-sign-out {
@@ -86,6 +82,41 @@
   color: var(--text);
 }
 .member-subnav button.member-sign-out:disabled { cursor: wait; opacity: .7; }
+/* Member navigation: visible essentials + a real, keyboard-accessible menu. */
+.member-nav-more { position: relative; flex: 0 0 auto; margin-left: auto; min-width: 94px; }
+.member-nav-more > summary {
+  display: block; cursor: pointer; list-style: none; user-select: none;
+  padding: 9px 16px; border: 1px solid var(--line); border-radius: 999px;
+  color: var(--text); font-size: .8rem; font-weight: 800; text-align: center;
+  background: rgba(255,255,255,.025);
+}
+.member-nav-more > summary::-webkit-details-marker { display: none; }
+.member-nav-more > summary::after { content: " ▾"; font-size: .86em; }
+.member-nav-more[open] > summary, .member-nav-more > summary:hover,
+.member-nav-more > summary:focus-visible, .member-nav-more > summary.active {
+  border-color: var(--line-hot); background: rgba(255,122,45,.09);
+}
+.member-nav-more > summary:focus-visible { outline: 2px solid var(--ember-pale); outline-offset: 3px; }
+.member-nav-more-panel {
+  position: absolute; top: calc(100% + 10px); right: 0; z-index: 22;
+  width: min(340px, calc(100vw - 42px)); max-height: min(72vh, 580px);
+  overflow-y: auto; overscroll-behavior: contain; display: grid; gap: 5px;
+  padding: 13px; border: 1px solid var(--line-hot); border-radius: 16px;
+  background: #151519; box-shadow: 0 20px 38px rgba(0,0,0,.55);
+}
+.member-subnav .member-nav-more-panel a,
+.member-subnav .member-nav-more-panel button.member-sign-out {
+  display: block; width: 100%; box-sizing: border-box; padding: 11px 13px;
+  text-align: left; border-radius: 9px; white-space: normal;
+  font-size: .87rem; line-height: 1.4; text-decoration: none;
+}
+.member-subnav .member-nav-more-panel a:hover,
+.member-subnav .member-nav-more-panel a:focus-visible,
+.member-subnav .member-nav-more-panel a.active { color: var(--text); border-color: var(--line-hot); background: rgba(255,122,45,.12); }
+.member-nav-more-panel a.member-exit { margin-top: 9px; }
+.member-subnav .member-nav-more-panel button.member-sign-out { margin-top: 4px; }
+.member-nav-mobile-duplicate { display: none !important; }
+
 
 .member-page-head {
   padding-top: 46px;
@@ -315,24 +346,24 @@ body[data-member-page] .callout h2 { font-size: clamp(1.8rem, 3vw, 2.7rem); }
   .member-shell { width: min(calc(100% - 20px), var(--max)); padding: 10px; top: 8px; }
   .member-shell-copy { display: none; }
   .member-subnav {
-    display: flex;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    gap: 6px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    justify-content: stretch;
+    gap: 8px;
     width: 100%;
-    overflow-x: auto;
-    overscroll-behavior-inline: contain;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
+    overflow: visible;
   }
-  .member-subnav::-webkit-scrollbar { display: none; }
-  .member-subnav a {
-    flex: 0 0 auto;
-    white-space: nowrap;
-    text-align: center;
-    border-color: var(--line);
-    border-radius: 12px;
+  .member-subnav > a.member-nav-compact-hide { display: none; }
+  .member-subnav > a {
+    display: flex; align-items: center; justify-content: center;
+    min-width: 0; white-space: normal; text-align: center; padding: 11px 6px;
+    border-color: var(--line); border-radius: 12px; font-size: .78rem;
   }
+  .member-nav-more { width: 100%; min-width: 0; margin: 0; }
+  .member-nav-more > summary { border-radius: 12px; padding: 11px 6px; font-size: .78rem; }
+  .member-nav-mobile-duplicate { display: block !important; }
+  .member-nav-more:has(.member-nav-mobile-duplicate.active) > summary { border-color: var(--line-hot); background: rgba(255,122,45,.09); }
+  .member-nav-more-panel { right: 0; top: calc(100% + 11px); }
   .member-page-head { padding-top: 28px; }
   .member-page-head h1 { font-size: clamp(2.05rem, 10vw, 3rem); }
   .member-dashboard-layout,

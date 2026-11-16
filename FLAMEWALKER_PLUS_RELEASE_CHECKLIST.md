@@ -1,5 +1,7 @@
 # Flamewalker+ release and operating checklist — November 16, 2026
 
+**Current founder browser QA steps:** [No-charge membership acceptance and December 2 cancellation checklist](MEMBERSHIP_LAUNCH_ACCEPTANCE_2026-11-16.md). Automated rules and Auth configuration have been verified; a human browser session remains a separate release gate.
+
 ## CURRENT PRODUCTION STATUS — all 35 guided lessons published
 
 - [x] **35 protected written lessons now have `status='published'`** in the production `flamewalker_premium_lessons` table: Tracks 1–6 = 7 + 8 + 5 + 5 + 5 + 5.

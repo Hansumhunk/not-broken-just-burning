@@ -14,6 +14,18 @@ Flame Spirits are small, independently understandable tasks, not unsupervised em
 | Spirit of the Ledger | Check membership revenue | **Intentionally held**: no financial reporting in a public GitHub repository |
 | Spirit of the Guard | Look for risky GitHub Actions patterns in checked-in workflows | **Runnable on GitHub**; not a replacement for Supabase advisories, Dependabot or secret scanning |
 
+
+## Added production-ready read-only spirits
+
+| Spirit | Role | Scope |
+| --- | --- | --- |
+| Spirit of the Library (#22 Resource Library Curator) | Inspect outgoing public resource and crisis-support links on `support.html` and `resources.html`; check allowlisted official service destinations | Inaccessible or redirected sites are marked for manual verification, never falsely called broken |
+| Spirit of Integrity (#26 Brand Consistency Inspector) | Inspect five public-facing pages for specific indicators: men-first language, free vs paid membership labels, crisis options, and scope boundaries | Deterministic presence checks only, not editorial, clinical or legal approval |
+
+These two spirits run on the existing Flame Spirits Monday/Wednesday/Friday GitHub schedule. The new module is `scripts/flame_spirits_guardrails.mjs`. Individual CLI checks: `node scripts/flame_spirits.mjs resources` and `node scripts/flame_spirits.mjs brand`. The workflow runs both with the other spirits using `all`. No additional ChatGPT scheduled-task slots or paid APIs are required.
+
+The Library Spirit fetches only explicitly allowlisted external support domains; unexpected domains are identified for founder review rather than fetched. Its HTTP signals do **not** establish whether a telephone service remains accurate or available. A blocked/redirected response should be checked manually using the official provider. The Brand Spirit reports missing configured phrases or cues; it does not read or rewrite protected lesson manuscripts, infer meaning beyond the checks, verify legal statements, or approve copy.
+
 The full weekly member/Stripe/Supabase monitoring functions configured in ChatGPT remain separate. This GitHub system does not require a ChatGPT plan upgrade.
 
 ## How to operate

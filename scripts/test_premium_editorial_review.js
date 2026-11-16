@@ -2271,7 +2271,7 @@ test('reader presentation removes internal Part labels while preserving actual c
   assert.ok(myWork.includes('data-work-tool="Lesson Journal"'));
   assert.ok(myWork.includes('<option>Lesson Journal</option>'));
 });
-\n
+
 test('every fallback reflection is anchored in the section teaching, not the chapter title', () => {
   const source = read('js/member-premium-lesson.js');
   const helper = source.slice(source.indexOf('  function contextualReflectionCue(step, blocks)'),

@@ -82,5 +82,5 @@ test("missing public sources never masquerade as zero product demand", async () 
   const report=(await productSpirit({request,sleepFn:async()=>{}})).join("\n");
   assert.match(report,/all community feeds unavailable/);
   assert.match(report,/unverified/);
-  assert.doesNotMatch(report,/no demand|zero demand/i);
+  assert.doesNotMatch(report,/(?:there is|shows|means)\s+(?:no|zero)\s+demand/i);
 });

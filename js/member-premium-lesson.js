@@ -603,19 +603,76 @@
     if (questions.length) {
       return { instruction: clean(questions[questions.length - 1]), kind: 'direct' };
     }
-    if (/integration/i.test(step?.title || '')) {
-      return { instruction: 'What lesson from this section do I want to put into practice, and what would that look like in my actual behavior?', kind: 'contextual' };
+    // A section may have a parent chapter title that says "Three Scenarios"
+    // while its *actual teaching* is a different topic. Work from the most
+    // recent authorized prose and the innermost heading, not the chapter name.
+    const prose = blocks.filter(block => block.kind !== 'heading')
+      .map(block => block.text).join('\n');
+    const recent = prose.slice(-1900);
+    const subheading = blocks.filter(block => block.kind === 'heading')
+      .map(block => block.text.trim()).filter(Boolean).pop() || '';
+    const context = (subheading + '\n' + recent).toLowerCase();
+
+    // These questions are tied to observable patterns and decisions in the
+    // reading. Match specific concepts before broader ones. The original
+    // manuscript and any authored question remain protected on the server.
+    const grounded = [
+      [/admission price for being loved|reclaiming your position|measure (?:their |your |our )?worth through usefulness|worth through usefulness/i,
+        'When have I felt I needed to earn love or attention by being useful, solving problems, or providing more? What need could I name directly instead of trying to prove my worth?'],
+      [/feeling like a placeholder|placeholder wound|merely a placeholder/i,
+        'When did I first feel like a placeholder rather than a chosen partner? What happened, what was my first thought, and what did I need to hear or ask for?'],
+      [/over.functioning|become indispensable|another bill|promise a bigger house/i,
+        'When uncertainty makes me want to do more, what am I afraid might happen if I stop? What honest conversation could replace one extra task or sacrifice?'],
+      [/invisible (?:work|labor)|caregiving, appointments|mental load/i,
+        'Whose contributions have I been counting, and whose have I overlooked—including my own? What specific conversation could help us divide the load more fairly?'],
+      [/medical crisis|illness, grief|reduced (?:capacity|intimacy)/i,
+        'When someone has less energy for closeness, how can I distinguish a difficult season from a recurring lack of care? What small, realistic request could I make?'],
+      [/reciprocity|keeping score|balanced ledger|one.sided effort/i,
+        'Where am I measuring a relationship by who does more, and what would genuine reciprocity look like in our daily choices rather than on a scoreboard?'],
+      [/inherited closeness|chosen closeness|approval seemed to require|relationship rules/i,
+        'What rule about closeness or approval did I learn early in life? Where does it still shape my relationships, and what healthier rule would I choose now?'],
+      [/boundary|boundaries|respectful no|say no without/i,
+        'Where have I agreed to something that crossed one of my limits? What clear, respectful boundary could I state and follow through on?'],
+      [/feelings? (?:of )?shame|shame (?:can|does|often)|self.blame/i,
+        'When shame shows up, what story do I start telling about myself? What responsibility is actually mine, and what judgment can I put down?'],
+      [/silence|stayed quiet|speak up|using (?:your|my) voice/i,
+        'When have I stayed quiet to keep the peace, and what did it cost me? What is one honest thing I could say without turning the conversation into a fight?'],
+      [/trust|betrayal|repair trust/i,
+        'What specific behavior has affected my trust, and what observable action—not a promise or assumption—would help me decide whether trust can be rebuilt?'],
+      [/father|mother|caregiver|parenting|fatherhood/i,
+        'Which rule or habit did I learn from the adults who raised me, where do I notice it now, and what do I want to carry forward or change?'],
+      [/integration|put into practice/i,
+        'Which lesson from the passage can I recognize in my own behavior, and what would practicing a healthier response look like in one real situation?'],
+      [/next honest action|one realistic action/i,
+        'What one action can I take this week to apply the specific idea I just read, and how will I recognize that I followed through?']
+    ];
+    for (const [pattern, question] of grounded) {
+      if (pattern.test(context)) return { instruction: question, kind: 'contextual' };
     }
-    if (/next honest action/i.test(step?.title || '')) {
-      return { instruction: 'Which one realistic action will I choose this week to apply what I just read?', kind: 'contextual' };
+
+    // Never fall back to "As I consider [chapter title] ..." again.
+    // When an author has not supplied an explicit exercise, quote a real
+    // sentence from the teaching so the member can respond to the content
+    // directly. Future editorial passes can replace this with authored cues.
+    const sentences = recent.replace(/\s+/g, ' ').trim()
+      .split(/(?<=[.!?])\s+/)
+      .map(text => text.replace(/^[“"‘']+|[”"’']+$/g, '').trim())
+      .filter(text => text.length >= 35 && text.length <= 220 && !/^\s*(?:example|part \d+)\b/i.test(text));
+    const anchor = sentences.length
+      ? sentences[sentences.length - 1]
+      : recent.replace(/\s+/g, ' ').trim().slice(0, 170);
+    if (anchor) {
+      const followup = /\b(?:need|care|support|ask|request)\b/i.test(anchor)
+        ? 'Which need comes to mind for me, and how could I express it directly in a real situation?'
+        : /\b(?:choose|choice|action|do differently|change|practice)\b/i.test(anchor)
+          ? 'What concrete choice would I make in a similar moment, and what might get in the way?'
+          : 'Where have I noticed this in my own behavior or relationships? What specific experience comes to mind?';
+      return { instruction: 'The reading says: “' + anchor +
+        '”\n' + followup, kind: 'grounded' };
     }
-    // The final fallback names the actual section. It is a reflection question,
-    // not the misleading "Write a private note about..." template.
-    const topic = String(step?.title || 'this section').replace(/^Part\s+\d+\s*(?:[—–·:\-]\s*)?/i, '').replace(/\s+/g, ' ').trim().slice(0, 110);
-    return {
-      instruction: 'As I consider ' + topic + ', what connects with my own experience, and what would I like to keep or change?',
-      kind: 'contextual'
-    };
+    // If the source has genuinely no readable teaching, do not invent a
+    // reflection merely to fill the interface.
+    return null;
   }
 
   function sectionReflectionCue(step) {
@@ -714,14 +771,19 @@
     const prompt=el('premium-pause-label');
     const response=el('premium-pause-note');
     if(!panel || !heading || !hint || !prompt || !response) return;
+    if (!cue) {
+      panel.hidden = true;
+      return;
+    }
+    panel.hidden = false;
     heading.textContent='Reflect on this section';
-    hint.textContent=cue.kind === 'contextual'
-      ? 'Your own experience · optional · saved only when you choose'
-      : 'Based on this section’s actual question · your choice to save';
+    hint.textContent=cue.kind === 'direct' || cue.kind === 'questions' || cue.kind === 'assignment'
+      ? 'Based on this section’s actual question · your choice to save'
+      : 'Grounded in this reading · optional · saved only when you choose';
     prompt.textContent=cue.instruction;
-    response.rows=cue.kind === 'contextual' ? 5 : 9;
+    response.rows=cue.kind === 'contextual' || cue.kind === 'grounded' ? 5 : 9;
     response.placeholder='Answer the reflection above in your own words. Nothing is uploaded automatically.';
-    panel.open=cue.kind !== 'contextual';
+    panel.open=cue.kind !== 'contextual' && cue.kind !== 'grounded';
   }
 
   function render({ focus = false } = {}) {

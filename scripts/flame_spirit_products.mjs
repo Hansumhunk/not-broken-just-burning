@@ -34,8 +34,8 @@ export const PRODUCT_CONCEPTS = Object.freeze([
   {
     id: "fatherhood", title: "Fatherhood Under Pressure Planning Kit",
     format: "Planning checklist and guided check-in cards",
-    focus: /\b(father|dad|dads|parent(?:s|ing)|coparent(?:ing)?|custody|child(?:ren)?|son|daughter)\b/i,
-    localSignals: /\b(father|dad|child|parent|guardian)\b/i,
+    focus: /\b(father(?:hood)?|dad|dads|parent(?:s|ing)|coparent(?:ing)?|custody|child(?:ren)?|son|daughter)\b/i,
+    localSignals: /\b(father(?:hood)?|dad|child|parent|guardian)\b/i,
     paths: ["index.html", "lessons.html"],
     query: "fatherhood parenting workbook",
     prototype: "A weekly presence-and-communication planner centered on actions a father controls."

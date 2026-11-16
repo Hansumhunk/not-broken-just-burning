@@ -34,6 +34,10 @@ on:
       - 'FLAMEWALKER_PLUS_RELEASE_CHECKLIST.md'
       - '.github/workflows/validate-site.yml'
       - '.github/workflows/clear-stale-pages.yml'
+      - '.github/workflows/flame-spirits.yml'
+      - 'scripts/flame_spirits.mjs'
+      - 'scripts/test_flame_spirits.mjs'
+      - 'FLAME_SPIRITS.md'
   pull_request:
     paths:
       - '**.html'
@@ -59,6 +63,10 @@ on:
       - 'FLAMEWALKER_PLUS_RELEASE_CHECKLIST.md'
       - '.github/workflows/validate-site.yml'
       - '.github/workflows/clear-stale-pages.yml'
+      - '.github/workflows/flame-spirits.yml'
+      - 'scripts/flame_spirits.mjs'
+      - 'scripts/test_flame_spirits.mjs'
+      - 'FLAME_SPIRITS.md'
 
 permissions:
   contents: read
@@ -87,6 +95,8 @@ jobs:
         run: node --test scripts/test_live_webhook_hardening.js
       - name: Verify honest public Flamewalker Plus curriculum preview
         run: node --test scripts/test_plus_preview.js
+      - name: Test Flame Spirits read-only scouting engine
+        run: node --test scripts/test_flame_spirits.mjs
       - name: Smoke-test live Flamewalker Supabase Auth
         if: ${{ github.base_ref == 'main' || github.ref_name == 'main' || startsWith(github.ref_name, 'release/') }}
         run: python scripts/validate_supabase_runtime.py

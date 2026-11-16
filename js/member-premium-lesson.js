@@ -308,12 +308,12 @@
     // explicit case marker, since that is where the reader had arrived.
     const marker = oldStep.blocks.slice().reverse().find(block =>
       (block.kind === 'heading' && (namedCaseHeading(block.text) ||
-        /^EXAMPLE\\s+\\d+\\b/i.test(block.text))) ||
+        /^EXAMPLE\s+\d+\b/i.test(block.text))) ||
       (block.kind === 'paragraph' && inlineScenario(block.text)));
     if (marker) {
       // A numbered example may stay within its parent chapter title, so its
       // heading is a block instead of the step title. Match either location.
-      if (marker.kind === 'heading' && /^EXAMPLE\\s+\\d+\\b/i.test(marker.text)) {
+      if (marker.kind === 'heading' && /^EXAMPLE\s+\d+\b/i.test(marker.text)) {
         const sameHeading = revisedSteps.findIndex(step => step.blocks?.some(block =>
           block.kind === 'heading' && block.text.trim() === marker.text.trim()));
         if (sameHeading >= 0) return sameHeading;

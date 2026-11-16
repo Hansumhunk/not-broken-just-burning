@@ -30,6 +30,7 @@
   let current = 0;
   let lesson = null;
   let inlineWorkspace = null;
+  let finalJournal = null;
   let reviewCatalog = [];
   let reading = false;
   let speechMode = 'all';
@@ -333,8 +334,15 @@
       step.blocks?.some(block => block.text === first));
     return byText >= 0 ? byText : legacyIndex;
   }
+  function displayTitle(title) {
+    // Keep authoring and chapter-split metadata intact, but never show
+    // "Part 2 / Part 3" numbering in a member-facing reading title.
+    const clean=String(title || 'Continue reading').replace(/^Part\s+\d+\s*(?:[—–·:\-]\s*)?/i,'').trim();
+    return clean || 'Continue reading';
+  }
   function label(step) {
-    return step.continuation ? step.title + ' · continued ' + (step.continuation + 1) : step.title;
+    const name = displayTitle(step.title);
+    return step.continuation ? name + ' · continued ' + (step.continuation + 1) : name;
   }
   function wordCount(step) {
     const text = step.exercise ? (lesson?.content?.exercise?.prompts || []).join(' ') : step.blocks.map(b => b.text).join(' ');
@@ -550,7 +558,7 @@
     const isStandaloneQuestion = text => {
       const value = clean(text);
       return value.length <= 290 && /\?$/.test(value) &&
-        /^(?:What|Which|How|Why|Who|When|Where|Do|Did|Can|Could|Should|Would|Is|Are)\b/i.test(value);
+        /^(?:What|Which|How|Why|Who|When|Where|If|Do|Did|Can|Could|Should|Would|Is|Are)\b/i.test(value);
     };
     const isSentenceStarter = text => {
       const value = clean(text);
@@ -603,7 +611,7 @@
     }
     // The final fallback names the actual section. It is a reflection question,
     // not the misleading "Write a private note about..." template.
-    const topic = String(step?.title || 'this section').replace(/\s+/g, ' ').trim().slice(0, 110);
+    const topic = String(step?.title || 'this section').replace(/^Part\s+\d+\s*(?:[—–·:\-]\s*)?/i, '').replace(/\s+/g, ' ').trim().slice(0, 110);
     return {
       instruction: 'As I consider ' + topic + ', what connects with my own experience, and what would I like to keep or change?',
       kind: 'contextual'
@@ -725,14 +733,16 @@
     // replacing section prose; typed values remain in the same DOM nodes.
     parkFatherMap();
     inlineWorkspace?.park();
+    finalJournal?.park();
     const onFatherMap = slug === 'father-wound' && /father imprint map/i.test(step.title) && !final;
     const onPositiveInheritance = slug === 'father-wound' && /^part 8\b/i.test(step.title) && !final;
     const isFatherPractice = onFatherMap || onPositiveInheritance;
     const isStructuredPractice = Boolean(inlineWorkspace?.matches(step));
+    const isFinalJournal = Boolean(finalJournal?.matches(step)) && !isStructuredPractice;
     el('premium-father-map-guide').hidden = !onFatherMap;
     el('premium-father-positive-guide').hidden = !onPositiveInheritance;
     el('premium-father-map').hidden = true;
-    el('premium-pause-reflection').hidden = isFatherPractice || isStructuredPractice || final;
+    el('premium-pause-reflection').hidden = isFatherPractice || isStructuredPractice || isFinalJournal || final;
     el('premium-current-step').hidden = final;
     el('premium-exercise').hidden = !final;
     const worksheetReview = el('premium-worksheet-review');
@@ -742,7 +752,7 @@
       el('premium-exercise-form').hidden = Boolean(inlineWorkspace?.replacesGuidedReflection);
       inlineWorkspace?.renderCompletion?.(worksheetReview);
     } else {
-      el('premium-step-kicker').textContent = 'Part ' + (current + 1) + ' · ' + estimate(step);
+      el('premium-step-kicker').textContent = 'Reading · ' + estimate(step);
       el('premium-step-title').textContent = label(step);
       const body = el('premium-reader-body');
       body.classList.toggle('premium-map-layout', isFatherPractice || isStructuredPractice);
@@ -751,11 +761,18 @@
       // of its column, not at the very bottom or on a separate reflection page.
       if (isFatherPractice) renderFatherMapInline(step, body, onPositiveInheritance);
       else if (isStructuredPractice) inlineWorkspace.render(step, body, appendText);
-      else step.blocks.forEach(b => appendText(body, b.kind === 'heading' ? 'h3' : 'p', b.text,
-        b.kind === 'paragraph' && /^(?:and|or):?$/i.test(b.text.trim()) ? 'premium-prose-connector' : ''));
+      else if (isFinalJournal) finalJournal.render(step, body, appendText);
+      else step.blocks.forEach(b => {
+        // Multiple thoughts inside one authorized paragraph (for example,
+        // scenario → explanation → question) should display as real paragraphs.
+        const segments = b.kind === 'paragraph' ? b.text.split(/\n\s*\n/) : [b.text];
+        segments.forEach(text => appendText(body, b.kind === 'heading' ? 'h3' : 'p',
+          b.kind === 'heading' ? displayTitle(text) : text,
+          b.kind === 'paragraph' && /^(?:and|or):?$/i.test(text.trim()) ? 'premium-prose-connector' : ''));
+      });
       el('premium-pause-note').value = notes.get(current) || '';
       el('premium-pause-status').textContent = '';
-      if(!isFatherPractice && !isStructuredPractice) applySectionReflection(step);
+      if(!isFatherPractice && !isStructuredPractice && !isFinalJournal) applySectionReflection(step);
       else el('premium-pause-reflection').open = false;
     }
     const count = steps.length;
@@ -829,6 +846,14 @@
     steps = [...sectionize(blocks), { title: 'Guided reflection', exercise: true, blocks: [] }];
     // Protected draft prompts are supplied only after authenticated access to
     // this lesson succeeds. No editorial text is bundled in public scripts.
+    // Final Reflection paragraphs that say "Finish these:" are rendered as
+    // small prompt/answer pairs. Save builds a single private journal entry;
+    // the source prompts arrive only with the authorized protected lesson.
+    finalJournal = window.NBJBFinalReflectionJournal?.create?.({
+      parking: el('premium-workspace-parking'),
+      lessonTitle: lesson.title,
+      saveJournal: (entry, status) => saveFinalReflectionJournal(entry, status)
+    }) || null;
     inlineWorkspace = window.NBJBEditorialWorkbooks?.create?.({
       slug,
       parking: el('premium-workspace-parking'),
@@ -1034,6 +1059,41 @@
     resultNode.textContent = saved.ok
       ? 'Saved to My Work on this device.' + (clipped.length < body.length ? ' Only the first 2,400 characters were saved; use Copy for the full answer.' : ' You can find it from the Hub.')
       : 'This device could not save the reflection. Use Copy to keep it privately.';
+  }
+  function saveFinalReflectionJournal(entry, resultNode) {
+    // Separate journal identity and accurate partial-answer count. Only the
+    // user's explicit Save action invokes this device-local member service.
+    const text = String(entry?.text || '').trim();
+    const answered = Number(entry?.answered || 0);
+    const total = Number(entry?.total || 0);
+    if (!text || !answered) {
+      resultNode.textContent = 'Answer at least one statement before saving.';
+      return false;
+    }
+    if (text.length > 20000) {
+      resultNode.textContent = 'This journal exceeds one local entry. Use Copy My Journal to keep all your answers.';
+      return false;
+    }
+    const service = window.NBJBMemberService;
+    if (!service?.recordToolEntry) {
+      resultNode.textContent = 'My Work is unavailable on this device. Use Copy My Journal to keep your answers.';
+      return false;
+    }
+    const saved = service.recordToolEntry('Lesson Journal', {
+      title: (lesson?.title || 'Flamewalker+') + ' · Final Reflection',
+      summary: 'Final reflection journal · ' + answered + ' of ' + total +
+        ' statements answered. Open this entry to read your organized responses.',
+      tags: ['Flamewalker+', 'Personal journal', 'Final reflection'],
+      data: { lessonSlug: slug, section: current + 1, worksheet: text,
+        journalEntries: Array.isArray(entry.answers) ? entry.answers.slice(0,20).map(item => ({
+          prompt: String(item.prompt || '').slice(0,260),
+          response: String(item.response || '').slice(0,800)
+        })) : [] }
+    });
+    resultNode.textContent = saved.ok
+      ? 'Saved ' + answered + ' answers as one journal entry in My Work on this device. You can open it below.'
+      : 'Your device could not save this journal. Use Copy My Journal to keep the complete entry.';
+    return Boolean(saved.ok);
   }
   function saveCompleteWorksheetToWork(text, context, resultNode) {
     // Complete worksheets are larger than ordinary 2,400-char notes. Store the

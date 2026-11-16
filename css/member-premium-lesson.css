@@ -275,3 +275,29 @@
 .premium-next-lesson-actions .button{white-space:normal;overflow-wrap:anywhere}
 @media(max-width:680px){.premium-next-lesson-actions{display:grid;grid-template-columns:1fr}
   .premium-next-lesson-actions .button{width:100%;text-align:center;justify-content:center}}
+
+/* Final Reflection journal: each authored sentence starter gets a modest
+   adjacent field. Inputs stay in memory until explicit Copy or Save. */
+.premium-journal-sheet{margin:16px 0 25px;padding:clamp(15px,2.5vw,22px);
+  border:1px solid rgba(255,122,45,.3);border-radius:15px;
+  background:linear-gradient(145deg,rgba(255,122,45,.047),rgba(255,255,255,.014))}
+.premium-journal-heading{margin:0 0 12px;font-size:clamp(1.1rem,2vw,1.4rem);line-height:1.4}
+.premium-journal-intro{margin:0 0 10px;max-width:72ch;color:var(--muted);font-size:.88rem;line-height:1.6}
+.premium-journal-count{font-size:.8rem;font-weight:750;color:var(--ember-pale);margin:0 0 14px}
+.premium-journal-rows{display:grid;gap:0}
+.premium-journal-row{display:grid;grid-template-columns:minmax(0,.91fr) minmax(0,1.09fr);
+  align-items:center;column-gap:18px;row-gap:8px;padding:12px 0;border-top:1px solid var(--line)}
+.premium-journal-row .premium-journal-prompt{font-weight:650;font-size:.88rem;line-height:1.55;color:var(--text);overflow-wrap:anywhere}
+.premium-journal-answer{width:100%;min-width:0;box-sizing:border-box;min-height:67px;max-height:220px;
+  padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#101014;color:var(--text);
+  font:inherit;font-size:.9rem;line-height:1.5;resize:vertical}
+.premium-journal-answer:focus-visible{outline:2px solid var(--ember-bright);outline-offset:2px;border-color:var(--line-hot)}
+.premium-journal-actions{margin:20px 0 8px}
+.premium-journal-actions .button{max-width:100%;white-space:normal}
+.premium-journal-status{margin:10px 0 0;line-height:1.6;font-size:.84rem}
+.premium-journal-work-link{display:inline-block;margin-top:8px;color:var(--ember-pale);font-weight:750}
+@media(max-width:690px){
+  .premium-journal-row{grid-template-columns:1fr;padding:14px 0}
+  .premium-journal-answer{min-height:72px}
+  .premium-journal-actions .button{width:100%;justify-content:center;text-align:center}
+}

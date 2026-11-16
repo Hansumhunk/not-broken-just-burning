@@ -260,7 +260,7 @@
       typeof entry.data?.worksheet === 'string' ? entry.data.worksheet : (entry.summary || '(no summary saved)')
     ];
     if (entry.tags?.length) sections.push('', `TAGS: ${entry.tags.join(', ')}`);
-    const details = Object.entries(entry.data || {}).filter(([key, value]) => key !== 'worksheet' && value !== '' && value !== null && value !== undefined);
+    const details = Object.entries(entry.data || {}).filter(([key, value]) => key !== 'worksheet' && key !== 'journalEntries' && value !== '' && value !== null && value !== undefined);
     if (details.length) {
       sections.push('', 'SAVED DETAILS');
       details.forEach(([key, value]) => sections.push(`${key.replace(/[-_]/g, ' ').toUpperCase()}: ${Array.isArray(value) ? value.join(', ') : String(value)}`));
@@ -315,7 +315,30 @@
       summary.textContent = entry.summary || 'No summary saved.';
       card.append(top, title, summary);
       // Full guided worksheets live in data, not the 2,400-character card summary.
-      if(typeof entry.data?.worksheet === 'string'){
+      const journal = entry.tool === 'Lesson Journal' && Array.isArray(entry.data?.journalEntries)
+        ? entry.data.journalEntries.filter(item=>item && typeof item.prompt==='string' &&
+            typeof item.response==='string' && item.response.trim())
+        : [];
+      if(journal.length){
+        const detail=document.createElement('details');
+        detail.className='member-full-worksheet member-journal-detail';
+        const trigger=document.createElement('summary');
+        trigger.textContent='Read my reflection journal ('+journal.length+' answers)';
+        const qa=document.createElement('dl');
+        qa.className='member-journal-entries';
+        journal.forEach((item,index)=>{
+          const row=document.createElement('div');
+          row.className='member-journal-entry';
+          const prompt=document.createElement('dt');
+          prompt.textContent=(index+1)+'. '+item.prompt;
+          const answer=document.createElement('dd');
+          answer.textContent=item.response;
+          row.append(prompt,answer);
+          qa.appendChild(row);
+        });
+        detail.append(trigger,qa);
+        card.appendChild(detail);
+      }else if(typeof entry.data?.worksheet === 'string'){
         const detail=document.createElement('details');
         detail.className='member-full-worksheet';
         const trigger=document.createElement('summary');
@@ -339,7 +362,7 @@
         card.appendChild(tags);
       }
 
-      const detailEntries = Object.entries(entry.data || {}).filter(([key, value]) => key !== 'worksheet' && value !== '' && value !== null && value !== undefined);
+      const detailEntries = Object.entries(entry.data || {}).filter(([key, value]) => key !== 'worksheet' && key !== 'journalEntries' && value !== '' && value !== null && value !== undefined);
       if (detailEntries.length) {
         const details = document.createElement('details');
         details.className = 'member-work-details';

@@ -229,7 +229,8 @@ test('section reflection prompts follow actual teaching tasks rather than a gene
   assert.match(other.instruction,/Write two concrete boundaries/);
   const general=getCue(page(['An informational paragraph without an exercise.']));
   assert.equal(general.kind,'contextual');
-  assert.match(general.instruction,/Part 1.*own experience/);
+  assert.match(general.instruction,/Name What Was Actually There.*own experience/);
+  assert.doesNotMatch(general.instruction,/Part 1/);
   assert.doesNotMatch(general.instruction,/Write a private note about/);
   const bareAsk=getCue(page([
     'Ask:',
@@ -684,7 +685,7 @@ test('the inline Imprint Map supplies four editable columns in the correct lesso
   assert.ok(js.includes('function renderFatherMapInline(step, body, positiveInheritance)'));
   assert.ok(js.includes('if (isFatherPractice) renderFatherMapInline(step, body, onPositiveInheritance)'));
   assert.ok(js.includes("el('premium-father-map').hidden = true;"));
-  assert.ok(js.includes("el('premium-pause-reflection').hidden = isFatherPractice || isStructuredPractice || final;"));
+  assert.ok(js.includes("el('premium-pause-reflection').hidden = isFatherPractice || isStructuredPractice || isFinalJournal || final;"));
   assert.ok(html.includes('id="premium-map-grid"'));
   assert.ok(html.includes('id="premium-map-actions"'));
   assert.ok(html.includes('Read a column. Fill in its box. Then continue.'));
@@ -1143,7 +1144,7 @@ test('Chosen Manhood full worksheet is member-only with private manual saving an
   const chosen=read('js/member-chosen-code.js');
   const platform=read('js/member-platform.js');
   const billing=read('js/member-billing.js');
-  assert.ok(loader.includes('"premium-lesson": ["js/member-chosen-code.js", "js/member-editorial-workbooks.js", "js/member-lesson-workspaces.js", "js/member-premium-lesson.js"]'));
+  assert.ok(loader.includes('"premium-lesson": ["js/member-chosen-code.js", "js/member-editorial-workbooks.js", "js/member-lesson-workspaces.js", "js/member-final-reflection-journal.js", "js/member-premium-lesson.js"]'));
   assert.ok(chosen.includes('saveWholeToWork(full,'));
   assert.ok(chosen.includes('Nothing is uploaded automatically.'));
   assert.ok(platform.includes('member-full-worksheet-paper'));
@@ -2111,9 +2112,9 @@ test('free premium lesson denial points to live membership without exposing prot
   assert.ok(js.includes('Monthly and annual memberships are available now.'));
   assert.ok(!js.includes('The paid membership is not for sale yet.'));
   assert.ok(html.includes('href="member-store.html">Membership options</a>'));
-  assert.ok(html.includes('js/member-bootstrap.js?v=context-reflection-v22'));
+  assert.ok(html.includes('js/member-bootstrap.js?v=journal-reader-v23'));
   assert.ok(bootstrap.includes("src === 'js/member-premium-lesson.js'"));
-  assert.ok(bootstrap.includes("src + '?v=context-reflection-v22'"));
+  assert.ok(bootstrap.includes("src + '?v=journal-reader-v23'"));
   assert.match(js, /const denied = error\?\.context\?\.status === 403/);
   assert.match(js, /renderLesson\(data\.lesson\)/);
 });
@@ -2125,7 +2126,7 @@ test('published premium lessons provide a safe next-lesson action only on the fi
   assert.match(html, /id="premium-next-lesson-panel"[^>]*hidden/);
   assert.match(html, /id="premium-next-lesson-link" href="member-lessons.html"/);
   assert.match(html, /href="member-work.html">My Saved Work/);
-  assert.match(html, /member-premium-lesson[.]css[?]v=reflection-examples-v20/);
+  assert.match(html, /member-premium-lesson[.]css[?]v=journal-reader-v23/);
   assert.match(css, /[.]premium-next-lesson-panel/);
   assert.ok(js.includes("lesson?.status === 'published' && steps.length"), 'unpublished drafts must not show member continuation');
   assert.ok(js.includes('current === steps.length - 1'), 'only show action after final reflection');
@@ -2159,4 +2160,93 @@ test('premium continuation selects the next published lesson and safely crosses 
   assert.equal(next(rows,'missing'),null);
   assert.equal(next(rows,'beta'),null,'an unpublished current lesson is not part of the member sequence');
   assert.equal(next([], 'alpha'),null);
+});
+
+
+test('final reflection journal places a compact answer box beside every authored sentence and explicitly saves one document', () => {
+  const source=read('js/member-final-reflection-journal.js');
+  const events=[];
+  const createElement=tag=>({
+    tag,children:[],className:'',value:'',hidden:false,attributes:{},handlers:{},
+    append(...nodes){this.children.push(...nodes);},
+    appendChild(node){this.children.push(node);},
+    setAttribute(key,val){this.attributes[key]=val;},
+    addEventListener(key,fn){this.handlers[key]=fn;}
+  });
+  const ctx={window:{},document:{createElement},navigator:{clipboard:{writeText:async()=>{}}}};
+  vm.runInNewContext(source,ctx);
+  const api=ctx.window.NBJBFinalReflectionJournal;
+  const step={title:'Final Reflection',blocks:[
+    {kind:'paragraph',text:'Finish these:'},
+    {kind:'paragraph',text:'I respect my mother for…\nWhat I want to keep is…\nHealthy closeness now means…'}
+  ]};
+  const parsed=api.parse(step);
+  assert.ok(parsed);
+  assert.equal(parsed.prompts.length,3);
+  assert.equal(api.parse({title:'Opening',blocks:step.blocks}),null);
+  const parking=createElement('div');
+  const saveCalls=[];
+  const journal=api.create({
+    parking,lessonTitle:'The Mother Wound',
+    saveJournal:(entry,status)=>{saveCalls.push(entry);status.textContent='Saved';return true;}
+  });
+  const body=createElement('div');
+  journal.render(step,body,(target,tag,text)=>{const node=createElement(tag);node.textContent=text;target.append(node);});
+  const sheet=body.children.find(el=>el.className==='premium-journal-sheet');
+  assert.ok(sheet);
+  const rows=sheet.children.find(el=>el.className==='premium-journal-rows');
+  assert.equal(rows.children.length,3);
+  assert.equal(rows.children[0].children[0].textContent,'01 · I respect my mother for…');
+  const answer0=rows.children[0].children[1];
+  const answer2=rows.children[2].children[1];
+  answer0.value='She taught me to make food for people.';
+  answer0.handlers.input();
+  answer2.value='Warmth and an honest boundary can coexist.';
+  answer2.handlers.input();
+  assert.equal(saveCalls.length,0,'typing must never save automatically');
+  journal.park();
+  assert.equal(parking.children.at(-1),sheet,'navigation must park rather than erase answers');
+  const returned=createElement('div');
+  journal.render(step,returned,(target,tag,text)=>{const node=createElement(tag);node.textContent=text;target.append(node);});
+  assert.equal(answer0.value,'She taught me to make food for people.');
+  const actions=sheet.children.find(el=>el.className.includes('premium-journal-actions'));
+  const save=actions.children.find(el=>el.textContent==='Save Journal to My Work');
+  save.handlers.click();
+  assert.equal(saveCalls.length,1);
+  assert.equal(saveCalls[0].answered,2);
+  assert.equal(saveCalls[0].total,3);
+  assert.equal(saveCalls[0].answers.length,2);
+  assert.match(saveCalls[0].text,/1\. I respect my mother for…\nShe taught me/);
+  assert.match(saveCalls[0].text,/3\. Healthy closeness now means…\nWarmth and an honest boundary/);
+  assert.ok(!saveCalls[0].text.includes('What I want to keep is…'),'unanswered fields are omitted');
+  assert.equal(sheet.children.at(-1).hidden,false,'My Work link appears only after successful save');
+});
+
+test('reader presentation removes internal Part labels while preserving actual chapter structure and private journal handoff', () => {
+  const reader=read('js/member-premium-lesson.js');
+  const loader=read('js/member-bootstrap.js');
+  const html=read('member-premium-lesson.html');
+  const css=read('css/member-premium-lesson.css');
+  const work=read('js/member-platform.js');
+  const myWork=read('member-work.html');
+  const helper=reader.slice(reader.indexOf('  function displayTitle(title)'),reader.indexOf('  function wordCount(step)'));
+  const display=vm.runInNewContext(helper+'\n({displayTitle,label})',{});
+  assert.equal(display.displayTitle('Part 4 — Three Scenarios, Three Different Readings'),'Three Scenarios, Three Different Readings');
+  assert.equal(display.displayTitle('Part 9 · Scenario A'),'Scenario A');
+  assert.equal(display.label({title:'Part 3 — Trust',continuation:0}),'Trust');
+  assert.equal(display.label({title:'Part 3 — Trust',continuation:1}),'Trust · continued 2');
+  assert.ok(reader.includes("textContent = 'Reading · ' + estimate(step)"));
+  assert.ok(reader.includes('finalJournal.render(step, body, appendText)'));
+  assert.ok(reader.includes('finalJournal?.park()'));
+  assert.ok(reader.includes("recordToolEntry('Lesson Journal'"));
+  assert.ok(reader.includes('journalEntries: Array.isArray(entry.answers)'));
+  assert.ok(loader.includes('js/member-final-reflection-journal.js'));
+  assert.ok(loader.includes("src + '?v=journal-reader-v23'"));
+  assert.ok(html.includes('css/member-premium-lesson.css?v=journal-reader-v23'));
+  assert.ok(css.includes('.premium-journal-row'));
+  assert.ok(work.includes('member-journal-entry'));
+  assert.ok(work.includes("entry.tool === 'Lesson Journal'"));
+  assert.ok(work.includes("key !== 'journalEntries'"));
+  assert.ok(myWork.includes('data-work-tool="Lesson Journal"'));
+  assert.ok(myWork.includes('<option>Lesson Journal</option>'));
 });

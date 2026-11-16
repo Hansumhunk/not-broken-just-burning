@@ -321,6 +321,7 @@ def main() -> int:
             "js/member-feedback.js",
             "js/member-platform.js",
             "js/member-premium-lesson.js",
+            "js/member-final-reflection-journal.js",
             "js/member-lesson-workspaces.js",
             "js/member-chosen-code.js",
             "js/member-editorial-workbooks.js",

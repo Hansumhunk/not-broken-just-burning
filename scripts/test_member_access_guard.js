@@ -308,3 +308,15 @@ test('account sign-in, signup and recovery preserve password whitespace exactly'
     ['updatePassword', ' new pass ']
   ]);
 });
+
+test('member dashboard accurately reflects paid or free authenticated tier after release', () => {
+  const dashboard = read('members.html');
+  const entitlements = read('js/member-entitlements.js');
+  assert.match(dashboard, /Current access · <span data-member-tier-label>/);
+  assert.match(dashboard, /<div class="member-status"><span data-member-tier-label>/);
+  assert.doesNotMatch(dashboard, /<span>Free Account<\\/span>/);
+  assert.doesNotMatch(dashboard, /Flamewalker\\+ comes later/);
+  assert.match(dashboard, /View Membership Plans/);
+  assert.match(entitlements, /document\\.querySelectorAll\\('\\[data-member-tier-label\\]'\\)/);
+  assert.match(entitlements, /tierLabel\\(current\\.tier\\)/);
+});

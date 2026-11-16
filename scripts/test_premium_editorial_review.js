@@ -417,7 +417,7 @@ test('Track 2 copy describes expanded exercises in the released track', () => {
   assert.match(store, /original shorter public educational articles remain available for future free use/i);
   assert.match(library, /eight expanded relationship modules/);
   assert.match(library, /eight guided modules now form the relationship/);
-  assert.match(library, /five lessons about trust and helping processes/);
+  assert.match(library, /fourteen lessons about therapeutic alliances, trust, records, credible assessment, accountability, and rebuilding support/);
   assert.match(release, /content.version = 2/);
   assert.match(release, /status = editorial_review/);
   assert.match(release, /no Stripe checkout was enabled/);

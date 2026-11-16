@@ -64,5 +64,5 @@ test('thirty-five published lessons are honestly presented in six distinct track
   assert.match(html, /Yes\. All thirty-five published guided written lessons are available with Flamewalker\+/);
   assert.match(read('join.html'), /Explore the thirty-five-lesson curriculum/);
   assert.match(html, /The Five Sacred Laws of Survival/);
-  assert.match(html, /the separate Sacred Laws book is not presented as finished or for sale/);
+  assert.match(html, /the separate Sacred Laws book is not offered for sale/);
 });

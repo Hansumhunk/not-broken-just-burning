@@ -2067,9 +2067,9 @@ test('free premium lesson denial points to live membership without exposing prot
   assert.ok(js.includes('Monthly and annual memberships are available now.'));
   assert.ok(!js.includes('The paid membership is not for sale yet.'));
   assert.ok(html.includes('href="member-store.html">Membership options</a>'));
-  assert.ok(html.includes('js/member-bootstrap.js?v=next-lesson-v18'));
+  assert.ok(html.includes('js/member-bootstrap.js?v=reflection-examples-v20'));
   assert.ok(bootstrap.includes("src === 'js/member-premium-lesson.js'"));
-  assert.ok(bootstrap.includes("src + '?v=premium-next-lesson-v17'"));
+  assert.ok(bootstrap.includes("src + '?v=reflection-examples-v19'"));
   assert.match(js, /const denied = error\?\.context\?\.status === 403/);
   assert.match(js, /renderLesson\(data\.lesson\)/);
 });
@@ -2081,7 +2081,7 @@ test('published premium lessons provide a safe next-lesson action only on the fi
   assert.match(html, /id="premium-next-lesson-panel"[^>]*hidden/);
   assert.match(html, /id="premium-next-lesson-link" href="member-lessons.html"/);
   assert.match(html, /href="member-work.html">My Saved Work/);
-  assert.match(html, /member-premium-lesson[.]css[?]v=next-lesson-v18/);
+  assert.match(html, /member-premium-lesson[.]css[?]v=reflection-examples-v20/);
   assert.match(css, /[.]premium-next-lesson-panel/);
   assert.ok(js.includes("lesson?.status === 'published' && steps.length"), 'unpublished drafts must not show member continuation');
   assert.ok(js.includes('current === steps.length - 1'), 'only show action after final reflection');

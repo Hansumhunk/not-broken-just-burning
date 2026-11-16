@@ -65,6 +65,29 @@ The full weekly member/Stripe/Supabase monitoring functions configured in ChatGP
 - Standard GitHub-hosted Actions runners are currently free for public repositories; artifact storage, larger runners and external services can have separate limitations or charges. This workflow uses no artifact uploads or paid APIs.
 - GitHub may delay or miss scheduled executions; workflows in public repositories can be automatically disabled after long inactivity. Check Actions run history.
 
+## #28 — The Flame Marshal: Automation Supervisor
+
+**Role:** A read-only supervisor of GitHub Actions, separate from the individual Flame Spirits. It collects **public GitHub workflow metadata only** and produces one clear report that distinguishes current failures, old failures replaced by later success, newly queued/running work, canceled deployments, and apparently missed schedules.
+
+**Automatic cadence:** daily around **10:47 AM America/New_York** and when any of these workflows finishes:
+- Validate static site
+- pages build and deployment
+- Flame Spirits Mission Control
+- Flame Spirit Product Opportunity Scout
+
+**Where to read the report:** GitHub Actions → **Flame Marshal Automation Supervisor** → latest completed run → **Summary**. Warnings are displayed as GitHub Actions annotations; **it does not email, notify via ChatGPT, or create issues**. The supervisor itself can have a green check while its **report identifies a failed child workflow**; its own check represents successful monitoring, not universal platform health.
+
+**What it monitors:**
+- Most recent GitHub workflow result on the **main** branch (separate from pull requests).
+- Latest check per workflow on each currently open pull request during the past 48 hours. A previous red X superseded by a later green check is not treated as unresolved.
+- Stalled runs older than two hours.
+- Whether the Monday/Wednesday/Friday Flame Spirits and Tuesday Product Scout have had their scheduled runs within a conservative grace period (five and nine days respectively). Those are **possibly overdue** warnings, not definitive outage claims.
+- Unavailable GitHub API evidence is labeled **unverified**, never treated as proof of health or failure.
+
+**Safety:** the workflow grants only read permissions for contents, actions, and pull requests. It uses GitHub's temporary built-in job token, does not persist checkout credentials, never pushes/merges/reviews/issues/edits, and does not inspect payments, Supabase member data, personal journals, social inboxes, or private ChatGPT automations. The supervisor can be extended later with founder-approved private-source checks without exposing secrets in public repository logs.
+
+**Files:** \`scripts/flame_marshal.mjs\`, \`scripts/test_flame_marshal.mjs\`, \`.github/workflows/flame-marshal.yml\`. Run the offline test suite with \`node --test scripts/test_flame_marshal.mjs\`.
+
 ## Next evolutionary steps
 
 - Add founder-approved free sources and data quality checks to the Audience Spirit.

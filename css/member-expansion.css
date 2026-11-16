@@ -305,9 +305,9 @@
 
 /* Flamewalker Start Here lesson */
 .member-locked-card.is-live::after {
-  content: 'AVAILABLE NOW';
-  background: rgba(255,122,45,.2);
-  color: var(--text);
+  /* Published cards already have an action and a clear status label. */
+  content: none;
+  display: none;
 }
 
 .member-lesson-layout {

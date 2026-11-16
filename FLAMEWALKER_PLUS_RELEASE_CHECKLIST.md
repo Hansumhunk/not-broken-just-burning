@@ -1,5 +1,13 @@
 # Flamewalker+ final launch checklist — November 15, 2026
 
+## Approved future curriculum standard — Tracks 7–8 (November 16, 2026)
+
+- [x] **Founder has LOCKED the new lesson depth policy.** Each of the 14 planned written lessons must contain **at least 3,000 substantive teaching words**; Standard target 3,000–3,500, Deep Dive 3,500–4,500, Flagship 4,500–5,500. Combined 14-lesson *writing target* **53,700 words**.
+- [x] Fixed individual targets and practical editorial acceptance criteria: [Tracks 7–8 writing standard](FLAMEWALKER_TRACKS_7_8_EDITORIAL_STANDARD.md).
+- [ ] **Develop manuscripts privately:** the 14 titles currently remain curriculum outlines, not finished lessons. Verify word count without headings or workbook questions; complete source, example, exercise, safety and quality reviews.
+- [ ] **No public release without founder signoff and access testing.** This planned expansion is **not a blocker** for the currently published seven-lesson membership and does not authorize any new subscriber claim, payment change or video production.
+
+
 ## All 35 teaching depth verified — November 16, 2026
 
 - [x] **35/35 lessons now exceed 2,500 teaching words** (paragraph text only, excluding headings and separate guided questions); range **2502–2929**, mean **2606**. Exact founding lesson versions and word counts: [all-35 depth audit](FLAMEWALKER_ALL_35_DEPTH_AUDIT_2026-11-16.md).

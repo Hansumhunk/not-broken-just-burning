@@ -144,6 +144,7 @@
     document.querySelectorAll('[data-member-nav]').forEach((link) => {
       const selected = link.dataset.memberNav === page ||
         (['start-here', 'framework', 'premium-lesson'].includes(page) && link.dataset.memberNav === 'lessons') ||
+        (page === 'path-stage' && link.dataset.memberNav === 'path') ||
         (page === 'workshop' && link.dataset.memberNav === 'tools');
       link.classList.toggle('active', selected);
       if (selected) link.setAttribute('aria-current', 'page');
@@ -315,7 +316,7 @@
       summary.textContent = entry.summary || 'No summary saved.';
       card.append(top, title, summary);
       // Full guided worksheets live in data, not the 2,400-character card summary.
-      const journal = entry.tool === 'Lesson Journal' && Array.isArray(entry.data?.journalEntries)
+      const journal = ['Lesson Journal','Path Reflection'].includes(entry.tool) && Array.isArray(entry.data?.journalEntries)
         ? entry.data.journalEntries.filter(item=>item && typeof item.prompt==='string' &&
             typeof item.response==='string' && item.response.trim())
         : [];
@@ -426,7 +427,7 @@
       const current = card.dataset.focusCard === data.journey.focus;
       card.classList.toggle('is-focus', current);
       if (current) {
-        deepDiveHref = card.querySelector('a[href^="path-"]')?.getAttribute('href') || '';
+        deepDiveHref = card.querySelector('a[href^="member-path-stage.html"]')?.getAttribute('href') || '';
       }
       const button = card.querySelector('[data-set-focus]');
       if (button) button.textContent = current ? 'Current focus' : 'Set as my focus';

@@ -81,7 +81,7 @@ test("No-source fallback still produces useful draft recommendations",async()=>{
   fs.writeFileSync(path.join(temp,"sitemap.xml"),sitemap);
   for(const [name,html] of Object.entries(pages))fs.writeFileSync(path.join(temp,name),html);
   const report=await runReach({root:temp,request:async()=>({ok:false,status:"HTTP 403"})});
-  assert.match(report,/unverified/);assert.match(report,/Boundary Builder/);
+  assert.match(report,/unverified/);assert.match(report,/Prioritized editorial opportunities/);
   assert.match(report,/No verified audience signal/);
  } finally{fs.rmSync(temp,{recursive:true,force:true});}
 });

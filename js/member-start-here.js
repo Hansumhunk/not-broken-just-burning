@@ -64,4 +64,57 @@
   });
 
   clear?.addEventListener('click', clearFields);
+
+  // One deliberate selection, one saved member Path focus, then a direct
+  // continuation to the selected Path card. No account-wide data is uploaded.
+  const pathIds = Object.freeze({
+    'Fire Reclamation': 'path-focus-fire-reclamation',
+    "The Guardian's Path": 'path-focus-guardian',
+    'Sacred Mirror Work': 'path-focus-sacred-mirror',
+    'Masculine Restoration': 'path-focus-masculine-restoration',
+    'Voice of Fire': 'path-focus-voice-of-fire',
+    'Circle of the Flame': 'path-focus-circle-of-flame'
+  });
+  const focusOptions = [...document.querySelectorAll('input[name="start-here-focus"]')];
+  const focusStatus = document.querySelector('#start-here-focus-status');
+  const focusButton = document.querySelector('#start-here-choose-focus');
+  const savedFocus = service.load()?.journey?.focus || '';
+  const prior = focusOptions.find((option) => option.value === savedFocus);
+  if (prior) prior.checked = true;
+  focusOptions.forEach((option) => option.addEventListener('change', () => {
+    if (focusStatus) {
+      focusStatus.textContent = option.value + ' selected. Choose My Current Focus to continue.';
+      focusStatus.dataset.state = 'ok';
+    }
+  }));
+  focusButton?.addEventListener('click', () => {
+    const choice = focusOptions.find((option) => option.checked);
+    if (!choice || !pathIds[choice.value]) {
+      if (focusStatus) {
+        focusStatus.textContent = 'Choose one of the six Path stages above first.';
+        focusStatus.dataset.state = 'error';
+      }
+      focusOptions[0]?.focus();
+      return;
+    }
+    const result = service.setFocus(choice.value);
+    if (!result.ok) {
+      if (focusStatus) {
+        focusStatus.textContent = 'This device could not save your Path focus. Check browser storage and try again.';
+        focusStatus.dataset.state = 'error';
+      }
+      return;
+    }
+    window.location.assign('member-path.html#' + pathIds[choice.value]);
+  });
+
+  // The next lesson is determined from the verified membership entitlement.
+  // A free member gets a substantive free lesson, never a broken paywall jump.
+  const nextLesson = document.querySelector('#start-here-next-lesson');
+  const entitlement = window.NBJBEntitlements?.load?.();
+  if (nextLesson && entitlement?.tier === 'paid' && entitlement?.source === 'server') {
+    nextLesson.href = 'member-premium-lesson.html?lesson=father-wound';
+    nextLesson.textContent = 'Continue to the Next Guided Lesson: The Father Wound →';
+  }
+
 })();

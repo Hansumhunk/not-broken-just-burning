@@ -30,7 +30,7 @@ test('Flamewalker Plus has a public, indexable, accessible thirty-five-lesson cu
 });
 test('the founding-preview identifies the available paid membership', () => {
   const html = read('flamewalker-plus.html');
-  assert.match(html, /Founding lessons published · Membership available/);
+  assert.match(html, /All six learning tracks published · Membership available/);
   assert.match(html, /All 35 guided lessons are published in the protected member library/);
   assert.match(html, /Paid checkout is available inside the authenticated member area/);
   assert.match(html, /\$14\.99/);

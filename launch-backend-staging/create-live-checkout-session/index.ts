@@ -96,6 +96,27 @@ export default {
           ? entitlement.provider_customer_ref
           : null;
 
+      if (customerId) {
+        // A historic Stripe customer reference must not trigger a new charge
+        // while a live Stripe subscription is still active. The local
+        // entitlement can be free when its paid access has ended or drifted;
+        // Stripe remains authoritative on existing billing agreements.
+        const customerSubscriptions = await stripe.subscriptions.list({
+          customer: customerId,
+          status: "all",
+          limit: 100,
+        });
+        const blockingStatuses = new Set([
+          "active", "trialing", "past_due", "unpaid", "incomplete", "paused",
+        ]);
+        if (customerSubscriptions.has_more) {
+          return json({ error: "subscription_check_incomplete" }, 503);
+        }
+        if (customerSubscriptions.data.some((item) => blockingStatuses.has(item.status))) {
+          return json({ error: "already_subscribed", manage_in_portal: true }, 409);
+        }
+      }
+
       if (!customerId) {
         const customer = await stripe.customers.create(
           {

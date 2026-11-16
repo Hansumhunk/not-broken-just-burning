@@ -228,8 +228,8 @@ test('section reflection prompts follow actual teaching tasks rather than a gene
   assert.equal(other.kind,'assignment');
   assert.match(other.instruction,/Write two concrete boundaries/);
   const general=getCue(page(['An informational paragraph without an exercise.']));
-  assert.equal(general.kind,'contextual');
-  assert.match(general.instruction,/Name What Was Actually There.*own experience/);
+  assert.equal(general.kind,'grounded');
+  assert.match(general.instruction,/An informational paragraph without an exercise/);
   assert.doesNotMatch(general.instruction,/Part 1/);
   assert.doesNotMatch(general.instruction,/Write a private note about/);
   const bareAsk=getCue(page([

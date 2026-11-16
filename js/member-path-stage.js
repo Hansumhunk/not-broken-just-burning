@@ -76,6 +76,20 @@
         {heading:'Accountability is behavioral',text:'You can acknowledge a harsh response, a broken promise, or a boundary you failed to hold without deciding that your whole identity is defective. Accountability asks what you did and what repair might be possible. Shame says you are nothing but the mistake. The first can lead to action; the second tends to keep you stuck.'},
         {heading:'Look for a standard you can live by',text:'Imagine someone you care about made the same mistake under similar stress. Would you insist their entire future be defined by it? Apply a fair standard to yourself. Then name a change you can actually practice—without taking responsibility for another person’s behavior.'}
       ],
+      deepDive:[
+      {
+            "heading": "A useful mirror has four columns",
+            "text": "Imagine a man who sees an unanswered message and immediately thinks he is being deliberately ignored. In a four-column exercise, the observation is that the message is unanswered. The feeling might be hurt or anger. The interpretation is that the silence was intentional. The unknown is what happened on the other end. The feeling matters, but none of these four categories should be swapped for another.\n\nThis practice protects you from two extremes: dismissing your instincts entirely or treating your first interpretation as a final verdict. It also makes any later conversation clearer because you can name what you actually experienced."
+      },
+      {
+            "heading": "Responsibility without swallowing another person's choices",
+            "text": "After a conflict, self-reflection can become self-punishment. You may notice one thing you handled poorly and then take responsibility for the entire relationship. Or you may feel so wronged that you cannot examine your own behavior at all. Both shortcuts steal the chance to learn.\n\nTry naming one action you own, one action that another person owns, and one consequence that remains uncertain. Then ask what repair or adjustment is actually available to you. Accountability works best when the assignment is precise: an apology, a clearer boundary, a changed routine, or a decision not to repeat the same reaction."
+      },
+      {
+            "heading": "Replace shame sentences with behavioral commitments",
+            "text": "“I always ruin everything” does not tell you what to do differently. “When I am overwhelmed, I interrupt before listening” identifies a pattern that can be practiced and changed. One is a broad identity attack; the other names a behavior.\n\nChoose a sentence you repeat when you feel ashamed. Rewrite it as an observation and an action without excusing harm. For instance, “I withdrew when I should have said I needed a pause; next time I will explain that I am taking twenty minutes and return when I said I would.” This is the difference between using the mirror as a weapon and using it as a tool."
+      }
+],
       questions:[
         {label:'What did I directly observe, and what meaning did I add afterward?',hint:'Separate a fact from an assumption; include an unknown if one remains.'},
         {label:'What part of my own response can I take responsibility for without accepting blame for everything?',hint:'Be specific about behavior, not identity.'},

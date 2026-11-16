@@ -133,6 +133,7 @@
     }
     await loadScript("js/learning-continuity.js");
     await loadScript("js/member-platform.js");
+    await loadScript("js/member-search.js");
     window.NBJBLearningContinuity?.render?.();
 
     const page = body.dataset.memberPage || "";

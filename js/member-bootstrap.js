@@ -45,7 +45,7 @@
 
   const pageScripts = {
     dashboard: ["js/member-dashboard.js"],
-    progress: ["js/member-history-insights.js"],
+    progress: ["js/member-history-insights.js", "js/member-learning-progress.js"],
     work: ["js/member-history-insights.js"],
     workshop: ["js/tool-member-history.js", "js/member-workshop.js"],
     "start-here": ["js/member-start-here.js"],
@@ -56,7 +56,9 @@
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = src === 'js/member-dashboard.js'
+      script.src = src === 'js/member-learning-progress.js'
+        ? src + '?v=learning-trail-v1'
+        : src === 'js/member-dashboard.js'
         ? src + '?v=journey-compass-v1'
         : src === 'js/member-platform.js'
         ? src + '?v=lessons-hub-v14'

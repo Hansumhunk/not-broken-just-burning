@@ -1,0 +1,40 @@
+name: Spirit of Welcome Conversion Audit
+
+# Public-source route and clarity audit. Never reads live member data or writes to production.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '37 11 * * 5'
+      timezone: America/New_York
+  pull_request:
+    paths:
+      - '.github/workflows/flame-spirit-welcome.yml'
+      - 'scripts/flame_spirit_welcome.mjs'
+      - 'scripts/test_flame_spirit_welcome.mjs'
+      - '.github/workflows/validate-site.yml'
+      - 'FLAME_SPIRITS.md'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nbjb-welcome-conversion-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    name: Spirit of Welcome — static member journey audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout published NBJB site source
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Test static route and privacy checks
+        run: node --test scripts/test_flame_spirit_welcome.mjs
+
+      - name: Report potential onboarding friction and fixes for founder review
+        if: github.event_name != 'pull_request'
+        run: node scripts/flame_spirit_welcome.mjs

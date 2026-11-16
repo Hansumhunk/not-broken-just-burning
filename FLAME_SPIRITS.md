@@ -108,6 +108,27 @@ The full weekly member/Stripe/Supabase monitoring functions configured in ChatGP
 
 **CLI:** node --test scripts/test_flame_spirit_reach.mjs (offline deterministic tests); node scripts/flame_spirit_reach.mjs (public-source research and report).
 
+## #30 — Spirit of Welcome: Member Journey & Conversion Readiness
+
+**Goal:** More people who reach NBJB can understand free access, find the right entry point, complete onboarding, and use the first useful lesson. This is a privacy-preserving **static conversion-readiness audit**, not live conversion tracking.
+
+**Schedule:** Friday around **11:37 AM Eastern**, plus optional manual dispatch. GitHub may delay schedule events. The workflow is .github/workflows/flame-spirit-welcome.yml. Flame Marshal monitors completions and possible missed schedules. No ChatGPT scheduled-task slot or paid AI service is required.
+
+**What is audited:**
+- The homepage to Join, Join to the account page, onboarding to the dashboard, dashboard to the first free lesson, first lesson to the next framework, lesson catalog to free foundation, dashboard to membership, and paid preview back to the account door.
+- An explicit check that the public authentication script mentions successful sign-up and onboarding routing; **this cannot establish that Supabase authentication actually works**.
+- Existence of local HTML destinations and anchors. Missing direct links may be intentional JavaScript routing and are labeled for review.
+- Public clarity signals: create a free account, free versus optional Flamewalker+ access, device-local privacy, skip onboarding, discoverability of the free lesson, and noindex directives on member pages.
+- Prioritized potential friction points and founder-reviewable recommendations for testing the real journey, using a consented test account and ordinary QA processes.
+
+**Evidence limits:** Existing PostHog is anonymous, cookieless, and pageview-only. Counts of homepage, Join, or account page views cannot be called unique visitor-to-signup conversion, successful registration, personal journeys, or paid conversion. Actual signup and paid conversion rates require separately authorized **aggregate** registration/payment source data and reconciled definitions. The GitHub report does not connect to PostHog, Supabase, Stripe, Metricool, user profiles, or private records.
+
+**Safety and publication boundaries:** Read-only GitHub Actions token with contents:read; no credentials persisted after checkout. No browser account creation, auth submissions, user identifiers, emails, legal/court/medical/reflection data, member journals, paid lessons, pricing changes, tracking changes, messages, video work, website edits, product publication, purchases, or automatic changes to the funnel. Any recommended edit must be reviewed and shipped through the site's ordinary PR validation process, with updates to the analytics/privacy policy before any additional analytics events.
+
+**Results:** GitHub Actions → Spirit of Welcome Conversion Audit → completed run → Summary. The runner's green check means the audit ran, **not** that paid conversion improved or that signup was tested end-to-end.
+
+**Local verification:** node --test scripts/test_flame_spirit_welcome.mjs for deterministic tests; node scripts/flame_spirit_welcome.mjs for a read-only local audit.
+
 ## Next evolutionary steps
 
 - Add founder-approved free sources and data quality checks to the Audience Spirit.

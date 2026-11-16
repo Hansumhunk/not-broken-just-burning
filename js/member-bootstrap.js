@@ -50,7 +50,7 @@
     workshop: ["js/tool-member-history.js", "js/member-workshop.js"],
     "start-here": ["js/member-start-here.js"],
     feedback: ["js/member-feedback.js"],
-    "premium-lesson": ["js/member-chosen-code.js", "js/member-editorial-workbooks.js", "js/member-lesson-workspaces.js", "js/member-premium-lesson.js"],
+    "premium-lesson": ["js/member-chosen-code.js", "js/member-editorial-workbooks.js", "js/member-lesson-workspaces.js", "js/member-final-reflection-journal.js", "js/member-premium-lesson.js"],
     store: ["js/member-billing.js"]
   };
 
@@ -64,9 +64,11 @@
         : src === 'js/member-dashboard.js'
         ? src + '?v=dashboard-returning-v2'
         : src === 'js/member-platform.js'
-        ? src + '?v=compact-nav-v1'
+        ? src + '?v=member-journal-v1'
+        : src === 'js/member-final-reflection-journal.js'
+        ? src + '?v=journal-reader-v23'
         : src === 'js/member-premium-lesson.js'
-        ? src + '?v=context-reflection-v22'
+        ? src + '?v=journal-reader-v23'
         : ['js/member-editorial-workbooks.js', 'js/member-chosen-code.js', 'js/member-premium-lesson.js', 'js/member-lesson-workspaces.js', 'js/member-history-insights.js', 'js/member-platform.js', 'js/member-billing.js', 'js/member-entitlements.js'].includes(src)
         ? src + '?v=nbjb-return-v12'
         : src;

@@ -52,7 +52,7 @@
 .premium-pause-reflection{border:1px solid rgba(242,142,82,.25);border-radius:15px;padding:15px 18px;margin:24px 0 4px;background:rgba(248,117,42,.055);max-width:75ch}
 .premium-pause-reflection summary{font-weight:750;cursor:pointer;line-height:1.5}
 .premium-pause-reflection summary small{color:var(--muted);font-weight:400;font-size:.8rem;margin-left:.5rem}
-.premium-pause-reflection label{display:block;margin:18px 0 8px;line-height:1.55}
+.premium-pause-reflection label{display:block;margin:18px 0 8px;line-height:1.55;white-space:pre-line;overflow-wrap:anywhere}
 .premium-pause-reflection textarea,.premium-exercise-form textarea{box-sizing:border-box;display:block;width:100%;max-width:100%;margin-top:9px;min-height:110px;padding:13px 15px;border:1px solid var(--line);border-radius:10px;background:#101014;color:var(--text);font:inherit;line-height:1.5;resize:vertical}
 .premium-pause-reflection textarea:focus-visible,.premium-exercise-form textarea:focus-visible,.premium-player-toolbar select:focus-visible{outline:2px solid var(--ember-bright);outline-offset:2px}
 .premium-pause-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:10px 0 0}

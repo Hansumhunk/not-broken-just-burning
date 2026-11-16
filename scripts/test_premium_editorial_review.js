@@ -2313,3 +2313,58 @@ test('every fallback reflection is anchored in the section teaching, not the cha
   assert.ok(presentation.includes("hint.textContent=cue.kind === 'direct'"));
   assert.doesNotMatch(helper,/As I consider ['"]?\s*\+/);
 });
+
+
+test('paid access ends at paid-through expiry for ordinary members without deleting their free account', () => {
+  // Synthetic timestamps and synthetic billing references: no customer records
+  // are modified. Both browser presentation and server reader must agree.
+  const clientSource=read('js/member-entitlements.js');
+  const begin=clientSource.indexOf('  function normalizeMembership(row) {');
+  const end=clientSource.indexOf('  function load() {',begin);
+  assert.ok(begin>=0 && end>begin,'client membership normalizer must exist');
+  const normalizerSource=clientSource.slice(begin,end);
+  const paidThrough=Date.parse('2026-12-02T18:31:27.000Z');
+  const fixture={
+    tier:'paid_member',
+    status:'active',
+    valid_from:'2026-11-02T18:31:27.000Z',
+    valid_until:'2026-12-02T18:31:27.000Z',
+    provider:'stripe',
+    provider_customer_ref:'cus_synthetic_do_not_bill'
+  };
+  const clientAt=timestamp=>vm.runInNewContext(
+    normalizerSource+'\nnormalizeMembership',
+    {Date:{now:()=>timestamp,parse:Date.parse}},
+    {timeout:1000})(fixture);
+  assert.equal(clientAt(paidThrough-1).tier,'paid','valid paid-through access must remain');
+  assert.equal(clientAt(paidThrough).tier,'free','access expires exactly at boundary');
+  assert.equal(clientAt(paidThrough+1).tier,'free','stale paid row cannot prolong access');
+  assert.equal(clientAt(paidThrough+1).hasStripeBilling,true,
+    'a canceled member may still need billing access after the paid term');
+  const futureStart={...fixture,valid_from:'2027-01-01T00:00:00Z'};
+  const normalizer=vm.runInNewContext(normalizerSource+'\nnormalizeMembership',
+    {Date:{now:()=>paidThrough-1,parse:Date.parse}},{timeout:1000});
+  assert.equal(normalizer(futureStart).tier,'free');
+  for(const status of ['canceled','incomplete','unpaid','paused']) {
+    assert.equal(normalizer({...fixture,status}).tier,'free',status+' must not grant paid access');
+  }
+  assert.equal(normalizer({...fixture,tier:'free_member'}).tier,'free');
+
+  // Exercise the actual source logic of the protected Edge Function without
+  // calling Stripe or changing production entitlements.
+  const server=read('supabase/functions/read-flamewalker-lesson/index.ts');
+  const s1=server.indexOf('    const goodDate = ');
+  const s2=server.indexOf('    // Only the nominated internal test account',s1);
+  assert.ok(s1>=0 && s2>s1,'server paid-through gate must exist');
+  const logic=server.slice(s1,s2).replace(
+    '(v: string | null, defaultIfNull: boolean)', '(v, defaultIfNull)'
+  );
+  const serverAt=(timestamp,overrides={})=>vm.runInNewContext(
+    'const now='+timestamp+';\n'+logic+'\nBoolean(entitled)',
+    {member:{...fixture,...overrides},Date},{timeout:1000});
+  assert.equal(serverAt(paidThrough-1),true);
+  assert.equal(serverAt(paidThrough),false);
+  assert.equal(serverAt(paidThrough+1),false);
+  assert.equal(serverAt(paidThrough-1,{status:'canceled'}),false);
+  assert.equal(serverAt(paidThrough-1,{tier:'free_member'}),false);
+});

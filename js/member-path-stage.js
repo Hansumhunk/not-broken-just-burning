@@ -215,7 +215,10 @@
       data:{
         stageKey:slug,stageName:chapter.name,
         worksheet:result.full,
-        journalEntries:result.journal.map(item=>({prompt:item.prompt,response:item.response})),
+        journalEntries:[
+          ...result.journal.map(item=>({prompt:item.prompt,response:item.response})),
+          ...(result.small?[{prompt:'One small action I can control next',response:result.small}]:[])
+        ],
         smallAction:result.small
       }
     });

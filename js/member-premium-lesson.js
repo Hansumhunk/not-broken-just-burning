@@ -560,6 +560,7 @@
       if(parts.length)return {instruction:parts.join('\n\n'),kind:'assignment'};
     }
     const entries=[];
+    let hasQuestionCue=false;
     const add=text=>{
       const clean=String(text||'').trim();
       if(clean && !entries.includes(clean) &&
@@ -574,6 +575,7 @@
       if(block.kind==='heading')continue;
       const text=block.text;
       if(/^(?:(?:THEN\s+)?ASK|PROMPTS?):/i.test(text)){
+        hasQuestionCue=true;
         const parts=[text];
         if(/^(?:(?:THEN\s+)?ASK|PROMPTS?):\s*$/i.test(text)){
           for(let j=i+1;j<blocks.length && j<i+18;j++){
@@ -608,10 +610,11 @@
       if(!entries.length && /\bAsk:\s+\S/i.test(text) &&
           blocks.some(b=>b.kind==='heading' && /\bQUESTIONS?\b/i.test(b.text))){
         const where=text.search(/\bAsk:\s+\S/i);
+        hasQuestionCue=true;
         add(text.slice(where));
       }
     }
-    return entries.length ? {instruction:entries.join('\n\n'),kind:'questions'} : null;
+    return entries.length ? {instruction:entries.join('\n\n'),kind:hasQuestionCue?'questions':'assignment'} : null;
   }
   function applySectionReflection(step) {
     const cue=sectionReflectionCue(step);

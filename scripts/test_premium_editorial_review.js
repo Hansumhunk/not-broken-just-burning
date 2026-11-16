@@ -228,8 +228,8 @@ test('section reflection prompts follow actual teaching tasks rather than a gene
   assert.equal(other.kind,'assignment');
   assert.match(other.instruction,/Write two concrete boundaries/);
   const general=getCue(page(['An informational paragraph without an exercise.']));
-  assert.equal(general.kind,'contextual');
-  assert.match(general.instruction,/Name What Was Actually There.*own experience/);
+  assert.equal(general.kind,'grounded');
+  assert.match(general.instruction,/An informational paragraph without an exercise/);
   assert.doesNotMatch(general.instruction,/Part 1/);
   assert.doesNotMatch(general.instruction,/Write a private note about/);
   const bareAsk=getCue(page([
@@ -2133,9 +2133,9 @@ test('free premium lesson denial points to live membership without exposing prot
   assert.ok(js.includes('Monthly and annual memberships are available now.'));
   assert.ok(!js.includes('The paid membership is not for sale yet.'));
   assert.ok(html.includes('href="member-store.html">Membership options</a>'));
-  assert.ok(html.includes('js/member-bootstrap.js?v=journal-reader-v23'));
+  assert.ok(html.includes('js/member-bootstrap.js?v=grounded-cues-v24'));
   assert.ok(bootstrap.includes("src === 'js/member-premium-lesson.js'"));
-  assert.ok(bootstrap.includes("src + '?v=journal-reader-v23'"));
+  assert.ok(bootstrap.includes("src + '?v=grounded-cues-v24'"));
   assert.match(js, /const denied = error\?\.context\?\.status === 403/);
   assert.match(js, /renderLesson\(data\.lesson\)/);
 });
@@ -2262,7 +2262,7 @@ test('reader presentation removes internal Part labels while preserving actual c
   assert.ok(reader.includes("recordToolEntry('Lesson Journal'"));
   assert.ok(reader.includes('journalEntries: Array.isArray(entry.answers)'));
   assert.ok(loader.includes('js/member-final-reflection-journal.js'));
-  assert.ok(loader.includes("src + '?v=journal-reader-v23'"));
+  assert.ok(loader.includes("src + '?v=grounded-cues-v24'"));
   assert.ok(html.includes('css/member-premium-lesson.css?v=journal-reader-v23'));
   assert.ok(css.includes('.premium-journal-row'));
   assert.ok(work.includes('member-journal-entry'));
@@ -2270,4 +2270,46 @@ test('reader presentation removes internal Part labels while preserving actual c
   assert.ok(work.includes("key !== 'journalEntries'"));
   assert.ok(myWork.includes('data-work-tool="Lesson Journal"'));
   assert.ok(myWork.includes('<option>Lesson Journal</option>'));
+});
+
+test('every fallback reflection is anchored in the section teaching, not the chapter title', () => {
+  const source = read('js/member-premium-lesson.js');
+  const helper = source.slice(source.indexOf('  function contextualReflectionCue(step, blocks)'),
+    source.indexOf('  function render({ focus = false }'));
+  const cue = vm.runInNewContext(helper + '\nsectionReflectionCue',
+    {slug:'being-needed-vs-chosen'}, {timeout:1000});
+  const paragraph = text => ({kind:'paragraph',text});
+  const header = text => ({kind:'heading',text});
+
+  const reclaiming = cue({title:'Part 4 — Three Scenarios, Three Different Readings',blocks:[
+    header('RECLAIMING YOUR POSITION'),
+    paragraph('A healthy relationship is not a prize awarded to the person who contributes the most. Both partners must make room for each other’s needs.'),
+    paragraph('For men accustomed to measuring worth through usefulness, this is an uncomfortable lesson: your ability to provide is one part of you. It is not the admission price for being loved.')
+  ]});
+  assert.equal(reclaiming.kind,'contextual');
+  assert.match(reclaiming.instruction,/earn love or attention by being useful/i);
+  assert.match(reclaiming.instruction,/What need could I name directly/);
+  assert.doesNotMatch(reclaiming.instruction,/As I consider|Three Scenarios/);
+
+  const authored = cue({title:'Scenario A',blocks:[
+    paragraph('A father is worn down after working too many hours.'),
+    paragraph('When have I tried to earn care by doing more, and what would I ask for instead?')
+  ]});
+  assert.equal(authored.kind,'direct');
+  assert.match(authored.instruction,/When have I tried to earn care/);
+
+  const neutral = cue({title:'The Same Chapter Title',blocks:[
+    paragraph('A man may find that a trusted friend offers help before being asked. Receiving support does not make him weak.')
+  ]});
+  assert.equal(neutral.kind,'grounded');
+  assert.match(neutral.instruction,/Receiving support does not make him weak/);
+  assert.doesNotMatch(neutral.instruction,/The Same Chapter Title|As I consider/);
+
+  const empty = cue({title:'Empty',blocks:[]});
+  assert.equal(empty,null);
+  const presentation = source.slice(source.indexOf('  function applySectionReflection(step) {'),
+    source.indexOf('  function render({ focus = false }'));
+  assert.ok(presentation.includes('if (!cue) {'));
+  assert.ok(presentation.includes("hint.textContent=cue.kind === 'direct'"));
+  assert.doesNotMatch(helper,/As I consider ['"]?\s*\+/);
 });

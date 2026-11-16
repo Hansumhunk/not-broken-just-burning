@@ -70,7 +70,7 @@
         : src === 'js/member-final-reflection-journal.js'
         ? src + '?v=journal-reader-v23'
         : src === 'js/member-premium-lesson.js'
-        ? src + '?v=journal-reader-v23'
+        ? src + '?v=grounded-cues-v24'
         : ['js/member-editorial-workbooks.js', 'js/member-chosen-code.js', 'js/member-premium-lesson.js', 'js/member-lesson-workspaces.js', 'js/member-history-insights.js', 'js/member-platform.js', 'js/member-billing.js', 'js/member-entitlements.js'].includes(src)
         ? src + '?v=nbjb-return-v12'
         : src;

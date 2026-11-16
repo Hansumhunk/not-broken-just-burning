@@ -335,7 +335,7 @@ test('Lessons is a direct top-nav destination on authenticated member pages', ()
   assert.ok(bootstrap.includes("src + '?v=member-journal-v1'"));
   for (const html of [dashboard, intro, library, premium]) {
     assert.ok(html.includes('href="member-lessons.html"'), 'members should have direct lessons navigation');
-    const expected = html === premium ? 'journal-reader-v23' : html === dashboard ? 'dashboard-returning-v2' : 'lessons-hub-v14';
+    const expected = html === premium ? 'grounded-cues-v24' : html === dashboard ? 'dashboard-returning-v2' : 'lessons-hub-v14';
     assert.ok(html.includes('js/member-bootstrap.js?v=' + expected), 'member nav script must use fresh revision');
   }
   assert.ok(dashboard.includes('Browse All Lessons'));

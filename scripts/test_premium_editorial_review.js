@@ -32,6 +32,61 @@ test('unpublished manuscript review controls remain hidden by default and never 
   assert.doesNotMatch(js, /\.from\(['"]flamewalker_premium_lessons['"]\).*\.update\(/s);
 });
 
+test('Red Flags Part 5 shows one complete scenario per reader page and preserves old bookmark location', () => {
+  const source = read('js/member-premium-lesson.js');
+  // Exercise the actual sectionizer with synthetic prose only. Protected
+  // curriculum manuscript bodies are never committed into the public repo.
+  const sectionCode = source.slice(source.indexOf('  const major ='), source.indexOf('  function label(step)'));
+  assert.ok(sectionCode.includes('function sectionize('));
+  function createReaderFor(lessonSlug) {
+    return vm.runInNewContext(
+      'const slug = ' + JSON.stringify(lessonSlug) +
+        '; const prettyHeading = s => s;' + sectionCode +
+        '\n({ sectionize, remapScenarioBookmark })',
+      {}, { timeout: 1000 });
+  }
+  const lessonReader = createReaderFor('red-flags-and-responsibility');
+  const blocks = [
+    { type: 'heading', text: 'PART 4 — CONTEXT' },
+    { type: 'paragraph', text: 'Brief earlier lesson context.' },
+    { type: 'heading', text: 'PART 5 — FOUR SCENARIOS THAT TEST YOUR JUDGMENT' },
+  ];
+  for (const letter of ['A','B','C','D']) {
+    blocks.push(
+      { type:'paragraph', text:'Scenario ' + letter + ' — Example ' + letter + '. ' + 'Illustrative situation. '.repeat(36) },
+      { type:'paragraph', text:'Why the decision is difficult. '.repeat(29) },
+      { type:'paragraph', text:'A grounded response and a decision principle. '.repeat(26) }
+    );
+  }
+  blocks.push({ type: 'paragraph', text: 'These examples illustrate careful decisions rather than diagnoses.' });
+  blocks.push({ type: 'heading', text: 'PART 6 — A DECISION CHECK' });
+  blocks.push({ type: 'paragraph', text: 'Continue to the next lesson skill.' });
+
+  const pages = lessonReader.sectionize(blocks);
+  const scenarios = pages.filter(page => /Part 5 · Scenario [A-D] —/.test(page.title));
+  assert.equal(scenarios.length, 4, 'each case should be its own reader page');
+  for (let i = 0; i < scenarios.length; i++) {
+    assert.equal(scenarios[i].title, 'Part 5 · Scenario ' + ['A','B','C','D'][i] + ' — Example ' + ['A','B','C','D'][i]);
+    assert.equal(scenarios[i].continuation, 0, 'no scenario continuation screens');
+    assert.equal(scenarios[i].blocks.length, i === 3 ? 4 : 3, 'all three paragraphs remain together');
+    assert.ok(!scenarios[i].blocks[0].text.startsWith('Scenario '), 'do not duplicate the scenario title in body');
+  }
+  assert.ok(pages.findIndex(page => page.title.includes('Scenario A')) <
+            pages.findIndex(page => page.title.includes('PART 6')), 'existing progression stays in order');
+
+  const oldPages = lessonReader.sectionize(blocks, { splitScenarios: false });
+  const oldB = oldPages.findIndex(page => page.blocks.some(block => block.text.startsWith('Scenario B —')));
+  assert.ok(oldB >= 0, 'legacy bookmark case should exist');
+  assert.equal(pages[lessonReader.remapScenarioBookmark(blocks,oldB,pages)].title,scenarios[1].title,
+    'an older saved position should reopen the correct scenario');
+
+  const unrelated = createReaderFor('mother-wound');
+  const untouched = unrelated.sectionize(blocks);
+  assert.equal(untouched.some(page => /Part 5 · Scenario/.test(page.title)), false,
+    'lesson-specific pagination must not change other courses');
+  assert.match(source, /storageWrite\(scenarioLayoutKey, 'one-scenario-per-page'\)/);
+});
+
 test('the server only returns premium content to paid accounts or a nominated reviewer', () => {
   const backend = read('supabase/functions/read-flamewalker-lesson/index.ts');
   assert.match(backend, /withSupabase\(\{ auth: "user" \}/);
@@ -1819,7 +1874,7 @@ test('free premium lesson denial points to live membership without exposing prot
   assert.ok(html.includes('href="member-store.html">Membership options</a>'));
   assert.ok(html.includes('js/member-bootstrap.js?v=lessons-hub-v14'));
   assert.ok(bootstrap.includes("src === 'js/member-premium-lesson.js'"));
-  assert.ok(bootstrap.includes("src + '?v=premium-access-v13'"));
+  assert.ok(bootstrap.includes("src + '?v=premium-access-v14'"));
   assert.match(js, /const denied = error\?\.context\?\.status === 403/);
   assert.match(js, /renderLesson\(data\.lesson\)/);
 });

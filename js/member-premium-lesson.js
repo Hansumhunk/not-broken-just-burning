@@ -558,7 +558,7 @@
     const isStandaloneQuestion = text => {
       const value = clean(text);
       return value.length <= 290 && /\?$/.test(value) &&
-        /^(?:What|Which|How|Why|Who|When|Where|Do|Did|Can|Could|Should|Would|Is|Are)\b/i.test(value);
+        /^(?:What|Which|How|Why|Who|When|Where|If|Do|Did|Can|Could|Should|Would|Is|Are)\b/i.test(value);
     };
     const isSentenceStarter = text => {
       const value = clean(text);

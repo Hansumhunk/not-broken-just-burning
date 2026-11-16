@@ -539,6 +539,77 @@
 
   // Use the writing task actually delivered by the protected lesson, rather
   // than repeating an unrelated, generic reflection question on every page.
+  // Read prompts from the *authorized section's* teaching text instead of
+  // displaying an unrelated generic writing invitation. The manuscript stays
+  // in the protected database; this script stores no lesson text or answers.
+  function contextualReflectionCue(step, blocks) {
+    const lines = blocks.flatMap(block => String(block.text || '').split('\n'))
+      .map(line => line.trim()).filter(Boolean);
+    const clean = text => String(text || '').trim()
+      .replace(/^[“"‘']+/, '').replace(/[”"’']+$/, '').trim();
+    const isStandaloneQuestion = text => {
+      const value = clean(text);
+      return value.length <= 290 && /\?$/.test(value) &&
+        /^(?:What|Which|How|Why|Who|When|Where|Do|Did|Can|Could|Should|Would|Is|Are)\b/i.test(value);
+    };
+    const isSentenceStarter = text => {
+      const value = clean(text);
+      return value.length <= 290 && /(?:_{3,}|\.{3}|…)/.test(value) &&
+        /^(?:One thing|I |My |The rule|Something I )/i.test(value);
+    };
+
+    // Lesson authors place the actual sentence directly below lead-ins such as
+    // "answer only" and "a grounded spiritual question is". Keep that sentence,
+    // including the fill-in blank, as the response-field label.
+    for (let i = 0; i < lines.length; i++) {
+      if (!/(?:answer only\s*:|(?:grounded\s+)?spiritual question is\s*:|(?:reflect(?:ion)?\s+question|ask yourself)\s*:)/i.test(lines[i])) continue;
+      const follow = lines.slice(i + 1, i + 4).find(line =>
+        isStandaloneQuestion(line) || isSentenceStarter(line));
+      if (follow) return { instruction: clean(follow), kind: 'direct' };
+    }
+    // The small, achievable "Smaller Door" exercises are framed as a single
+    // quoted sentence to finish. That sentence IS the writing instruction.
+    if (/smaller door/i.test(step?.title || '')) {
+      const starter = lines.find(isSentenceStarter);
+      if (starter) return { instruction: clean(starter), kind: 'direct' };
+    }
+    if (/optional spiritual lens/i.test(step?.title || '')) {
+      const question = lines.find(isStandaloneQuestion);
+      if (question) return { instruction: clean(question), kind: 'direct' };
+    }
+
+    // One opening contrasts dramatic labels with the inherited relationship
+    // rule that is observable in adult behavior. Ask the member about their
+    // own pattern, rather than asking them to write a generic private note.
+    if (slug === 'mother-wound' &&
+        /opening/i.test(step?.title || '') &&
+        lines.some(line => /(?:adult question|which rule).{0,100}(?:behavior|behave)/i.test(line))) {
+      return {
+        instruction: 'What rule about love or closeness did I learn growing up, and where do I see it shaping my behavior or relationships today?',
+        kind: 'contextual'
+      };
+    }
+    // Where a section contains a real standalone question, let that specific
+    // question guide the writing rather than a stock prompt.
+    const questions = lines.filter(isStandaloneQuestion);
+    if (questions.length) {
+      return { instruction: clean(questions[questions.length - 1]), kind: 'direct' };
+    }
+    if (/integration/i.test(step?.title || '')) {
+      return { instruction: 'What lesson from this section do I want to put into practice, and what would that look like in my actual behavior?', kind: 'contextual' };
+    }
+    if (/next honest action/i.test(step?.title || '')) {
+      return { instruction: 'Which one realistic action will I choose this week to apply what I just read?', kind: 'contextual' };
+    }
+    // The final fallback names the actual section. It is a reflection question,
+    // not the misleading "Write a private note about..." template.
+    const topic = String(step?.title || 'this section').replace(/\s+/g, ' ').trim().slice(0, 110);
+    return {
+      instruction: 'As I consider ' + topic + ', what connects with my own experience, and what would I like to keep or change?',
+      kind: 'contextual'
+    };
+  }
+
   function sectionReflectionCue(step) {
     // Work only with already-authorized lesson blocks. The actual task, not a
     // stock prompt, must be shown beside the member's response area.
@@ -622,7 +693,10 @@
         add(text.slice(where));
       }
     }
-    return entries.length ? {instruction:entries.join('\n\n'),kind:hasQuestionCue?'questions':'assignment'} : null;
+    const meaningful = entries.filter(text => !/^(?:Choose one|Finish these|Answer these)\.?$/i.test(text.trim()));
+    return meaningful.length
+      ? {instruction:meaningful.join('\n\n'),kind:hasQuestionCue?'questions':'assignment'}
+      : contextualReflectionCue(step, blocks);
   }
   function applySectionReflection(step) {
     const cue=sectionReflectionCue(step);
@@ -632,15 +706,14 @@
     const prompt=el('premium-pause-label');
     const response=el('premium-pause-note');
     if(!panel || !heading || !hint || !prompt || !response) return;
-    heading.textContent=cue ? 'Complete this section’s reflection' : 'Private reading note';
-    hint.textContent=cue ? 'Follow the lesson’s actual questions · your choice to save' :
-      'Optional · use this space for your own notes';
-    prompt.textContent=cue ? cue.instruction :
-      'Write a private note about “'+step.title+'”, or leave this section blank.';
-    response.rows=cue ? 9 : 4;
-    response.placeholder=cue ? 'Write your answers here. Nothing is uploaded automatically.' :
-      'Your optional note. Nothing is uploaded automatically.';
-    panel.open=Boolean(cue);
+    heading.textContent='Reflect on this section';
+    hint.textContent=cue.kind === 'contextual'
+      ? 'Your own experience · optional · saved only when you choose'
+      : 'Based on this section’s actual question · your choice to save';
+    prompt.textContent=cue.instruction;
+    response.rows=cue.kind === 'contextual' ? 5 : 9;
+    response.placeholder='Answer the reflection above in your own words. Nothing is uploaded automatically.';
+    panel.open=cue.kind !== 'contextual';
   }
 
   function render({ focus = false } = {}) {

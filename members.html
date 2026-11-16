@@ -63,29 +63,45 @@
           <p>The dashboard is a return point, not a performance report. Keep one action visible, continue the work already in motion, and let everything else wait its turn.</p>
         </article>
 
+        <section class="member-dashboard-card member-journey-compass reveal" aria-labelledby="journey-compass-heading">
+          <p class="eyebrow">Continue my journey</p>
+          <h2 id="journey-compass-heading">Pick up where you left off.</h2>
+          <p>The next useful step, not another task list. Your reading place and Path focus stay on this device. Reflection text is not shown here.</p>
+          <div class="member-today-grid" aria-label="My learning, current Path focus, and next action">
+            <article class="member-today-block member-compass-reading">
+              <span>My learning</span>
+              <h3 data-dashboard-reading-name>Start with the foundation</h3>
+              <p data-dashboard-reading-state>Open Start Here to find your next learning step.</p>
+              <a class="text-link" data-dashboard-reading-link href="member-start-here.html">Start Here →</a>
+            </article>
+            <article class="member-today-block">
+              <span>Current Path focus</span>
+              <h3 data-dashboard-focus-name>Choose a current Path focus</h3>
+              <p data-dashboard-focus-state>No focus selected yet</p>
+              <a class="text-link" data-dashboard-focus-link href="member-path.html">Choose my focus →</a>
+            </article>
+            <article class="member-today-block">
+              <span>My Next Honest Action</span>
+              <h3 data-dashboard-action-title>One action I can control</h3>
+              <p data-dashboard-action-state>No next action saved yet. You can name one below.</p>
+              <a class="text-link" href="#member-quick-action">Set or update my action →</a>
+            </article>
+          </div>
+          <div class="member-compass-tools">
+            <span>Last tool: <strong data-dashboard-continue-tool>No tool started yet</strong></span>
+            <span data-dashboard-continue-time>Saved on this device</span>
+            <a class="text-link" data-dashboard-continue-link href="member-tools.html">Choose a tool →</a>
+          </div>
+        </section>
+
         <article class="member-dashboard-card member-quick-action member-today-card reveal">
-          <p class="eyebrow">My Next Honest Action</p>
+          <p class="eyebrow">Set or update my next action</p>
           <h2>One move is enough for now.</h2>
           <p>Keep this inside your control and small enough that you can tell whether you actually did it.</p>
           <label for="member-quick-action">What is one action you can actually take next?</label>
           <textarea id="member-quick-action" rows="4" maxlength="500" placeholder="One concrete next step. Keep it inside your control."></textarea>
           <div class="member-actions"><button class="button button-primary" id="save-quick-action" type="button">Save Next Action</button><span class="member-status-line" data-member-status role="status" aria-live="polite"></span></div>
         </article>
-
-        <div class="member-today-grid reveal" aria-label="Continue and current focus">
-          <article class="member-today-block">
-            <span>Continue where I left off</span>
-            <h3 data-dashboard-continue-tool>No tool started yet</h3>
-            <p data-dashboard-continue-time>Use the Toolbox when a specific problem needs a specific tool.</p>
-            <a class="text-link" data-dashboard-continue-link href="member-tools.html">Choose a tool</a>
-          </article>
-          <article class="member-today-block">
-            <span>Current Path focus</span>
-            <h3 data-dashboard-focus-name>Choose a current Path focus</h3>
-            <p data-dashboard-focus-state>No focus selected yet</p>
-            <a class="text-link" data-dashboard-focus-link href="member-path.html">Choose my focus</a>
-          </article>
-        </div>
 
         <article class="member-dashboard-card reveal">
           <p class="eyebrow">Recent Work</p>

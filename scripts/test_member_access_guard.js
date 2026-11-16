@@ -359,14 +359,31 @@ test('Lessons hub shows one free lesson and seven published premium lessons with
   assert.ok(!html.includes('data-premium-lesson-content'), 'premium manuscripts must never be embedded in index');
 });
 
-test('published lesson cards show AVAILABLE NOW instead of the generic COMING SOON ribbon', () => {
+test('published Lessons cards have no decorative availability ribbons', () => {
   const catalog = read('member-lessons.html');
-  const liveStyles = read('css/member-expansion.css');
   const cards = catalog.match(/class="member-locked-card is-live" aria-labelledby="lesson-/g) || [];
   assert.equal(cards.length, 7);
-  assert.ok(liveStyles.includes(".member-locked-card.is-live::after"));
-  assert.ok(liveStyles.includes("content: 'AVAILABLE NOW'"));
+  assert.ok(catalog.includes('body[data-member-page="lessons"] .member-locked-card::after{display:none!important;content:none!important}'));
   assert.ok(catalog.includes('28 more lessons are being prepared'));
+});
+
+test('all 28 drafted lessons appear in five expandable tracks without unpublished content access', () => {
+  const catalog = read('member-lessons.html');
+  assert.equal((catalog.match(/data-editorial-preview=/g) || []).length, 28);
+  assert.equal((catalog.match(/class="lesson-track-preview"/g) || []).length, 5);
+  for (const [track, count] of [
+    ['The Placeholder Wound', 8],
+    ['When the Safe Room Becomes the Courtroom', 5],
+    ['Steadiness &amp; Emotional Command', 5],
+    ['Rebuilding a Life That Holds', 5],
+    ['The Five Sacred Laws of Survival', 5],
+  ]) {
+    assert.ok(catalog.includes(track), 'missing draft track: ' + track);
+  }
+  assert.equal((catalog.match(/data-paid-lesson-open hidden/g) || []).length, 7);
+  assert.ok(catalog.includes('not included in today'));
+  assert.ok(catalog.includes('Video lessons remain shelved'));
+  assert.ok(!catalog.includes('href="member-premium-lesson.html?lesson=being-needed-vs-chosen"'));
 });
 
 test('paid dashboard learning continues into published written lessons, not unreleased video area', () => {

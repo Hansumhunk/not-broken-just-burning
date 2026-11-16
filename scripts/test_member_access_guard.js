@@ -552,6 +552,26 @@ test('a paid member with a protected reading bookmark is returning, not first-ru
   assert.ok(js.includes('renderFirstRun(state, entries, entitlementState)'));
   assert.ok(js.includes("window.addEventListener('nbjb:entitlements', render)"));
 });
+test('live Terms and Refund pages describe currently available paid membership without changing founding safeguards', () => {
+  const terms=read('terms.html');
+  const refunds=read('refunds.html');
+  for(const [name,page] of [['terms',terms],['refunds',refunds]]) {
+    assert.ok(page.includes('Flamewalker+ paid subscriptions are available now.'),name);
+    assert.ok(page.includes('35 currently published written lessons'),name);
+    assert.ok(!page.includes('paid subscriptions are not yet available for purchase'),name);
+    assert.ok(!page.includes('Applies to paid memberships when offered'),name);
+    assert.ok(page.includes('notbrokenjustburning@gmail.com'),name);
+    assert.ok(page.includes('14'),name);
+    assert.ok(page.includes('30'),name);
+  }
+  assert.match(terms,/\\$14\.99 USD per month/);
+  assert.match(terms,/\\$149 USD per year/);
+  assert.match(refunds,/\\$14\.99\\/month/);
+  assert.match(refunds,/\\$149\\/year/);
+  assert.match(refunds,/7 calendar days after the renewal charge/);
+  assert.match(terms,/your free account to cancel a paid subscription/);
+  assert.match(refunds,/Stripe's Customer Portal/);
+});
 test('Membership page gives paid subscribers account management instead of another purchase pitch', () => {
   const html=read('member-store.html');
   const js=read('js/member-billing.js');

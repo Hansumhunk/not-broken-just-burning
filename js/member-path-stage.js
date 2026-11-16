@@ -223,9 +223,19 @@
     foundationsNode.append(node);
   });
   const depth=Array.isArray(chapter.deepDive)?chapter.deepDive:[];
+  const readingWords=[
+    ...foundation.map(block=>block.text||''),
+    ...chapter.teaching.map(block=>block.heading+' '+block.text),
+    ...depth.map(block=>block.heading+' '+block.text)
+  ].join(' ').trim().split(/\s+/).filter(Boolean).length;
+  set('path-stage-course-meta','Complete foundation + '+(chapter.teaching.length+depth.length)+
+    ' member teaching chapters · approximately '+Math.max(1,Math.ceil(readingWords/200))+
+    ' minutes to read at a comfortable pace. Work through it in sections.');
+
   const teaching=byId('path-stage-teaching-blocks');
   [...chapter.teaching, ...depth].forEach((section,index)=>{
     const block=make('section',undefined,'path-stage-teaching-block');
+    if (/^Case study:/i.test(section.heading||'')) block.className+=' is-case-study';
     block.id='path-stage-teaching-'+(index+1);
     block.append(make('h3',section.heading));
     String(section.text||'').split(/\n\s*\n/).filter(Boolean).forEach(text=>

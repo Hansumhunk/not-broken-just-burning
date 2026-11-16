@@ -289,6 +289,7 @@ def main() -> int:
             "member-auth.html",
             "member-community.html",
             "member-library.html",
+            "member-lessons.html",
             "member-media.html",
             "member-onboarding.html",
             "member-path.html",

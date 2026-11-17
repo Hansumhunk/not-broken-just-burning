@@ -23,8 +23,8 @@ H.A.W.K. helps people facing high-conflict divorce organize the external situati
 | 03 | Documentation Checklist | Implementation complete on feature branch; browser and editorial review pending |
 | 04 | Communication Analyzer | Implementation complete on feature branch; browser and editorial review pending |
 | 05 | Court Preparation Organizer | Implementation complete on feature branch; browser and editorial review pending |
-| 06 | Parenting Log | Next |
-| 07 | Financial Organizer | Planned |
+| 06 | Parenting Log | Implementation complete on feature branch; browser and editorial review pending |
+| 07 | Financial Organizer | Next |
 | 08 | Witness Observation Organizer | Planned |
 | 09 | Support Network Map | Planned |
 | 10 | H.A.W.K. Dashboard | Planned |
@@ -117,3 +117,21 @@ Optional local readers for version-1 timeline, evidence index and checklist expo
 - Static integration validation: run #718, completed (success) at integration commit f7ad7fe0d935dabcd0246020898035abd50f9416.
 - Real-browser desktop/mobile, actual download/import/print under CSP, keyboard/screen-reader and editorial review remain release gates.
 - Tool 06: Parenting Log should focus on child-centered, ordinary care and continuity: schedules, attendance, appointments, activities, practical arrangements and factual observations. Minimize sensitive information; no surveillance, custody scoring, child questioning or diagnosing other parents. Retain the same substantive teaching minimum and offline standards.
+
+
+## Tool 06 architecture and verification
+
+Public lesson: `hawk-parenting-log.html` (3,963 independently counted teaching words, 17 sections, three fictional worked scenarios, one guided exercise). Expands the original manuscript's Parenting While Under Siege chapter around ordinary presence, routine care, education, transitions, activities, appointments, factual observations, child privacy and professional help when needed.
+
+Offline application: `downloads/hawk-parenting-log-offline.html`. Self-contained, restrictive CSP, no external resources, network, account or automatic storage. Up to 1,000 entries, explicit unencrypted JSON export and import, print displayed records, clear session. No surveillance, custody scoring, custody-time calculation, medical-record storage, diagnoses, notification system or legal assessment.
+
+Parenting envelope: `{format: "NBJB-HAWK-PARENTING", version: 1, entries: [...]}`. Stable L- ID plus 16 uppercase hexadecimal characters. Fields: child alias, care category, planned/occurred/changed/not completed/uncertain status, title, relevant date, optional time and time zone, knowledge source, factual description, care response, context and uncertainty, practical follow-up, T-/E-/C- references, revision note, creation/update timestamps. Planned and occurred entries require a real date; an occurred entry requires a stated knowledge source other than uncertain. Time requires date; edits require revision note. Nine care categories; newest dated entries first, undated entries last; child alias, category, status and text filters. Entry counts do not evaluate parenting quality or custody. Users should maintain an independent calendar for appointments.
+
+Optional local readers for version-1 timeline, evidence and checklist exports retain only stable ID sets; source files and descriptions remain separate. References demonstrate presence in a selected export, not authenticity or truth. No automatic synchronization, attachments or child-location tracking.
+
+- Committed teaching body verified at 3,963 words.
+- JavaScript syntax and external dependency/network-call inspection passed.
+- Simulated DOM harness: 29/29 checks passed, including required fields, date validation, planned/occurred/uncertain status, reference format and imports, duplicate rejection, missing ID reporting, stable IDs and revision requirement, child/category/status filters, sorting, tally, full export, print invocation, round-trip import, malformed/duplicate imports, removing entries and clearing unsubmitted work.
+- Static integration validation: run #722, completed (success) at integration commit 98e3993c8f341b7d0baf98641daca7bac85d77f3.
+- Real-browser desktop/mobile, accessibility, actual download/import/print and editorial review remain release gates.
+- Tool 07: Financial Organizer should organize user-entered income, ordinary expenses, shared obligations, assets and liabilities, dates, source and status, factual discrepancies, supporting references and questions for counsel or accountants. Distinguish documented figures, estimates and disputed amounts; no banking credentials, account connectivity, automated allegations, recommendations on hiding assets, legal entitlement calculations or tax advice. Same 3,000-word minimum, offline privacy and release standards.

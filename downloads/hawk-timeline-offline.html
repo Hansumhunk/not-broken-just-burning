@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<title>H.A.W.K. Incident Timeline Builder — Offline | NBJB</title>
+<style>
+:root{color-scheme:dark;--bg:#111113;--panel:#1b1b1f;--line:#414148;--text:#f5f2ed;--muted:#c6c2bc;--ember:#ffb56a;--soft:#2a2623}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:1rem/1.6 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:28px 18px 60px}h1,h2,h3{line-height:1.2;overflow-wrap:anywhere}h1{font-size:clamp(1.9rem,5vw,2.8rem)}h2{font-size:1.5rem}p{max-width:78ch}a{color:var(--ember)}.eyebrow{color:var(--ember);font-weight:700;letter-spacing:.1em;font-size:.8rem}.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:clamp(14px,3vw,24px);margin:18px 0}.note{color:var(--muted);font-size:.95rem}.warning{border-left:4px solid var(--ember);padding:10px 14px;background:var(--soft)}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.wide{grid-column:1/-1}label{display:block;font-weight:650;font-size:.95rem;margin-bottom:4px}input,select,textarea,button{font:inherit}input,select,textarea{display:block;width:100%;padding:10px;border:1px solid #77777e;border-radius:7px;background:var(--bg);color:var(--text);min-width:0}textarea{resize:vertical;min-height:90px}button{padding:9px 14px;border:1px solid #77777e;border-radius:7px;background:var(--panel);color:var(--text);cursor:pointer;min-height:44px}.primary{background:var(--ember);color:#1b140e;border-color:var(--ember);font-weight:700}button:hover{border-color:var(--ember)}button:disabled{opacity:.5;cursor:not-allowed}:focus-visible{outline:3px solid var(--ember);outline-offset:3px}.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}.entry{margin-top:12px;border:1px solid var(--line);border-radius:8px;padding:16px;overflow-wrap:anywhere}.entry h3{margin:0 0 6px;font-size:1.15rem}.meta{color:var(--muted);font-size:.88rem}.entry dl{margin:12px 0}.entry dt{font-weight:700;color:var(--muted);margin-top:8px;font-size:.87rem}.entry dd{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}.status{min-height:1.6em;color:var(--ember)}[hidden]{display:none!important}fieldset{border:0;margin:0;padding:0;min-width:0}legend{font-weight:700;margin-bottom:10px}footer{border-top:1px solid var(--line);padding-top:16px;margin-top:28px}.count{font-weight:700}
+@media(max-width:640px){.grid{grid-template-columns:minmax(0,1fr)}.wide{grid-column:auto}.actions button{flex:1 1 auto}}
+@media print{:root{color-scheme:light}body,main,.panel,.entry{background:white;color:black}.panel,.entry{border-color:#aaa}.note,.meta,.entry dt,.eyebrow{color:#333}.no-print,button,form,footer{display:none!important}main{max-width:none;padding:0}.entry{break-inside:avoid}.panel{padding:0;border:0}h1{font-size:22pt}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<p class="eyebrow">NOT BROKEN JUST BURNING · H.A.W.K. · HARD EVIDENCE</p>
+<h1>Incident Timeline Builder</h1>
+<p>Organize events, not accusations. Record the most precise date you can support, describe what happened, identify your source and keep conclusions separate.</p>
+<div class="warning no-print"><strong>Privacy and preservation:</strong> This tool has no account, analytics, network connections or automatic storage. Entries exist in this session only. Export before you close or reload. Exported JSON and printed pages are unencrypted and may contain sensitive data. Use secure storage; avoid shared or monitored devices. Do not include identifying details unless necessary. This is an editable working chronology, not a legal filing or immutable evidence log. Preserve originals separately and follow professional preservation guidance.</div>
+</header>
+<section class="panel no-print" aria-labelledby="editor-title">
+<h2 id="editor-title" tabindex="-1">Add an incident</h2>
+<p class="note">Use codes or aliases instead of full names. Do not attach original evidence; enter a reference such as E001. Fields marked required must be completed.</p>
+<form id="entry-form" novalidate>
+<div class="grid">
+<div><label for="precision">Date precision (required)</label><select id="precision"><option value="day">Known day</option><option value="month">Approximate month</option><option value="unknown">Unknown date</option></select></div>
+<div id="date-wrap"><label for="date">Event date (required)</label><input id="date" type="text" placeholder="YYYY-MM-DD" maxlength="10" autocomplete="off" aria-describedby="date-help"><small id="date-help" class="note">Use YYYY-MM-DD. Use context to explain uncertainty.</small></div>
+<div id="time-wrap"><label for="time">Local time, if known</label><input id="time" type="time"><small class="note">Note the time zone in context if known.</small></div>
+<div><label for="category">Category (required)</label><select id="category"><option>Parenting</option><option>Communication</option><option>Finances</option><option>Legal administration</option><option>Housing</option><option>Safety</option><option>Other</option></select></div>
+<div class="wide"><label for="source">Basis of knowledge (required)</label><select id="source"><option value="">Choose a source</option><option>Direct observation</option><option>Record reviewed</option><option>Reported by another person</option><option>Personal recollection</option><option>Mixed sources / explain in context</option><option>Unknown / not established</option></select></div>
+<div class="wide"><label for="summary">What happened? (required)</label><textarea id="summary" maxlength="4000" required placeholder="A neutral description of what occurred."></textarea></div>
+<div class="wide"><label for="context">Context and source limitations</label><textarea id="context" maxlength="3000" placeholder="Include relevant context, time zone, what you did not see, or conflicting information."></textarea></div>
+<div class="wide"><label for="references">Evidence reference codes</label><input id="references" maxlength="500" autocomplete="off" placeholder="E001, E002 (no sensitive attachment paths)"></div>
+<div class="wide"><label for="impact">Practical impact, if any</label><textarea id="impact" maxlength="2000" placeholder="What changed in the schedule, finances, responsibilities or daily life?"></textarea></div>
+<div class="wide"><label for="unknowns">Unknowns / questions for counsel</label><textarea id="unknowns" maxlength="2000" placeholder="What remains uncertain? What question should you ask?"></textarea></div>
+<div class="wide"><label for="correction">Correction or revision note</label><textarea id="correction" maxlength="2000" placeholder="When editing an event, explain what changed and why."></textarea></div>
+</div>
+<div class="actions"><button class="primary" type="submit" id="save">Add incident to session</button><button type="button" id="cancel">Reset form</button></div>
+<p id="error" class="status" role="alert"></p>
+</form>
+</section>
+<section class="panel" aria-labelledby="timeline-title">
+<h2 id="timeline-title">Your working chronology</h2>
+<p id="print-note">Events are ordered by supported date. Within a day, unknown times do not establish sequence. Approximate months and unknown dates remain visibly labeled.</p>
+<div class="no-print">
+<div class="grid"><div><label for="filter">Filter category</label><select id="filter"><option value="">All categories</option><option>Parenting</option><option>Communication</option><option>Finances</option><option>Legal administration</option><option>Housing</option><option>Safety</option><option>Other</option></select></div><div><label for="search">Search entries</label><input id="search" type="search" maxlength="150" placeholder="Search words or reference codes" autocomplete="off"></div></div>
+<div class="actions"><button type="button" class="primary" id="export" disabled>Export all as JSON</button><button type="button" id="import">Open saved JSON</button><input id="file" type="file" accept=".json,application/json" hidden><button type="button" id="print" disabled>Print displayed entries</button><button type="button" id="clear" disabled>Clear session</button></div>
+<p class="note">Import replaces the session after confirmation. Export includes every entry, not just the filtered list. Printing includes only displayed entries. Neither operation changes the original evidence.</p>
+<p id="status" class="status" role="status" aria-live="polite"></p>
+</div>
+<p id="count" class="count" aria-live="polite"></p>
+<div id="list"></div>
+</section>
+<footer><p class="note">H.A.W.K. is an educational framework for lawful organization and personal development. Not therapy, legal advice, formal evidence storage or emergency assistance. In immediate danger, contact local emergency services.</p><p class="note">Offline version 1.0 · Your next step is more important than the size of your archive.</p></footer>
+</main>
+<script>
+'use strict';
+(()=> {
+const $=id=>document.getElementById(id);
+const categories=['Parenting','Communication','Finances','Legal administration','Housing','Safety','Other'];
+const sources=['Direct observation','Record reviewed','Reported by another person','Personal recollection','Mixed sources / explain in context','Unknown / not established'];
+const keys={precision:10,date:10,time:5,category:40,source:80,summary:4000,context:3000,references:500,impact:2000,unknowns:2000,correction:2000};
+const maxEntries=1000,maxFile=20*1024*1024;
+let entries=[],editing=null,dirty=false;
+function validDay(s){if(!/^\d{4}-\d{2}-\d{2}$/.test(s))return false;const y=Number(s.slice(0,4));if(y<1)return false;const d=new Date(s+'T00:00:00Z');return !Number.isNaN(d.valueOf())&&d.toISOString().slice(0,10)===s;}
+function validMonth(s){return /^\d{4}-(0[1-9]|1[0-2])$/.test(s)&&Number(s.slice(0,4))>0;}
+function validTime(s){return s===''||/^([01]\d|2[0-3]):[0-5]\d$/.test(s);}
+function validStamp(s){return typeof s==='string'&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(s)&&!Number.isNaN(Date.parse(s))&&new Date(s).toISOString()===s;}
+function validate(r){if(!r||typeof r!=='object'||Array.isArray(r))throw Error('An entry is not an object.');
+const clean={};
+for(const [k,n] of Object.entries(keys)){if(typeof r[k]!=='string'||r[k].length>n)throw Error('Invalid or missing '+k+'.');clean[k]=r[k];}
+if(!['day','month','unknown'].includes(clean.precision))throw Error('Choose a valid date precision.');
+if(clean.precision==='day'&&!validDay(clean.date))throw Error('Enter a real date in YYYY-MM-DD format.');
+if(clean.precision==='month'&&!validMonth(clean.date))throw Error('Enter a month in YYYY-MM format.');
+if(clean.precision==='unknown'&&clean.date!=='')throw Error('Unknown dates must have no date value.');
+if(!validTime(clean.time)||(clean.precision!=='day'&&clean.time!==''))throw Error('Time requires a known day and valid HH:MM.');
+if(!categories.includes(clean.category)||!sources.includes(clean.source))throw Error('Choose a valid category and source.');
+if(!clean.summary.trim())throw Error('Describe what happened.');
+if(typeof r.id!=='string'||!/^T-[A-F0-9]{16}$/.test(r.id))throw Error('Invalid event reference.');
+if(!validStamp(r.createdAt)||!validStamp(r.updatedAt)||r.updatedAt<r.createdAt)throw Error('Invalid entry timestamps.');
+return {...clean,id:r.id,createdAt:r.createdAt,updatedAt:r.updatedAt};}
+function uid(){let id;do{id='T-'+Array.from(crypto.getRandomValues(new Uint8Array(8)),n=>n.toString(16).padStart(2,'0')).join('').toUpperCase();}while(entries.some(e=>e.id===id));return id;}
+function syncPrecision(){const p=$('precision').value;$('date-wrap').hidden=p==='unknown';$('date').disabled=p==='unknown';$('time-wrap').hidden=p!=='day';$('time').disabled=p!=='day';$('date').placeholder=p==='month'?'YYYY-MM':'YYYY-MM-DD';$('date-help').textContent=p==='month'?'Use YYYY-MM; explain the estimate in context.':'Use YYYY-MM-DD. Use context to explain uncertainty.';}
+function reset(){editing=null;$('entry-form').reset();$('editor-title').textContent='Add an incident';$('save').textContent='Add incident to session';$('cancel').textContent='Reset form';$('error').textContent='';syncPrecision();}
+function message(s){$('status').textContent=s;}
+function formHasText(){return ['summary','context','references','impact','unknowns','correction','date','time'].some(k=>$(k).value.trim()!=='');}
+function confirmForm(){return !formHasText()||confirm('Discard the current unsubmitted form?');}
+function node(tag,txt,cls){const el=document.createElement(tag);if(txt!==undefined)el.textContent=txt;if(cls)el.className=cls;return el;}
+function sortKey(e){return e.precision==='unknown'?'9999-99-99-99:99':e.precision==='month'?e.date+'-00-00:00':e.date+'-'+(e.time||'99:99');}
+function displayed(){const f=$('filter').value,q=$('search').value.trim().toLowerCase();return entries.filter(e=>(!f||e.category===f)&&(!q||Object.values(e).some(x=>x.toLowerCase().includes(q)))).sort((a,b)=>sortKey(a).localeCompare(sortKey(b))||a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id));}
+function edit(id){if(!confirmForm())return;const e=entries.find(x=>x.id===id);if(!e)return;editing=id;for(const k of Object.keys(keys))$(k).value=e[k];$('editor-title').textContent='Edit '+id;$('save').textContent='Update incident';$('cancel').textContent='Cancel edit';$('error').textContent='';syncPrecision();$('editor-title').focus();}
+function remove(id){if(!confirm('Remove this working entry from the session? Preserve underlying originals and any required prior versions separately.'))return;entries=entries.filter(x=>x.id!==id);if(editing===id)reset();dirty=true;render();message('Working entry removed.');}
+function render(){const shown=displayed();$('count').textContent=shown.length+' of '+entries.length+' incident(s) shown.';$('list').replaceChildren();$('export').disabled=entries.length===0;$('clear').disabled=entries.length===0;$('print').disabled=shown.length===0;
+if(!shown.length){$('list').append(node('p',entries.length?'No entries match your filters.':'No incidents yet. Start with a practice event.','note'));return;}
+for(const e of shown){const a=node('article',undefined,'entry');const date=e.precision==='unknown'?'Date unknown':e.precision==='month'?e.date+' (approximate month)':e.date+(e.time?' · '+e.time+' local':' · time unknown');a.append(node('h3',date+' — '+e.category),node('p',e.id+' · '+e.source,'meta'));const dl=node('dl');for(const [k,label] of [['summary','What happened'],['context','Context / source limitations'],['references','Reference codes'],['impact','Practical impact'],['unknowns','Unknowns / questions'],['correction','Correction note']]){if(e[k])dl.append(node('dt',label),node('dd',e[k]));}a.append(dl,node('p','Created '+e.createdAt+' · Updated '+e.updatedAt,'meta'));const actions=node('div',undefined,'actions no-print');const b=node('button','Edit');b.type='button';b.setAttribute('aria-label','Edit '+e.id);b.addEventListener('click',()=>edit(e.id));const d=node('button','Remove');d.type='button';d.setAttribute('aria-label','Remove '+e.id);d.addEventListener('click',()=>remove(e.id));actions.append(b,d);a.append(actions);$('list').append(a);}}
+$('precision').addEventListener('change',syncPrecision);
+$('cancel').addEventListener('click',()=>{if(confirmForm())reset();});
+$('entry-form').addEventListener('submit',ev=>{ev.preventDefault();$('error').textContent='';try{if(!editing&&entries.length>=maxEntries)throw Error('Session limit reached. Export and start a new session.');const fields={};for(const k of Object.keys(keys))fields[k]=$(k).value.trim();if(fields.precision==='unknown')fields.date='';if(fields.precision!=='day')fields.time='';const old=entries.find(e=>e.id===editing),now=new Date().toISOString();if(old&&!fields.correction)throw Error('Add a correction note describing what changed.');const record=validate({...fields,id:old?old.id:uid(),createdAt:old?old.createdAt:now,updatedAt:old&&old.updatedAt>now?old.updatedAt:now});if(old)entries=entries.map(e=>e.id===old.id?record:e);else entries.push(record);dirty=true;reset();render();message(old?'Incident updated. Export to preserve your changes.':'Incident added. Export to preserve your changes.');}catch(err){$('error').textContent=err.message;}});
+$('filter').addEventListener('change',render);$('search').addEventListener('input',render);
+$('export').addEventListener('click',()=>{try{const blob=new Blob([JSON.stringify({format:'NBJB-HAWK-TIMELINE',version:1,entries},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=node('a');a.href=url;a.download='hawk-timeline-'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);message('Export requested. Confirm your browser saved the file in a secure location.');}catch{message('Export failed. Keep this session open and try again.');}});
+$('import').addEventListener('click',()=>{$('file').click();});
+$('file').addEventListener('change',async()=>{const file=$('file').files[0];$('file').value='';if(!file)return;try{if(file.size>maxFile)throw Error('File exceeds the 20 MB import limit.');const data=JSON.parse(await file.text());if(!data||data.format!=='NBJB-HAWK-TIMELINE'||data.version!==1||!Array.isArray(data.entries)||data.entries.length>maxEntries)throw Error('Choose a valid version 1 HAWK timeline export with at most 1,000 entries.');const next=data.entries.map(validate);if(new Set(next.map(e=>e.id)).size!==next.length)throw Error('Duplicate event references in file.');if((entries.length||formHasText())&&!confirm('Replace this session and discard any unsubmitted form with the selected file? Export current work first if needed.'))return;entries=next;dirty=false;reset();$('filter').value='';$('search').value='';render();message('Saved timeline opened locally.');}catch(err){message('Import not applied: '+err.message);}});
+$('print').addEventListener('click',()=>{if(confirm('Print the displayed entries? Printed or PDF copies are not encrypted.'))window.print();});
+$('clear').addEventListener('click',()=>{if(!confirm('Clear all incidents and any unsubmitted form from this session? Export first if needed. This does not delete any saved files.'))return;entries=[];dirty=false;reset();$('filter').value='';$('search').value='';render();message('Session cleared. Previously exported files are unchanged.');});
+window.addEventListener('beforeunload',e=>{if(dirty||formHasText()){e.preventDefault();e.returnValue='';}});syncPrecision();render();
+})();
+</script>
+</body>
+</html>

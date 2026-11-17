@@ -25,8 +25,8 @@ H.A.W.K. helps people facing high-conflict divorce organize the external situati
 | 05 | Court Preparation Organizer | Implementation complete on feature branch; browser and editorial review pending |
 | 06 | Parenting Log | Implementation complete on feature branch; browser and editorial review pending |
 | 07 | Financial Organizer | Implementation complete on feature branch; browser and editorial review pending |
-| 08 | Witness Observation Organizer | Next |
-| 09 | Support Network Map | Planned |
+| 08 | Witness Observation Organizer | Implementation complete on feature branch; browser and editorial review pending |
+| 09 | Support Network Map | Next |
 | 10 | H.A.W.K. Dashboard | Planned |
 
 ## Tool 01 architecture
@@ -153,3 +153,21 @@ Optional local readers for version-1 timeline, evidence index and checklist expo
 - Static integration validation: run #727, completed (success) at integration commit 245d0cbc2315decc277f7e79d3d9704eefafc6af.
 - Real-browser desktop/mobile, accessibility, actual download/import/print and editorial review remain release gates.
 - Tool 08: Witness Observation Organizer should distinguish firsthand observations, reported information and unknowns; support source and context notes, voluntary independent accounts, appropriate professional coordination and references. No witness coaching, pressure, solicitation of restricted contact, children as investigators, legal affidavits generated automatically or credibility scores. Keep same substantive word minimum, offline privacy and release standards.
+
+
+## Tool 08 architecture and verification
+
+Public lesson: `hawk-witness-observations.html` (3,957 independently counted teaching words, 17 sections, three fictional worked scenarios, one guided exercise). Adapts the original H.A.W.K. manuscript's Affidavits & Allies and Witness Impact Statements concepts into source independence, bounded firsthand observations, reported accounts, separate event and account dates, attributed impact, differing perspectives, confidentiality and professional coordination.
+
+Offline application: `downloads/hawk-witness-observations-offline.html`. Self-contained, restrictive CSP, no external resources, network, account or automatic storage. Up to 1,000 entries; explicit unencrypted JSON export/import and print of displayed working notes. No outreach, witness solicitation or coaching, sworn statement generation, contact database, credibility assessment, verdict or legal determination. Children must not be recruited into evidence collection.
+
+Observation envelope: `{format: "NBJB-HAWK-WITNESS", version: 1, entries: [...]}`. Stable W- identifier plus 16 uppercase hexadecimal characters. Fields: source alias, relationship to event, title, recorder information basis, source-stated knowledge basis, review status, optional event and account dates, observation/attributed account, perspective/context/limitations, optional source-stated impact, handling/provenance, next action, T-/E-/C- references, fresh revision note on edits, creation/update timestamps. Direct personal observations must use firsthand source basis; accounts received by the user retain separate recorder and source classifications. Dates validated independently; unknown may remain blank. Alias, recorder basis, source basis, status and text filters. Entry counts measure records only, not credibility or corroboration.
+
+Optional local readers for version-1 timeline, evidence index and checklist exports retain only stable identifier sets; source material remains separate and unaltered. Per-entry links are included in export, not loaded identifier sets. Presence in a selected file is not evidence authentication.
+
+- Committed teaching body verified at 3,957 words.
+- JavaScript syntax, external dependency and network-call inspection passed.
+- Simulated DOM harness: 28/28 checks passed, including required fields, invalid dates, incompatible direct observation basis, separate firsthand-reported and secondhand classifications, unknown event date, account date and impact, alias and status counts, three reference readers, duplicate and missing IDs, revision and stable IDs, combined filters, full export, print invocation, clear, round-trip import, malformed/duplicate imports and remove.
+- Static integration validation: run #732, completed (success) at integration commit 602d6dc2943ec898718b794c31e1e2b273c3f406.
+- Real-browser desktop/mobile, accessibility, actual download/import/print and editorial review remain release gates.
+- Tool 09: Support Network Map should distinguish personal, practical, professional and community support roles, boundaries, availability and specific appropriate help requests. No witness recruitment, private contact database, contact automation, locating individuals, judging loyalty or pressure to take sides. Include emergency and professional support routing when appropriate. Same substantive word minimum, offline privacy and release standards.

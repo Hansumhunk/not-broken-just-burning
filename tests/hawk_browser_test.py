@@ -3,6 +3,7 @@ Run: python -m pip install playwright==1.51.0 && python -m playwright install ch
      python tests/hawk_browser_test.py
 """
 import json
+import os
 import re
 import tempfile
 from pathlib import Path
@@ -72,6 +73,15 @@ def basic_accessibility(page):
       return {duplicates:ids.filter((v,i)=>ids.indexOf(v)!==i),missing};
     }""")
     assert not issues["duplicates"] and not issues["missing"], issues
+    # Run axe when supplied by CI; evaluate locally (test only), not a product dependency.
+    axe_path = os.environ.get("HAWK_AXE_PATH")
+    if axe_path:
+        page.evaluate(Path(axe_path).read_text(encoding="utf-8"))
+        violations = page.evaluate("""async () => {
+            const result=await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}});
+            return result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>n.target)}));
+        }""")
+        assert not violations, (page.url, violations)
     page.keyboard.press("Tab")
     assert page.evaluate("document.activeElement !== document.body"), "Keyboard focus did not enter controls"
 
@@ -228,6 +238,38 @@ def main():
             else:
                 expect(editor.locator("#count")).to_contain_text("1 of 1")
             editor.close()
+        # An import in flight must not repopulate a deliberately cleared dashboard.
+        page.evaluate("""() => {
+          const original=File.prototype.text;
+          window.__hawkRead=null;
+          File.prototype.text=function(){return new Promise(resolve=>{window.__hawkRead=()=>resolve(original.call(this));});};
+          window.__restoreFileText=()=>{File.prototype.text=original;};
+        }""")
+        page.locator("#allow-communication").check()
+        page.locator("#allow-support").check()
+        upload(page,full)
+        page.wait_for_function("typeof window.__hawkRead === 'function'")
+        page.locator("#clear").click()
+        page.evaluate("window.__hawkRead();window.__restoreFileText()")
+        page.wait_for_timeout(300)
+        expect(page.locator("#overview-count")).to_contain_text("0 of 9")
+        expect(status(page)).to_contain_text("Dashboard cleared")
+        # Treat markup supplied in an imported text field strictly as literal data.
+        hostile = json.loads(json.dumps(exports[fmt("CHECKLIST")]))
+        hostile["entries"][0]["title"] = '<img src=x onerror="window.hawkInjected=true">'
+        upload(page, hostile)
+        wait_import(page)
+        page.locator("#toggle-actions").click()
+        expect(page.locator("#action-list")).to_contain_text('<img src=x onerror="window.hawkInjected=true">')
+        assert page.locator("#action-list img").count()==0
+        assert page.evaluate("window.hawkInjected !== true")
+        page.locator("#clear").click()
+        page.goto(path("documentation-checklist"))
+        upload(page,hostile)
+        wait_import(page)
+        expect(page.locator("#list")).to_contain_text('<img src=x onerror="window.hawkInjected=true">')
+        assert page.locator("#list img").count()==0
+        assert page.evaluate("window.hawkInjected !== true")
         assert not errors, errors
         assert not network, network
         browser.close()

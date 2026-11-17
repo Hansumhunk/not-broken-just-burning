@@ -26,8 +26,8 @@ H.A.W.K. helps people facing high-conflict divorce organize the external situati
 | 06 | Parenting Log | Implementation complete on feature branch; browser and editorial review pending |
 | 07 | Financial Organizer | Implementation complete on feature branch; browser and editorial review pending |
 | 08 | Witness Observation Organizer | Implementation complete on feature branch; browser and editorial review pending |
-| 09 | Support Network Map | Next |
-| 10 | H.A.W.K. Dashboard | Planned |
+| 09 | Support Network Map | Implementation complete on feature branch; browser and editorial review pending |
+| 10 | H.A.W.K. Dashboard | Next |
 
 ## Tool 01 architecture
 
@@ -171,3 +171,19 @@ Optional local readers for version-1 timeline, evidence index and checklist expo
 - Static integration validation: run #732, completed (success) at integration commit 602d6dc2943ec898718b794c31e1e2b273c3f406.
 - Real-browser desktop/mobile, accessibility, actual download/import/print and editorial review remain release gates.
 - Tool 09: Support Network Map should distinguish personal, practical, professional and community support roles, boundaries, availability and specific appropriate help requests. No witness recruitment, private contact database, contact automation, locating individuals, judging loyalty or pressure to take sides. Include emergency and professional support routing when appropriate. Same substantive word minimum, offline privacy and release standards.
+
+
+## Tool 09 architecture and verification
+
+Public lesson: `hawk-support-network.html` (3,862 independently counted substantive teaching words after removing a soft hyphen, 17 sections, three fictional worked scenarios, one guided exercise). Adapts the original Allies and New Brotherhood concepts into practical support, personal connection, qualified professional roles, constructive community, specific respectful requests, consent, boundaries, support gaps, ordinary fallback options and privacy. Emergency and crisis routing is consistent with NBJB's existing Support & Safety page.
+
+Offline application: `downloads/hawk-support-network-offline.html`. Self-contained, restrictive CSP, no external resources, network, account or automatic storage. Up to 1,000 entries; explicit unencrypted JSON export/import and print displayed entries. No private contact database, witness recruitment, loyalty score, locating or contacting people, safety monitoring, emergency dispatch, automated reminders or professional vetting.
+
+Support envelope: `{format: "NBJB-HAWK-SUPPORT", version: 1, entries: [...]}`. Stable S- ID plus 16 uppercase hexadecimal characters. Fields: specific support need, role, resource alias, availability/arrangement status, practical priority, request/next action, boundaries, agreement/outcome notes, ordinary fallback, optional personal review date, revision note and creation/update timestamps. Eight role categories; six arrangement states, including unidentified gap, identified/not agreed, request made/waiting, confirmed, unavailable/declined and resolved. Unidentified gaps require blank resource alias. Identified/awaiting/confirmed/unavailable entries require alias; confirmed or resolved entries require agreement/outcome note. Confirmation is self-reported, not verification. Grouped role display, priority ordering, role/status/priority/text filters and entry counts. No case-document imports; support roles deliberately remain separate from witness and evidence records.
+
+- Committed teaching body independently verified at 3,862 words; page and center display corrected accordingly.
+- JavaScript syntax and external dependency/network-call inspection passed.
+- Simulated DOM harness: 30/30 checks passed, including required fields, real dates, gap/alias rules, confirmation/outcome rules, grouping, fallback, status counts, stable IDs/revisions, filters, full export, print invocation, import round-trip, malformed/duplicate import rejection, cancel replacement/clear, remove, dirty unload protection and unsubmitted select clearing.
+- Static integration validation: run #736, completed (success) at integration commit b91cba0e6348279d4c7ce40435fe697c800aac9d.
+- Real-browser desktop/mobile, accessibility, actual download/import/print under CSP and editorial review remain release gates.
+- Tool 10: H.A.W.K. Dashboard should provide a standalone offline coordinator for the nine existing version-1 exports. Define and document versioned workspace envelope and strict per-tool schema validation before implementing cross-file aggregation. Preserve existing standalone exports and stable IDs; explicit replacement/merge policy and duplicate handling; no automatic synchronization or cloud storage. Prioritize clear counts, unresolved questions, cross-reference presence, practical next actions, export back to original formats, privacy and no case-readiness scores, legal conclusions or relationship scoring. Communication draft and support data should remain deliberately separable; do not automatically expose their text in summary or print. Same 3,000-word minimum and release standards.

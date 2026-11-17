@@ -20,8 +20,8 @@ H.A.W.K. helps people facing high-conflict divorce organize the external situati
 |---|---|---|
 | 01 | Incident Timeline Builder | Implementation complete on feature branch; browser and editorial review pending |
 | 02 | Evidence Index | Implementation complete on feature branch; browser and editorial review pending |
-| 03 | Documentation Checklist | Next |
-| 04 | Communication Analyzer | Planned |
+| 03 | Documentation Checklist | Implementation complete on feature branch; browser and editorial review pending |
+| 04 | Communication Analyzer | Next |
 | 05 | Court Preparation Organizer | Planned |
 | 06 | Parenting Log | Planned |
 | 07 | Financial Organizer | Planned |
@@ -63,3 +63,21 @@ Interoperability: optional read-only import of a Tool 01 version-1 timeline expo
 - Simulated DOM harness: 20 of 21 initial assertions passed. Search test incorrectly expected one result for "Message" even though both records used the record type "Message or email". Focused retest of unique title, all-field behavior, category filtering and full export passed all four assertions. All intended core behaviors verified in simulation.
 - Desktop/mobile browser behavior, download/print under CSP, keyboard/screen-reader and editorial review still pending.
 - Tool 03 should track missing records, lawful request routes, priority, status, and next action. Reuse existing reference formats; no sensitive uploads or automatic access to other people's records. No requirement to collect every possible document.
+
+
+## Tool 03 architecture and verification
+
+Public lesson: `hawk-documentation-checklist.html` (3,801 independently counted teaching words, 17 sections, three worked scenarios, one guided exercise).
+
+Offline application: `downloads/hawk-documentation-checklist-offline.html`. Memory-only task plan, restrictive CSP, no external dependencies, account, network, automatic storage or reminders. Up to 1,000 tasks, explicitly exported unencrypted JSON or printed displayed entries.
+
+Checklist envelope: `{format: "NBJB-HAWK-CHECKLIST", version: 1, entries: [...]}`. Stable task ID C- plus 16 uppercase hexadecimal characters. Entries include title, category, priority, status, purpose, lawful access/request route, next action, optional target date and source/basis, actual request date, related timeline and evidence IDs, outcome, revision note, creation/update timestamps. Target dates are planning fields, not legal deadlines; requested status requires a recorded request date, and completed/deferred/not-needed status requires a result or reason.
+
+Optional read-only local readers for version-1 timeline and evidence exports retain only corresponding ID sets in memory. Cross-reference checks establish presence in a selected file, not truth, provenance or admissibility. The tool does not synchronize source files or transmit requests. It reports counts of active, completed, deferred and not-needed tasks, not a measure of case readiness.
+
+- Committed prose independently counted at 3,801 words.
+- JavaScript syntax and offline dependency inspection passed.
+- Simulated DOM harness: 24/24 checks passed, including required fields, valid dates and date basis, request date, outcome, stable IDs, both reference imports, duplicate rejection, no source descriptions retained/displayed, sorting, search-independent status/priority filters, round-trip export, print invocation and removal.
+- Static integration validation: run #707, completed (success) at integration commit bb2580c0819e75154b32fad3c29102b77caccb6d.
+- Real-browser desktop/mobile, actual download/print, keyboard/screen-reader and editorial review remain release gates.
+- Tool 04 should teach communication discipline and offer local self-review of drafts, not diagnosis, motive detection, legal assessment or automatic messaging. Use a transparent rules/checklist approach without network, external AI, or claims to infer intent or criminal conduct. Avoid encouraging contact if restricted or unsafe.

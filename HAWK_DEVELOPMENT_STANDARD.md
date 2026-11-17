@@ -19,8 +19,8 @@ H.A.W.K. helps people facing high-conflict divorce organize the external situati
 | Order | Application | Status |
 |---|---|---|
 | 01 | Incident Timeline Builder | Implementation complete on feature branch; browser and editorial review pending |
-| 02 | Evidence Index | Next |
-| 03 | Documentation Checklist | Planned |
+| 02 | Evidence Index | Implementation complete on feature branch; browser and editorial review pending |
+| 03 | Documentation Checklist | Next |
 | 04 | Communication Analyzer | Planned |
 | 05 | Court Preparation Organizer | Planned |
 | 06 | Parenting Log | Planned |
@@ -46,3 +46,20 @@ Tool 02 should use stable evidence references (e.g. E001) and support linking to
 - Simulated DOM/event harness: 15/15 checks passed (blank date/fields; invalid day; valid add; approximate and unknown dates; export; required correction; stable ID; search; filtered export; print invocation; clear; JSON round trip; malformed import; delete).
 - GitHub Actions Validate static site run #699 succeeded at commit 2752d420bfffdad49b7fcb95eaa68fd5982fb7ad.
 - Real browser desktop/mobile, actual download/print under CSP, keyboard/screen reader usability and editorial review are still required before production. No live production release from this PR yet.
+
+
+## Tool 02 architecture and verification
+
+Public lesson: `hawk-evidence-index.html` (3,735 independently counted teaching words, 17 sections, three worked scenarios, one guided exercise).
+
+Offline application: `downloads/hawk-evidence-index-offline.html`. Memory-only editor, explicit JSON export/import, text-only rendering, restrictive CSP, no network or automatic storage. Up to 1,000 records. Exported files are unencrypted.
+
+Evidence envelope: `{format: "NBJB-HAWK-EVIDENCE", version: 1, entries: [...]}`. Stable ID: E- plus 16 uppercase hexadecimal characters. Legacy codes such as E001 may be retained as an alias (not an official exhibit number). Each entry includes title, neutral category, type, source status, record date, acquired date, origin, storage alias, description, limitations, related timeline IDs, correction note, and creation/update timestamps. The tool does not receive original documents or inspect metadata.
+
+Interoperability: optional read-only import of a Tool 01 version-1 timeline export; only event ID set retained in memory. Per-record links are stored in the evidence export. Unmatched IDs mean absent from selected file, not false. User copies E-ID into timeline reference field manually. Separate versioned exports remain the source of working data. No automatic two-way synchronization, combined workspace or cross-file merge yet.
+
+- Committed teaching body verified at 3,735 words.
+- JavaScript syntax and offline dependency inspection passed.
+- Simulated DOM harness: 20 of 21 initial assertions passed. Search test incorrectly expected one result for "Message" even though both records used the record type "Message or email". Focused retest of unique title, all-field behavior, category filtering and full export passed all four assertions. All intended core behaviors verified in simulation.
+- Desktop/mobile browser behavior, download/print under CSP, keyboard/screen-reader and editorial review still pending.
+- Tool 03 should track missing records, lawful request routes, priority, status, and next action. Reuse existing reference formats; no sensitive uploads or automatic access to other people's records. No requirement to collect every possible document.

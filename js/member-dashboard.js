@@ -243,7 +243,7 @@
 
     if (isPaid) {
       title.textContent = focus ? `Go deeper with ${focus}` : 'Continue the deeper member library';
-      copy.textContent = '35 published guided lessons and workbooks are available across six Flamewalker+ tracks. Videos are not included.';
+      copy.textContent = '44 published guided lessons and workbooks are available across six Flamewalker+ tracks. Videos are not included.';
       link.href = 'member-lessons.html';
       link.textContent = 'Browse My Lessons';
       return;

@@ -21,8 +21,8 @@ H.A.W.K. helps people facing high-conflict divorce organize the external situati
 | 01 | Incident Timeline Builder | Implementation complete on feature branch; browser and editorial review pending |
 | 02 | Evidence Index | Implementation complete on feature branch; browser and editorial review pending |
 | 03 | Documentation Checklist | Implementation complete on feature branch; browser and editorial review pending |
-| 04 | Communication Analyzer | Next |
-| 05 | Court Preparation Organizer | Planned |
+| 04 | Communication Analyzer | Implementation complete on feature branch; browser and editorial review pending |
+| 05 | Court Preparation Organizer | Next |
 | 06 | Parenting Log | Planned |
 | 07 | Financial Organizer | Planned |
 | 08 | Witness Observation Organizer | Planned |
@@ -81,3 +81,21 @@ Optional read-only local readers for version-1 timeline and evidence exports ret
 - Static integration validation: run #707, completed (success) at integration commit bb2580c0819e75154b32fad3c29102b77caccb6d.
 - Real-browser desktop/mobile, actual download/print, keyboard/screen-reader and editorial review remain release gates.
 - Tool 04 should teach communication discipline and offer local self-review of drafts, not diagnosis, motive detection, legal assessment or automatic messaging. Use a transparent rules/checklist approach without network, external AI, or claims to infer intent or criminal conduct. Avoid encouraging contact if restricted or unsafe.
+
+
+## Tool 04 architecture and verification
+
+Public lesson: `hawk-communication-analyzer.html` (4,087 independently counted teaching words, 17 sections, three worked scenarios, one guided exercise).
+
+Offline application: `downloads/hawk-communication-analyzer-offline.html`. Memory-only draft reviewer with restrictive CSP, no external dependencies, AI, automatic storage, accounts, network calls or message sending. Three decision inputs (safety, permitted channel, practical need) plus stated purpose are required before drafting/review/export; unsafe, uncertain, restricted or unnecessary contact blocks the reviewer. This is a self-report workflow, not actual permission, legal advice or risk assessment.
+
+Transparent English literal rules: absolute terms, personal labels, possible motive attribution, accusation words, threat-like phrases, repeated punctuation, uppercase words, plus length review above 120 words. Every flag is contextual; no abuse score, personality classification, predictive claim or green-light result. Composer joins the user's own factual context, practical request/update and optional next step. Initial and revised drafts can be independently reviewed. A six-item human reflection checklist resets on revised draft or decision changes and requires a current revised review.
+
+Review envelope: `{format: "NBJB-HAWK-COMMUNICATION", version: 1, review: {...}, checks: {...}}`. Contains one working review with decision choices, purpose, optional manual T-/E-/C- references, original outgoing draft, revised draft, composer fields and historical reflection choices. Imported text is restored while current decision fields and checks reset; only a summary of prior choices and count is displayed. No record of actual sending. Export is optional readable, unencrypted JSON. No automatic cross-file synchronization or validation of referenced IDs.
+
+- Final teaching body independently counted at 4,087 words after editorial clarification of import behavior.
+- JavaScript syntax and offline dependency inspection passed.
+- Simulated DOM harness: 27/27 checks passed, including emergency/uncertain/restricted/no-response gates, purpose and reference validation, all seven pattern classes, length threshold, stale-review invalidation, composer, human checklist reset, export gating, import reconfirmation, malformed input handling, cancel and clear. Later changes were copy/word-count only.
+- Static integration validation: run #714, in_progress at integration commit 494000e29f922b07d8f6a8bc0310800444a07981.
+- Real browser/mobile, actual local download/import under CSP, keyboard/screen-reader and editorial review remain release gates.
+- Tool 05: Court Preparation Organizer should help users structure issues, questions for counsel, relevant record references and practical logistics; distinguish official dates from personal targets. Do not offer procedural deadlines, legal conclusions, filings, witness coaching or litigation strategy as legal advice. Keep the same word-count and offline standards.

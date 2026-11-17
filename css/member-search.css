@@ -1,0 +1,70 @@
+/* Compact Find & Resume, alongside More in the signed-in member nav. */
+.member-nav-actions{
+  display:flex;align-items:stretch;gap:8px;margin-left:auto;min-width:0;
+  flex:0 0 auto;position:relative;
+}
+.member-nav-actions .member-nav-more{margin-left:0}
+.member-subnav button.member-search-toggle{
+  font:inherit;font-size:.8rem;font-weight:800;line-height:1.2;
+  min-height:38px;padding:9px 13px;flex:0 0 auto;
+  border:1px solid var(--line);border-radius:999px;
+  background:rgba(255,255,255,.025);color:var(--text);
+  cursor:pointer;white-space:nowrap;
+}
+.member-subnav button.member-search-toggle:hover,
+.member-subnav button.member-search-toggle:focus-visible,
+.member-subnav button.member-search-toggle[aria-expanded="true"]{
+  outline-offset:3px;border-color:var(--line-hot);
+  background:rgba(255,122,45,.09);
+}
+.member-search-panel{
+  position:absolute;right:0;top:calc(100% + 10px);z-index:23;
+  width:min(420px,calc(100vw - 42px));
+  max-height:min(75vh,680px);overflow:auto;overscroll-behavior:contain;
+  padding:16px;box-sizing:border-box;border:1px solid var(--line-hot);
+  border-radius:16px;background:#151519;box-shadow:0 20px 38px rgba(0,0,0,.6);
+  color:var(--text);
+}
+.member-search-panel[hidden]{display:none!important}
+.member-search-panel form{display:grid;gap:9px;margin:0}
+.member-search-panel label{font-size:.86rem;font-weight:800;color:var(--text)}
+.member-search-panel input[type="search"]{
+  box-sizing:border-box;width:100%;min-height:44px;padding:10px 13px;
+  border-radius:12px;border:1px solid var(--line);
+  color:var(--text);background:#0e0e12;font:inherit;font-size:.9rem;
+}
+.member-search-panel input[type="search"]:focus-visible{
+  outline:2px solid var(--ember-pale);outline-offset:2px;
+}
+.member-search-privacy{margin:9px 0 12px;color:var(--muted);font-size:.76rem;line-height:1.5}
+.member-search-results{display:grid;gap:5px;margin:0;padding:0;list-style:none}
+.member-search-results li{min-width:0}
+.member-subnav .member-search-panel .member-search-result{
+  display:grid;gap:4px;box-sizing:border-box;width:100%;
+  padding:11px 12px;line-height:1.4;white-space:normal;text-align:left;
+  border:1px solid transparent;border-radius:10px;text-decoration:none;
+  color:var(--text);font-weight:400;background:transparent;
+}
+.member-subnav .member-search-panel .member-search-result:hover,
+.member-subnav .member-search-panel .member-search-result:focus-visible{
+  border-color:var(--line-hot);background:rgba(255,122,45,.09);
+  outline-offset:2px;
+}
+.member-search-result strong{font-size:.88rem;overflow-wrap:anywhere}
+.member-search-result small{font-size:.76rem;color:var(--muted);line-height:1.45;overflow-wrap:anywhere}
+.member-search-status{margin:12px 0 0;color:var(--muted);font-size:.8rem;line-height:1.5}
+@media(max-width:760px){
+  /* Dashboard + Lessons + Search + More in the same sticky navigation row. */
+  .member-subnav{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .member-nav-actions{
+    grid-column:span 2;margin-left:0;width:100%;gap:6px;
+  }
+  .member-nav-actions .member-nav-more,
+  .member-subnav button.member-search-toggle{
+    flex:1 1 0;min-width:0;
+  }
+  .member-subnav button.member-search-toggle{
+    min-height:43px;padding:10px 5px;border-radius:12px;font-size:.78rem;
+  }
+  .member-search-panel{width:min(420px,calc(100vw - 36px));right:0;top:calc(100% + 11px)}
+}

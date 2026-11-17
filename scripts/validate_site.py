@@ -288,10 +288,14 @@ def main() -> int:
         approved_member_artifacts = {
             "member-auth.html",
             "member-community.html",
+            "member-framework.html",
+            "member-feedback.html",
             "member-library.html",
+            "member-lessons.html",
             "member-media.html",
             "member-onboarding.html",
             "member-path.html",
+            "member-path-stage.html",
             "member-profile.html",
             "member-premium-lesson.html",
             "member-progress.html",
@@ -303,19 +307,27 @@ def main() -> int:
             "member-work.html",
             "members.html",
             "css/member-dashboard.css",
+            "css/member-search.css",
             "css/member-workshop.css",
             "css/member-expansion.css",
             "css/member-premium-lesson.css",
             "css/members.css",
+            "css/member-path-stage.css",
             "js/member-auth.js",
             "js/member-billing.js",
             "js/member-bootstrap.js",
             "js/member-dashboard.js",
+            "js/member-search.js",
             "js/member-workshop.js",
             "js/member-entitlements.js",
             "js/member-history-insights.js",
+            "js/member-learning-progress.js",
+            "js/member-feedback.js",
             "js/member-platform.js",
+            "js/member-path-stage.js",
+            "js/member-path-foundations.js",
             "js/member-premium-lesson.js",
+            "js/member-final-reflection-journal.js",
             "js/member-lesson-workspaces.js",
             "js/member-chosen-code.js",
             "js/member-editorial-workbooks.js",
@@ -373,7 +385,7 @@ def main() -> int:
             "forge-tool", "checkin-tool", "pattern-tool",
             "boundary-builder", "one-stone", "six-question-tool"
         )
-        if 'data-member-page="workshop"' not in workshop_text or 'src="js/member-bootstrap.js"' not in workshop_text:
+        if 'data-member-page="workshop"' not in workshop_text or not re.search(r'src="js/member-bootstrap[.]js(?:[?][^"]*)?"', workshop_text):
             errors.append("member-workshop.html: authenticated member bootstrap is required.")
         if 'name="robots" content="noindex,nofollow"' not in workshop_text:
             errors.append("member-workshop.html: member workspace must be noindex,nofollow.")
@@ -460,19 +472,19 @@ def main() -> int:
         if billing_client.exists():
             billing_code = billing_client.read_text(encoding="utf-8")
             if (
-                "const PUBLIC_CHECKOUT_UI_ENABLED = false;" not in billing_code
+                "const PUBLIC_CHECKOUT_UI_ENABLED = true;" not in billing_code
                 or "if (!PUBLIC_CHECKOUT_UI_ENABLED) return;" not in billing_code
             ):
-                errors.append("Premium billing UI cannot be enabled before launch authorization.")
+                errors.append("Premium billing UI release switch or fail-closed fallback is missing.")
             staged_store = (ROOT / "member-store.html").read_text(encoding="utf-8")
             if 'id="member-live-billing" aria-labelledby="member-live-billing-title" hidden' not in staged_store:
                 errors.append("Premium Store checkout panel must remain hidden during prelaunch.")
         staged_server = ROOT / "launch-backend-staging/create-live-checkout-session/index.ts"
         if staged_server.exists():
             server_code = staged_server.read_text(encoding="utf-8")
-            for must in ("const PUBLIC_LIVE_CHECKOUT_ENABLED = false;", "publishedLessons < 7", "NBJB_LIVE_BILLING_MODE"):
+            for must in ("const PUBLIC_LIVE_CHECKOUT_ENABLED = true;", "publishedLessons < 7", "NBJB_LIVE_BILLING_MODE"):
                 if must not in server_code:
-                    errors.append("Live Checkout staged backend must be hard-locked and require published content.")
+                    errors.append("Live Checkout backend must validate published content and subscription authorization.")
         # Unreviewed legacy billing and migrations are excluded from the static site.
         paid_only_paths = {
             "STRIPE_INTEGRATION.md",
@@ -554,7 +566,7 @@ def main() -> int:
         dashboard_text = (ROOT / "members.html").read_text(encoding="utf-8") if (ROOT / "members.html").exists() else ""
         dashboard_js = (ROOT / "js" / "member-dashboard.js").read_text(encoding="utf-8") if (ROOT / "js" / "member-dashboard.js").exists() else ""
 
-        if 'data-member-page="start-here"' not in start_here_text or 'src="js/member-bootstrap.js"' not in start_here_text:
+        if 'data-member-page="start-here"' not in start_here_text or not re.search(r'src="js/member-bootstrap[.]js(?:[?][^"]*)?"', start_here_text):
             errors.append("member-start-here.html: lesson must remain inside the authenticated member bootstrap.")
         if 'name="robots" content="noindex,nofollow"' not in start_here_text:
             errors.append("member-start-here.html: member lesson must remain noindex,nofollow.")
@@ -575,8 +587,14 @@ def main() -> int:
         community_text = (ROOT / "member-community.html").read_text(encoding="utf-8") if (ROOT / "member-community.html").exists() else ""
         future_surface_text = "\n".join((library_text, media_text, community_text, member_css_text))
 
-        if "top: 10px" not in member_css_text or "overflow-x: auto" not in member_css_text:
-            errors.append("css/members.css: member navigation must remain top-pinned and horizontally usable on mobile.")
+        # The current nav uses accessible primary links plus a native More
+        # disclosure; on mobile it is a compact grid, not a horizontal scroller.
+        if ("top: 10px" not in member_css_text or
+                ".member-nav-more-panel" not in member_css_text or
+                ".member-nav-mobile-duplicate" not in member_css_text or
+                "grid-template-columns: repeat(3, minmax(0, 1fr))" not in member_css_text or
+                "overflow: visible" not in member_css_text):
+            errors.append("css/members.css: member navigation must remain top-pinned, compact and reachable on mobile.")
         if "member-page-head h1" not in member_css_text or "body[data-member-page] .member-panel h2" not in member_css_text:
             errors.append("css/members.css: member-only heading scale overrides are missing.")
         if "content: 'COMING SOON'" not in member_css_text:

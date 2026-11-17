@@ -1,0 +1,40 @@
+name: Spirit of Reach Growth Briefs
+
+# Research and founder-reviewable drafts only; no social posting, site changes or secrets.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '13 11 * * 4'
+      timezone: America/New_York
+  pull_request:
+    paths:
+      - '.github/workflows/flame-spirit-reach.yml'
+      - 'scripts/flame_spirit_reach.mjs'
+      - 'scripts/test_flame_spirit_reach.mjs'
+      - '.github/workflows/validate-site.yml'
+      - 'FLAME_SPIRITS.md'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nbjb-reach
+  cancel-in-progress: false
+
+jobs:
+  briefs:
+    name: Spirit of Reach — editorial growth briefs
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Checkout published site source
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Test reach briefs and content-duplication guardrails
+        run: node --test scripts/test_flame_spirit_reach.mjs
+
+      - name: Produce three public-source, founder-reviewable text briefs
+        if: github.event_name != 'pull_request'
+        run: node scripts/flame_spirit_reach.mjs

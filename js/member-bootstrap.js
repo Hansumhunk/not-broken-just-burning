@@ -45,19 +45,39 @@
 
   const pageScripts = {
     dashboard: ["js/member-dashboard.js"],
-    progress: ["js/member-history-insights.js"],
+    "path-stage": ["js/member-path-foundations.js", "js/member-path-stage.js"],
+    progress: ["js/member-history-insights.js", "js/member-learning-progress.js"],
     work: ["js/member-history-insights.js"],
     workshop: ["js/tool-member-history.js", "js/member-workshop.js"],
     "start-here": ["js/member-start-here.js"],
-    "premium-lesson": ["js/member-chosen-code.js", "js/member-editorial-workbooks.js", "js/member-lesson-workspaces.js", "js/member-premium-lesson.js"],
+    feedback: ["js/member-feedback.js"],
+    "premium-lesson": ["js/member-chosen-code.js", "js/member-editorial-workbooks.js", "js/member-lesson-workspaces.js", "js/member-final-reflection-journal.js", "js/member-premium-lesson.js"],
     store: ["js/member-billing.js"]
   };
 
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = ['js/member-editorial-workbooks.js', 'js/member-chosen-code.js', 'js/member-premium-lesson.js', 'js/member-lesson-workspaces.js', 'js/member-history-insights.js', 'js/member-platform.js', 'js/member-billing.js', 'js/member-entitlements.js'].includes(src)
-        ? src + '?v=qa-billing-v11'
+      script.src = src === 'js/member-search.js'
+        ? src + '?v=find-resume-v1'
+        : src === 'js/member-path-foundations.js' || src === 'js/member-path-stage.js'
+        ? src + '?v=member-depth-v2'
+        : src === 'js/member-billing.js'
+        ? src + '?v=paid-account-view-v1'
+        : src === 'js/member-feedback.js'
+        ? src + '?v=member-feedback-v1'
+        : src === 'js/member-learning-progress.js'
+        ? src + '?v=member-path-v1'
+        : src === 'js/member-dashboard.js'
+        ? src + '?v=dashboard-returning-v2'
+        : src === 'js/member-platform.js'
+        ? src + '?v=member-path-v1'
+        : src === 'js/member-final-reflection-journal.js'
+        ? src + '?v=journal-reader-v23'
+        : src === 'js/member-premium-lesson.js'
+        ? src + '?v=grounded-cues-v24'
+        : ['js/member-editorial-workbooks.js', 'js/member-chosen-code.js', 'js/member-premium-lesson.js', 'js/member-lesson-workspaces.js', 'js/member-history-insights.js', 'js/member-platform.js', 'js/member-billing.js', 'js/member-entitlements.js'].includes(src)
+        ? src + '?v=nbjb-return-v12'
         : src;
       script.onload = resolve;
       script.onerror = () => reject(new Error("Failed to load " + src));
@@ -115,6 +135,7 @@
     }
     await loadScript("js/learning-continuity.js");
     await loadScript("js/member-platform.js");
+    await loadScript("js/member-search.js");
     window.NBJBLearningContinuity?.render?.();
 
     const page = body.dataset.memberPage || "";
@@ -123,6 +144,12 @@
     // A sign-out might have occurred while scripts were loading.
     if (!auth.user?.id || auth.user.id !== user.id) return redirectToLogin();
     body.dataset.memberAccess = "granted";
+    // Honor a deep-link only after the protected member page becomes visible.
+    if ((page === 'framework' || page === 'path') &&
+        /^#(?:chaos|clarity|agency|action|integration|path-focus-[a-z-]+)$/.test(location.hash || '')) {
+      const target = document.getElementById(location.hash.slice(1));
+      window.requestAnimationFrame?.(() => target?.scrollIntoView({ block: 'start' }));
+    }
   }
 
   start().catch((error) => {

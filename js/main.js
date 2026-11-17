@@ -60,6 +60,14 @@ if (analyticsHostnames.has(window.location.hostname) && !privacySignalEnabled) {
     disable_session_recording: true,
     capture_exceptions: false
   });
+  // Anonymous, aggregate only: record intent to begin a free membership.
+  // Never attach email, account ID, reflection text, or session identity.
+  document.addEventListener('click', (event) => {
+    const link = event.target?.closest?.('a[data-growth-cta]');
+    const placement = link?.getAttribute('data-growth-cta');
+    if (!['home_hero', 'home_lessons', 'join_signup'].includes(placement)) return;
+    window.posthog?.capture?.('nbjb_free_membership_cta_clicked', { placement });
+  });
 }
 
 

@@ -32,6 +32,301 @@ test('unpublished manuscript review controls remain hidden by default and never 
   assert.doesNotMatch(js, /\.from\(['"]flamewalker_premium_lessons['"]\).*\.update\(/s);
 });
 
+test('semantic pagination keeps every distinct scenario and case study on its own page', () => {
+  const source = read('js/member-premium-lesson.js');
+  // Synthetic examples only: protected manuscript bodies stay in Supabase.
+  const sectionCode = source.slice(source.indexOf('  const major ='), source.indexOf('  function label(step)'));
+  function makeReader(slug) {
+    return vm.runInNewContext(
+      'const slug = ' + JSON.stringify(slug) +
+      '; const prettyHeading = s => s;' + sectionCode +
+      '\n({ sectionize, remapScenarioBookmark })', {}, {timeout:1000});
+  }
+  const blocks = [
+    {type:'heading',text:'PART 4 — CONTEXT'},
+    {type:'paragraph',text:'A shorter teaching introduction.'},
+    {type:'heading',text:'PART 5 — FOUR SCENARIOS THAT TEST YOUR JUDGMENT'}
+  ];
+  for(const letter of ['A','B','C','D']) {
+    blocks.push(
+      {type:'paragraph',text:'Scenario ' + letter + ' — Example ' + letter + '. ' + 'A practical situation. '.repeat(34)},
+      {type:'paragraph',text:'Why a decision is difficult. '.repeat(30)},
+      {type:'paragraph',text:'What a thoughtful response might look like. '.repeat(28)}
+    );
+  }
+  blocks.push({type:'paragraph',text:'These cases illustrate decisions, not diagnoses.'});
+  blocks.push({type:'heading',text:'PART 6 — A DECISION CHECK'});
+  blocks.push({type:'paragraph',text:'Apply what you learned.'});
+  const reader = makeReader('red-flags-and-responsibility');
+  const pages = reader.sectionize(blocks);
+  const scenarios = pages.filter(page => /Part 5 · Scenario [A-D] —/.test(page.title));
+  assert.deepEqual([...scenarios].map(page=>page.title),
+    ['A','B','C','D'].map(letter=>'Part 5 · Scenario ' + letter + ' — Example ' + letter));
+  assert.equal(scenarios.length,4);
+  for(let i=0;i<scenarios.length;i++) {
+    assert.equal(scenarios[i].continuation,0);
+    assert.equal(scenarios[i].blocks.length,i===3?4:3);
+    assert.ok(scenarios[i].blocks.every(block=>!/^Scenario [A-D] —/.test(block.text)));
+  }
+  const legacy = reader.sectionize(blocks,{splitScenarios:false});
+  const oldB = legacy.findIndex(page=>page.blocks.some(block=>block.text.startsWith('Scenario B —')));
+  assert.ok(oldB>=0);
+  assert.equal(pages[reader.remapScenarioBookmark(blocks,oldB,pages)].title,scenarios[1].title);
+
+  const second = makeReader('the-love-bargain');
+  const shortCases = [
+    {type:'heading',text:'PART 3 — DIFFERENT PATTERNS'},
+    {type:'paragraph',text:'Scenario A — the assumed bargain. A large sacrifice was made.'},
+    {type:'paragraph',text:'Scenario B — an agreed exchange. Both partners share a plan.'},
+    {type:'paragraph',text:'Scenario C — protective restraint. A parent seeks good advice.'},
+    {type:'paragraph',text:'The conclusion applies all three examples.'},
+    {type:'heading',text:'PART 4 — WHAT COMES NEXT'},
+    {type:'paragraph',text:'The following practice.'}
+  ];
+  const shortPages=second.sectionize(shortCases);
+  const titles=shortPages.map(page=>page.title);
+  assert.equal(titles.filter(title=>/^Part 3 · Scenario [A-C]/.test(title)).length,3);
+  assert.ok(titles.indexOf('Part 3 · Scenario A — the assumed bargain') <
+            titles.indexOf('Part 3 · Scenario B — an agreed exchange'));
+  assert.ok(titles.indexOf('Part 3 · Scenario B — an agreed exchange') <
+            titles.indexOf('Part 3 · Scenario C — protective restraint'));
+  assert.ok(shortPages.filter(page=>/^Part 3 · Scenario/.test(page.title))
+    .every(page=>page.blocks.length>=1));
+
+  const third = makeReader('body-as-ally');
+  const headed = [
+    {type:'heading',text:'PART 2 — LEARNING THE SKILL'},
+    {type:'paragraph',text:'An explanation of the skill.'},
+    {type:'heading',text:'SCENARIO: THE OVERWORKED PROVIDER'},
+    {type:'paragraph',text:'The setting. '.repeat(120)},
+    {type:'paragraph',text:'The applied response. '.repeat(105)},
+    {type:'heading',text:'FIELD STUDY — WHAT TO PRACTICE'},
+    {type:'paragraph',text:'This practical exercise is after the case.'},
+    {type:'heading',text:'PART 3 — MOVING FORWARD'},
+    {type:'paragraph',text:'Next concept.'},
+    {type:'heading',text:'WORKED SCENARIO — A SECOND CHOICE'},
+    {type:'paragraph',text:'The second setting. '.repeat(68)},
+    {type:'paragraph',text:'The resulting action. '.repeat(63)},
+    {type:'heading',text:'PART 4 — THE NEXT STEP'},
+    {type:'paragraph',text:'Next topic.'}
+  ];
+  const headedPages=third.sectionize(headed);
+  const firstCase=headedPages.find(page=>page.title.endsWith('SCENARIO: THE OVERWORKED PROVIDER'));
+  const secondCase=headedPages.find(page=>page.title.endsWith('WORKED SCENARIO — A SECOND CHOICE'));
+  assert.ok(firstCase && secondCase);
+  assert.equal(firstCase.blocks.length,2,'even long scenarios remain on one reading page');
+  assert.equal(secondCase.blocks.length,2);
+  assert.ok(!firstCase.blocks.some(block=>block.text.includes('FIELD STUDY')));
+  const oldHeaded=third.sectionize(headed,{splitScenarios:false});
+  const oldCaseIndex=oldHeaded.findIndex(page=>page.blocks.some(block=>block.text==='SCENARIO: THE OVERWORKED PROVIDER'));
+  assert.ok(oldCaseIndex>=0);
+  assert.equal(headedPages[third.remapScenarioBookmark(headed,oldCaseIndex,headedPages)].title,firstCase.title);
+  const fieldPage=headedPages.find(page=>page.blocks.some(block=>block.text.includes('FIELD STUDY')));
+  assert.ok(fieldPage && fieldPage !== firstCase);
+
+  // Preserve the original seven founding-reader structures, including their
+  // special map layouts and chapter indexes.
+  const original=makeReader('father-wound');
+  const legacyMap=[
+    {type:'heading',text:'PART 2 — FATHER IMPRINT MAP'},
+    {type:'heading',text:'EXAMPLE 1'},
+    {type:'paragraph',text:'A worked worksheet example.'},
+    {type:'heading',text:'EXAMPLE 2'},
+    {type:'paragraph',text:'Second worksheet example.'}
+  ];
+  assert.deepEqual(original.sectionize(legacyMap),original.sectionize(legacyMap,{splitScenarios:false}));
+  assert.equal(original.sectionize(legacyMap).length,1);
+  assert.ok(source.includes("storageWrite(caseLayoutKey, 'semantic-cases-v1')"));
+  assert.ok(source.includes("storageWrite(scenarioLayoutKey, 'one-scenario-per-page')"));
+});
+
+test('numbered examples stay with their explanation in Father and Mother Wound', () => {
+  const source=read('js/member-premium-lesson.js');
+  const sectionCode=source.slice(source.indexOf('  const major ='),source.indexOf('  function label(step)'));
+  const reader=slug=>vm.runInNewContext(
+    'const slug = '+JSON.stringify(slug)+'; const prettyHeading = s => s;'+sectionCode+
+    '\n({sectionize,remapScenarioBookmark})',{}, {timeout:1200}
+  );
+  for(const slug of ['father-wound','mother-wound']){
+    const ctx=reader(slug);
+    const blocks=[
+      {type:'heading',text:slug==='father-wound'?'THE FATHER IMPRINT MAP':'THE MATERNAL IMPRINT MAP'},
+      {type:'heading',text:'COLUMN 1 — WHAT I RECEIVED'},
+      {type:'paragraph',text:'Start with what you received. '+ 'Realistic detail. '.repeat(31)},
+      {type:'heading',text:'COLUMN 2 — WHAT I MISSED'},
+      {type:'paragraph',text:'Notice what you needed. '+ 'Relevant details. '.repeat(24)},
+      {type:'heading',text:'COLUMN 3 — WHAT I LEARNED'},
+      {type:'paragraph',text:'Identify the inherited rule. '+ 'Further detail. '.repeat(25)},
+      {type:'heading',text:'COLUMN 4 — WHAT I CHOOSE NOW'},
+      {type:'paragraph',text:'Describe your new rule. '+ 'More detail. '.repeat(16)}
+    ];
+    for(let n=1;n<=3;n++){
+      blocks.push({type:'heading',text:'EXAMPLE '+n});
+      for(let k=1;k<=5;k++)blocks.push({
+        type:'paragraph',text:'Example '+n+' response '+k+': '+ 'Practical worked answer. '.repeat(5)
+      });
+    }
+    const updated=ctx.sectionize(blocks);
+    for(let n=1;n<=3;n++){
+      const heading='EXAMPLE '+n;
+      const pages=updated.filter(step=>step.blocks.some(b=>b.kind==='heading'&&b.text===heading));
+      assert.equal(pages.length,1,slug+': each example heading occurs on one page');
+      const page=pages[0];
+      const start=page.blocks.findIndex(b=>b.kind==='heading'&&b.text===heading);
+      assert.ok(start>=0&&start<page.blocks.length-1,slug+': never orphan a heading');
+      for(let k=1;k<=5;k++){
+        assert.ok(page.blocks.some(b=>b.text.startsWith('Example '+n+' response '+k+':')),
+          slug+': keep all five responses on the same page as Example '+n);
+      }
+    }
+    const previous=ctx.sectionize(blocks,{splitScenarios:true,keepExamplesTogether:false});
+    const oldIndex=previous.findIndex(step=>step.blocks.some(b=>b.kind==='heading'&&b.text==='EXAMPLE 3'));
+    assert.ok(oldIndex>=0);
+    const remapped=ctx.remapScenarioBookmark(blocks,oldIndex,updated,
+      {splitScenarios:true,keepExamplesTogether:false});
+    assert.ok(updated[remapped]?.blocks.some(b=>b.text==='EXAMPLE 3'),
+      slug+': the old Example 3 bookmark resumes at the complete example');
+  }
+  assert.match(source,/storageWrite\(exampleLayoutKey, 'complete-examples-v1'\)/);
+  assert.match(source,/priorExampleLayout/);
+});
+
+test('section reflection prompts follow actual teaching tasks rather than a generic question', () => {
+  const source=read('js/member-premium-lesson.js');
+  const html=read('member-premium-lesson.html');
+  const css=read('css/member-premium-lesson.css');
+  const helper=source.slice(source.indexOf('  function contextualReflectionCue(step, blocks)'),source.indexOf('  function render({ focus = false }'));
+  assert.ok(helper.startsWith('  function contextualReflectionCue'));
+  const getCue=vm.runInNewContext(helper+'\nsectionReflectionCue',{slug:'father-wound'},{timeout:1000});
+  const page=blocks=>({title:'Part 1 — Name What Was Actually There',blocks:blocks.map(text=>({kind:'paragraph',text}))});
+  const father=getCue(page([
+    'Start with observable reality.',
+    'REFLECTION\nWrite 5–10 statements beginning with:',
+    '“My father / father figure…”',
+    'Keep each statement as observable as you reasonably can.'
+  ]));
+  assert.equal(father.kind,'assignment');
+  assert.match(father.instruction,/Write 5–10 statements beginning with:/);
+  assert.match(father.instruction,/My father \/ father figure/);
+  assert.match(father.instruction,/Keep each statement as observable/);
+  assert.doesNotMatch(father.instruction,/What stood out/);
+  const approval=getCue(page([
+    'For many boys, approval feels conditional.',
+    'Ask:\n- What made him proud of me?\n- Was effort valued, or only results?'
+  ]));
+  assert.equal(approval.kind,'questions');
+  assert.match(approval.instruction,/What made him proud/);
+  assert.match(approval.instruction,/Was effort valued/);
+  const failure=getCue(page([
+    'Ask:\n- What happened when my father made a mistake?\n- Did he admit it?',
+    'Then ask:\n- What happened when I made a mistake?\n- Was I corrected?'
+  ]));
+  assert.equal(failure.kind,'questions');
+  assert.match(failure.instruction,/What happened when my father made a mistake/);
+  assert.match(failure.instruction,/What happened when I made a mistake/);
+  const other=getCue(page(['A longer lesson explanation.','Write two concrete boundaries you can enforce without threatening someone.']));
+  assert.equal(other.kind,'assignment');
+  assert.match(other.instruction,/Write two concrete boundaries/);
+  const general=getCue(page(['An informational paragraph without an exercise.']));
+  assert.equal(general.kind,'grounded');
+  assert.match(general.instruction,/An informational paragraph without an exercise/);
+  assert.doesNotMatch(general.instruction,/Part 1/);
+  assert.doesNotMatch(general.instruction,/Write a private note about/);
+  const bareAsk=getCue(page([
+    'Ask:',
+    '- Was I permitted to ask for support?',
+    '- Did I feel heard when I asked?',
+    'An explanatory paragraph that should not be mistaken for a question.'
+  ]));
+  assert.equal(bareAsk.kind,'questions');
+  assert.match(bareAsk.instruction,/Was I permitted to ask for support/);
+  assert.match(bareAsk.instruction,/Did I feel heard/);
+  assert.doesNotMatch(bareAsk.instruction,/An explanatory paragraph/);
+  const twoColumns=getCue({
+    title:'A practical process',blocks:[
+      {kind:'heading',text:'Exercise'},
+      {kind:'paragraph',text:'Write two columns:'},
+      {kind:'paragraph',text:'What I hoped the conversation would accomplish.'},
+      {kind:'paragraph',text:'What the conversation actually focused on.'},
+      {kind:'paragraph',text:'Do not assign motive yet.'}
+    ]
+  });
+  assert.match(twoColumns.instruction,/Write two columns/);
+  assert.match(twoColumns.instruction,/What I hoped/);
+  assert.match(twoColumns.instruction,/What the conversation actually/);
+  const silence=getCue({
+    title:'Making silence observable',blocks:[
+      {kind:'heading',text:'REFLECTION'},
+      {kind:'paragraph',text:'Write 5–10 statements beginning with:'},
+      {kind:'paragraph',text:'“When I spoke…”'},
+      {kind:'paragraph',text:'or:'},
+      {kind:'paragraph',text:'“When I stayed quiet…”'},
+      {kind:'paragraph',text:'Keep each statement observable.'}
+    ]
+  });
+  assert.equal(silence.kind,'assignment');
+  assert.match(silence.instruction,/When I spoke/);
+  assert.match(silence.instruction,/When I stayed quiet/);
+  const embedded=getCue({
+    title:'The pattern check',blocks:[
+      {kind:'heading',text:'THE PATTERN CHECK: SIX QUESTIONS'},
+      {kind:'paragraph',text:'The exercise has six parts. Ask: What repeated? What changed? What supports the pattern? Record each answer in a sentence.'}
+    ]
+  });
+  assert.match(embedded.instruction,/What repeated/);
+  assert.match(embedded.instruction,/What supports the pattern/);
+
+
+  // Synthetic private-section fixtures: lesson text remains in Supabase.
+  const smaller=getCue({
+    title:'The Smaller Door',blocks:[
+      {kind:'paragraph',text:'If this is too much, answer only:'},
+      {kind:'paragraph',text:'“One thing I learned about courage growing up was ______.”'},
+      {kind:'paragraph',text:'Then stop.'}
+    ]
+  });
+  assert.equal(smaller.kind,'direct');
+  assert.equal(smaller.instruction,'One thing I learned about courage growing up was ______.');
+  const spiritual=getCue({
+    title:'Optional Spiritual Lens',blocks:[
+      {kind:'paragraph',text:'A grounded spiritual question is:'},
+      {kind:'paragraph',text:'“What kind of care will I bring forward, and what ends with me?”'}
+    ]
+  });
+  assert.equal(spiritual.kind,'direct');
+  assert.equal(spiritual.instruction,'What kind of care will I bring forward, and what ends with me?');
+  const motherCue=vm.runInNewContext(helper+'\nsectionReflectionCue',{slug:'mother-wound'},{timeout:1000});
+  const maternalOpen=motherCue({
+    title:'Opening',blocks:[
+      {kind:'paragraph',text:'We learn rules about care, connection, and independence.'},
+      {kind:'paragraph',text:'The adult question is which rule still shows up in your behavior.'}
+    ]
+  });
+  assert.equal(maternalOpen.kind,'contextual');
+  assert.match(maternalOpen.instruction,/rule about love or closeness/);
+  assert.match(maternalOpen.instruction,/my behavior or relationships today/);
+  const maternalSmaller=motherCue({
+    title:'The Smaller Door',blocks:[
+      {kind:'paragraph',text:'If this feels like too much, answer only:'},
+      {kind:'paragraph',text:'“One thing I learned about closeness from a caregiver was _____.”'}
+    ]
+  });
+  assert.match(maternalSmaller.instruction,/One thing I learned about closeness/);
+  const readerApply=source.slice(source.indexOf('  function applySectionReflection(step) {'),source.indexOf('  function render({ focus = false }'));
+  assert.ok(readerApply.includes('prompt.textContent=cue.instruction'));
+  assert.ok(readerApply.includes('Answer the reflection above in your own words'));
+  assert.doesNotMatch(readerApply,/Write a private note about/);
+
+  assert.match(html,/id="premium-pause-label"/);
+  assert.match(html,/id="premium-pause-heading"/);
+  assert.match(html,/id="premium-pause-hint"/);
+  assert.match(html,/maxlength="12000"/);
+  assert.match(css,/white-space:pre-line/);
+  assert.match(source,/if\(body\.length > 2400\) return saveCompleteWorksheetToWork\(body, context, resultNode\)/);
+  assert.match(source,/applySectionReflection\(step\)/);
+  assert.doesNotMatch(html,/What stood out, or what would you do differently after reading this part/);
+});
+
 test('the server only returns premium content to paid accounts or a nominated reviewer', () => {
   const backend = read('supabase/functions/read-flamewalker-lesson/index.ts');
   assert.match(backend, /withSupabase\(\{ auth: "user" \}/);
@@ -51,7 +346,7 @@ test('the reviewer checklist stores no manuscript content and can never grant en
   assert.match(snippet, /This does not approve or publish the lesson/);
 });
 
-test('the private reader lists thirty-five lessons in six distinct tracks', () => {
+test('the private reader lists premium lessons in six distinct tracks', () => {
   const html = read('member-premium-lesson.html');
   const slugs = [
     'father-wound', 'mother-wound', 'learned-silence',
@@ -62,6 +357,7 @@ test('the private reader lists thirty-five lessons in six distinct tracks', () =
     'grieving-future-never-happened', 'other-person-not-your-measure',
     'promise-of-the-room', 'split-alliance-therapy-triangle', 'professional-authority-multiplier',
     'when-you-stop-trusting-own-account', 'double-bind-darvo-reaction',
+    'psychological-abuse-therapy-feedback-loop', 'what-comes-after-survival-adaptations', 'men-vulnerability-never-again-rule', 'document-fire-not-live-evidence-locker', 'when-therapy-enters-court-records', 'when-distress-looks-like-deception', 'the-credibility-cascade', 'challenge-bias-and-repair', 'rebuilding-ability-to-seek-help',
     'body-as-ally', 'name-the-emotion-choose-action', 'the-space-between-trigger-and-response',
     'boundaries-without-cruelty', 'discipline-without-self-punishment',
     'provision-without-proving-worth', 'fatherhood-what-children-watch',
@@ -82,20 +378,20 @@ test('the private reader lists thirty-five lessons in six distinct tracks', () =
   assert.match(js, /Track 2 · The Placeholder Wound/);
 });
 
-test('membership and library accurately distinguish published founding lessons from drafts without opening sales', () => {
+test('membership and library accurately present all 44 released written lessons', () => {
   const store = read('member-store.html');
   const library = read('member-library.html');
   const doc = read('FOUNDING_LAUNCH_RELEASE.md');
-  assert.match(store, /Seven founding lessons on inherited manhood are now approved and published/);
-  assert.match(store, /Seven founding lessons are published in the protected library/);
-  assert.match(store, /Planned: not for sale yet/);
-  assert.match(library, /Seven-Lesson Track · Enrollment Pending/);
-  assert.match(library, /twenty-eight additional manuscripts remain private editorial drafts/);
-  assert.match(read('flamewalker-plus.html'), /7 published · Enrollment pending/);
-  assert.match(read('flamewalker-plus.html'), /Paid checkout is closed/);
-  assert.match(library, /Paid membership enrollment remains closed/);
-  assert.match(library, /Eight-Lesson Track · Coming Soon/);
-  assert.match(library, /Five-Lesson Track · Coming Soon/);
+  assert.match(store, /All forty-four guided lessons are now published/);
+  assert.match(store, /All forty-four guided lessons are published in the protected member library/);
+  assert.match(store, /Available: 44 published lessons/);
+  assert.match(library, /View Flamewalker\+ Membership/);
+  assert.match(library, /All 44 guided lessons are published and available/);
+  assert.match(read('flamewalker-plus.html'), /7 published · Available with Flamewalker\+/);
+  assert.match(read('flamewalker-plus.html'), /Paid checkout is available inside the authenticated member area/);
+  assert.match(library, /All 44 guided lessons are published and available/);
+  assert.match(library, /Open Published Track/);
+  assert.match(library, /Open Published Track/);
   assert.match(doc, /All seven are present in Supabase/);
   assert.match(doc, /status = editorial_review/);
   assert.match(doc, /No source manuscript bodies were added to public GitHub/);
@@ -105,7 +401,7 @@ test('expanded relationship modules deliver additional guided value without gati
   const store = read('member-store.html');
   const library = read('member-library.html');
   const release = read('FOUNDING_LAUNCH_RELEASE.md');
-  assert.match(store, /seven on inherited manhood, eight on relationships, five on professional trust and credibility, five on emotional command, five on rebuilding life, and five on the Sacred Laws of Survival/);
+  assert.match(store, /seven on inherited manhood, eight on relationships, fourteen on professional trust and credibility, five on emotional command, five on rebuilding life, and five on the Sacred Laws of Survival/);
   assert.match(store, /original shorter public educational articles remain available for future free use/i);
   assert.match(library, /Original shorter educational articles can remain free/);
   assert.match(release, /7 original full-length \+ 3 newly expanded = 10 substantial guided lessons/);
@@ -113,7 +409,7 @@ test('expanded relationship modules deliver additional guided value without gati
   assert.doesNotMatch(release, /any of the seven are published/);
 });
 
-test('Track 2 copy describes expanded exercises accurately without suggesting publication', () => {
+test('Track 2 copy describes expanded exercises in the released track', () => {
   const store = read('member-store.html');
   const library = read('member-library.html');
   const release = read('FOUNDING_LAUNCH_RELEASE.md');
@@ -121,7 +417,7 @@ test('Track 2 copy describes expanded exercises accurately without suggesting pu
   assert.match(store, /original shorter public educational articles remain available for future free use/i);
   assert.match(library, /eight expanded relationship modules/);
   assert.match(library, /eight guided modules now form the relationship/);
-  assert.match(library, /five lessons about trust and helping processes/);
+  assert.match(library, /fourteen lessons about therapeutic alliances, trust, records, credible assessment, accountability, and rebuilding support/);
   assert.match(release, /content.version = 2/);
   assert.match(release, /status = editorial_review/);
   assert.match(release, /no Stripe checkout was enabled/);
@@ -272,12 +568,25 @@ test('AI Doc Maker recordings cannot be served by the premium lesson API', () =>
   assert.match(html, /id="premium-speak"/);
 });
 
-test('every protected founding lesson link is unique across six tracks', () => {
+test('new Safe Room lessons have preview entries but are never embedded in public HTML', () => {
+  const hub = read('member-lessons.html');
+  const reader = read('member-premium-lesson.html');
+  const slugs = ['psychological-abuse-therapy-feedback-loop','what-comes-after-survival-adaptations','men-vulnerability-never-again-rule','document-fire-not-live-evidence-locker','when-therapy-enters-court-records','when-distress-looks-like-deception','the-credibility-cascade','challenge-bias-and-repair','rebuilding-ability-to-seek-help'];
+  for (const slug of slugs) {
+    assert.ok(hub.includes('data-editorial-preview="' + slug + '"'), 'missing preview ' + slug);
+    assert.ok(reader.includes('data-premium-lesson-link="' + slug + '"'), 'missing protected reader link ' + slug);
+  }
+  assert.ok(hub.includes('if (lessons.length >= 44) paintCatalog(lessons);'));
+  assert.ok(hub.includes("item.status !== 'published'"));
+  assert.ok(!hub.includes('data-premium-lesson-content'));
+});
+
+test('every protected premium lesson link is unique across six tracks', () => {
   const html = read('member-premium-lesson.html');
   const links = [...html.matchAll(/data-premium-lesson-link="([^"]+)"/g)].map(m => m[1]);
-  assert.equal(links.length, 35);
-  assert.equal(new Set(links).size, 35);
-  assert.match(html, /Review the thirty-five founding lessons/);
+  assert.equal(links.length, 44);
+  assert.equal(new Set(links).size, 44);
+  assert.match(html, /Review the guided lesson catalog/);
   const script = read('js/member-premium-lesson.js');
   assert.match(script, /'safe-room-courtroom'/);
   assert.match(script, /Track 3 · When the Safe Room Becomes the Courtroom/);
@@ -291,8 +600,8 @@ test('new practical tracks appear in private reader and editorial queue without 
   }
   assert.match(js, /Track 4 · Steadiness & Emotional Command/);
   assert.match(js, /Track 5 · Rebuilding a Life That Holds/);
-  assert.match(html, /Thirty-five-lesson editorial review queue/);
-  assert.match(read('member-store.html'), /Seven founding lessons are published in the protected library/);
+  assert.match(html, /Premium lesson editorial review queue/);
+  assert.match(read('member-store.html'), /All forty-four guided lessons are published in the protected member library/);
 });
 
 test('the recovered Sacred Laws remain private, correctly ordered, and awaiting founder approval', () => {
@@ -302,8 +611,8 @@ test('the recovered Sacred Laws remain private, correctly ordered, and awaiting 
   const slugs = ['sacred-law-emotional-boundaries','sacred-law-pattern-recognition','sacred-law-self-worth','sacred-law-strategic-retreat','sacred-law-authentic-voice'];
   for (const slug of slugs) assert.match(html, new RegExp('data-premium-lesson-link="'+slug+'"'));
   assert.match(js, /Track 6 · The Five Sacred Laws of Survival/);
-  assert.match(html, /Thirty-five-lesson editorial review queue/);
-  assert.match(read('member-store.html'), /Seven founding lessons are published in the protected library/);
+  assert.match(html, /Premium lesson editorial review queue/);
+  assert.match(read('member-store.html'), /All forty-four guided lessons are published in the protected member library/);
   assert.match(doc, /35 drafts · 6 tracks · 0 published/);
   assert.match(doc, /Founding content scope is frozen/);
 });
@@ -329,7 +638,7 @@ test('live subscription UI is prepared but closed until explicit final launch ap
   assert.match(html, /id="member-billing-portal"/);
   assert.match(html, /href="terms\.html"/);
   assert.match(html, /href="refunds\.html"/);
-  assert.match(js, /const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+  assert.match(js, /const PUBLIC_CHECKOUT_UI_ENABLED = true;/);
   assert.match(js, /if \(!PUBLIC_CHECKOUT_UI_ENABLED\) return;/);
   assert.match(js, /const MIN_PUBLISHED_LESSONS = 7;/);
   assert.match(js, /item\?\.status === 'published'/);
@@ -344,11 +653,21 @@ test('live subscription UI is prepared but closed until explicit final launch ap
   assert.doesNotMatch(js, /sk_live_|rk_live_|STRIPE_LIVE_SECRET_KEY/);
 });
 
+test('live checkout checks returning customer Stripe subscription status before opening a new session', () => {
+  const source = read('launch-backend-staging/create-live-checkout-session/index.ts');
+  assert.match(source, /stripe\.subscriptions\.list\(/);
+  assert.match(source, /status: "all"/);
+  assert.match(source, /"active", "trialing", "past_due", "unpaid", "incomplete", "paused"/);
+  assert.match(source, /customerSubscriptions\.has_more/);
+  assert.match(source, /already_subscribed/);
+  assert.ok(source.indexOf('stripe.subscriptions.list(') < source.indexOf('stripe.checkout.sessions.create('));
+});
+
 test('deployed live checkout source requires a real published library before Stripe customer creation', () => {
   const source = read('launch-backend-staging/create-live-checkout-session/index.ts');
   assert.match(source, /NBJB_LIVE_BILLING_MODE/);
-  assert.match(source, /const PUBLIC_LIVE_CHECKOUT_ENABLED = false;/);
-  assert.match(source, /\(!PUBLIC_LIVE_CHECKOUT_ENABLED \|\| launchMode !== "public"\)/);
+  assert.match(source, /const PUBLIC_LIVE_CHECKOUT_ENABLED = true;/);
+  assert.match(source, /if \(!PUBLIC_LIVE_CHECKOUT_ENABLED && !isCanary\)/);
   assert.match(source, /flamewalker_premium_lessons/);
   assert.match(source, /count: "exact", head: true/);
   assert.match(source, /\.eq\("status", "published"\)/);
@@ -380,7 +699,7 @@ test('the inline Imprint Map supplies four editable columns in the correct lesso
   assert.ok(js.includes('function renderFatherMapInline(step, body, positiveInheritance)'));
   assert.ok(js.includes('if (isFatherPractice) renderFatherMapInline(step, body, onPositiveInheritance)'));
   assert.ok(js.includes("el('premium-father-map').hidden = true;"));
-  assert.ok(js.includes("el('premium-pause-reflection').hidden = isFatherPractice || isStructuredPractice || final;"));
+  assert.ok(js.includes("el('premium-pause-reflection').hidden = isFatherPractice || isStructuredPractice || isFinalJournal || final;"));
   assert.ok(html.includes('id="premium-map-grid"'));
   assert.ok(html.includes('id="premium-map-actions"'));
   assert.ok(html.includes('Read a column. Fill in its box. Then continue.'));
@@ -519,8 +838,11 @@ test('exercise usability audit covers the 35-lesson library and preserves privat
   const doc = read('FLAMEWALKER_EXERCISE_USABILITY_AUDIT.md');
   const html = read('member-premium-lesson.html');
   const slugs = [...html.matchAll(/data-premium-lesson-link="([^"]+)"/g)].map(match => match[1]);
-  assert.equal(slugs.length, 35);
-  for (const slug of slugs) assert.ok(doc.includes('`' + slug + '`'), 'missing audit entry: ' + slug);
+  assert.equal(slugs.length, 44);
+  const founding = slugs.filter(slug => doc.includes('`' + slug + '`'));
+  assert.equal(founding.length, 35, 'historical founding audit must still cover all 35 original lessons');
+  const nineNew = ['psychological-abuse-therapy-feedback-loop','what-comes-after-survival-adaptations','men-vulnerability-never-again-rule','document-fire-not-live-evidence-locker','when-therapy-enters-court-records','when-distress-looks-like-deception','the-credibility-cascade','challenge-bias-and-repair','rebuilding-ability-to-seek-help'];
+  for (const slug of nineNew) assert.ok(slugs.includes(slug), 'missing new Safe Room lesson: ' + slug);
   assert.match(doc, /All seven now have inline workspaces/);
   assert.match(doc, /editorial_review/);
   assert.match(doc, /No changes to Stripe launch gates or disabled Read to Me/);
@@ -839,12 +1161,12 @@ test('Chosen Manhood full worksheet is member-only with private manual saving an
   const chosen=read('js/member-chosen-code.js');
   const platform=read('js/member-platform.js');
   const billing=read('js/member-billing.js');
-  assert.ok(loader.includes('"premium-lesson": ["js/member-chosen-code.js", "js/member-editorial-workbooks.js", "js/member-lesson-workspaces.js", "js/member-premium-lesson.js"]'));
+  assert.ok(loader.includes('"premium-lesson": ["js/member-chosen-code.js", "js/member-editorial-workbooks.js", "js/member-lesson-workspaces.js", "js/member-final-reflection-journal.js", "js/member-premium-lesson.js"]'));
   assert.ok(chosen.includes('saveWholeToWork(full,'));
   assert.ok(chosen.includes('Nothing is uploaded automatically.'));
   assert.ok(platform.includes('member-full-worksheet-paper'));
   assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
-  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = true;/);
 });
 
 
@@ -1068,7 +1390,7 @@ test('Strength Model Audit preserves published text, access controls, and billin
   assert.ok(module.includes('strengthTargets[Number(numbered[1])-1]'));
   assert.match(module,/PART II — THE ARMOR AUDIT/);
   assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
-  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = true;/);
 });
 
 
@@ -1195,7 +1517,7 @@ test('Needs lesson retains privacy, publication and checkout locks', () => {
   assert.match(source,/NEEDS PERMISSION MAP — MY CHOSEN SUPPORT/);
   assert.match(source,/My answers are personal reflection|These answers are personal reflection/);
   assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
-  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = true;/);
   assert.match(html,/premium-worksheet-review/);
 });
 
@@ -1289,7 +1611,7 @@ test('draft batch preserves the seven published workspaces, source privacy and c
   assert.ok(module.includes('replacesGuidedReflection:true'));
   assert.ok(module.includes('maxLength=1300'));
   assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
-  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = true;/);
 });
 
 
@@ -1396,7 +1718,7 @@ test('split-alliance early inline exercise does not bundle manuscript wording or
   assert.ok(module.includes('item.right.append(item.field)'));
   assert.ok(!module.includes('Can I disagree without disagreement becoming pathology?'));
   assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
-  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = true;/);
 });
 
 
@@ -1517,7 +1839,7 @@ test('DARVO early exercise is protected at runtime and lesson publication settin
     'unpublished source prompts must remain inside authorized lesson data');
   assert.ok(!module.includes('What evidence supports that interpretation?'));
   assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
-  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = true;/);
 });
 
 
@@ -1640,11 +1962,11 @@ test('editorial QA early-exercise fixtures do not leak protected question text i
   assert.ok(!module.includes('What was I hoping this relationship would solve outside the relationship itself?'));
   assert.ok(!module.includes('What I hoped therapy would help us do.'));
   assert.match(reader,/const READ_TO_ME_ENABLED = false;/);
-  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = false;/);
+  assert.match(billing,/const PUBLIC_CHECKOUT_UI_ENABLED = true;/);
 });
 
 
-function simulateLiveBilling({ hasStripeBilling = false, tier = 'free', cancelAtPeriodEnd = false, remoteError = null } = {}) {
+function simulateLiveBilling({ hasStripeBilling = false, tier = 'free', cancelAtPeriodEnd = false, remoteError = null, locationSearch = '' } = {}) {
   const invoked = [], redirects = [];
   const create = (value = {}) => ({
     hidden: true,
@@ -1665,12 +1987,19 @@ function simulateLiveBilling({ hasStripeBilling = false, tier = 'free', cancelAt
     'member-billing-consent': create({ checked: true }),
     'member-billing-portal': create()
   };
+  const paidOverview = create();
+  const marketing = Array.from({length:6},()=>create());
   const monthly = create({ dataset: { liveBillingOffer: 'flamewalker_plus_monthly' } });
   const annual = create({ dataset: { liveBillingOffer: 'flamewalker_plus_annual' } });
   const context = {
     document: {
       getElementById(id) { return els[id] || null; },
-      querySelectorAll(selector) { return selector === '[data-live-billing-offer]' ? [monthly, annual] : []; }
+      querySelector(selector) { return selector === '[data-membership-paid-overview]' ? paidOverview : null; },
+      querySelectorAll(selector) {
+        if (selector === '[data-live-billing-offer]') return [monthly, annual];
+        if (selector === '[data-membership-upgrade]') return marketing;
+        return [];
+      }
     },
     window: {
       NBJBAuth: {
@@ -1679,6 +2008,9 @@ function simulateLiveBilling({ hasStripeBilling = false, tier = 'free', cancelAt
           functions: {
             async invoke(name, options) {
               invoked.push(name);
+              if (name === 'read-flamewalker-lesson') {
+                return { data: { lessons: Array.from({ length: 7 }, () => ({ status: 'published' })) } };
+              }
               return remoteError
                 ? { error: new Error('Expected test rejection') }
                 : { data: { url: name.includes('portal')
@@ -1689,31 +2021,47 @@ function simulateLiveBilling({ hasStripeBilling = false, tier = 'free', cancelAt
         }
       },
       NBJBEntitlements: {
-        async refresh() { return { hasStripeBilling, tier, cancelAtPeriodEnd }; }
+        async refresh() { return { hasStripeBilling, tier, cancelAtPeriodEnd, source: 'server' }; }
       },
       location: {
-        search: '',
+        search: locationSearch,
         assign(url) { redirects.push(url); }
       }
     },
     URL, URLSearchParams, console
   };
   vm.runInNewContext(read('js/member-billing.js'), context);
-  return { els, monthly, annual, invoked, redirects };
+  return { els, monthly, annual, invoked, redirects, paidOverview, marketing };
 }
 
-test('closed enrollment hides purchase options for free members and disallows synthetic checkout clicks', async () => {
+test('live enrollment checks the published catalog before showing monthly and annual plans', async () => {
   const app = simulateLiveBilling();
   await new Promise(resolve => setImmediate(resolve));
-  assert.equal(app.els['member-live-billing'].hidden, true);
-  assert.equal(app.els['member-billing-purchase'].hidden, true);
+  assert.equal(app.els['member-live-billing'].hidden, false);
+  assert.equal(app.els['member-billing-purchase'].hidden, false);
   assert.equal(app.els['member-billing-management'].hidden, true);
-  await app.monthly.handlers.click();
-  assert.equal(app.invoked.length, 0, 'checkout must not even be called if a hidden button is activated');
-  assert.match(app.els['member-billing-status'].textContent, /not on sale yet/i);
+  assert.deepEqual(app.invoked, ['read-flamewalker-lesson']);
+  app.monthly.handlers.click();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(app.invoked, ['read-flamewalker-lesson', 'create-live-checkout-session']);
+  assert.deepEqual(app.redirects, ['https://checkout.stripe.com/c/pay/test-link']);
 });
 
-test('existing Stripe customer can manage a subscription while new sales stay closed', async () => {
+test('paid accounts see the account summary and no plan-marketing blocks', async () => {
+  const active = simulateLiveBilling({hasStripeBilling:true,tier:'paid'});
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(active.paidOverview.hidden,false);
+  assert.ok(active.marketing.every(node=>node.hidden));
+  assert.equal(active.els['member-billing-management'].hidden,false);
+  assert.equal(active.els['member-billing-purchase'].hidden,true);
+  const free = simulateLiveBilling({tier:'free'});
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(free.paidOverview.hidden,true);
+  assert.ok(free.marketing.every(node=>!node.hidden));
+  assert.equal(free.els['member-billing-purchase'].hidden,false);
+});
+
+test('existing Stripe customer can manage a subscription while duplicate purchase controls stay hidden', async () => {
   const app = simulateLiveBilling({ hasStripeBilling: true, tier: 'paid', cancelAtPeriodEnd: true });
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(app.els['member-live-billing'].hidden, false);
@@ -1726,15 +2074,35 @@ test('existing Stripe customer can manage a subscription while new sales stay cl
   assert.deepEqual(app.redirects, ['https://billing.stripe.com/p/session/test-link']);
 });
 
-test('expired Stripe customers can review billing without getting lesson access or a new purchase offer', async () => {
-  const app = simulateLiveBilling({ hasStripeBilling: true, tier: 'free', cancelAtPeriodEnd: true });
+test('free Stripe customers with old billing history can rejoin and still manage past invoices', async () => {
+  const app = simulateLiveBilling({ hasStripeBilling: true, tier: 'free' });
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(app.els['member-live-billing'].hidden, false);
+  assert.equal(app.els['member-billing-purchase'].hidden, false);
+  assert.equal(app.els['member-billing-management'].hidden, false);
+  assert.deepEqual(app.invoked, ['read-flamewalker-lesson']);
+  app.annual.handlers.click();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(app.invoked, ['read-flamewalker-lesson', 'create-live-checkout-session']);
+  assert.deepEqual(app.redirects, ['https://checkout.stripe.com/c/pay/test-link']);
+});
+
+test('returning from an abandoned Stripe Checkout shows both plans and old invoices', async () => {
+  const app = simulateLiveBilling({ hasStripeBilling: true, tier: 'free', locationSearch: '?checkout=cancelled' });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(app.els['member-billing-purchase'].hidden, false);
+  assert.equal(app.els['member-billing-management'].hidden, false);
+  assert.match(app.els['member-billing-status'].textContent, /left Checkout without completing/i);
+});
+
+test('success redirect cannot trigger a second purchase while entitlement settles', async () => {
+  const app = simulateLiveBilling({ hasStripeBilling: true, tier: 'free', locationSearch: '?checkout=success' });
+  await new Promise(resolve => setImmediate(resolve));
   assert.equal(app.els['member-billing-purchase'].hidden, true);
   assert.equal(app.els['member-billing-management'].hidden, false);
-  assert.match(app.els['member-billing-status'].textContent, /paid period/);
-  await app.annual.handlers.click();
-  assert.equal(app.invoked.length, 0);
+  app.annual.handlers.click();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(app.invoked, ['read-flamewalker-lesson']);
 });
 
 test('Stripe portal request failure leaves the member on NBJB without a redirect', async () => {
@@ -1757,5 +2125,263 @@ test('client paid tier respects authoritative validity dates; billing management
   assert.match(billing, /if \(!PUBLIC_CHECKOUT_UI_ENABLED\) return;/);
   assert.match(billing, /if \(!PUBLIC_CHECKOUT_UI_ENABLED\) \{/);
   assert.match(billing, /if \(current\?\.hasStripeBilling\)/);
-  assert.doesNotMatch(billing, /PUBLIC_CHECKOUT_UI_ENABLED = true/);
+  assert.match(billing, /if \(activePaid\)/);
+  assert.match(billing, /PUBLIC_CHECKOUT_UI_ENABLED = true/);
+});
+
+test('membership store and dynamic billing scripts use the same fresh cache revision', () => {
+  const store = read('member-store.html');
+  const bootstrap = read('js/member-bootstrap.js');
+  const billing = read('js/member-billing.js');
+  assert.ok(store.includes('js/member-bootstrap.js?v=paid-account-view-v1'));
+  assert.ok(bootstrap.includes("src + '?v=paid-account-view-v1'"));
+  assert.ok(!store.includes('qa-billing-v11'));
+  assert.ok(!bootstrap.includes('qa-billing-v11'));
+  assert.ok(billing.includes("if (activePaid)"));
+  assert.ok(billing.includes('purchase.hidden = false;'));
+});
+
+
+test('free premium lesson denial points to live membership without exposing protected content', () => {
+  const js = read('js/member-premium-lesson.js');
+  const html = read('member-premium-lesson.html');
+  const bootstrap = read('js/member-bootstrap.js');
+  assert.ok(js.includes('Flamewalker+ membership required'));
+  assert.ok(js.includes('Monthly and annual memberships are available now.'));
+  assert.ok(!js.includes('The paid membership is not for sale yet.'));
+  assert.ok(html.includes('href="member-store.html">Membership options</a>'));
+  assert.ok(html.includes('js/member-bootstrap.js?v=grounded-cues-v24'));
+  assert.ok(bootstrap.includes("src === 'js/member-premium-lesson.js'"));
+  assert.ok(bootstrap.includes("src + '?v=grounded-cues-v24'"));
+  assert.match(js, /const denied = error\?\.context\?\.status === 403/);
+  assert.match(js, /renderLesson\(data\.lesson\)/);
+});
+
+test('published premium lessons provide a safe next-lesson action only on the final page', () => {
+  const html=read('member-premium-lesson.html');
+  const js=read('js/member-premium-lesson.js');
+  const css=read('css/member-premium-lesson.css');
+  assert.match(html, /id="premium-next-lesson-panel"[^>]*hidden/);
+  assert.match(html, /id="premium-next-lesson-link" href="member-lessons.html"/);
+  assert.match(html, /href="member-work.html">My Saved Work/);
+  assert.match(html, /member-premium-lesson[.]css[?]v=journal-reader-v23/);
+  assert.match(css, /[.]premium-next-lesson-panel/);
+  assert.ok(js.includes("lesson?.status === 'published' && steps.length"), 'unpublished drafts must not show member continuation');
+  assert.ok(js.includes('current === steps.length - 1'), 'only show action after final reflection');
+  assert.ok(js.includes("items.filter(item => item?.status === 'published'"), 'never suggest unpublished lessons');
+  assert.ok(js.includes("reviewCatalog = items;\n      renderReviewQueue();\n      updateNextLesson();"));
+  assert.ok(js.includes("updateNextLesson();\n    const saved = storageWrite(positionKey"), 'section changes must hide/show next lesson');
+  assert.ok(js.includes("link.href = 'member-lessons.html'"), 'last published lesson must have a valid catalog fallback');
+});
+
+test('premium continuation selects the next published lesson and safely crosses tracks', () => {
+  const source=read('js/member-premium-lesson.js');
+  const first=source.indexOf('  function nextPublishedLesson(items, currentSlug)');
+  const end=source.indexOf('  function noticeState(', first);
+  assert.ok(first>=0 && end>first);
+  const helpers=source.slice(first,end);
+  const next=vm.runInNewContext(helpers + '\nnextPublishedLesson', {});
+  const rows=[
+    {slug:'alpha',status:'published',track_slug:'first',title:'First'},
+    {slug:'beta',status:'editorial_review',track_slug:'first',title:'Draft'},
+    {slug:'gamma',status:'published',track_slug:'first',title:'Second'},
+    {slug:'delta',status:'published',track_slug:'second',title:'New Track'}
+  ];
+  const one=next(rows,'alpha');
+  assert.equal(one.slug,'gamma');
+  assert.equal(one.title,'Second');
+  assert.equal(one.newTrack,false);
+  const two=next(rows,'gamma');
+  assert.equal(two.slug,'delta');
+  assert.equal(two.newTrack,true);
+  assert.equal(next(rows,'delta'),null);
+  assert.equal(next(rows,'missing'),null);
+  assert.equal(next(rows,'beta'),null,'an unpublished current lesson is not part of the member sequence');
+  assert.equal(next([], 'alpha'),null);
+});
+
+
+test('final reflection journal places a compact answer box beside every authored sentence and explicitly saves one document', () => {
+  const source=read('js/member-final-reflection-journal.js');
+  const events=[];
+  const createElement=tag=>({
+    tag,children:[],className:'',value:'',hidden:false,attributes:{},handlers:{},
+    append(...nodes){this.children.push(...nodes);},
+    appendChild(node){this.children.push(node);},
+    setAttribute(key,val){this.attributes[key]=val;},
+    addEventListener(key,fn){this.handlers[key]=fn;}
+  });
+  const ctx={window:{},document:{createElement},navigator:{clipboard:{writeText:async()=>{}}}};
+  vm.runInNewContext(source,ctx);
+  const api=ctx.window.NBJBFinalReflectionJournal;
+  const step={title:'Final Reflection',blocks:[
+    {kind:'paragraph',text:'Finish these:'},
+    {kind:'paragraph',text:'I respect my mother for…\nWhat I want to keep is…\nHealthy closeness now means…'}
+  ]};
+  const parsed=api.parse(step);
+  assert.ok(parsed);
+  assert.equal(parsed.prompts.length,3);
+  assert.equal(api.parse({title:'Opening',blocks:step.blocks}),null);
+  const parking=createElement('div');
+  const saveCalls=[];
+  const journal=api.create({
+    parking,lessonTitle:'The Mother Wound',
+    saveJournal:(entry,status)=>{saveCalls.push(entry);status.textContent='Saved';return true;}
+  });
+  const body=createElement('div');
+  journal.render(step,body,(target,tag,text)=>{const node=createElement(tag);node.textContent=text;target.append(node);});
+  const sheet=body.children.find(el=>el.className==='premium-journal-sheet');
+  assert.ok(sheet);
+  const rows=sheet.children.find(el=>el.className==='premium-journal-rows');
+  assert.equal(rows.children.length,3);
+  assert.equal(rows.children[0].children[0].textContent,'01 · I respect my mother for…');
+  const answer0=rows.children[0].children[1];
+  const answer2=rows.children[2].children[1];
+  answer0.value='She taught me to make food for people.';
+  answer0.handlers.input();
+  answer2.value='Warmth and an honest boundary can coexist.';
+  answer2.handlers.input();
+  assert.equal(saveCalls.length,0,'typing must never save automatically');
+  journal.park();
+  assert.equal(parking.children.at(-1),sheet,'navigation must park rather than erase answers');
+  const returned=createElement('div');
+  journal.render(step,returned,(target,tag,text)=>{const node=createElement(tag);node.textContent=text;target.append(node);});
+  assert.equal(answer0.value,'She taught me to make food for people.');
+  const actions=sheet.children.find(el=>el.className.includes('premium-journal-actions'));
+  const save=actions.children.find(el=>el.textContent==='Save Journal to My Work');
+  save.handlers.click();
+  assert.equal(saveCalls.length,1);
+  assert.equal(saveCalls[0].answered,2);
+  assert.equal(saveCalls[0].total,3);
+  assert.equal(saveCalls[0].answers.length,2);
+  assert.match(saveCalls[0].text,/1\. I respect my mother for…\nShe taught me/);
+  assert.match(saveCalls[0].text,/3\. Healthy closeness now means…\nWarmth and an honest boundary/);
+  assert.ok(!saveCalls[0].text.includes('What I want to keep is…'),'unanswered fields are omitted');
+  assert.equal(sheet.children.at(-1).hidden,false,'My Work link appears only after successful save');
+});
+
+test('reader presentation removes internal Part labels while preserving actual chapter structure and private journal handoff', () => {
+  const reader=read('js/member-premium-lesson.js');
+  const loader=read('js/member-bootstrap.js');
+  const html=read('member-premium-lesson.html');
+  const css=read('css/member-premium-lesson.css');
+  const work=read('js/member-platform.js');
+  const myWork=read('member-work.html');
+  const helper=reader.slice(reader.indexOf('  function displayTitle(title)'),reader.indexOf('  function wordCount(step)'));
+  const display=vm.runInNewContext(helper+'\n({displayTitle,label})',{});
+  assert.equal(display.displayTitle('Part 4 — Three Scenarios, Three Different Readings'),'Three Scenarios, Three Different Readings');
+  assert.equal(display.displayTitle('Part 9 · Scenario A'),'Scenario A');
+  assert.equal(display.label({title:'Part 3 — Trust',continuation:0}),'Trust');
+  assert.equal(display.label({title:'Part 3 — Trust',continuation:1}),'Trust · continued 2');
+  assert.ok(reader.includes("textContent = 'Reading · ' + estimate(step)"));
+  assert.ok(reader.includes('finalJournal.render(step, body, appendText)'));
+  assert.ok(reader.includes('finalJournal?.park()'));
+  assert.ok(reader.includes("recordToolEntry('Lesson Journal'"));
+  assert.ok(reader.includes('journalEntries: Array.isArray(entry.answers)'));
+  assert.ok(loader.includes('js/member-final-reflection-journal.js'));
+  assert.ok(loader.includes("src + '?v=grounded-cues-v24'"));
+  assert.ok(html.includes('css/member-premium-lesson.css?v=journal-reader-v23'));
+  assert.ok(css.includes('.premium-journal-row'));
+  assert.ok(work.includes('member-journal-entry'));
+  assert.ok(work.includes("['Lesson Journal','Path Reflection'].includes(entry.tool)"));
+  assert.ok(work.includes("key !== 'journalEntries'"));
+  assert.ok(myWork.includes('data-work-tool="Lesson Journal"'));
+  assert.ok(myWork.includes('<option>Lesson Journal</option>'));
+});
+
+test('every fallback reflection is anchored in the section teaching, not the chapter title', () => {
+  const source = read('js/member-premium-lesson.js');
+  const helper = source.slice(source.indexOf('  function contextualReflectionCue(step, blocks)'),
+    source.indexOf('  function render({ focus = false }'));
+  const cue = vm.runInNewContext(helper + '\nsectionReflectionCue',
+    {slug:'being-needed-vs-chosen'}, {timeout:1000});
+  const paragraph = text => ({kind:'paragraph',text});
+  const header = text => ({kind:'heading',text});
+
+  const reclaiming = cue({title:'Part 4 — Three Scenarios, Three Different Readings',blocks:[
+    header('RECLAIMING YOUR POSITION'),
+    paragraph('A healthy relationship is not a prize awarded to the person who contributes the most. Both partners must make room for each other’s needs.'),
+    paragraph('For men accustomed to measuring worth through usefulness, this is an uncomfortable lesson: your ability to provide is one part of you. It is not the admission price for being loved.')
+  ]});
+  assert.equal(reclaiming.kind,'contextual');
+  assert.match(reclaiming.instruction,/earn love or attention by being useful/i);
+  assert.match(reclaiming.instruction,/What need could I name directly/);
+  assert.doesNotMatch(reclaiming.instruction,/As I consider|Three Scenarios/);
+
+  const authored = cue({title:'Scenario A',blocks:[
+    paragraph('A father is worn down after working too many hours.'),
+    paragraph('When have I tried to earn care by doing more, and what would I ask for instead?')
+  ]});
+  assert.equal(authored.kind,'direct');
+  assert.match(authored.instruction,/When have I tried to earn care/);
+
+  const neutral = cue({title:'The Same Chapter Title',blocks:[
+    paragraph('A man may find that a trusted friend offers help before being asked. Receiving support does not make him weak.')
+  ]});
+  assert.equal(neutral.kind,'grounded');
+  assert.match(neutral.instruction,/Receiving support does not make him weak/);
+  assert.doesNotMatch(neutral.instruction,/The Same Chapter Title|As I consider/);
+
+  const empty = cue({title:'Empty',blocks:[]});
+  assert.equal(empty,null);
+  const presentation = source.slice(source.indexOf('  function applySectionReflection(step) {'),
+    source.indexOf('  function render({ focus = false }'));
+  assert.ok(presentation.includes('if (!cue) {'));
+  assert.ok(presentation.includes("hint.textContent=cue.kind === 'direct'"));
+  assert.doesNotMatch(helper,/As I consider ['"]?\s*\+/);
+});
+
+
+test('paid access ends at paid-through expiry for ordinary members without deleting their free account', () => {
+  // Synthetic timestamps and synthetic billing references: no customer records
+  // are modified. Both browser presentation and server reader must agree.
+  const clientSource=read('js/member-entitlements.js');
+  const begin=clientSource.indexOf('  function normalizeMembership(row) {');
+  const end=clientSource.indexOf('  function load() {',begin);
+  assert.ok(begin>=0 && end>begin,'client membership normalizer must exist');
+  const normalizerSource=clientSource.slice(begin,end);
+  const paidThrough=Date.parse('2026-12-02T18:31:27.000Z');
+  const fixture={
+    tier:'paid_member',
+    status:'active',
+    valid_from:'2026-11-02T18:31:27.000Z',
+    valid_until:'2026-12-02T18:31:27.000Z',
+    provider:'stripe',
+    provider_customer_ref:'cus_synthetic_do_not_bill'
+  };
+  const clientAt=timestamp=>vm.runInNewContext(
+    normalizerSource+'\nnormalizeMembership',
+    {Date:{now:()=>timestamp,parse:Date.parse}},
+    {timeout:1000})(fixture);
+  assert.equal(clientAt(paidThrough-1).tier,'paid','valid paid-through access must remain');
+  assert.equal(clientAt(paidThrough).tier,'free','access expires exactly at boundary');
+  assert.equal(clientAt(paidThrough+1).tier,'free','stale paid row cannot prolong access');
+  assert.equal(clientAt(paidThrough+1).hasStripeBilling,true,
+    'a canceled member may still need billing access after the paid term');
+  const futureStart={...fixture,valid_from:'2027-01-01T00:00:00Z'};
+  const normalizer=vm.runInNewContext(normalizerSource+'\nnormalizeMembership',
+    {Date:{now:()=>paidThrough-1,parse:Date.parse}},{timeout:1000});
+  assert.equal(normalizer(futureStart).tier,'free');
+  for(const status of ['canceled','incomplete','unpaid','paused']) {
+    assert.equal(normalizer({...fixture,status}).tier,'free',status+' must not grant paid access');
+  }
+  assert.equal(normalizer({...fixture,tier:'free_member'}).tier,'free');
+
+  // Exercise the actual source logic of the protected Edge Function without
+  // calling Stripe or changing production entitlements.
+  const server=read('supabase/functions/read-flamewalker-lesson/index.ts');
+  const s1=server.indexOf('    const goodDate = ');
+  const s2=server.indexOf('    // Only the nominated internal test account',s1);
+  assert.ok(s1>=0 && s2>s1,'server paid-through gate must exist');
+  const logic=server.slice(s1,s2).replace(
+    '(v: string | null, defaultIfNull: boolean)', '(v, defaultIfNull)'
+  );
+  const serverAt=(timestamp,overrides={})=>vm.runInNewContext(
+    'const now='+timestamp+';\n'+logic+'\nBoolean(entitled)',
+    {member:{...fixture,...overrides},Date},{timeout:1000});
+  assert.equal(serverAt(paidThrough-1),true);
+  assert.equal(serverAt(paidThrough),false);
+  assert.equal(serverAt(paidThrough+1),false);
+  assert.equal(serverAt(paidThrough-1,{status:'canceled'}),false);
+  assert.equal(serverAt(paidThrough-1,{tier:'free_member'}),false);
 });

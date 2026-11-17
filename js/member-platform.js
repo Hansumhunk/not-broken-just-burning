@@ -7,6 +7,7 @@
 
   const memberRoutes = [
     ['dashboard', 'members.html', 'Dashboard'],
+    ['lessons', 'member-lessons.html', 'Lessons'],
     ['path', 'member-path.html', 'My Path'],
     ['tools', 'member-tools.html', 'Toolbox'],
     ['work', 'member-work.html', 'My Work'],
@@ -16,7 +17,8 @@
     ['store', 'member-store.html', 'Membership'],
     ['community', 'member-community.html', 'Circle · Soon'],
     ['profile', 'member-profile.html', 'Profile'],
-    ['settings', 'member-settings.html', 'Settings']
+    ['settings', 'member-settings.html', 'Settings'],
+    ['feedback', 'member-feedback.html', 'Send Feedback']
   ];
 
   function status(message, target = document.querySelector('[data-member-status]')) {
@@ -36,21 +38,52 @@
   function ensureMemberNav() {
     document.querySelectorAll('.member-subnav').forEach((nav) => {
       nav.replaceChildren();
-      memberRoutes.forEach(([key, href, label]) => {
+      const primaryKeys = new Set(['dashboard', 'lessons', 'path', 'tools', 'work']);
+      const compactKeys = new Set(['path', 'tools', 'work']);
+      function makeLink(key, href, label) {
         const link = document.createElement('a');
         link.dataset.memberNav = key;
         link.href = href;
         link.textContent = label;
-        nav.appendChild(link);
+        return link;
+      }
+
+      // Keep the five daily destinations visible at desktop widths. On a
+      // narrow screen, keep Dashboard and Lessons visible and put the other
+      // three inside More, rather than forcing horizontal menu scrolling.
+      memberRoutes.filter(([key]) => primaryKeys.has(key)).forEach(([key, href, label]) => {
+        const link = makeLink(key, href, label);
+        if (compactKeys.has(key)) link.classList.add('member-nav-compact-hide');
+        nav.append(link);
       });
+
+      const more = document.createElement('details');
+      more.className = 'member-nav-more';
+      const moreToggle = document.createElement('summary');
+      moreToggle.textContent = 'More';
+      moreToggle.setAttribute('aria-label', 'More Flamewalker pages and account actions');
+      const menu = document.createElement('div');
+      menu.className = 'member-nav-more-panel';
+
+      // Mobile copies are visible only when the corresponding desktop link is
+      // hidden. Both point to the same authenticated pages and active states.
+      memberRoutes.filter(([key]) => compactKeys.has(key)).forEach(([key, href, label]) => {
+        const link = makeLink(key, href, label);
+        link.className = 'member-nav-mobile-duplicate';
+        menu.append(link);
+      });
+      memberRoutes.filter(([key]) => !primaryKeys.has(key)).forEach(([key, href, label]) => {
+        menu.append(makeLink(key, href, label));
+      });
+
       const exit = document.createElement('a');
       exit.className = 'member-exit';
       exit.href = 'index.html';
       exit.textContent = 'Exit to site';
-      nav.appendChild(exit);
+      menu.append(exit);
 
-      // Exit to site is not a logout. Keep account sign-out explicit and
-      // reachable from every signed-in member screen, including mobile.
+      // Exit to site is not a logout. Keep sign-out a distinct button,
+      // reachable from the More menu on every signed-in page.
       const signOut = document.createElement('button');
       signOut.type = 'button';
       signOut.className = 'member-sign-out';
@@ -70,7 +103,24 @@
           status('Could not sign out. Please try again or open Account Access.');
         }
       });
-      nav.appendChild(signOut);
+      menu.append(signOut);
+      more.append(moreToggle, menu);
+      // Search and More share one compact right-aligned navigation group.
+      // The search module adds its button immediately before More.
+      const actions = document.createElement('div');
+      actions.className = 'member-nav-actions';
+      actions.append(more);
+      nav.append(actions);
+
+      more.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          more.open = false;
+          moreToggle.focus();
+        }
+      });
+      document.addEventListener('click', (event) => {
+        if (more.open && !more.contains(event.target)) more.open = false;
+      });
     });
   }
 
@@ -97,11 +147,19 @@
     });
 
     document.querySelectorAll('[data-member-nav]').forEach((link) => {
-      const selected = link.dataset.memberNav === page || (page === 'workshop' && link.dataset.memberNav === 'tools');
+      const selected = link.dataset.memberNav === page ||
+        (['start-here', 'framework', 'premium-lesson'].includes(page) && link.dataset.memberNav === 'lessons') ||
+        (page === 'path-stage' && link.dataset.memberNav === 'path') ||
+        (page === 'workshop' && link.dataset.memberNav === 'tools');
       link.classList.toggle('active', selected);
       if (selected) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     });
+    const menuToggle = document.querySelector('.member-nav-more > summary');
+    if (menuToggle) {
+      const secondary = memberRoutes.slice(5).some(([key]) => key === page);
+      menuToggle.classList.toggle('active', secondary);
+    }
   }
 
   function copyText(text) {
@@ -208,7 +266,7 @@
       typeof entry.data?.worksheet === 'string' ? entry.data.worksheet : (entry.summary || '(no summary saved)')
     ];
     if (entry.tags?.length) sections.push('', `TAGS: ${entry.tags.join(', ')}`);
-    const details = Object.entries(entry.data || {}).filter(([key, value]) => key !== 'worksheet' && value !== '' && value !== null && value !== undefined);
+    const details = Object.entries(entry.data || {}).filter(([key, value]) => key !== 'worksheet' && key !== 'journalEntries' && value !== '' && value !== null && value !== undefined);
     if (details.length) {
       sections.push('', 'SAVED DETAILS');
       details.forEach(([key, value]) => sections.push(`${key.replace(/[-_]/g, ' ').toUpperCase()}: ${Array.isArray(value) ? value.join(', ') : String(value)}`));
@@ -263,7 +321,30 @@
       summary.textContent = entry.summary || 'No summary saved.';
       card.append(top, title, summary);
       // Full guided worksheets live in data, not the 2,400-character card summary.
-      if(typeof entry.data?.worksheet === 'string'){
+      const journal = ['Lesson Journal','Path Reflection'].includes(entry.tool) && Array.isArray(entry.data?.journalEntries)
+        ? entry.data.journalEntries.filter(item=>item && typeof item.prompt==='string' &&
+            typeof item.response==='string' && item.response.trim())
+        : [];
+      if(journal.length){
+        const detail=document.createElement('details');
+        detail.className='member-full-worksheet member-journal-detail';
+        const trigger=document.createElement('summary');
+        trigger.textContent='Read my reflection journal ('+journal.length+' answers)';
+        const qa=document.createElement('dl');
+        qa.className='member-journal-entries';
+        journal.forEach((item,index)=>{
+          const row=document.createElement('div');
+          row.className='member-journal-entry';
+          const prompt=document.createElement('dt');
+          prompt.textContent=(index+1)+'. '+item.prompt;
+          const answer=document.createElement('dd');
+          answer.textContent=item.response;
+          row.append(prompt,answer);
+          qa.appendChild(row);
+        });
+        detail.append(trigger,qa);
+        card.appendChild(detail);
+      }else if(typeof entry.data?.worksheet === 'string'){
         const detail=document.createElement('details');
         detail.className='member-full-worksheet';
         const trigger=document.createElement('summary');
@@ -287,7 +368,7 @@
         card.appendChild(tags);
       }
 
-      const detailEntries = Object.entries(entry.data || {}).filter(([key, value]) => key !== 'worksheet' && value !== '' && value !== null && value !== undefined);
+      const detailEntries = Object.entries(entry.data || {}).filter(([key, value]) => key !== 'worksheet' && key !== 'journalEntries' && value !== '' && value !== null && value !== undefined);
       if (detailEntries.length) {
         const details = document.createElement('details');
         details.className = 'member-work-details';
@@ -345,12 +426,21 @@
   });
 
   function paintFocus(data = service.load()) {
+    const deepDive = document.querySelector('#member-focus-deep-dive');
+    let deepDiveHref = '';
     document.querySelectorAll('[data-focus-card]').forEach((card) => {
       const current = card.dataset.focusCard === data.journey.focus;
       card.classList.toggle('is-focus', current);
+      if (current) {
+        deepDiveHref = card.querySelector('a[href^="member-path-stage.html"]')?.getAttribute('href') || '';
+      }
       const button = card.querySelector('[data-set-focus]');
       if (button) button.textContent = current ? 'Current focus' : 'Set as my focus';
     });
+    if (deepDive) {
+      deepDive.hidden = !deepDiveHref;
+      if (deepDiveHref) deepDive.href = deepDiveHref;
+    }
   }
 
   document.querySelectorAll('[data-stage-progress]').forEach((select) => {

@@ -50,8 +50,17 @@
     if (node) node.hidden = Boolean(hidden);
   }
 
-  function isFirstRun(state, entries) {
-    return !state.journey.onboardingComplete
+  function isFirstRun(state, entries, entitlementState) {
+    // A member actively reading the protected curriculum is returning to
+    // their journey, even if they haven't completed optional Path onboarding.
+    // Only server-confirmed paid access permits consulting the protected
+    // reading bookmark; a forged browser tier never grants access.
+    const verifiedPaid = entitlementState?.tier === 'paid' &&
+      entitlementState?.source === 'server';
+    const hasReadingHistory = verifiedPaid &&
+      Boolean(window.NBJBLearningContinuity?.get?.());
+    return !hasReadingHistory
+      && !state.journey.onboardingComplete
       && !state.journey.focus
       && !state.journey.nextAction
       && !state.journey.lastTool
@@ -67,6 +76,43 @@
     link.textContent = tool ? `Continue ${tool}` : 'Choose a tool';
     setText('[data-dashboard-continue-tool]', tool || 'No tool started yet');
     setText('[data-dashboard-continue-time]', tool ? formatDate(state.journey.lastVisited) : 'Use the Toolbox when a specific problem needs a specific tool.');
+  }
+
+  function renderReading(entitlementState) {
+    const title = document.querySelector('[data-dashboard-reading-name]');
+    const description = document.querySelector('[data-dashboard-reading-state]');
+    const link = document.querySelector('[data-dashboard-reading-link]');
+    if (!title || !description || !link) return;
+    // Do not trust browser-edited local metadata as an entitlement. The
+    // protected lesson endpoint performs the authoritative check on access.
+    const paid = entitlementState?.tier === 'paid' && entitlementState?.source === 'server';
+    const position = paid ? window.NBJBLearningContinuity?.get?.() : null;
+    if (position) {
+      title.textContent = position.title;
+      description.textContent = 'Section ' + position.section + ' of ' + position.total +
+        ' · Reading position saved on this device.';
+      link.href = 'member-premium-lesson.html?lesson=' +
+        encodeURIComponent(position.slug) + '&section=' + position.section;
+      link.textContent = 'Resume this lesson →';
+    } else if (paid) {
+      title.textContent = 'Begin a guided Flamewalker+ lesson';
+      description.textContent = 'Explore the published curriculum and choose what matters now.';
+      link.href = 'member-lessons.html';
+      link.textContent = 'Browse my lessons →';
+    } else {
+      title.textContent = 'Start Here · Facts, Feelings, Control';
+      description.textContent = 'Begin with the free foundation, then explore the five-step framework.';
+      link.href = 'member-start-here.html';
+      link.textContent = 'Start the free lesson →';
+    }
+  }
+
+  function renderNextAction(state) {
+    const action = String(state.journey?.nextAction || '').trim();
+    // The next action is entered by the member. The compass intentionally
+    // avoids the private saved journal or exercise response bodies.
+    setText('[data-dashboard-action-title]', action ? 'Your chosen next move' : 'One action I can control');
+    setText('[data-dashboard-action-state]', action || 'No next action saved yet. You can name one below.');
   }
 
   function renderFocus(state) {
@@ -197,9 +243,9 @@
 
     if (isPaid) {
       title.textContent = focus ? `Go deeper with ${focus}` : 'Continue the deeper member library';
-      copy.textContent = 'Paid Flamewalker access can surface the deeper recurring learning layer here while keeping flagship programs separate.';
-      link.href = 'member-media.html';
-      link.textContent = 'Open Watch & Learn';
+      copy.textContent = '44 published guided lessons and workbooks are available across six Flamewalker+ tracks. Videos are not included.';
+      link.href = 'member-lessons.html';
+      link.textContent = 'Browse My Lessons';
       return;
     }
 
@@ -211,8 +257,8 @@
     link.textContent = 'Open Start Here';
   }
 
-  function renderFirstRun(state, entries) {
-    const firstRun = isFirstRun(state, entries);
+  function renderFirstRun(state, entries, entitlementState) {
+    const firstRun = isFirstRun(state, entries, entitlementState);
     setHidden('[data-dashboard-first-run]', !firstRun);
     setHidden('[data-dashboard-returning]', firstRun);
   }
@@ -223,7 +269,9 @@
     const entitlementState = entitlements?.load?.() || { tier: 'free' };
     const isPaid = entitlements?.hasTier?.('paid', entitlementState) || false;
 
-    renderFirstRun(state, entries);
+    renderFirstRun(state, entries, entitlementState);
+    renderReading(entitlementState);
+    renderNextAction(state);
     renderContinue(state);
     renderFocus(state);
     renderRecentWork(entries);
@@ -238,6 +286,9 @@
   });
 
   window.addEventListener('pageshow', render);
+  // Refresh the first-run versus returning view after a genuine entitlement
+  // refresh, without requiring the member to revisit the page manually.
+  window.addEventListener('nbjb:entitlements', render);
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', render, { once: true });

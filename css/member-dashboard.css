@@ -1,4 +1,4 @@
-/* Today / Continue dashboard: development-only Phase Two member experience. */
+/* Flamewalker member dashboard: current learning, Path focus, and action. */
 
 .member-today-card {
   border-color: var(--line-hot);
@@ -137,3 +137,18 @@
   .member-dashboard-recent-item > div { flex-direction: column; gap: 2px; }
   .member-dashboard-recent-item span { text-align: left; }
 }
+
+/* A single member-owned journey compass. No private My Work bodies appear here. */
+.member-journey-compass{border-color:rgba(255,122,45,.29);background:linear-gradient(160deg,rgba(255,122,45,.055),rgba(255,255,255,.012))}
+.member-journey-compass>p:not(.eyebrow){max-width:75ch}
+.member-journey-compass .member-today-grid{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:20px}
+.member-compass-reading{border-color:var(--line-hot)}
+.member-journey-compass .member-today-block{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
+.member-journey-compass .member-today-block h3,.member-journey-compass .member-today-block p{overflow-wrap:anywhere}
+.member-journey-compass .member-today-block .text-link{margin-top:auto;padding-top:16px}
+.member-compass-tools{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px;padding-top:18px;margin-top:18px;border-top:1px solid var(--line);font-size:.84rem;color:var(--muted)}
+.member-compass-tools strong{color:var(--text)}
+.member-compass-tools .text-link{margin-left:auto}
+#member-quick-action{scroll-margin-top:160px}
+@media(max-width:1040px){.member-journey-compass .member-today-grid{grid-template-columns:1fr}}
+@media(max-width:560px){.member-compass-tools .text-link{margin-left:0;width:100%}.member-journey-compass .member-today-block{padding:18px}}

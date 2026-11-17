@@ -25,8 +25,11 @@ on:
       - 'scripts/test_member_save_flow.js'
       - 'scripts/test_member_workshop.js'
       - 'scripts/test_member_access_guard.js'
+      - 'scripts/test_member_search.js'
       - 'scripts/test_premium_editorial_review.js'
       - 'scripts/test_live_webhook_hardening.js'
+      - 'scripts/test_membership_lifecycle.js'
+      - 'MEMBERSHIP_LAUNCH_ACCEPTANCE_2026-11-16.md'
       - 'launch-backend-staging/stripe-live-webhook/**'
       - 'scripts/validate_supabase_runtime.py'
       - 'supabase/migrations/**'
@@ -34,6 +37,23 @@ on:
       - 'FLAMEWALKER_PLUS_RELEASE_CHECKLIST.md'
       - '.github/workflows/validate-site.yml'
       - '.github/workflows/clear-stale-pages.yml'
+      - '.github/workflows/flame-spirits.yml'
+      - 'scripts/flame_spirits.mjs'
+      - 'scripts/test_flame_spirits.mjs'
+      - 'scripts/flame_spirits_guardrails.mjs'
+      - '.github/workflows/flame-spirit-products.yml'
+      - 'scripts/flame_spirit_products.mjs'
+      - 'scripts/test_flame_spirit_products.mjs'
+      - '.github/workflows/flame-marshal.yml'
+      - 'scripts/flame_marshal.mjs'
+      - 'scripts/test_flame_marshal.mjs'
+      - '.github/workflows/flame-spirit-reach.yml'
+      - 'scripts/flame_spirit_reach.mjs'
+      - 'scripts/test_flame_spirit_reach.mjs'
+      - '.github/workflows/flame-spirit-welcome.yml'
+      - 'scripts/flame_spirit_welcome.mjs'
+      - 'scripts/test_flame_spirit_welcome.mjs'
+      - 'FLAME_SPIRITS.md'
   pull_request:
     paths:
       - '**.html'
@@ -50,8 +70,11 @@ on:
       - 'scripts/test_member_save_flow.js'
       - 'scripts/test_member_workshop.js'
       - 'scripts/test_member_access_guard.js'
+      - 'scripts/test_member_search.js'
       - 'scripts/test_premium_editorial_review.js'
       - 'scripts/test_live_webhook_hardening.js'
+      - 'scripts/test_membership_lifecycle.js'
+      - 'MEMBERSHIP_LAUNCH_ACCEPTANCE_2026-11-16.md'
       - 'launch-backend-staging/stripe-live-webhook/**'
       - 'scripts/validate_supabase_runtime.py'
       - 'supabase/migrations/**'
@@ -59,6 +82,23 @@ on:
       - 'FLAMEWALKER_PLUS_RELEASE_CHECKLIST.md'
       - '.github/workflows/validate-site.yml'
       - '.github/workflows/clear-stale-pages.yml'
+      - '.github/workflows/flame-spirits.yml'
+      - 'scripts/flame_spirits.mjs'
+      - 'scripts/test_flame_spirits.mjs'
+      - 'scripts/flame_spirits_guardrails.mjs'
+      - '.github/workflows/flame-spirit-products.yml'
+      - 'scripts/flame_spirit_products.mjs'
+      - 'scripts/test_flame_spirit_products.mjs'
+      - '.github/workflows/flame-marshal.yml'
+      - 'scripts/flame_marshal.mjs'
+      - 'scripts/test_flame_marshal.mjs'
+      - '.github/workflows/flame-spirit-reach.yml'
+      - 'scripts/flame_spirit_reach.mjs'
+      - 'scripts/test_flame_spirit_reach.mjs'
+      - '.github/workflows/flame-spirit-welcome.yml'
+      - 'scripts/flame_spirit_welcome.mjs'
+      - 'scripts/test_flame_spirit_welcome.mjs'
+      - 'FLAME_SPIRITS.md'
 
 permissions:
   contents: read
@@ -81,12 +121,26 @@ jobs:
         run: node --test scripts/test_member_workshop.js
       - name: Test signed-out member access and browser Back prevention
         run: node --test scripts/test_member_access_guard.js
+      - name: Test member Find & Resume alongside More
+        run: node --test scripts/test_member_search.js
       - name: Test protected Flamewalker Plus editorial review
         run: node --test scripts/test_premium_editorial_review.js
       - name: Verify staged live webhook signature and payment resilience
         run: node --test scripts/test_live_webhook_hardening.js
+      - name: Verify signup routing, expiring paid access and sandbox isolation
+        run: node --test scripts/test_membership_lifecycle.js
       - name: Verify honest public Flamewalker Plus curriculum preview
         run: node --test scripts/test_plus_preview.js
+      - name: Test Flame Spirits read-only scouting engine
+        run: node --test scripts/test_flame_spirits.mjs
+      - name: Test product research integrity and market signal separation
+        run: node --test scripts/test_flame_spirit_products.mjs
+      - name: Test Flame Marshal supervisor status and cadence checks
+        run: node --test scripts/test_flame_marshal.mjs
+      - name: Test Spirit of Reach ethical content research
+        run: node --test scripts/test_flame_spirit_reach.mjs
+      - name: Test Spirit of Welcome member route and privacy checks
+        run: node --test scripts/test_flame_spirit_welcome.mjs
       - name: Smoke-test live Flamewalker Supabase Auth
         if: ${{ github.base_ref == 'main' || github.ref_name == 'main' || startsWith(github.ref_name, 'release/') }}
         run: python scripts/validate_supabase_runtime.py

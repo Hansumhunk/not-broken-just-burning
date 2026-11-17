@@ -37,10 +37,11 @@ export default {
     const launchMode = Deno.env.get("NBJB_LIVE_BILLING_MODE");
     const canaryUser = Deno.env.get("NBJB_LIVE_CANARY_USER_ID");
     const isCanary = launchMode === "canary" && canaryUser === userId;
-    // Hard public release lock. Only an explicitly approved final launch PR may
-    // switch this flag; canary testing remains independently restricted by user ID.
-    const PUBLIC_LIVE_CHECKOUT_ENABLED = false;
-    if ((!PUBLIC_LIVE_CHECKOUT_ENABLED || launchMode !== "public") && !isCanary) {
+    // Founder-authorized public release: the independent frontend and backend
+    // flags are enabled in the reviewed release code, not by a browser request.
+    // Canary mode remains available whenever public release is disabled again.
+    const PUBLIC_LIVE_CHECKOUT_ENABLED = true;
+    if (!PUBLIC_LIVE_CHECKOUT_ENABLED && !isCanary) {
       return json({ error: "live_checkout_not_enabled" }, 503);
     }
     // The sandbox QA identity must not contaminate real customer billing.
@@ -94,6 +95,27 @@ export default {
         entitlement.provider === "stripe" && entitlement.provider_customer_ref
           ? entitlement.provider_customer_ref
           : null;
+
+      if (customerId) {
+        // A historic Stripe customer reference must not trigger a new charge
+        // while a live Stripe subscription is still active. The local
+        // entitlement can be free when its paid access has ended or drifted;
+        // Stripe remains authoritative on existing billing agreements.
+        const customerSubscriptions = await stripe.subscriptions.list({
+          customer: customerId,
+          status: "all",
+          limit: 100,
+        });
+        const blockingStatuses = new Set([
+          "active", "trialing", "past_due", "unpaid", "incomplete", "paused",
+        ]);
+        if (customerSubscriptions.has_more) {
+          return json({ error: "subscription_check_incomplete" }, 503);
+        }
+        if (customerSubscriptions.data.some((item) => blockingStatuses.has(item.status))) {
+          return json({ error: "already_subscribed", manage_in_portal: true }, 409);
+        }
+      }
 
       if (!customerId) {
         const customer = await stripe.customers.create(

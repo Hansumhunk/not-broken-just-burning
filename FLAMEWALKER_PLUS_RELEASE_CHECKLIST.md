@@ -1,26 +1,116 @@
+# Flamewalker+ release and operating checklist — November 16, 2026
+
+**Founder browser QA status:** 4/4 Free-account tests and 5/5 existing live paid-account tests were founder-reported successful on November 16. See the [full membership acceptance record and open December 2 cancellation checks](MEMBERSHIP_LAUNCH_ACCEPTANCE_2026-11-16.md). These are founder browser reports, not independently observed test runs; independent external customer purchase, broader device/track coverage and paid-to-Free transition remain distinct.
+
+## Founder-reported Free membership browser acceptance — November 16, 2026
+
+- [x] **No-charge browser check 4/4 (founder reported):** signed-out protection, new Free signup, free lessons with premium locked in Free UI, and sign-out/re-entry protection all passed. Detailed record: [membership browser acceptance](MEMBERSHIP_LAUNCH_ACCEPTANCE_2026-11-16.md).
+- [x] **Paid-member browser acceptance 5/5 (founder reported):** live Flamewalker+ account recognized, published Track 2 lesson opened, test worksheet saved/retrieved, Membership page correct, and Stripe billing portal opened; no errors reported. No charge or member-data mutation made.
+- [ ] **Other distinct end-to-end gates:** direct Free API protected-lesson denial, a genuine independent new customer checkout-to-access test, mobile/keyboard and other premium-track lesson checks, editorial proofing, and December 2–4 cancellation/paid-to-Free transition. These are not established by the founder's successful UI acceptance.
+
+## CURRENT PRODUCTION STATUS — all 35 guided lessons published
+
+- [x] **35 protected written lessons now have `status='published'`** in the production `flamewalker_premium_lessons` table: Tracks 1–6 = 7 + 8 + 5 + 5 + 5 + 5.
+- [x] **Controlled release gate passed:** the 28 newly released manuscripts had unique slugs, nonempty teaching blocks, 7–8 guided prompts, Next Honest Action and Smaller Door; revisions matched the previously audited November 16 manuscripts before promotion. No manuscript bodies were placed in public GitHub.
+- [x] **Existing entitlement model preserved:** protected lesson reads require current server-side paid membership; ordinary Free and guests do not receive manuscript bodies. Reviewer-only draft handling remains available for future manuscripts.
+- [x] **Website release:** [PR #184](https://github.com/Hansumhunk/not-broken-just-burning/pull/184) merged with static site CI passing. [PR #185](https://github.com/Hansumhunk/not-broken-just-burning/pull/185) fixes all six paid track links, live copy and regression checks. Keep membership pricing and video pause unchanged.
+- [x] **Initial paid lesson access/save acceptance (founder reported):** signed in as a genuine active paid member, opened a published Track 2 lesson, saved and retrieved a worksheet in My Work. No issues reported November 16.
+- [ ] **Expanded track and device acceptance:** sample Tracks 3–6 with paid account, keyboard/mobile worksheet editing, Save to My Work and return/resume behavior. Founder reports for the Track 2 test do not cover these.
+- [ ] **Access isolation confirmation:** visit a newly published lesson with a separate genuine Free account and signed out, confirm no protected body is returned. Check paid-to-Free transition when legitimately expired or canceled, without artificially changing billing.
+- [ ] **Final human editorial proofing:** founder should proof the released versions for audience fit, citations, safety, clarity and repetition; promptly revise or temporarily unpublish any lesson with a material issue. The founder's instruction to proceed with launch authorized the operating release; it does not replace a claim-by-claim expert proofread.
+- [ ] **First external customer acceptance:** confirm real customer checkout → entitlement → library → Stripe portal/cancellation after an authorized purchase. Never fabricate a sale.
+- [ ] **Support/tax follow-up:** confirm support inbox and applicable digital education tax treatment, keep records. No tax registration or Stripe settings changed with curriculum publication.
+- [ ] **No videos:** all video publication and production stay paused by founder instruction.
+
+> The sections below are dated historical release-stage snapshots, not the current lesson status.
+
+---
+
 # Flamewalker+ final launch checklist — November 15, 2026
+
+## Approved future curriculum standard — Tracks 7–8 (November 16, 2026)
+
+- [x] **Founder has LOCKED the new lesson depth policy.** Each of the 14 planned written lessons must contain **at least 3,000 substantive teaching words**; Standard target 3,000–3,500, Deep Dive 3,500–4,500, Flagship 4,500–5,500. Combined 14-lesson *writing target* **53,700 words**.
+- [x] Fixed individual targets and practical editorial acceptance criteria: [Tracks 7–8 writing standard](FLAMEWALKER_TRACKS_7_8_EDITORIAL_STANDARD.md).
+- [ ] **Develop manuscripts privately:** the 14 titles currently remain curriculum outlines, not finished lessons. Verify word count without headings or workbook questions; complete source, example, exercise, safety and quality reviews.
+- [ ] **No public release without founder signoff and access testing.** This planned expansion is **not a blocker** for the currently published seven-lesson membership and does not authorize any new subscriber claim, payment change or video production.
+
+
+## All 35 teaching depth verified — November 16, 2026
+
+- [x] **35/35 lessons now exceed 2,500 teaching words** (paragraph text only, excluding headings and separate guided questions); range **2502–2929**, mean **2606**. Exact founding lesson versions and word counts: [all-35 depth audit](FLAMEWALKER_ALL_35_DEPTH_AUDIT_2026-11-16.md).
+- [x] The five previously short live founding lessons were substantively deepened and updated in place; their slugs, status, exercises, pricing, entitlement requirements, and underlying member route remain unchanged. The remaining two founding lessons were already compliant.
+- [x] **28 private lessons remain private and in editorial review**. No new video work or publication of unfinished manuscripts.
+- [ ] **Cross-device acceptance**: complete paid/free/lapsed member read, worksheet, local save/resume, keyboard and mobile QA for the newly deepened founding content.
+- [ ] **Founder editorial QA**: approve exact revision versions and check substance, original lesson continuity, repetition, sensitivity and readability before additional curriculum is released.
+
+
+## Founding 28 teaching-depth threshold — November 15, 2026
+
+- [x] **All 28 private Tracks 2–6 manuscripts meet a minimum of 2,500 teaching words** (paragraph content only, excluding headings and separate worksheet questions). Range: **2502–2648**, mean **2576**. Source-of-record versions and per-lesson counts: [minimum 2,500 audit](FOUNDING_28_MINIMUM_2500_AUDIT_2026-11-15.md).
+- [x] **Content and privacy structure check:** 28/28 remain `editorial_review`; 7 founding lessons remain published. All private manuscripts have complete typed blocks, 7–8 guided questions, Next Honest Action, Smaller Door and safety guidance. No exact duplicated exercise questions; RLS enabled and no direct anon/auth SELECT grant.
+- [ ] **Release is still gated** on founder approval of specific manuscript versions and manual mobile/desktop worksheet, resume and entitlement checks; no new manuscript publication or Stripe changes occurred in this depth pass.
+- [x] **The seven existing founding lessons have now been revised where needed to meet 2,500 teaching words** (five revisions, two already compliant). See [all-35 depth audit](FLAMEWALKER_ALL_35_DEPTH_AUDIT_2026-11-16.md).
+
+
+## Additional lesson-depth pass — November 15, 2026
+
+- [x] **All 28 private manuscripts deepened:** added distinct case studies, counterexamples, decision frameworks, field studies and application guidance. Current private draft paragraph lengths: 1854–2528 words, mean 1998. Precise revision numbers recorded in [28-lesson deepening report](FOUNDING_28_DEEPENING_REPORT_2026-11-15.md).
+- [x] **Lesson-order polish:** five shorter Placeholder Wound lessons now close with One action, Take this with you, and a safety note after the substantive teaching.
+- [x] **Live data structure/access check:** 35 total; 7 published, 28 private `editorial_review`; all 28 have intact guided prompts, actions, Smaller Door, safety headings. Cross-library exact duplicate questions 0, exercise titles 35 unique; table RLS enabled with no direct anon/auth SELECT grant.
+- [ ] **Founder signoff and manual cross-device testing still required** before releasing any of the 28 revised private lessons. This change is editorial only: no live checkout, membership entitlement or site navigation changes.
+
+
+## Founding 28 manuscripts — substantive editorial pass, November 15, 2026
+
+- [x] **25 shorter manuscript revisions saved privately in Supabase.** Expanded applied examples, differentiated decision tools, safer scenario framing, concrete practice and follow-through. Three longer original Placeholder Wound drafts already contained substantial guided teaching and were preserved.
+- [x] **Five Safe Room manuscripts research-checked and qualified.** Added traceable DOI references to therapeutic alliance, philosophical epistemic injustice, and DARVO experimental vignette research; terms are used educationally, not as proof concerning any individual.
+- [x] **20 reader-facing introductions polished** to remove internal 'draft/v0.1' language; two standalone foundation labels removed. Original source attribution remains in protected manuscript metadata.
+- [x] **Read-only QA clean:** 28/28 private draft manuscripts have valid nonempty teaching blocks, 7–8 nonempty guided questions, a Next Honest Action, a Smaller Door, a safety boundary, and distinct exercise title. No exact repeated guided questions detected. Protected RLS remains enabled; anon/auth roles have no direct table SELECT permission. **7 published / 28 editorial_review**, unchanged.
+- [x] **Non-sensitive revision manifest:** [Founding 28 editorial readiness report](FOUNDING_28_EDITORIAL_READINESS_2026-11-15.md). Protected manuscript bodies were not copied to GitHub.
+- [ ] **Before publishing the remaining 28:** founder editorial signoff tied to the exact revised lesson versions, final private browser UX checks (including guided worksheet saving, mobile and keyboard), and controlled access/entitlement verification. Do not represent all 35 as currently available or bulk-promote 28 drafts from a structural test alone.
+
+
+## Production sales release — November 15, 2026
+
+- [x] **Founder's explicit launch instruction executed.** PR #166 merged to `main` at `473cb1d64040fa804aee38ccc310cf82a1c2886f`; GitHub Pages build and site validation both completed successfully. `js/member-billing.js` now has `PUBLIC_CHECKOUT_UI_ENABLED=true`. Member Store shows live monthly ($14.99) and annual ($149) offers only after authenticated entitlement/catalog checks; public syllabus and Join copy reflect seven **published** lessons and 28 private drafts.
+- [x] **Production checkout backend deployed:** `create-live-checkout-session` Edge Function version 8 `ACTIVE`, `verify_jwt=true`; `PUBLIC_LIVE_CHECKOUT_ENABLED=true`. Existing restrictions remain: authenticated user, seven published manuscripts, specific recurring lookup keys and amounts, already-subscribed rejection, sandbox test-account exclusion, Stripe live-customer ownership mapping.
+- [x] **Production webhook hardened:** `stripe-live-webhook` v6 `ACTIVE` with signature validation, paid Checkout gating, async-paid handling, and retryable processing receipt responses. Seven published manuscripts, 28 drafts, previously processed live subscription events and Stripe merchant KYC/currently_due=0 verified before launch.
+- [x] **Monitoring:** a separate NBJB Checkout Launch Watch was enabled, daily for 14 initial-launch checks beginning November 16, without duplicating weekly operations review. No video assets were released.
+- [ ] **First external customer acceptance:** Confirm a fresh free member can open live Checkout, complete a real authorized payment, receive verified paid access, and open live Billing Portal; verify member and webhook records using safe masked audit data. Do not manufacture a purchase or silently charge the founder to run the test.
+- [ ] **Seller compliance follow-up:** Keep records for sales-tax and potential out-of-state obligations; Stripe Tax remains active with zero registrations and live Checkout does not automatically collect tax. Product still uses `txcd_10000000` until the actual subscription classification is confirmed. This outstanding item is a compliance follow-up, not a claim of tax exemption.
+- [ ] **Customer support:** Verify actual deliverability of the published support address and timely handling of cancellation/refund inquiries; no email or live billing changes were made in this release.
+
+**The prelaunch lock-off snapshots below are historical and superseded by this production release. Do not restore them without a deliberate rollback.**
+
+## November 15, 2026 — Latest Stripe read-only account verification
+
+- **Live account state at this read:** `business_type=company`, company structure `single_member_llc`, `charges_enabled=true`, `payouts_enabled=true`, `requirements.past_due=[]`, no disabled reason. This supersedes older November 5 and earlier November 15 `business_type=individual` snapshots below.
+- **Latest live readback (after founder submission):** Stripe reports `company.owners_provided=true`, `company.executives_provided=true`, `requirements.currently_due=[]`, `requirements.past_due=[]`, and **zero `pending_verification` items**. Charges and payouts remain enabled, with no verification errors. This supersedes the earlier same-day two-items-pending snapshot. Monitor for any newly requested verification; no more personal information is currently due.
+- **Caution:** An enabled charge/payout capability is not authorization to enable public checkout. Both existing checkout locks stay OFF; tax, support, member access, and founder launch authorization remain outstanding.
+- **Change scope:** Read-only Stripe verification only. No payments, billing settings, credentials, checkout flags, products or live backend were modified.
 
 ## November 15, 2026 — Founder correction: LLC and EIN already obtained
 
 - [x] **Business formation complete.** Florida LLC filing paid November 5, 2026; founder confirmed Not Broken Just Burning LLC was established and the federal EIN issued by November 10, 2026. Do **not** request another LLC filing or a second EIN.
 - [x] Founder previously stated NBJB is a **single-member LLC with one sole owner**, using default disregarded-entity federal tax treatment (no S-corporation election reported). An EIN was issued. **Never commit, publish, or request its digits in chat.** Use official formation and IRS records securely inside Stripe to complete the appropriate fields.
-- [ ] **Actual remaining merchant task:** reconcile the existing Stripe live account (still reporting `business_type=individual`) with the registered **single-member LLC** legal identity, applicable disregarded-entity federal tax reporting rules, IRS matching details and payout ownership. An LLC with one owner can have special disregarded-entity tax reporting rules; do not blindly assume its EIN is the right TIN for every Stripe field.
+- [x] **Stripe merchant KYC readback:** Stripe reports `business_type=company`, company structure `single_member_llc`, owner and executive declarations provided, `requirements.currently_due=[]`, `requirements.past_due=[]`, `requirements.pending_verification=[]`, with charges and payouts enabled. No current Stripe information request is outstanding. **Separate remaining gate:** confirm tax reporting/TIN treatment, payout ownership and seller disclosures before public sale. Do not expose identity documents or tax IDs.
 - [ ] Preserve existing Stripe products, subscription, webhook setup, and historical payouts. No new Stripe account, business incorporation or tax ID application needed.
 
 ## November 15, 2026 — Connected live billing readback and release controls
 
-- [x] Stripe merchant account: `business_type=individual`, charges/payouts enabled, no currently- or past-due verification requirements. This does not establish a separately registered NBJB entity or trade name.
+- [x] **Earlier Nov 15 readback (superseded by the update below):** Stripe previously reported `business_type=individual`, charges/payouts enabled, and no currently- or past-due requirements. Do not use this historical read as the present account status.
 - [x] Monthly $14.99 and annual $149 recurring prices are active and have expected lookup keys. A distinct $149 one-time annual-looking product remains active and must not be confused with the recurring subscription.
 - [x] One completed live Checkout and active monthly subscription from the internal test flow. Its cancellation remains scheduled for December 2, 2026; no charge or cancellation changes during this readback.
 - [x] Stripe payout: $13.96 status `paid`, with November 9 arrival date. This is not evidence of independent external customer demand.
 - [x] Live Stripe webhook endpoint is enabled and configured to deliver subscription and invoice lifecycle events; five live and six sandbox event receipts are marked `processed`.
 - [x] Supabase `ACTIVE_HEALTHY`; 7 published lessons, 28 editorial reviews, 2 paid and 2 free entitlements at query time.
-- [x] Stripe portal configuration supports invoices, payment-method changes and cancel-at-period-end; authenticated browser portal opening still awaits QA.
+- [x] Stripe portal configuration supports invoices, payment-method changes and cancel-at-period-end. **Sandbox Customer Portal opened successfully in founder browser Nov 15** with test subscription, invoice, payment method and scheduled cancellation shown. A distinct **live-paying-customer browser portal test** remains outstanding: designated sandbox account is intentionally blocked from live portal with `sandbox_test_account_not_eligible`.
 - [x] PR #157 merged a source-controlled live webhook candidate with stronger unfinished-event retry and asynchronous-payment guards, and passed CI. **No production Edge Function was deployed.** Controlled event tests and Stripe endpoint event configuration remain necessary before production promotion.
 - [x] Two independent new-sale locks remain enforced on site and deployed server: `PUBLIC_CHECKOUT_UI_ENABLED=false`, `PUBLIC_LIVE_CHECKOUT_ENABLED=false`.
 - [x] Founder confirmed registered Not Broken Just Burning LLC and EIN. [ ] Verify Stripe's legal business/tax classification and align Terms, receipts, and support identity with existing LLC.
-- [ ] Verify relevant product tax treatment and required jurisdictions. Stripe Tax Settings is active, but zero jurisdictions are registered and live Checkout omits `automatic_tax`; do not assume tax is being collected.
-- [ ] Authenticate as the existing paid member to open billing portal and confirm all seven paid lessons load; test ordinary free/guest denial of published lessons and cancellation expiry.
+- [ ] **Tax treatment/registration decision outstanding:** Stripe Tax is active but has **zero registered jurisdictions** and live Checkout omits `automatic_tax`, so do not assume tax is collected. The recurring Flamewalker+ product currently uses `txcd_10000000` (General - Electronically Supplied Services). Stripe's catalog identifies the more specific candidate `txcd_20060358` (On demand Online Courses - written material content); **do not change tax code or tax settings until classification is validated for the actual membership offer**. Florida DOR's past advisements treat certain fully digital course/subscription sales differently from taxable tangible goods; other jurisdictions may vary. Determine actual taxable nexus, applicable states, registration obligations and appropriate product category before enabling a public tax flow.
+- [ ] **Membership acceptance remaining:** existing paid/QA account opened *The Father Wound* protected lesson with its interactive workbook; six additional published lessons, free/guest denial of a **published** lesson, real live-paying-customer portal access, and cancellation/expiration transition still need validation. Sandbox billing portal passed; no new charge required.
 - [ ] Confirm payment failure, refund/dispute reconciliation and signed webhook retries before public activation.
 - [ ] Obtain separate explicit public-sale launch approval before changing either checkout lock.
 

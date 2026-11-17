@@ -1,5 +1,29 @@
 # Flamewalker+ — Founding 35 Editorial Gate
 
+## Latest production update — November 16, 2026
+
+**35 of 35 protected written lessons are now published and included with active Flamewalker+ membership.** The protected Supabase database was verified after a conditional, 28-row status promotion. Six tracks contain 7 + 8 + 5 + 5 + 5 + 5 lessons, with 0 manuscripts left in editorial review as of this release.
+
+The private manuscript bodies remain server-authorized, no public GitHub content copies were created, and videos remain paused. [Release PR #184](https://github.com/Hansumhunk/not-broken-just-burning/pull/184) and [navigation follow-up PR #185](https://github.com/Hansumhunk/not-broken-just-burning/pull/185) update the member experience. Production browser QA and final founder content proofing remain active post-release acceptance items; a structural/word count audit is not a substitute for that work.
+
+**The November 15 and November 4 sections below are historical snapshots and are superseded for production availability.**
+
+---
+
+## Current production status — November 15, 2026
+
+**35 protected guided-lesson manuscripts exist across six tracks: 7 published, 28 in editorial review.** The November 4 snapshot below recorded the original all-draft state and is retained as historical context, not current production availability.
+
+- **Track 1 — The Wounded Boy and Inherited Manhood:** seven full-length manuscripts published and accessible only through server-authorized Flamewalker+ membership or authorized editorial review.
+- **Tracks 2–6:** all 28 manuscripts and guided exercises are already drafted, not empty placeholders. Counts are 8 + 5 + 5 + 5 + 5. They remain unpublished pending final editorial quality and founder approval.
+- **Protected curriculum audit:** 28/28 drafts contain 25–70 teaching blocks each, 7–8 guided prompts, a Next Honest Action and a Smaller Door; no missing or empty required action/exercise fields were found in the current structural audit. Lengths range from approximately 7,159 to 18,540 JSON characters per manuscript. This measures structure, not quality or approval.
+- **Formatting candidates:** 18 short paragraph fragments occur across six draft lessons, mainly section names and worksheet column labels. Inspect the actual reader before altering source material. A short label is not automatically a defect.
+- **Cross-track duplication:** source and safety disclaimers repeat intentionally; final review must still check that each lesson's skill and exercise are distinct.
+- **Public member catalog:** all 35 titles can now be discovered in the authenticated Lessons hub. Only seven published premium lessons have reader links for paid members; 28 draft previews expose titles and summaries only, with no protected manuscript bodies or promises of release dates. Videos remain shelved.
+- **Remaining approval gate:** complete substantive source/claim review, sequence and redundancy evaluation, mobile/keyboard exercise UX, and **founder signoff tied to each final manuscript revision** before changing any of the 28 records to `published`. Do not bulk publish simply because the structural checks pass.
+
+---
+
 **35 drafts · 6 tracks · 0 published**  
 Created: November 4, 2026  
 **Decision: Founding content scope is frozen until editorial, usability, access, and launch gates are completed.**

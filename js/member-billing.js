@@ -1,9 +1,9 @@
 (() => {
   'use strict';
 
-  // Release gate: flip only in the final approved launch PR, never during
-  // ordinary website work. Live Supabase Checkout has an independent gate.
-  const PUBLIC_CHECKOUT_UI_ENABLED = false;
+  // Public launch: enabled by founder-authorized release. The live Supabase
+  // checkout service independently validates subscription, content and customer.
+  const PUBLIC_CHECKOUT_UI_ENABLED = true;
   const MIN_PUBLISHED_LESSONS = 7;
   const region = document.getElementById('member-live-billing');
   if (!region) return;
@@ -22,6 +22,26 @@
   const manageButton = document.getElementById('member-billing-portal');
   const heading = document.getElementById('member-live-billing-title');
   function elHeading(value) { if (heading) heading.textContent = value; }
+  const paidOverview = document.querySelector('[data-membership-paid-overview]');
+  const upgradeSections = [...document.querySelectorAll('[data-membership-upgrade]')];
+  function showMembershipView(current) {
+    const verified = current?.source === 'server';
+    const activePaid = verified && current?.tier === 'paid';
+    if (paidOverview) paidOverview.hidden = !activePaid;
+    for (const section of upgradeSections) section.hidden = !verified || activePaid;
+    return activePaid;
+  }
+  function paidThroughText(current) {
+    const parsed = current?.validUntil ? new Date(current.validUntil) : null;
+    const date = parsed && Number.isFinite(parsed.getTime()) ?
+      parsed.toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' }) : null;
+    return current?.cancelAtPeriodEnd
+      ? (date
+          ? 'Your membership is scheduled to end on ' + date + '. Review subscription details or invoices in Stripe.'
+          : 'Your subscription is scheduled to end after the current paid period. Review billing details in Stripe.')
+      : 'Your Flamewalker+ membership is active. Manage your subscription and invoices in Stripe.';
+  }
+
 
   function message(text, error = false) {
     status.textContent = text;
@@ -80,6 +100,8 @@
 
   for (const button of buttons) {
     button.addEventListener('click', () => {
+      // Never let an invisible or inapplicable purchase control invoke checkout.
+      if (region.hidden || purchase.hidden) return;
       // Defense in depth: disabling new sales is independent of billing management.
       if (!PUBLIC_CHECKOUT_UI_ENABLED) {
         message('New Flamewalker+ subscriptions are not on sale yet.', true);
@@ -106,24 +128,28 @@
     region.hidden = true;
     purchase.hidden = true;
     management.hidden = true;
+    if (paidOverview) paidOverview.hidden = true;
+    for (const section of upgradeSections) section.hidden = true;
     if (!auth?.user?.id || !entitlements?.refresh) return;
 
     const current = await entitlements.refresh();
-    if (current?.hasStripeBilling) {
-      // Billing management remains available for a customer with a Stripe
-      // billing record even if the paid lesson entitlement has ended.
+    if (current?.source !== 'server') return;
+    const activePaid = showMembershipView(current);
+    if (activePaid) {
       region.hidden = false;
-      management.hidden = false;
       elHeading('Manage your Flamewalker+ billing');
-      message(current.cancelAtPeriodEnd
-        ? 'Your subscription is scheduled to end after the current paid period. Review invoices or billing in Stripe.'
-        : current.tier === 'paid'
-          ? 'Your Flamewalker+ membership is active. Manage billing in Stripe.'
-          : 'Review past payments and billing in Stripe. Paid lesson access is not currently active.');
+      message(current.hasStripeBilling ? paidThroughText(current) :
+        'Your Flamewalker+ access is active. Contact NBJB support for subscription billing assistance.');
+      management.hidden = !current.hasStripeBilling;
       return;
     }
-    // Free members cannot start a new subscription until the separate,
-    // explicit launch approval enables both checkout gates.
+    if (current?.hasStripeBilling) {
+      // Billing history alone is not proof of current paid access.
+      region.hidden = false;
+      management.hidden = false;
+    }
+    // When free after a prior subscription, offer renewal alongside access
+    // to old invoices. No paid lesson entitlement is granted by this UI.
     if (!PUBLIC_CHECKOUT_UI_ENABLED) return;
     region.hidden = false;
     elHeading('Choose your guided learning membership');
@@ -160,5 +186,7 @@
     region.hidden = true;
     purchase.hidden = true;
     management.hidden = true;
+    if (paidOverview) paidOverview.hidden = true;
+    for (const section of upgradeSections) section.hidden = true;
   });
 })();

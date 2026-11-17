@@ -1076,3 +1076,38 @@ test('lessons catalog accurately advertises 44 published lessons without implyin
     assert.ok(html.includes('Flamewalker+ · Track 1 · Lesson '+i+' of 7'), 'Track 1 badge '+i);
   }
 });
+
+
+test('live portal UI accepts only trusted URLs and explains sandbox denial without leaking details', async () => {
+  const src=read('js/member-billing.js');
+  const start=src.indexOf('  function stripeRedirectUrl(value, purpose) {');
+  const end=src.indexOf('  for (const button of buttons)',start);
+  assert.ok(start>=0 && end>start);
+  async function scenario(response, user=true) {
+    const calls=[],messages=[],redirects=[],busy=[];
+    const context={URL,auth:{user:user?{id:'synthetic-member'}:null,client:{functions:{invoke:async(fn,opts)=>{calls.push({fn,body:opts.body});return response;}}}},
+      message:(value,error)=>messages.push({value,error}),setBusy:value=>busy.push(value),window:{location:{assign:url=>redirects.push(url)}}};
+    const invoke=vm.runInNewContext(src.slice(start,end)+'\ninvokeAndRedirect',context);
+    await invoke('create-live-customer-portal-session',{},'portal');
+    return {calls,messages,redirects,busy};
+  }
+  const success=await scenario({data:{url:'https://billing.stripe.com/p/session/synthetic'}});
+  assert.equal(success.calls[0].fn,'create-live-customer-portal-session');
+  assert.equal(success.redirects[0],'https://billing.stripe.com/p/session/synthetic');
+  const sandbox=await scenario({error:{context:{json:async()=>({}),clone:()=>({json:async()=>({error:'sandbox_test_account_not_eligible',private:'synthetic-private-detail'})})}}});
+  assert.match(sandbox.messages.at(-1).value,/reserved for billing tests/);
+  assert.doesNotMatch(sandbox.messages.at(-1).value,/synthetic-private-detail|sandbox_test_account_not_eligible/);
+  assert.equal(sandbox.redirects.length,0);
+  assert.equal(sandbox.busy.at(-1),false);
+  const generic=await scenario({data:{error:'synthetic-sensitive-error'}});
+  assert.match(generic.messages.at(-1).value,/We could not open Stripe/);
+  assert.doesNotMatch(generic.messages.at(-1).value,/synthetic-sensitive-error/);
+  for(const url of ['http://billing.stripe.com/p/session/synthetic','https://billing.stripe.com.example.com/fake','https://checkout.stripe.com/fake']) {
+    const unsafe=await scenario({data:{url}});
+    assert.equal(unsafe.redirects.length,0);
+    assert.match(unsafe.messages.at(-1).value,/We could not open Stripe/);
+  }
+  const guest=await scenario({data:{url:'https://billing.stripe.com/fake'}},false);
+  assert.equal(guest.calls.length,0);
+  assert.match(guest.messages.at(-1).value,/session has expired/);
+});

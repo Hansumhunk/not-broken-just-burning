@@ -27,7 +27,7 @@ H.A.W.K. helps people facing high-conflict divorce organize the external situati
 | 07 | Financial Organizer | Implementation complete on feature branch; browser and editorial review pending |
 | 08 | Witness Observation Organizer | Implementation complete on feature branch; browser and editorial review pending |
 | 09 | Support Network Map | Implementation complete on feature branch; browser and editorial review pending |
-| 10 | H.A.W.K. Dashboard | Next |
+| 10 | H.A.W.K. Dashboard | Implementation complete on feature branch; browser and editorial review pending |
 
 ## Tool 01 architecture
 
@@ -187,3 +187,23 @@ Support envelope: `{format: "NBJB-HAWK-SUPPORT", version: 1, entries: [...]}`. S
 - Static integration validation: run #736, completed (success) at integration commit b91cba0e6348279d4c7ce40435fe697c800aac9d.
 - Real-browser desktop/mobile, accessibility, actual download/import/print under CSP and editorial review remain release gates.
 - Tool 10: H.A.W.K. Dashboard should provide a standalone offline coordinator for the nine existing version-1 exports. Define and document versioned workspace envelope and strict per-tool schema validation before implementing cross-file aggregation. Preserve existing standalone exports and stable IDs; explicit replacement/merge policy and duplicate handling; no automatic synchronization or cloud storage. Prioritize clear counts, unresolved questions, cross-reference presence, practical next actions, export back to original formats, privacy and no case-readiness scores, legal conclusions or relationship scoring. Communication draft and support data should remain deliberately separable; do not automatically expose their text in summary or print. Same 3,000-word minimum and release standards.
+
+
+## Tool 10 architecture and verification
+
+Public lesson: `hawk-dashboard.html` (4,036 independently counted substantive teaching words, 17 sections, three fictional scenarios, one guided exercise). Explains the nine original tool roles, snapshot selection, schema validation, replacement versus merging, reference checks, next-action review, sensitive-module separation, selective exports and recovery.
+
+Offline application: `downloads/hawk-dashboard-offline.html`. See `HAWK_WORKSPACE_CONTRACT.md` for the version-one data contract and replacement rules. Read-only coordinator, no network, account, analytics, external AI or automatic storage. Copies the existing nine standalone validators into the static application at build time; strict object shapes and duplicate record checks. Supports complete original version-one module envelopes, and `{format:"NBJB-HAWK-WORKSPACE",version:1,modules:{...}}`. Record IDs and timestamps remain stable. Standalone import replaces one module; workspace import atomically replaces the entire selection. No automatic merge or sync. Explicit selection exports individual original formats or a workspace. Sensitive communication/support modules require one-time loading permission and are unchecked for combined export by default. Data is unencrypted. Caps: 1,000 records per applicable module; 100 MiB ordinary standalone, 32 MiB support, 256 KiB communication, 128 MiB workspace. No original documents, attachments or record editing.
+
+Default overview shows loaded/not loaded, counts and status summaries. Reference checks distinguish present, absent in loaded snapshot and target not loaded. The timeline's free-text references support complete evidence ID token extraction only. Detailed links and existing next-action text are opt-in screen views; no communication drafts or support text exposed, no case-readiness or credibility scoring, outcome prediction or inferred risk. Printing excludes private text and reference details, retaining counts and top-level reference totals. No reminders, automated advice or emergency dispatch.
+
+- Committed teaching body verified at 4,036 words.
+- All ten committed teaching bodies independently counted: 39,206 substantive words total; every guide exceeds 3,000. All ten public guide links verified on the Divorce Recovery Center.
+- JavaScript syntax, restrictive CSP and external dependency/network-call inspection passed.
+- Simulated DOM harness: 38/38 checks passed, including acceptance of fixtures for all nine actual source-derived validators, standalone replacement, workspace atomic rejection/replacement/roundtrip, duplicate IDs, unexpected fields, incompatible amount validation, sensitive permissions and export selection, private views, loaded/empty/unloaded distinctions, reference counts, filtered actions, original-format export, print invocation, cancellation, clearing and malformed file handling.
+- Static site integration validation #742 completed successfully at commit 7282fff3a9812cfab05d2f1eda7cb9978e7326d8.
+- Real-browser download/import/print, actual standalone editor reopening, mobile layout, keyboard/screen-reader accessibility and final editorial review remain release gates. The simulated harness does not establish actual browser or accessibility behavior.
+
+## Initial implementation milestone
+
+All ten applications and teaching guides are now implemented on the feature branch. Total independently recounted teaching volume: 39,206 words, 170 teaching sections, 30 fictional worked scenarios and ten guided exercises. No production deployment. Next priority is a dedicated release-hardening pass for all ten modules: persistent automated regression fixtures, exact schema/roundtrip compatibility against original editors, security/privacy and concurrency review, desktop/mobile browser testing under restrictive CSP, keyboard/screen-reader checks, actual exports and printed output, final editorial and source review, and a complete landing-page/navigation check. Resolve any failures before approving the draft PR for release. Keep the original H.A.W.K. manuscript archived unchanged and the previously agreed product pricing and commercial launch decisions separate from this engineering milestone.

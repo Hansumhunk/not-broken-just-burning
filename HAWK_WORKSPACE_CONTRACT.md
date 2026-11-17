@@ -30,7 +30,7 @@ Each value is a complete original version-1 envelope. Missing module keys mean n
 - A workspace import validates every module before applying a complete replacement. Absent modules are cleared. Any invalid module rejects the whole import. Explicit confirmation if any module is loaded.
 - Communication/support are sensitive separate modules. Each requires explicit opt-in to load, even when inside a workspace. Workspace export checkboxes default ON for ordinary modules, OFF for communication/support. User explicitly selects modules; no implicit bundling. Individual exports allow separate recovery in the original tools.
 - Remove one module or clear all with confirmation; never deletes files or source records. No editing in dashboard. Reopen original editor, export updated module, explicitly replace snapshot.
-- Dashboard limits 128 MiB workspace, 100 MiB ordinary standalone (support 32 MiB; communication 256 KiB), 1,000 entries per record module. Export refuses files beyond these bounds, suggesting individual exports where appropriate. No passwords or encryption; secure storage is the user's responsibility. Imports atomic; pending reads blocked from concurrent mutation by busy control.
+- Dashboard limits 128 MiB workspace, 100 MiB ordinary standalone (support 32 MiB; communication 256 KiB), 1,000 entries per record module. Export refuses files beyond these bounds, suggesting individual exports where appropriate. No passwords or encryption; secure storage is the user's responsibility. Imports atomic; pending reads blocked from concurrent mutation by busy control, except Clear which immediately invalidates the pending import. A late read or error cannot restore discarded data or interfere with a newer session.
 
 ## Display policy
 

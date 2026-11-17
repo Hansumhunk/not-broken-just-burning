@@ -24,8 +24,8 @@ H.A.W.K. helps people facing high-conflict divorce organize the external situati
 | 04 | Communication Analyzer | Implementation complete on feature branch; browser and editorial review pending |
 | 05 | Court Preparation Organizer | Implementation complete on feature branch; browser and editorial review pending |
 | 06 | Parenting Log | Implementation complete on feature branch; browser and editorial review pending |
-| 07 | Financial Organizer | Next |
-| 08 | Witness Observation Organizer | Planned |
+| 07 | Financial Organizer | Implementation complete on feature branch; browser and editorial review pending |
+| 08 | Witness Observation Organizer | Next |
 | 09 | Support Network Map | Planned |
 | 10 | H.A.W.K. Dashboard | Planned |
 
@@ -135,3 +135,21 @@ Optional local readers for version-1 timeline, evidence and checklist exports re
 - Static integration validation: run #722, completed (success) at integration commit 98e3993c8f341b7d0baf98641daca7bac85d77f3.
 - Real-browser desktop/mobile, accessibility, actual download/import/print and editorial review remain release gates.
 - Tool 07: Financial Organizer should organize user-entered income, ordinary expenses, shared obligations, assets and liabilities, dates, source and status, factual discrepancies, supporting references and questions for counsel or accountants. Distinguish documented figures, estimates and disputed amounts; no banking credentials, account connectivity, automated allegations, recommendations on hiding assets, legal entitlement calculations or tax advice. Same 3,000-word minimum, offline privacy and release standards.
+
+
+## Tool 07 architecture and verification
+
+Public lesson: `hawk-financial-organizer.html` (3,999 independently counted teaching words, 17 sections, three fictional worked scenarios, one guided exercise). Expands the H.A.W.K. manuscript's financial record organization principles into cash activity, plans, positions, source-aware estimates, discrepancies, duplicates, privacy and professional questions.
+
+Offline application: `downloads/hawk-financial-organizer-offline.html`. Self-contained, restrictive CSP, no external resources, network, banking connectivity, account or automatic storage. Up to 1,000 entries, explicit unencrypted JSON export/import, print displayed entries and summary. No attachment storage, automatic reconciliation, financial institution connectivity, tax calculation, legal entitlement, net worth or property division calculation.
+
+Financial envelope: `{format: "NBJB-HAWK-FINANCIAL", version: 1, entries: [...]}`. Stable F- identifier plus 16 uppercase hexadecimal characters. Fields: period, category, basis, amount status, title, currency, nonnegative decimal amount, relevant date, source, context, practical next action, T-/E-/C- references, revision and creation/update timestamps. Seven categories: income, expense, shared obligation, asset, liability, transfer and discrepancy/question. Compatible basis rules distinguish actual cash, future plan, point-in-time position and information only. Four amount states: documented, estimated, disputed, unknown. Unknown amounts must be blank; known zero is distinct. Six supported two-decimal currencies (USD, CAD, EUR, GBP, AUD, NZD); no conversion. Amounts constrained to 999999999.99 maximum per record; integer-cent arithmetic; totals grouped by exact period, currency, basis, category and amount status. Unknowns counted without summation. No combined total; duplicate/overlapping entries and incomplete coverage require manual review.
+
+Optional local readers for version-1 timeline, evidence index and checklist exports retain only stable identifier sets. No source descriptions or originals retained or altered. Per-entry links are exported; reference sets are not. Presence in a selected export is not authentication.
+
+- Committed teaching body verified at 3,999 words.
+- JavaScript syntax, external dependency and network-call inspection passed.
+- Simulated DOM harness: 32/32 checks passed, including required fields, exact integer-cent addition, amount precision and limits, unknown vs zero, incompatible category/basis rejection, separated period/currency/basis/category/status groups, three reference readers, duplicate and missing IDs, revision and stable IDs, filters, full export, print invocation, clear, round-trip import, malformed/duplicate imports and remove.
+- Static integration validation: run #727, completed (success) at integration commit 245d0cbc2315decc277f7e79d3d9704eefafc6af.
+- Real-browser desktop/mobile, accessibility, actual download/import/print and editorial review remain release gates.
+- Tool 08: Witness Observation Organizer should distinguish firsthand observations, reported information and unknowns; support source and context notes, voluntary independent accounts, appropriate professional coordination and references. No witness coaching, pressure, solicitation of restricted contact, children as investigators, legal affidavits generated automatically or credibility scores. Keep same substantive word minimum, offline privacy and release standards.

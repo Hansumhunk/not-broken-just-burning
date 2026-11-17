@@ -22,8 +22,8 @@ H.A.W.K. helps people facing high-conflict divorce organize the external situati
 | 02 | Evidence Index | Implementation complete on feature branch; browser and editorial review pending |
 | 03 | Documentation Checklist | Implementation complete on feature branch; browser and editorial review pending |
 | 04 | Communication Analyzer | Implementation complete on feature branch; browser and editorial review pending |
-| 05 | Court Preparation Organizer | Next |
-| 06 | Parenting Log | Planned |
+| 05 | Court Preparation Organizer | Implementation complete on feature branch; browser and editorial review pending |
+| 06 | Parenting Log | Next |
 | 07 | Financial Organizer | Planned |
 | 08 | Witness Observation Organizer | Planned |
 | 09 | Support Network Map | Planned |
@@ -99,3 +99,21 @@ Review envelope: `{format: "NBJB-HAWK-COMMUNICATION", version: 1, review: {...},
 - Static integration validation: run #714, in_progress at integration commit 494000e29f922b07d8f6a8bc0310800444a07981.
 - Real browser/mobile, actual local download/import under CSP, keyboard/screen-reader and editorial review remain release gates.
 - Tool 05: Court Preparation Organizer should help users structure issues, questions for counsel, relevant record references and practical logistics; distinguish official dates from personal targets. Do not offer procedural deadlines, legal conclusions, filings, witness coaching or litigation strategy as legal advice. Keep the same word-count and offline standards.
+
+
+## Tool 05 architecture and verification
+
+Public lesson: `hawk-court-preparation.html` (3,988 independently counted teaching words, 17 sections, three fictional worked scenarios, one guided exercise). Covers consultations, mediation, court appearance preparation, neutral issue definition, factual context, questions for counsel, date verification, privacy and practical attendance arrangements.
+
+Offline application: `downloads/hawk-court-preparation-offline.html`. Self-contained, restrictive CSP, no network, external dependencies, account or automatic storage. Up to 1,000 entries. Explicit unencrypted JSON export/import and print displayed entries. No filing, deadline calculation, legal outcome prediction, automated reminders or testimony advice.
+
+Preparation envelope: `{format: "NBJB-HAWK-PREPARATION", version: 1, entries: [...]}`. Stable P- identifier plus 16 uppercase hexadecimal characters. Entries contain named plan, appointment type, entry type (issue, question, document review, logistics, outcome/follow-up), title, status, priority, factual context, uncertainty, practical next action, date, optional time/time zone, date basis and source, T-/E-/C- references, outcome, revision note and creation/update timestamps. Dates require basis and source; closure requires outcome/reason. Separate independent calendar required. Plans group entries by exact plan name; filters by plan, type, status and search. Self-reported ready is not a legal readiness determination.
+
+Optional local readers for version-1 timeline, evidence index and checklist exports retain only reference IDs; no source text or original records retained or altered. Imported reference sets are not exported; per-entry links are. References establish presence in selected file, not authenticity or admissibility. Communication review remains separate; related decisions may be noted without importing draft text. No automatic synchronization.
+
+- Committed instructional body verified at 3,988 words.
+- JS syntax, external dependency and network-call inspection passed.
+- Simulated DOM harness: 26/26 checks passed, covering input validation, date/basis/source, closure requirement, three reference imports, missing/duplicate IDs, grouped plans, edit/revision, stable IDs, status tally, filters, full export, print invocation, clear and round-trip import, malformed or duplicate import rejection, remove.
+- Static integration validation: run #718, completed (success) at integration commit f7ad7fe0d935dabcd0246020898035abd50f9416.
+- Real-browser desktop/mobile, actual download/import/print under CSP, keyboard/screen-reader and editorial review remain release gates.
+- Tool 06: Parenting Log should focus on child-centered, ordinary care and continuity: schedules, attendance, appointments, activities, practical arrangements and factual observations. Minimize sensitive information; no surveillance, custody scoring, child questioning or diagnosing other parents. Retain the same substantive teaching minimum and offline standards.

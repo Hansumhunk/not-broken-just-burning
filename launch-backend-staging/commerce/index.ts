@@ -1,7 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.116.0";
 import Stripe from "npm:stripe@22.6.2";
 import { verifiedStripeEvent } from "./signature.ts";
-import { providerSnapshot } from "./provider.ts";
+import { providerSnapshot, verifySandboxAccount } from "./provider.ts";
 import { sandboxAllowed, SKU, idOf, validatePrice, verifySession, ownedDownload } from "./commerce-core.mjs";
 const env=(k:string)=>Deno.env.get(k)||"";
 const url=env("SUPABASE_URL"), key=env("NBJB_COMMERCE_STRIPE_TEST_KEY"), ref=env("NBJB_COMMERCE_SANDBOX_REF");
@@ -76,6 +76,7 @@ async function webhook(req:Request) {
 }
 Deno.serve(async(req:Request)=>{
  if(!sandbox||!admin||!stripe)return json({error:"commerce_disabled"},503);
+ if(req.method!=="OPTIONS"){try{await verifySandboxAccount(stripe,env("NBJB_COMMERCE_SANDBOX_STRIPE_ACCOUNT"));}catch{return json({error:"sandbox_provider_unavailable"},503);}}
  if(req.method==="POST" && new URL(req.url).pathname.endsWith("/webhook"))return webhook(req);
  if(req.method==="OPTIONS")return new Response(null,{status:204,headers});
  if(req.method!=="POST"||req.headers.get("origin")!==origin)return json({error:"not_allowed"},403);

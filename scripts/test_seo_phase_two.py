@@ -59,21 +59,22 @@ class SEO(unittest.TestCase):
                 for item in items[:-1]:
                     if item["item"] != ORIGIN + "/":
                         self.assertIn(urlsplit(item["item"]).path.lstrip("/"), page.links)
-    def test_public_course_list_matches_actual_syllabus(self):
+    def test_public_learning_resource_list_matches_actual_syllabus(self):
         page = read("flamewalker-plus.html")
         html = (ROOT / "flamewalker-plus.html").read_text()
-        schema = page.schemas["course-list"]
+        schema = page.schemas["learning-resource-list"]
         self.assertEqual(schema["@type"], "ItemList")
         items = schema["itemListElement"]
         self.assertEqual(len(items), 6)
         self.assertEqual([i["position"] for i in items], list(range(1,7)))
         for obj in items:
             course = obj["item"]
-            self.assertEqual(course["@type"], "Course")
+            self.assertEqual(course["@type"], "LearningResource")
+            self.assertEqual(course["learningResourceType"], "Self-guided written learning track")
             self.assertFalse(course["isAccessibleForFree"])
             self.assertNotIn("offers", course)
             self.assertNotIn("aggregateRating", course)
-            self.assertEqual(course["provider"]["name"], "Not Broken Just Burning")
+            self.assertEqual(course["publisher"]["name"], "Not Broken Just Burning")
             part = urlsplit(course["url"])
             self.assertEqual(part.path, "/flamewalker-plus.html")
             self.assertIn(part.fragment, page.ids)

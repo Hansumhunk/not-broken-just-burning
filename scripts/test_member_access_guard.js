@@ -301,6 +301,12 @@ test('account sign-in, signup and recovery preserve password whitespace exactly'
   };
   await submit('sign-in-form');
   await submit('sign-up-form');
+  // A password update is not permitted without verified recovery identity.
+  await submit('new-password-form');
+  assert.equal(calls.filter(call => call[0] === 'updatePassword').length, 0);
+  auth.user = { id: 'synthetic-recovery-user' };
+  auth.refresh = async () => ({user: auth.user});
+  elements['#recovery-state'].hidden = false;
   await submit('new-password-form');
   assert.deepEqual(calls, [
     ['signIn', 'member@example.com', '  secret pass  '],

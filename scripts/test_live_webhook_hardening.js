@@ -29,3 +29,8 @@ test('preserves separation from sandbox and signed entitlement sync', () => {
   assert.match(webhook, /from\("membership_entitlements"\)/);
   assert.match(webhook, /provider_subscription_ref: subscription\.id/);
 });
+
+test('receipt insert uniqueness collision must be retryable, not successful', () => {
+  assert.match(webhook, /if \(insertError\.code === "23505"\) return json\(\{ error: "event_still_processing" \}, 503\)/);
+  assert.doesNotMatch(webhook, /if \(insertError\.code === "23505"\) return json\(\{ received: true/);
+});

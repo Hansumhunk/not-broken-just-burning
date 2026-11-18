@@ -193,3 +193,50 @@ test('Reader links and catalog cards describe the same unique premium lesson slu
  assert.ok(catalogSlugs.size>=44);
  assert.deepEqual([...catalogSlugs].sort(),[...new Set(readerSlugs)].sort());
 });
+
+function evaluateAnalytics(page, search='', hash='', navigator={}) {
+ const script=source('js/main.js');
+ const start=script.indexOf('const analyticsHostnames');
+ const end=script.indexOf('// V0.8 launch metadata fallback',start);
+ assert.ok(start>=0&&end>start);
+ const events=[],config=[];
+ const posthog={__loaded:true,init(_key,options){config.push(options)},capture(name,properties){events.push({name,properties})}};
+ const window={location:{hostname:'notbrokenjustburning.com',search,hash},posthog};
+ vm.runInNewContext(script.slice(start,end),{currentPage:page,window,posthog,navigator,URL,URLSearchParams,document:{addEventListener(){}}});
+ return {window,events,config};
+}
+test('membership analytics refuses private workspaces, token-bearing URLs and opt-out',()=>{
+ for(const [page,search,hash,navigator] of [
+   ['member-auth.html','','#access_token=synthetic'],['member-work.html','',''],
+   ['member-premium-lesson.html','?lesson=father-wound',''],
+   ['index.html','?code=synthetic',''],['member-store.html','?email=synthetic',''],
+   ['member-store.html','','',{globalPrivacyControl:true}],
+   ['member-store.html','','',{doNotTrack:'1'}]
+ ]){
+   const result=evaluateAnalytics(page,search,hash,navigator);
+   assert.equal(result.config.length,0,page);
+   assert.equal(result.window.NBJBTrackCheckoutIntent,undefined,page);
+ }
+});
+test('membership intent telemetry has only allowlisted event and plan, URL properties omit credentials',()=>{
+ const result=evaluateAnalytics('member-store.html','?checkout=success');
+ assert.equal(result.config.length,1);
+ assert.equal(result.config[0].cookieless_mode,'always');
+ assert.equal(result.config[0].disable_session_recording,true);
+ result.window.NBJBTrackCheckoutIntent('flamewalker_plus_monthly');
+ result.window.NBJBTrackCheckoutIntent('flamewalker_plus_annual');
+ result.window.NBJBTrackCheckoutIntent('unrecognized');
+ assert.deepEqual(JSON.parse(JSON.stringify(result.events)),[
+   {name:'nbjb_membership_checkout_requested',properties:{plan:'monthly',$process_person_profile:false}},
+   {name:'nbjb_membership_checkout_requested',properties:{plan:'annual',$process_person_profile:false}}
+ ]);
+ const sanitized=result.config[0].before_send({properties:{$current_url:'https://notbrokenjustburning.com/member-store.html?checkout=success#sensitive', $referrer:'https://example.com/?token=synthetic',plan:'monthly'}});
+ assert.equal(sanitized.properties.$current_url,'https://notbrokenjustburning.com/member-store.html');
+ assert.equal(sanitized.properties.$referrer,'https://example.com/');
+ assert.equal(sanitized.properties.plan,'monthly');
+ const campaign=evaluateAnalytics('lesson-clarity-before-certainty.html','?utm_source=facebook&utm_campaign=flamewalker_first10');
+ assert.equal(campaign.config.length,1);
+ const billing=source('js/member-billing.js');
+ assert.ok(billing.indexOf('if (!consent?.checked)')<billing.indexOf('window.NBJBTrackCheckoutIntent?.(offer)'));
+ assert.ok(billing.indexOf("if (!['flamewalker_plus_monthly', 'flamewalker_plus_annual'].includes(offer))")<billing.indexOf('window.NBJBTrackCheckoutIntent?.(offer)'));
+});

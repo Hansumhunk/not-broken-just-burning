@@ -29,7 +29,7 @@ async function productAsset(p:any) {
 }
 async function orderById(id:string){return must(await admin!.from("commerce_orders").select("*").eq("id",id).maybeSingle());}
 async function entitlement(user:string,slug:string){return must(await admin!.from("product_entitlements").select("user_id,product_slug,status,source,provider_entitlement_ref,valid_until").eq("user_id",user).eq("product_slug",slug).maybeSingle());}
-async function reconcile(sid:string,eventID:string) {
+async function reconcile(sid:string,eventID:string,eventType:string) {
  const s=await stripe!.checkout.sessions.retrieve(sid);
  if(s.metadata?.nbjb_commerce!=="v1"||s.mode!=="payment")return;
  const oid=s.metadata.order_id;
@@ -41,6 +41,8 @@ async function reconcile(sid:string,eventID:string) {
  const pi=s.payment_status==="paid"&&intent?await stripe!.paymentIntents.retrieve(intent):null;
  const ch=idOf(pi?.latest_charge);const charge=ch?await stripe!.charges.retrieve(ch):null;
  const v=verifySession(s,items,o,pi,charge);
+ if(eventType.startsWith("charge.dispute.")&&v.state==="paid")v.state="disputed";
+ if(eventType==="checkout.session.async_payment_failed"&&s.status==="complete"&&s.payment_status==="unpaid"&&intent){const failed=await stripe!.paymentIntents.retrieve(intent);if(["canceled","requires_payment_method"].includes(failed.status))v.state="failed";}
  // Failed card attempts can be retried in the same open session. Delayed methods
  // are disabled; if one somehow occurs, keep pending until provider expiry or human reconciliation.
  must(await admin!.rpc("commerce_reconcile",{p_order:o.id,p_event:eventID,p_session:s.id,p_intent:v.intent,p_state:v.state,p_total:v.total,p_refunded:v.refunded}));
@@ -53,14 +55,14 @@ async function webhook(req:Request) {
  if(event.livemode)return json({error:"wrong_environment"},400);
  try{
  const obj:any=event.data.object;
- if(["checkout.session.completed","checkout.session.async_payment_succeeded","checkout.session.async_payment_failed","checkout.session.expired"].includes(event.type))await reconcile(obj.id,event.id);
+ if(["checkout.session.completed","checkout.session.async_payment_succeeded","checkout.session.async_payment_failed","checkout.session.expired"].includes(event.type))await reconcile(obj.id,event.id,event.type);
  else if(["charge.refunded","charge.dispute.created","charge.dispute.updated","charge.dispute.closed","refund.created","refund.updated","refund.failed"].includes(event.type)){
    let pi=idOf(obj.payment_intent);
    if(!pi&&obj.charge){const charge=await stripe!.charges.retrieve(idOf(obj.charge)!);pi=idOf(charge.payment_intent);}
    if(pi){const intent=await stripe!.paymentIntents.retrieve(pi);if(intent.metadata?.nbjb_commerce==="v1"){
      const sessions=await stripe!.checkout.sessions.list({payment_intent:pi,limit:2});
      if(sessions.has_more||sessions.data.length!==1)throw Error("session_lookup_ambiguous");
-     await reconcile(sessions.data[0].id,event.id);
+     await reconcile(sessions.data[0].id,event.id,event.type);
    }}
  }
  return json({received:true});

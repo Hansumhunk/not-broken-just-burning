@@ -18,7 +18,7 @@ Deno.test("truncated, foreign or unknown refund snapshots fail closed",async()=>
 Deno.test("duplicate scanner only selects matching one-time commerce sessions",async()=>{const result=await orderSessions(fake({sessions:[session,{...session,id:"cs_other"},{...session,mode:"subscription"},{...session,livemode:true},{...session,metadata:{order_id:"other"}}]}),o);assert(result.length===2);await reject(()=>orderSessions(fake({sessions:[session,session]}),o,1));});
 
 Deno.test("sandbox identity must be independently confirmed, not merely a test key",async()=>{
- const provider={accounts:{retrieve:async()=>({id:"acct_QAfixture"})}} as unknown as Stripe;
+ const provider={accounts:{retrieve:async(id:unknown)=>{assert(id===null);return {id:"acct_QAfixture"};}}} as unknown as Stripe;
  assert(await verifySandboxAccount(provider,"acct_QAfixture"));
  for(const wrong of ["","acct_other","acct_1UIHnYGyOSBYVfGl"])await reject(()=>verifySandboxAccount(provider,wrong));
 });

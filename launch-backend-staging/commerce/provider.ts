@@ -19,7 +19,7 @@ export async function providerSnapshot(stripe:Stripe,sid:string,o:any) {
   const disputes=await stripe.disputes.list({charge:charge.id,limit:100});
   if(disputes.has_more || disputes.data.some(x=>x.livemode!==false || idOf(x.charge)!==charge.id))throw Error("dispute_snapshot_incomplete");
   won=disputes.data.length>0 && disputes.data.every(x=>x.status==="won");
-  const hold=charge.disputed || disputes.data.length>0;
+  const hold=(charge.disputed || disputes.data.length>0) && !won;
   v.refunded=succeeded;
   v.state=succeeded===charge.amount?"refunded":hold?"disputed":"paid";
  }

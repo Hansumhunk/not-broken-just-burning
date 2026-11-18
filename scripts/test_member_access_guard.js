@@ -1154,3 +1154,25 @@ test('same-browser switch immediately hides old member page and reloads for new 
   assert.equal(state.body.dataset.memberAccess,undefined);
   assert.equal(state.reloads(),1);
 });
+
+test('member UX P2 applies accessible focus, mobile targets, explicit data export and scoped reset',()=>{
+  const css=read('css/members.css');
+  const premium=read('css/member-premium-lesson.css');
+  const platform=read('js/member-platform.js');
+  const service=read('js/member-service.js');
+  assert.match(css,/data-member-motion="reduced"/);
+  assert.match(css,/focus-visible/);
+  assert.match(premium,/font-size:16px;min-height:96px/);
+  assert.match(platform,/Copy private local member data to the clipboard/);
+  assert.match(service,/nbjb\.plus\.reading-position\.v1\./);
+  assert.match(service,/nbjb\.plus\.last-learning\.v1\./);
+  assert.doesNotMatch(service,/localStorage\.clear\(/);
+});
+test('recovery flow deduplicates requests and validates session before updating password',()=>{
+  const auth=read('js/member-auth.js');
+  assert.match(auth,/if \(recoveryRequestPending\) return/);
+  assert.match(auth,/if \(passwordUpdatePending\) return/);
+  assert.match(auth,/if \(auth\.refresh\) await auth\.refresh\(\)/);
+  assert.match(auth,/if \(!auth\.user\?\.id \|\| recovery\?\.hidden\)/);
+  assert.match(auth,/If that account exists/);
+});

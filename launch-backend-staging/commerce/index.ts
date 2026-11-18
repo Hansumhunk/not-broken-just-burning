@@ -38,13 +38,14 @@ async function reconcile(sid:string,eventID:string,eventType:string) {
  if(!uuid.test(oid||""))throw Error("invalid_order_id");
  const o=await orderById(oid);
  if(!o)throw Error("order_missing");
- const {v,pendingRefund,won}=await providerSnapshot(stripe!,s.id,o);
+ const {v,pendingRefund,won,refundRecords}=await providerSnapshot(stripe!,s.id,o);
  const intent=idOf(s.payment_intent);
  if(eventType.startsWith("charge.dispute.")&&v.state==="paid"&&!won)v.state="disputed";
  if(eventType==="checkout.session.async_payment_failed"&&s.status==="complete"&&s.payment_status==="unpaid"&&intent){const failed=await stripe!.paymentIntents.retrieve(intent);if(["canceled","requires_payment_method"].includes(failed.status))v.state="failed";}
  // Failed card attempts can be retried in the same open session. Delayed methods
  // are disabled; if one somehow occurs, keep pending until provider expiry or human reconciliation.
  must(await admin!.rpc("commerce_reconcile",{p_order:o.id,p_event:eventID,p_session:s.id,p_intent:v.intent,p_state:v.state,p_total:v.total,p_refunded:v.refunded}));
+ if(refundRecords.length&&v.intent)must(await admin!.rpc("commerce_record_refunds",{p_order:o.id,p_session:s.id,p_intent:v.intent,p_data:refundRecords}));
  if(pendingRefund)must(await admin!.from("commerce_orders").update({review_required:true,updated_at:new Date().toISOString()}).eq("id",o.id));
 }
 async function webhook(req:Request) {

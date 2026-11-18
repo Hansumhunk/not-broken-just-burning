@@ -123,7 +123,7 @@ revoke execute on function public.commerce_erasure_preflight(uuid),public.commer
 grant execute on function public.commerce_erasure_preflight(uuid),public.commerce_erasure_hold(uuid,boolean,uuid,uuid,text),public.commerce_ops_recover(uuid,timestamptz,text,text,integer,integer,boolean,uuid,uuid,text),public.commerce_mark_review(uuid,uuid,uuid,text,boolean),public.commerce_replace_asset(text,text,text,text,text,text,uuid,uuid,text) to service_role;
 -- Provider-refund records are financial observations, not customer analytics.
 create table public.commerce_refund_observations(
- refund_ref text primary key check(refund_ref ~ '^re_[A-Za-z0-9_]+),
+ refund_ref text primary key check(refund_ref ~ '^re_[A-Za-z0-9_]+$'),
  order_id uuid not null references public.commerce_orders(id),
  amount integer not null check(amount>0),
  status text not null check(status in ('pending','requires_action','succeeded','failed','canceled')),

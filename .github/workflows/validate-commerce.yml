@@ -42,6 +42,7 @@ jobs:
           PGPASSWORD: fixture-only
         run: |
           psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/test-fixture.sql
+          psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/qa-entitlement-baseline.sql
           psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/migration.sql
           psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/test-migration.sql
           psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/operations.sql

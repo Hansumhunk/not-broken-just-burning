@@ -5,8 +5,8 @@
     paid: 2
   });
 
-  let state = {
-    tier: 'free',
+  function emptyState(tier = 'free') { return {
+    tier
     membershipStatus: 'active',
     cancelAtPeriodEnd: false,
     validUntil: null,
@@ -15,7 +15,10 @@
     events: [],
     updatedAt: null,
     source: 'server'
-  };
+  }; }
+  let state = emptyState();
+  let stateUserId = null;
+  let requestVersion = 0;
 
   function normalizeMembership(row) {
     const now = Date.now();
@@ -35,10 +38,12 @@
   }
 
   function load() {
+    const id = window.NBJBAuth?.user?.id || null;
+    const current = id && id === stateUserId ? state : emptyState(id ? 'free' : 'guest');
     return {
-      ...state,
-      products: [...state.products],
-      events: [...state.events]
+      ...current,
+      products: [...current.products],
+      events: [...current.events]
     };
   }
 
@@ -105,9 +110,17 @@
     const auth = window.NBJBAuth;
     const client = auth?.client;
     const user = auth?.user;
+    const id = user?.id || null;
+    const version = ++requestVersion;
+    const isCurrent = () => version === requestVersion && (window.NBJBAuth?.user?.id || null) === id;
+    if (id !== stateUserId) {
+      state = emptyState(id ? 'free' : 'guest');
+      stateUserId = id;
+      apply();
+    }
 
-    if (!client || !user?.id) {
-      state = { ...state, tier: 'guest', hasStripeBilling: false, updatedAt: Date.now() };
+    if (!client || !id) {
+      state = { ...emptyState(id ? 'free' : 'guest'), updatedAt: Date.now() };
       apply();
       return load();
     }
@@ -131,6 +144,7 @@
           .eq('status', 'active')
       ]);
 
+      if (!isCurrent()) return load();
       if (membershipResult.error) throw membershipResult.error;
       if (productsResult.error) throw productsResult.error;
       if (eventsResult.error) throw eventsResult.error;
@@ -152,13 +166,10 @@
         source: 'server'
       };
     } catch (error) {
+      if (!isCurrent()) return load();
       console.error('entitlement_read_failed', error);
       state = {
-        ...state,
-        tier: 'free',
-        hasStripeBilling: false,
-        products: [],
-        events: [],
+        ...emptyState('free'),
         updatedAt: Date.now(),
         source: 'server_error'
       };

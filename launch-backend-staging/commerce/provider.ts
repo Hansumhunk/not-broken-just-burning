@@ -45,7 +45,7 @@ export async function orderSessions(stripe:Stripe,o:any,maximum=2000){
 export async function verifySandboxAccount(stripe:Stripe,expected:string){
  // A test-mode key alone does not identify the intended sandbox. Account read permission required.
  if(!/^acct_[A-Za-z0-9]+$/.test(expected||"")||expected==="acct_1UIHnYGyOSBYVfGl")throw Error("sandbox_account_not_configured");
- const account=await stripe.accounts.retrieve();
+ const account=await stripe.accounts.retrieve(null);
  if(account.id!==expected)throw Error("sandbox_account_mismatch");
  return true;
 }

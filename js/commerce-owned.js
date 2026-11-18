@@ -21,14 +21,14 @@
       item.textContent = product.title + ' — Owned ';
       if (window.NBJBCommerce?.enabled) {
         const btn = document.createElement('button');
-        btn.type='button'; btn.className='button button-ghost'; btn.textContent='Download';
+        btn.type='button'; btn.className='button button-ghost'; btn.textContent='Download'; btn.setAttribute('aria-label','Download '+product.title);
         btn.addEventListener('click',async()=>{
-          btn.disabled=true;
+          btn.disabled=true; btn.textContent='Preparing download…';
           try {
             const data=await window.NBJBCommerce.call('download',{slug:product.slug});
             location.assign(window.NBJBCommerce.downloadUrl(data.url));
-          } catch { status.textContent='Unable to authorize download. Refresh or contact support.'; }
-          finally { btn.disabled=false; }
+          } catch(e) { status.textContent=e.message==='download_unavailable'?'Your purchase is still owned. File delivery is temporarily unavailable. Retry Download for a fresh link or contact support.':'Unable to authorize download. Refresh your Library or contact support.'; }
+          finally { btn.disabled=false; btn.textContent='Download'; }
         });
         item.appendChild(btn);
       } else item.append('· Delivery unavailable');

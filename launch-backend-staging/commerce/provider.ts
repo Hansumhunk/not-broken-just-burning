@@ -12,7 +12,7 @@ export async function providerSnapshot(stripe:Stripe,sid:string,o:any) {
  let refundRecords:{id:string,amount:number,status:string|null,currency:string,created:number}[]=[];
  if(charge && pi) {
   const refunds=await stripe.refunds.list({charge:charge.id,limit:100});
-  if(refunds.has_more || refunds.data.some(x=>x.livemode!==false || idOf(x.charge)!==charge.id || x.currency!==o.currency))throw Error("refund_snapshot_incomplete");
+  if(refunds.has_more || refunds.data.some(x=>idOf(x.charge)!==charge.id || x.currency!==o.currency))throw Error("refund_snapshot_incomplete");
   refundRecords=refunds.data.map(({id,amount,status,currency,created})=>({id,amount,status:status??null,currency,created}));
   if(refundRecords.some(x=>!["pending","requires_action","succeeded","failed","canceled"].includes(x.status||"")))throw Error("unknown_refund_status");
   const succeeded=refunds.data.filter(x=>x.status==="succeeded").reduce((sum,x)=>sum+x.amount,0);

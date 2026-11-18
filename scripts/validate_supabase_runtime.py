@@ -120,6 +120,28 @@ def probe_premium_guest(base_url: str, publishable_key: str) -> None:
             raise RuntimeError(f"premium guest denial ({label}) was unreachable") from exc
 
 
+def probe_unsigned_webhook(base_url: str, publishable_key: str) -> None:
+    """Prove the live webhook rejects unsigned requests without writing a receipt."""
+    req = Request(f"{base_url}/functions/v1/stripe-live-webhook", data=b"{}",
+                  headers={"apikey":publishable_key, "Content-Type":"application/json",
+                           "User-Agent":"NBJB-Membership-QA-CI/1.0"}, method="POST")
+    try:
+        with urlopen(req, timeout=20) as response:
+            raise RuntimeError(f"unsigned live webhook unexpectedly returned HTTP {response.status}")
+    except HTTPError as exc:
+        if exc.code != 400:
+            raise RuntimeError(f"unsigned live webhook returned HTTP {exc.code}, expected 400") from exc
+        try:
+            data = json.loads(exc.read(65536))
+        except (json.JSONDecodeError, UnicodeDecodeError) as err:
+            raise RuntimeError("unsigned live webhook returned an unexpected body") from err
+        if not isinstance(data, dict) or data.get("error") != "missing_signature":
+            raise RuntimeError("unsigned live webhook did not report missing_signature")
+        print("Live Stripe webhook — unsigned request denied HTTP 400")
+    except URLError as exc:
+        raise RuntimeError("unsigned live webhook was unreachable") from exc
+
+
 def probe_deployed_membership_assets() -> None:
     """Read-only CDN diagnostics. PR CI can precede Pages deployment."""
     cases = (
@@ -128,10 +150,14 @@ def probe_deployed_membership_assets() -> None:
         ("js/member-learning-progress.js", "practiceRenderVersion"),
         ("js/member-bootstrap.js", "member-qa-20261118"),
         ("member-progress.html", "qa=member-qa-20261118"),
+        ("js/member-entitlements.js?v=member-qa-20261118", "requestVersion"),
+        ("js/member-learning-progress.js?v=member-qa-20261118", "practiceRenderVersion"),
+        ("js/tool-member-history.js?v=member-qa-20261118", "pending.ownerId"),
     )
     for path, marker in cases:
         try:
-            req = Request(f"{EXPECTED_ORIGIN}/{path}?nbjb_qa=20261118",
+            separator = "&" if "?" in path else "?"
+            req = Request(f"{EXPECTED_ORIGIN}/{path}{separator}nbjb_qa=20261118",
                           headers={"Cache-Control":"no-cache", "User-Agent":"NBJB-Membership-QA-CI/1.0"})
             with urlopen(req, timeout=15) as response:
                 body = response.read(2000000).decode("utf-8", errors="replace")
@@ -220,6 +246,7 @@ def main() -> int:
     print("Secret browser credential check: passed")
     try:
         probe_premium_guest(base_url, publishable_key)
+        probe_unsigned_webhook(base_url, publishable_key)
     except RuntimeError as exc:
         return fail(str(exc))
     probe_deployed_membership_assets()

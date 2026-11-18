@@ -134,7 +134,7 @@ create table public.commerce_refund_observations(
 alter table public.commerce_refund_observations enable row level security;
 revoke all on public.commerce_refund_observations from public,anon,authenticated,service_role;
 grant select,insert,update on public.commerce_refund_observations to service_role;
-create function public.commerce_record_refunds(p_order uuid,p_session text,p_intent text,p_data jsonb) returns void language plpgsql security invoker set search_path='' as $
+create function public.commerce_record_refunds(p_order uuid,p_session text,p_intent text,p_data jsonb) returns void language plpgsql security invoker set search_path='' as $$
 declare o public.commerce_orders; f jsonb; a integer; st text; rid text; stamp timestamptz;
 begin
  select * into o from public.commerce_orders where id=p_order for update;
@@ -150,12 +150,12 @@ begin
   where commerce_refund_observations.order_id=o.id and commerce_refund_observations.amount=a;
   if not found then raise exception 'refund_reference_conflict';end if;
  end loop;
-end $;
+end $$;
 revoke execute on function public.commerce_record_refunds(uuid,text,text,jsonb) from public,anon,authenticated;
 grant execute on function public.commerce_record_refunds(uuid,text,text,jsonb) to service_role;
 -- Record a confirmed full refund even when a late successful payment hit an expired local order.
 -- No Stripe money movement. Only an exact provider-verified full refund may close the record.
-create function public.commerce_ops_close_refund(p_order uuid,p_expected_updated timestamptz,p_session text,p_intent text,p_total integer,p_refunded integer,p_operation uuid,p_ticket uuid,p_operator text) returns void language plpgsql security invoker set search_path='' as $
+create function public.commerce_ops_close_refund(p_order uuid,p_expected_updated timestamptz,p_session text,p_intent text,p_total integer,p_refunded integer,p_operation uuid,p_ticket uuid,p_operator text) returns void language plpgsql security invoker set search_path='' as $$
 declare o public.commerce_orders;
 begin
  select * into o from public.commerce_orders where id=p_order for update;
@@ -168,7 +168,7 @@ begin
  update public.commerce_orders set stripe_session_id=p_session,stripe_payment_intent_id=p_intent,status='refunded',total_amount=p_total,
  refunded_amount=p_refunded,paid_at=coalesce(paid_at,now()),review_required=false,updated_at=clock_timestamp() where id=o.id;
  update public.product_entitlements set status='refunded',updated_at=now() where user_id=o.user_id and product_slug=o.slug and source='stripe_commerce' and provider_entitlement_ref=o.id::text;
-end $;
+end $$;
 revoke execute on function public.commerce_ops_close_refund(uuid,timestamptz,text,text,integer,integer,uuid,uuid,text) from public,anon,authenticated;
 grant execute on function public.commerce_ops_close_refund(uuid,timestamptz,text,text,integer,integer,uuid,uuid,text) to service_role;
 commit;

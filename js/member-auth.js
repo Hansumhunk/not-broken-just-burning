@@ -58,8 +58,9 @@
   q('#recovery-form')?.addEventListener('submit', async (e)=>{
     e.preventDefault();
     if (recoveryRequestPending) return;
+    const form = e.currentTarget;
     recoveryRequestPending = true;
-    setFormBusy(e.currentTarget, true);
+    setFormBusy(form, true);
     setStatus('Sending recovery link…');
     try {
       const {error} = await auth.sendRecovery(value('recovery-email'));
@@ -73,7 +74,7 @@
       setStatus('Recovery is temporarily unavailable. Retry or contact support.', true);
     } finally {
       recoveryRequestPending = false;
-      setFormBusy(e.currentTarget, false);
+      setFormBusy(form, false);
     }
   });
   q('#new-password-form')?.addEventListener('submit', async (e)=>{
@@ -82,8 +83,9 @@
     const p1=value('new-password'); const p2=value('new-password-confirm');
     if(p1.length<8)return setStatus('Use at least 8 characters.',true);
     if(p1!==p2)return setStatus('The passwords do not match.',true);
+    const form = e.currentTarget;
     passwordUpdatePending = true;
-    setFormBusy(e.currentTarget, true);
+    setFormBusy(form, true);
     try {
       if (auth.refresh) await auth.refresh();
       if (!auth.user?.id || recovery?.hidden) return setStatus('Recovery has expired or is unavailable. Request a new recovery link.',true);
@@ -96,7 +98,7 @@
       setStatus('Recovery could not be verified. Request a new recovery link.', true);
     } finally {
       passwordUpdatePending = false;
-      setFormBusy(e.currentTarget, false);
+      setFormBusy(form, false);
     }
   });
   q('#sign-out-button')?.addEventListener('click', async ()=>{ setStatus('Signing out…'); const {error}=await auth.signOut(); if(error)return setStatus(error.message,true); setStatus('Signed out.'); });

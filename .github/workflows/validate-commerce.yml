@@ -18,8 +18,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test scripts/test_commerce_catalog.js scripts/test_commerce_security.mjs scripts/test_commerce_browser.js
+      - run: node --test scripts/test_commerce_catalog.js scripts/test_commerce_security.mjs scripts/test_commerce_browser.js scripts/test_commerce_release.js
       - run: for f in js/commerce-*.js; do node --check "$f"; done
+      - name: Assert unapproved production manifest stays blocked
+        run: |
+          set +e
+          node scripts/check_commerce_release.js launch-backend-staging/commerce/release-review.json
+          result=$?
+          set -e
+          test "$result" -eq 2
   commerce-database:
     runs-on: ubuntu-latest
     services:

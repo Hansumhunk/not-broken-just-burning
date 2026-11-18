@@ -1,6 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.116.0";
 import Stripe from "npm:stripe@22.6.2";
 import { verifiedStripeEvent } from "./signature.ts";
+import { providerSnapshot } from "./provider.ts";
 import { sandboxAllowed, SKU, idOf, validatePrice, verifySession, ownedDownload } from "./commerce-core.mjs";
 const env=(k:string)=>Deno.env.get(k)||"";
 const url=env("SUPABASE_URL"), key=env("NBJB_COMMERCE_STRIPE_TEST_KEY"), ref=env("NBJB_COMMERCE_SANDBOX_REF");
@@ -37,16 +38,14 @@ async function reconcile(sid:string,eventID:string,eventType:string) {
  if(!uuid.test(oid||""))throw Error("invalid_order_id");
  const o=await orderById(oid);
  if(!o)throw Error("order_missing");
- const items=await stripe!.checkout.sessions.listLineItems(s.id,{limit:2});
+ const {v,pendingRefund}=await providerSnapshot(stripe!,s.id,o);
  const intent=idOf(s.payment_intent);
- const pi=s.payment_status==="paid"&&intent?await stripe!.paymentIntents.retrieve(intent):null;
- const ch=idOf(pi?.latest_charge);const charge=ch?await stripe!.charges.retrieve(ch):null;
- const v=verifySession(s,items,o,pi,charge);
  if(eventType.startsWith("charge.dispute.")&&v.state==="paid")v.state="disputed";
  if(eventType==="checkout.session.async_payment_failed"&&s.status==="complete"&&s.payment_status==="unpaid"&&intent){const failed=await stripe!.paymentIntents.retrieve(intent);if(["canceled","requires_payment_method"].includes(failed.status))v.state="failed";}
  // Failed card attempts can be retried in the same open session. Delayed methods
  // are disabled; if one somehow occurs, keep pending until provider expiry or human reconciliation.
  must(await admin!.rpc("commerce_reconcile",{p_order:o.id,p_event:eventID,p_session:s.id,p_intent:v.intent,p_state:v.state,p_total:v.total,p_refunded:v.refunded}));
+ if(pendingRefund)must(await admin!.from("commerce_orders").update({review_required:true,updated_at:new Date().toISOString()}).eq("id",o.id));
 }
 async function webhook(req:Request) {
  const secret=env("NBJB_COMMERCE_STRIPE_TEST_WEBHOOK_SECRET"), signature=req.headers.get("stripe-signature");
@@ -99,8 +98,11 @@ Deno.serve(async(req:Request)=>{
    if(!e?.provider_entitlement_ref||!uuid.test(e.provider_entitlement_ref))return json({error:"not_owned"},403);
    const o=await orderById(e.provider_entitlement_ref);
    if(!ownedDownload(o,e,user.id,slug))return json({error:"not_owned"},403);
-   await productAsset(o);
-   const signed=must(await admin.storage.from(bucket).createSignedUrl(o.asset_key,60,{download:o.download_name}));
+   const replacement=must(await admin.from("commerce_asset_replacements").select("asset_version,asset_key,download_name").eq("slug",slug).eq("original_version",o.asset_version).eq("original_asset_key",o.asset_key).maybeSingle());
+   const asset=replacement?{...o,...replacement}:o;
+   let signed;
+   try {await productAsset(asset); signed=must(await admin.storage.from(bucket).createSignedUrl(asset.asset_key,60,{download:asset.download_name}));}
+   catch {console.error("commerce_delivery_retry");return json({error:"download_unavailable",retryable:true},503);}
    // Recheck before releasing bearer URL; no raw keys or identifiers in metrics.
    if(!ownedDownload(await orderById(o.id),await entitlement(user.id,slug),user.id,slug))return json({error:"not_owned"},403);
    must(await admin.rpc("commerce_metric",{p_slug:slug,p_metric:"download_link_issued"}));
@@ -115,7 +117,7 @@ Deno.serve(async(req:Request)=>{
  validatePrice(price,p);
  if(typeof price.product==="string"||"deleted" in price.product||!price.product.active||idOf(price.product.tax_code)!==p.tax_code)return json({error:"tax_or_product_mismatch"},503);
  const reserve=await admin.rpc("commerce_reserve",{p_user:user.id,p_slug:slug,p_terms:p.terms_version});
- if(reserve.error){const m=reserve.error.message;return json({error:["already_owned","order_review","not_available"].includes(m)?m:"checkout_unavailable"},409);}
+ if(reserve.error){const m=reserve.error.message;return json({error:["already_owned","order_review","not_available","account_review"].includes(m)?m:"checkout_unavailable"},409);}
  const o=Array.isArray(reserve.data)?reserve.data[0]:reserve.data;
  if(!o)throw Error('order_not_reserved');
  if(o.stripe_price_id!==p.stripe_price_id||o.amount!==p.amount||o.tax_behavior!==p.tax_behavior)return json({error:"order_review"},409);

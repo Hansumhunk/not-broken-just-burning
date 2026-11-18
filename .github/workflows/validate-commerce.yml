@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test scripts/test_commerce_catalog.js scripts/test_commerce_security.mjs scripts/test_commerce_browser.js scripts/test_commerce_release.js
+      - run: node --test scripts/test_commerce_catalog.js scripts/test_commerce_security.mjs scripts/test_commerce_browser.js scripts/test_commerce_release.js scripts/test_commerce_phase_four.mjs
       - run: for f in js/commerce-*.js; do node --check "$f"; done
       - name: Assert unapproved production manifest stays blocked
         run: |
@@ -54,6 +54,8 @@ jobs:
           psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/test-migration.sql
           psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/operations.sql
           psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/test-operations.sql
+          psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/phase-four.sql
+          psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/test-phase-four.sql
           psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/financial-command-report.sql
           reserve="set role service_role; select (public.commerce_reserve('22222222-2222-4222-8222-222222222222','forge-workbook','draft-v1')).id;"
           psql -h localhost -U postgres -d commerce_fixture -qAt -v ON_ERROR_STOP=1 -c "$reserve" > /tmp/order-1 & p1=$!
@@ -80,6 +82,7 @@ jobs:
         env:
           NBJB_QA_PUBLISHABLE_KEY: sb_publishable_fixture_not_a_real_key
         run: |
+          python -m py_compile launch-backend-staging/commerce/verify-customer-archive.py
           python launch-backend-staging/commerce/make-fixtures.py --out /tmp/nbjb-commerce-fixtures
           python launch-backend-staging/commerce/build-qa-preview.py --out /tmp/nbjb-commerce-preview --project-ref abcdefghijklmnopqrst
           test "$(find /tmp/nbjb-commerce-fixtures -name '*.pdf' | wc -l)" -eq 3

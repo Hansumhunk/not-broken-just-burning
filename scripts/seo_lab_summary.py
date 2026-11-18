@@ -17,12 +17,12 @@ def category(report, key):
 def main():
     folder = Path(sys.argv[1])
     print("## Local Lighthouse laboratory snapshot (not production field data)")
-    print("One run per condition; results may vary. Local HTTP excludes production-only analytics, CDN caching and HTTPS behavior. TBT is a lab proxy, not INP. Compare repeated runs before claiming durable improvement.")
+    print("Two mobile runs per comparison; desktop and new hubs single snapshots; results may vary. Local HTTP excludes production-only analytics, CDN caching and HTTPS behavior. TBT is a lab proxy, not INP. Compare repeated runs before claiming durable improvement.")
     print("| Page / condition | Perf /100 | A11y /100 | SEO /100 | LCP ms | TBT ms | CLS | FCP ms |")
     print("|---|---:|---:|---:|---:|---:|---:|---:|")
     reports = sorted(folder.glob("*.json"))
-    if len(reports) != 6:
-        raise SystemExit(f"Expected 6 reports; got {len(reports)}")
+    if len(reports) != 12:
+        raise SystemExit(f"Expected 12 reports; got {len(reports)}")
     for path in reports:
         data = json.loads(path.read_text())
         if data.get("runtimeError"):

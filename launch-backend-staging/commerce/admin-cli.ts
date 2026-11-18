@@ -2,7 +2,7 @@
 import {createClient} from "npm:@supabase/supabase-js@2.116.0";
 import Stripe from "npm:stripe@22.6.2";
 import {sandboxAllowed,SKU} from "./commerce-core.mjs";
-import {orderSessions,providerSnapshot} from "./provider.ts";
+import {orderSessions,providerSnapshot,verifySandboxAccount} from "./provider.ts";
 const env=(k:string)=>Deno.env.get(k)||"";
 const url=env("SUPABASE_URL"),ref=env("NBJB_COMMERCE_SANDBOX_REF"),key=env("NBJB_COMMERCE_STRIPE_TEST_KEY");
 if(!sandboxAllowed({mode:env("NBJB_COMMERCE_MODE"),key,url,expectedRef:ref}))throw Error("isolated_QA_only");
@@ -10,6 +10,7 @@ const service=env("SUPABASE_SERVICE_ROLE_KEY");
 if(!service)throw Error("QA_service_key_required");
 const admin=createClient(url,service,{auth:{persistSession:false,autoRefreshToken:false}});
 const stripe=new Stripe(key);
+await verifySandboxAccount(stripe,env("NBJB_COMMERCE_SANDBOX_STRIPE_ACCOUNT"));
 const operator=env("NBJB_COMMERCE_OPERATOR");
 const [cmd,target,...args]=Deno.args;
 const apply=args.includes("--apply");

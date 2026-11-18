@@ -45,7 +45,26 @@ jobs:
                       assert a.is_visible()
                   section.scroll_into_view_if_needed()
                   page.wait_for_timeout(500)
-                  section.screenshot(path=f"/tmp/nbjb-237-review/lesson-directory-{width}.png",timeout=20000)
+                  page.evaluate("document.activeElement?.blur()")
+                  page.evaluate("window.scrollTo(0, document.querySelector('section[aria-labelledby=founder-lesson-heading]').getBoundingClientRect().top + window.scrollY - 95)")
+                  page.wait_for_timeout(250)
+                  skip=page.locator(".skip-link").first
+                  bounds=skip.bounding_box()
+                  print("Skip link idle bounds",width,bounds,flush=True)
+                  assert bounds["y"]+bounds["height"]<=0,(width,bounds)
+                  page.screenshot(path=f"/tmp/nbjb-237-review/lesson-directory-viewport-{width}.png",timeout=20000)
+                  if width==390:
+                      for i in (2,4):
+                          section.locator("article").nth(i).scroll_into_view_if_needed()
+                          page.wait_for_timeout(150)
+                          page.screenshot(path=f"/tmp/nbjb-237-review/lesson-directory-viewport-{width}-card-{i+1}.png",timeout=20000)
+                  skip.focus()
+                  page.wait_for_timeout(250)
+                  bounds=skip.bounding_box()
+                  assert bounds["y"]>=0 and bounds["y"]<height,(width,bounds)
+                  page.evaluate("document.activeElement?.blur()")
+                  page.wait_for_timeout(250)
+                  print("PASS skip link hidden at rest and visible on keyboard focus",width,flush=True)
                   for link in links:
                       a=section.locator(f'a[href="{link}"]')
                       a.click()

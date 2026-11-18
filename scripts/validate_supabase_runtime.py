@@ -142,6 +142,26 @@ def probe_unsigned_webhook(base_url: str, publishable_key: str) -> None:
         raise RuntimeError("unsigned live webhook was unreachable") from exc
 
 
+def probe_net_schema_visibility(base_url: str, publishable_key: str) -> None:
+    """Read-only zero-row schema reachability diagnostic. Never request headers or payload rows."""
+    for table in ("http_request_queue", "_http_response"):
+        req = Request(f"{base_url}/rest/v1/{table}?select=id&limit=0",
+                      headers={"apikey": publishable_key, "Accept-Profile": "net",
+                               "Accept": "application/json", "User-Agent": "NBJB-Production-Assurance-CI/1.0"},
+                      method="GET")
+        try:
+            with urlopen(req, timeout=15) as response:
+                # Do not read or print any returned body, even on success.
+                print(f"pg_net public API diagnostic {table}: HTTP {response.status}; REVIEW schema reachability")
+        except HTTPError as exc:
+            if exc.code in (401, 403, 406):
+                print(f"pg_net public API diagnostic {table}: HTTP {exc.code}; denied/not exposed")
+            else:
+                print(f"pg_net public API diagnostic {table}: HTTP {exc.code}; inconclusive")
+        except (URLError, TimeoutError):
+            print(f"pg_net public API diagnostic {table}: unavailable; inspect Dashboard configuration")
+
+
 def probe_deployed_membership_assets() -> None:
     """Read-only CDN diagnostics. PR CI can precede Pages deployment."""
     cases = (
@@ -164,6 +184,11 @@ def probe_deployed_membership_assets() -> None:
         ("js/main.js", "safeAnalyticsSurface"),
         ("js/member-billing.js", "NBJBTrackCheckoutIntent"),
         ("privacy.html", "Private member workspaces and account access/recovery pages are excluded"),
+        ("js/member-account-export.js", "nbjb.account-data.v1"),
+        ("member-settings.html", "Request Account Deletion"),
+        ("js/member-bootstrap.js", "account-export-v1"),
+        ("js/main.js", "Unknown event payloads"),
+        ("privacy.html", "limited authenticated account-data JSON export"),
     )
     for path, marker in cases:
         try:
@@ -260,6 +285,7 @@ def main() -> int:
         probe_unsigned_webhook(base_url, publishable_key)
     except RuntimeError as exc:
         return fail(str(exc))
+    probe_net_schema_visibility(base_url, publishable_key)
     probe_deployed_membership_assets()
     return 0
 

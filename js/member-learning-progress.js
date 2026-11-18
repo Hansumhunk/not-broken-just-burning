@@ -112,9 +112,15 @@
       return record;
     } catch (_) { return {}; }
   }
-  async function renderPractice() {
+  let practiceRenderVersion = 0;
+  function hasPaidAccess() {
     const entitlement = entitlements?.load?.();
-    const paid = entitlement?.tier === 'paid' && entitlement?.source === 'server';
+    return entitlement?.tier === 'paid' && entitlement?.source === 'server';
+  }
+  async function renderPractice() {
+    const version = ++practiceRenderVersion;
+    if (auth?.user?.id !== userId) return;
+    const paid = hasPaidAccess();
     const list = node('[data-learning-trail-practiced]');
     if (list) list.replaceChildren();
     renderReading(paid);
@@ -130,8 +136,9 @@
       const client = auth.client;
       if (!client?.functions?.invoke) throw new Error('No trusted catalog connection');
       const response = await client.functions.invoke('read-flamewalker-lesson', { body: { action: 'catalog' } });
+      if (version !== practiceRenderVersion || auth?.user?.id !== userId) return;
+      if (!hasPaidAccess()) return renderPractice();
       if (response.error || !Array.isArray(response.data?.lessons)) throw new Error('Catalog unavailable');
-      if (auth?.user?.id !== userId) return;
       const published = response.data.lessons.filter(item =>
         item?.status === 'published' && slugPattern.test(item.slug || '') && typeof item.title === 'string');
       const titles = new Map(published.map(item => [item.slug, item.title]));
@@ -160,6 +167,8 @@
         list.append(li);
       }
     } catch (_) {
+      if (version !== practiceRenderVersion || auth?.user?.id !== userId) return;
+      if (!hasPaidAccess()) return renderPractice();
       setText('[data-learning-trail-count]', 'Temporarily unavailable');
       setText('[data-learning-trail-practice-state]', 'Could not verify the current published curriculum. Your local practice marks remain unchanged.');
       setText('[data-learning-trail-status]', 'Try reloading this page later. We did not change your saved work.');
@@ -167,6 +176,7 @@
     }
   }
   renderPath();
+  window.addEventListener?.('nbjb:entitlements', renderPractice);
   Promise.resolve(entitlements?.ready).then(renderPractice).catch(() => {
     setText('[data-learning-trail-status]', 'Could not verify membership access. No practice records were changed.');
   });

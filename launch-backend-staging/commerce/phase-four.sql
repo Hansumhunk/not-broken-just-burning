@@ -72,4 +72,39 @@ end $q$;
 create trigger commerce_exception_reservation_guard before insert on public.commerce_orders for each row execute function public.commerce_exception_guard();
 revoke execute on function public.commerce_resolve_asset(text,text,text,text),public.commerce_record_exception(uuid,text,text,integer,integer,text,boolean),public.commerce_exception_guard() from public,anon,authenticated;
 grant execute on function public.commerce_resolve_asset(text,text,text,text),public.commerce_record_exception(uuid,text,text,integer,integer,text,boolean),public.commerce_exception_guard() to service_role;
+-- More precise deletion preflight: a review hold is not erasure permission.
+create or replace function public.commerce_erasure_preflight(p_user uuid) returns jsonb language sql security invoker set search_path='' as $q$
+ select jsonb_build_object(
+ 'held',exists(select 1 from public.commerce_account_holds where user_id=p_user),
+ 'pending',count(*) filter(where status='pending'),
+ 'paid',count(*) filter(where status='paid'),
+ 'disputed',count(*) filter(where status='disputed'),
+ 'review',count(*) filter(where review_required),
+ 'retained_orders',count(*),
+ 'unresolved_additional_payments',(select count(*) from public.commerce_payment_exceptions x join public.commerce_orders y on y.id=x.order_id where y.user_id=p_user and (x.state<>'refunded' or x.pending_refund)),
+ 'pending_refunds',(select count(*) from public.commerce_refund_observations r join public.commerce_orders y on y.id=r.order_id where y.user_id=p_user and r.status in ('pending','requires_action')),
+ 'active_product_rights',(select count(*) from public.product_entitlements where user_id=p_user and status='active' and (valid_until is null or valid_until>now())),
+ 'deletion_authorized',false) from public.commerce_orders where user_id=p_user;
+$q$;
+-- Before either reusing or inserting an order, ensure prior exceptions do not permit a second checkout.
+create or replace function public.commerce_reserve(p_user uuid,p_slug text,p_terms text) returns public.commerce_orders language plpgsql security invoker set search_path='' as $q$
+declare p public.commerce_products; o public.commerce_orders;
+begin
+ perform pg_advisory_xact_lock(pg_catalog.hashtextextended('commerce-account:'||p_user::text,0));
+ if exists(select 1 from public.commerce_account_holds where user_id=p_user) then raise exception 'account_review'; end if;
+ perform pg_advisory_xact_lock(pg_catalog.hashtextextended(p_user::text||':'||p_slug,0));
+ if exists(select 1 from public.commerce_payment_exceptions x join public.commerce_orders y on y.id=x.order_id where y.user_id=p_user and y.slug=p_slug and (x.state<>'refunded' or x.pending_refund)) then raise exception 'payment_exception_review';end if;
+ if exists(select 1 from public.product_entitlements where user_id=p_user and product_slug=p_slug and status='active' and (valid_until is null or valid_until>now())) then raise exception 'already_owned'; end if;
+ select * into p from public.commerce_products where slug=p_slug and active and terms_version=p_terms;
+ if not found then raise exception 'not_available'; end if;
+ select * into o from public.commerce_orders where user_id=p_user and slug=p_slug and status in ('pending','paid','disputed');
+ if found then
+  if o.status<>'pending' or o.terms_version<>p_terms then raise exception 'order_review'; end if;
+  return o;
+ end if;
+ insert into public.commerce_orders(user_id,slug,amount,currency,stripe_price_id,terms_version,tax_behavior,asset_version,asset_key,download_name)
+ values(p_user,p_slug,p.amount,p.currency,p.stripe_price_id,p.terms_version,p.tax_behavior,p.asset_version,p.asset_key,p.download_name) returning * into o;
+ perform public.commerce_metric(p_slug,'checkout_requested');
+ return o;
+end $q$;
 commit;

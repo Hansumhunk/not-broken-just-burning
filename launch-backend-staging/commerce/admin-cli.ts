@@ -20,7 +20,7 @@ function must(r:any){if(r.error)throw Error("operation_failed:"+String(r.error.c
 function audit(){if(!apply||!uuid(ticket)||!uuid(operation)||!/^[a-zA-Z0-9_-]{3,32}$/.test(operator))throw Error("apply_ticket_operation_and_operator_required");return {p_operation:operation,p_ticket:ticket,p_operator:operator};}
 async function inspect(id:string){if(!uuid(id))throw Error("order_id_required");const o=must(await admin.from("commerce_orders").select("*").eq("id",id).maybeSingle());if(!o)throw Error("unknown_order");return o;}
 async function main(){
- if(["inspect","recover","restore","review"].includes(cmd)){
+ if(["inspect","recover","restore","review","close-refund"].includes(cmd)){
   const o=await inspect(target);
   const sessions=await orderSessions(stripe,o);
   const paid=sessions.filter(s=>s.payment_status==="paid");
@@ -36,8 +36,15 @@ async function main(){
   const snap=await providerSnapshot(stripe,paid[0].id,o);
   console.log(JSON.stringify({verifiedState:snap.v.state,grossCents:snap.v.total,successfulRefundCents:snap.v.refunded,disputeWon:snap.won,pendingRefund:snap.pendingRefund}));
   if(cmd==="inspect"||!apply)return;
+  if(cmd==="close-refund"){
+   if(snap.pendingRefund||snap.v.state!=="refunded")throw Error("confirmed_full_refund_required");
+   must(await admin.rpc("commerce_ops_close_refund",{p_order:o.id,p_expected_updated:o.updated_at,p_session:snap.session.id,p_intent:snap.v.intent,p_total:snap.v.total,p_refunded:snap.v.refunded,...audit()}));
+   must(await admin.rpc("commerce_record_refunds",{p_order:o.id,p_session:snap.session.id,p_intent:snap.v.intent,p_data:snap.refundRecords}));
+   console.log("QA refund closeout committed");return;
+  }
   if(snap.pendingRefund||snap.v.state==="refunded"||!(cmd==="recover"&&snap.v.state==="paid"||cmd==="restore"&&snap.v.state==="paid"&&snap.won))throw Error("manual_review_required");
   must(await admin.rpc("commerce_ops_recover",{p_order:o.id,p_expected_updated:o.updated_at,p_session:snap.session.id,p_intent:snap.v.intent,p_total:snap.v.total,p_refunded:snap.v.refunded,p_restore_won:cmd==="restore",...audit()}));
+  if(snap.refundRecords.length)must(await admin.rpc("commerce_record_refunds",{p_order:o.id,p_session:snap.session.id,p_intent:snap.v.intent,p_data:snap.refundRecords}));
   console.log("QA recovery committed");
  }else if(["erasure-check","erasure-hold","erasure-cancel"].includes(cmd)){
   if(!uuid(target))throw Error("user_uuid_required");

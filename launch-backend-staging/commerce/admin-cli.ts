@@ -36,7 +36,7 @@ async function main(){
   const snap=await providerSnapshot(stripe,paid[0].id,o);
   console.log(JSON.stringify({verifiedState:snap.v.state,grossCents:snap.v.total,successfulRefundCents:snap.v.refunded,disputeWon:snap.won,pendingRefund:snap.pendingRefund}));
   if(cmd==="inspect"||!apply)return;
-  if(snap.pendingRefund||snap.v.state==="refunded"||!(cmd==="recover"&&snap.v.state==="paid"||cmd==="restore"&&snap.v.state==="disputed"&&snap.won))throw Error("manual_review_required");
+  if(snap.pendingRefund||snap.v.state==="refunded"||!(cmd==="recover"&&snap.v.state==="paid"||cmd==="restore"&&snap.v.state==="paid"&&snap.won))throw Error("manual_review_required");
   must(await admin.rpc("commerce_ops_recover",{p_order:o.id,p_expected_updated:o.updated_at,p_session:snap.session.id,p_intent:snap.v.intent,p_total:snap.v.total,p_refunded:snap.v.refunded,p_restore_won:cmd==="restore",...audit()}));
   console.log("QA recovery committed");
  }else if(["erasure-check","erasure-hold","erasure-cancel"].includes(cmd)){

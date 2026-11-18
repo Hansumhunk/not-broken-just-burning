@@ -399,7 +399,7 @@
 <script src="js/nbjb-config.js"></script>
 <script src="js/nbjb-auth.js"></script>
 <script src="js/main.js"></script>
-<script src="js/member-bootstrap.js?v=lessons-hub-v14"></script>
+<script src="js/member-bootstrap.js?v=lessons-hub-v14&amp;qa=member-qa-20261118"></script>
 <script>
 (() => {
   let memberState = { tier: 'free' };
@@ -421,11 +421,12 @@
     });
     const upgrade = document.getElementById('lesson-upgrade');
     if (upgrade) upgrade.hidden = paid;
-    const published = catalog ? catalog.filter(item => item.status === 'published').length : 7;
+    const published = catalog ? catalog.filter(item => item.status === 'published').length : null;
     const status = document.getElementById('lesson-access-status');
-    if (status) status.textContent = paid
-      ? 'Your Flamewalker+ membership includes ' + published + ' published guided lessons.'
-      : 'Start Here is free. ' + published + ' published guided lessons require Flamewalker+.';
+    if (status) status.textContent = published === null
+      ? (paid ? 'Your Flamewalker+ access is active. The current lesson count is awaiting catalog verification.' : 'Start Here is free. Published premium lessons require Flamewalker+.')
+      : (paid ? 'Your Flamewalker+ membership includes ' + published + ' published guided lessons.'
+        : 'Start Here is free. ' + published + ' published guided lessons require Flamewalker+.');
   }
   function paintCatalog(items) {
     catalog = items;

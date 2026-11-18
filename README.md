@@ -2,9 +2,9 @@
 
 Official website and digital platform for the **Not Broken Just Burning** movement.
 
-## Current learning offer — November 16, 2026
+## Current learning offer — November 18, 2026
 
-**Flamewalker+ currently includes 35 published, protected guided written lessons across six tracks** and their guided workbooks, at $14.99/month or $149/year. Video lessons remain paused; books and separately sold products remain distinct. See [the current release and acceptance checklist](FLAMEWALKER_PLUS_RELEASE_CHECKLIST.md). Private lesson bodies are delivered by authenticated Supabase authorization, not stored in the public site repository.
+**Flamewalker+ currently includes 44 published, protected guided written lessons across six tracks** and their guided workbooks, at $14.99/month or $149/year. Video lessons remain paused; books and separately sold products remain distinct. See [the current release and acceptance checklist](FLAMEWALKER_PLUS_RELEASE_CHECKLIST.md). Private lesson bodies are delivered by authenticated Supabase authorization, not stored in the public site repository.
 
 ## Current version
 

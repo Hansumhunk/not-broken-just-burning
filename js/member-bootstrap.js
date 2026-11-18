@@ -58,7 +58,9 @@
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = src === 'js/member-search.js'
+      script.src = ['js/member-entitlements.js', 'js/member-learning-progress.js', 'js/tool-member-history.js'].includes(src)
+        ? src + '?v=member-qa-20261118'
+        : src === 'js/member-search.js'
         ? src + '?v=find-resume-v1'
         : src === 'js/member-path-foundations.js' || src === 'js/member-path-stage.js'
         ? src + '?v=member-depth-v2'

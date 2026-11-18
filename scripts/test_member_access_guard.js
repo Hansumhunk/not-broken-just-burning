@@ -1111,3 +1111,46 @@ test('live portal UI accepts only trusted URLs and explains sandbox denial witho
   assert.equal(guest.calls.length,0);
   assert.match(guest.messages.at(-1).value,/session has expired/);
 });
+
+test('Learning Trail clears premium progress when access changes and ignores late catalog reads', async () => {
+  const source=read('js/member-learning-progress.js');
+  const selectors={};
+  const element=()=>({textContent:'',href:'',dataset:{},children:[],
+    replaceChildren(){this.children=[];},append(...items){this.children.push(...items);},setAttribute(k,v){this[k]=v;}});
+  const document={querySelector:key=>selectors[key]||(selectors[key]=element()),createElement:()=>element()};
+  let tier='paid', release, notify;
+  const window={
+    NBJBMemberService:{load:()=>({journey:{focus:'',progress:{}}}),stages:['Fire Reclamation']},
+    NBJBAuth:{user:{id:'u-one'},client:{functions:{invoke:()=>new Promise(resolve=>{release=resolve;})}}},
+    NBJBEntitlements:{ready:Promise.resolve(),load:()=>({tier,source:'server'})},
+    NBJBLearningContinuity:{get:()=>({slug:'published-one',title:'Published Lesson',section:2,total:8})},
+    addEventListener(type,fn){if(type==='nbjb:entitlements')notify=fn;}
+  };
+  vm.runInNewContext(source,{window,document,localStorage:{getItem:()=>JSON.stringify({'published-one':'2026-11-16T10:00:00Z'})},Date,Promise});
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(selectors['[data-learning-trail-reading-link]'].href,'member-premium-lesson.html?lesson=published-one&section=2');
+  tier='free';
+  notify();
+  release({data:{lessons:[{slug:'published-one',title:'Published Lesson',status:'published'}]}});
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(selectors['[data-learning-trail-count]'].textContent,'Flamewalker Free');
+  assert.equal(selectors['[data-learning-trail-reading-link]'].href,'member-start-here.html');
+  assert.ok(!JSON.stringify(selectors['[data-learning-trail-practiced]']).includes('Published Lesson'));
+});
+
+test('all protected member entry pages request a fresh QA bootstrap and changed scripts', () => {
+  for (const file of memberPages) {
+    assert.match(read(file), /member-bootstrap\.js\?[^"]*member-qa-20261118/, file);
+  }
+  const bootstrap=read('js/member-bootstrap.js');
+  assert.match(bootstrap,/\['js\/member-entitlements\.js', 'js\/member-learning-progress\.js', 'js\/tool-member-history\.js'\]\.includes\(src\)\s*\? src \+ '\?v=member-qa-20261118'/);
+});
+
+test('same-browser switch immediately hides old member page and reloads for new identity',async()=>{
+  const state=simulate({userId:'member-A'});
+  await settle();
+  assert.equal(state.body.dataset.memberAccess,'granted');
+  state.setUser('member-B');
+  assert.equal(state.body.dataset.memberAccess,undefined);
+  assert.equal(state.reloads(),1);
+});

@@ -1,4 +1,4 @@
-# Flamewalker+ release and operating checklist — November 16, 2026
+# Flamewalker+ release and operating checklist — November 18, 2026
 
 **Founder browser QA status:** 4/4 Free-account tests and 5/5 existing live paid-account tests were founder-reported successful on November 16. See the [full membership acceptance record and open December 2 cancellation checks](MEMBERSHIP_LAUNCH_ACCEPTANCE_2026-11-16.md). These are founder browser reports, not independently observed test runs; independent external customer purchase, broader device/track coverage and paid-to-Free transition remain distinct.
 
@@ -8,10 +8,10 @@
 - [x] **Paid-member browser acceptance 5/5 (founder reported):** live Flamewalker+ account recognized, published Track 2 lesson opened, test worksheet saved/retrieved, Membership page correct, and Stripe billing portal opened; no errors reported. No charge or member-data mutation made.
 - [ ] **Other distinct end-to-end gates:** direct Free API protected-lesson denial, a genuine independent new customer checkout-to-access test, mobile/keyboard and other premium-track lesson checks, editorial proofing, and December 2–4 cancellation/paid-to-Free transition. These are not established by the founder's successful UI acceptance.
 
-## CURRENT PRODUCTION STATUS — all 35 guided lessons published
+## CURRENT PRODUCTION STATUS — all 44 guided lessons published
 
-- [x] **35 protected written lessons now have `status='published'`** in the production `flamewalker_premium_lessons` table: Tracks 1–6 = 7 + 8 + 5 + 5 + 5 + 5.
-- [x] **Controlled release gate passed:** the 28 newly released manuscripts had unique slugs, nonempty teaching blocks, 7–8 guided prompts, Next Honest Action and Smaller Door; revisions matched the previously audited November 16 manuscripts before promotion. No manuscript bodies were placed in public GitHub.
+- [x] **44 protected written lessons now have `status='published'`** in the production `flamewalker_premium_lessons` table: Tracks 1–6 = 7 + 8 + 14 + 5 + 5 + 5. Read-only November 18 metadata check found no missing or extra slugs in either the Lessons catalog or reader navigation. This verifies publication and route metadata, not individual paid-browser acceptance.
+- [x] **Historical November 16 controlled release gate passed:** the 28 manuscripts released at that time had unique slugs, nonempty teaching blocks, 7–8 guided prompts, Next Honest Action and Smaller Door; revisions matched the previously audited November 16 manuscripts before promotion. No manuscript bodies were placed in public GitHub.
 - [x] **Existing entitlement model preserved:** protected lesson reads require current server-side paid membership; ordinary Free and guests do not receive manuscript bodies. Reviewer-only draft handling remains available for future manuscripts.
 - [x] **Website release:** [PR #184](https://github.com/Hansumhunk/not-broken-just-burning/pull/184) merged with static site CI passing. [PR #185](https://github.com/Hansumhunk/not-broken-just-burning/pull/185) fixes all six paid track links, live copy and regression checks. Keep membership pricing and video pause unchanged.
 - [x] **Initial paid lesson access/save acceptance (founder reported):** signed in as a genuine active paid member, opened a published Track 2 lesson, saved and retrieved a worksheet in My Work. No issues reported November 16.

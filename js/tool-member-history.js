@@ -31,9 +31,28 @@
         return;
       }
 
-      // The person checked the consent box and selected "Sign in to save".
-      // Finish that same explicit save after login; do not silently require
-      // a second Save click. The saved reflection remains device-local.
+      // Guest handoff has no known owner until login. Never transfer private
+      // text just because a shared browser subsequently authenticates.
+      if (pending.ownerId && pending.ownerId !== currentUser.id) {
+        sessionStorage.removeItem(PENDING_KEY);
+        controls.status.textContent = 'A temporary draft belonged to another sign-in and was discarded. No work was saved to this account.';
+        return;
+      }
+      if (!pending.ownerId) {
+        const accepted = typeof window.confirm === 'function' && window.confirm(
+          'Save the reflection from before sign-in to this signed-in account? Continue only if this is your reflection and your account. Cancel discards the temporary handoff.'
+        );
+        if (!accepted) {
+          sessionStorage.removeItem(PENDING_KEY);
+          controls.status.textContent = 'Temporary handoff discarded. No reflection was saved.';
+          return;
+        }
+        pending.ownerId = currentUser.id;
+        if (window.NBJBAuth?.user?.id !== currentUser.id) return;
+        // Bind the retry to the confirmed account before the archive write.
+        sessionStorage.setItem(PENDING_KEY, JSON.stringify(pending));
+      }
+      if (window.NBJBAuth?.user?.id !== currentUser.id) return;
       const alreadySaved = service.listEntries(config.tool).some((entry) =>
         entry.createdAt >= pending.createdAt - 1000 &&
         entry.title === pending.payload.title &&
@@ -56,7 +75,8 @@
     } catch (error) {
       // On failure, keep the temporary draft so the user can retry saving it.
       console.error('tool_draft_save_failed', error?.message || 'Unknown local storage error');
-      if (!pending || pending.path !== location.pathname.split('/').pop() || pending.key !== key) return;
+      if (!pending || pending.ownerId !== currentUser.id || window.NBJBAuth?.user?.id !== currentUser.id ||
+          pending.path !== location.pathname.split('/').pop() || pending.key !== key) return;
       Object.entries(pending.payload?.data || {}).forEach(([name, value]) => {
         const input = document.querySelector(fieldSelectors[key]?.[name]);
         if (input && !input.value.trim()) input.value = String(value || '');
@@ -375,7 +395,13 @@
       ? 'Flamewalker account recognized. Saving stays on this device.'
       : 'Guest mode. Tools remain free; an account is needed only for My Work.';
     panel.append(eyebrow, heading, description, sessionNote, consentLabel, actions, optional);
+    let consentOwner = window.NBJBAuth?.user?.id || '';
     window.NBJBAuth?.onChange?.(({ user }) => {
+      const nextOwner = user?.id || '';
+      if (consentOwner !== nextOwner) {
+        consent.checked = false;
+        consentOwner = nextOwner;
+      }
       button.textContent = user?.id ? 'Save to My Work' : 'Sign in & save to My Work';
       sessionNote.textContent = user?.id
         ? 'Flamewalker account recognized. Saving stays on this device.'
@@ -415,7 +441,8 @@
 
       // Re-read the authenticated session on click. A stale initial auth
       // snapshot must not send an already signed-in member through login again.
-      let userId = window.NBJBAuth?.user?.id;
+      const consentedUserId = window.NBJBAuth?.user?.id || '';
+      let userId = consentedUserId;
       if (!userId && window.NBJBAuth?.refresh) {
         try {
           const snapshot = await window.NBJBAuth.refresh();
@@ -423,6 +450,10 @@
         } catch (_) {
           // No confirmed session; continue with the explicit sign-in handoff.
         }
+      }
+      if ((userId || '') !== consentedUserId || (window.NBJBAuth?.user?.id || '') !== consentedUserId) {
+        controls.consent.checked = false;
+        return flash(controls.status, 'Your sign-in changed. Confirm again before saving this reflection.');
       }
       if (!userId) {
         try {

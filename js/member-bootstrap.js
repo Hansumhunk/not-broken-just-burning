@@ -60,6 +60,8 @@
       const script = document.createElement("script");
       script.src = ['js/member-entitlements.js', 'js/member-learning-progress.js', 'js/tool-member-history.js'].includes(src)
         ? src + '?v=member-qa-20261118'
+        : ['js/member-service.js','js/member-platform.js','js/member-billing.js'].includes(src)
+        ? src + '?v=member-p2-20261118'
         : src === 'js/member-search.js'
         ? src + '?v=find-resume-v1'
         : src === 'js/member-path-foundations.js' || src === 'js/member-path-stage.js'

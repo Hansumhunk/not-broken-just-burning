@@ -12,7 +12,7 @@ const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const safePath=(p:string)=>/^[a-z0-9-]+\/[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+\.(pdf|zip)$/.test(p) && !p.includes("..");
 const headers={"Access-Control-Allow-Origin":origin,"Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info","Access-Control-Allow-Methods":"POST, OPTIONS","Cache-Control":"no-store","Vary":"Origin"};
 const json=(body:unknown,status=200)=>Response.json(body,{status,headers});
-function must<T>(result:{data:T,error:unknown}):T{if(result.error)throw Error("database_or_storage_error");return result.data;}
+function must(result:{data:any,error:unknown}):any{if(result.error)throw Error("database_or_storage_error");return result.data;}
 function trustedCheckoutUrl(s:string){const u=new URL(s);return u.protocol==="https:" && u.hostname==="checkout.stripe.com";}
 async function verifiedUser(req:Request) {
  const token=req.headers.get("Authorization")?.match(/^Bearer (\S+)$/i)?.[1];
@@ -114,7 +114,8 @@ Deno.serve(async(req:Request)=>{
  if(typeof price.product==="string"||"deleted" in price.product||!price.product.active||idOf(price.product.tax_code)!==p.tax_code)return json({error:"tax_or_product_mismatch"},503);
  const reserve=await admin.rpc("commerce_reserve",{p_user:user.id,p_slug:slug,p_terms:p.terms_version});
  if(reserve.error){const m=reserve.error.message;return json({error:["already_owned","order_review","not_available"].includes(m)?m:"checkout_unavailable"},409);}
- const o=reserve.data;
+ const o=Array.isArray(reserve.data)?reserve.data[0]:reserve.data;
+ if(!o)throw Error('order_not_reserved');
  if(o.stripe_price_id!==p.stripe_price_id||o.amount!==p.amount||o.tax_behavior!==p.tax_behavior)return json({error:"order_review"},409);
  let s:Stripe.Checkout.Session;
  if(o.stripe_session_id)s=await stripe.checkout.sessions.retrieve(o.stripe_session_id);
@@ -123,7 +124,7 @@ Deno.serve(async(req:Request)=>{
  // Stripe idempotency retention is at least 24h. Never recreate an old unknown session.
  if(!Number.isFinite(expires)||expires<Math.floor(Date.now()/1000)+1900)return json({error:"order_review"},409);
  const metadata={nbjb_commerce:"v1",order_id:o.id,slug};
- s=await stripe.checkout.sessions.create({mode:"payment",payment_method_types:["card"],line_items:[{price:o.stripe_price_id,quantity:1}],client_reference_id:o.id,metadata,payment_intent_data:{metadata},expires_at:expires,automatic_tax:{enabled:true},customer_email:user.email,success_url:origin+"/commerce-result.html?order="+o.id+"&return=success",cancel_url:origin+"/commerce-result.html?order="+o.id+"&return=cancel"}, {idempotencyKey:"nbjb-commerce-v1-"+o.id});
+ s=await stripe.checkout.sessions.create({mode:"payment",payment_method_types:["card"],line_items:[{price:o.stripe_price_id,quantity:1}],client_reference_id:o.id,metadata,payment_intent_data:{metadata},expires_at:expires,automatic_tax:{enabled:true},customer_creation:"always",success_url:origin+"/commerce-result.html?order="+o.id+"&return=success",cancel_url:origin+"/commerce-result.html?order="+o.id+"&return=cancel"}, {idempotencyKey:"nbjb-commerce-v1-"+o.id});
  // Conditional bind: a webhook may have already bound this order.
  must(await admin.from("commerce_orders").update({stripe_session_id:s.id}).eq("id",o.id).eq("status","pending").is("stripe_session_id",null));
  }

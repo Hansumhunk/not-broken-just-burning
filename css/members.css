@@ -389,3 +389,16 @@ body[data-member-page] .callout h2 { font-size: clamp(1.8rem, 3vw, 2.7rem); }
   .member-actions .button,
   .member-welcome-actions .button { width: 100%; justify-content: center; text-align: center; }
 }
+
+/* Member controls: explicit keyboard focus and device-level reduced motion. */
+body[data-member-page] :is(button,a,input,select,textarea,summary):focus-visible {
+  outline: 2px solid var(--ember-pale, #ffb078);
+  outline-offset: 3px;
+}
+body[data-member-motion="reduced"] *,body[data-member-motion="reduced"] *::before,
+body[data-member-motion="reduced"] *::after {animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+@media (max-width: 680px) {
+  body[data-member-page] :is(input:not([type=checkbox]):not([type=radio]), select, textarea) {font-size: max(16px, 1rem);max-width:100%;min-width:0}
+  body[data-member-page] :is(.button, summary) {min-height:44px;white-space:normal;overflow-wrap:anywhere}
+  body[data-member-page] .member-setting-row {flex-wrap:wrap}
+}

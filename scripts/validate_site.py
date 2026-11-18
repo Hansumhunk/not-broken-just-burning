@@ -648,7 +648,8 @@ def main() -> int:
         text = page.read_text(encoding="utf-8")
         rel = page.relative_to(ROOT)
         title = "".join(parser.title_parts).strip()
-        uses_main_js = 'src="js/main.js"' in text or "src='js/main.js'" in text
+        # Cache-busted shared scripts supply the same navigation and privacy routes.
+        uses_main_js = bool(re.search(r"""src=["']js/main[.]js(?:[?][^"']*)?["']""", text))
         expected_url = expected_page_url(page)
 
         if not parser.noindex and page.name != "404.html":

@@ -153,6 +153,17 @@ def probe_deployed_membership_assets() -> None:
         ("js/member-entitlements.js?v=member-qa-20261118", "requestVersion"),
         ("js/member-learning-progress.js?v=member-qa-20261118", "practiceRenderVersion"),
         ("js/tool-member-history.js?v=member-qa-20261118", "pending.ownerId"),
+        ("css/member-premium-lesson.css", "Mobile workbook: readable entry fields"),
+        ("css/members.css", "Member controls: explicit keyboard focus"),
+        ("js/member-service.js", "nbjb.plus.last-learning.v1."),
+        ("js/member-platform.js", "Copy private local member data to the clipboard"),
+        ("js/member-auth.js", "recoveryRequestPending"),
+        ("contact.html", "member-support-title"),
+        ("refunds.html", "optional-exit-feedback"),
+        ("member-store.html", "refunds.html#refund-request"),
+        ("js/main.js", "safeAnalyticsSurface"),
+        ("js/member-billing.js", "NBJBTrackCheckoutIntent"),
+        ("privacy.html", "Private member workspaces and account access/recovery pages are excluded"),
     )
     for path, marker in cases:
         try:

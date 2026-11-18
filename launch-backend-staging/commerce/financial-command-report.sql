@@ -27,3 +27,11 @@ select slug,currency,count(*) filter(where status='pending') as pending_orders,
  where t.slug=o.slug and t.currency=o.currency and r.status='succeeded'),0) as observation_refund_cents
 from public.commerce_orders o group by slug,currency order by slug,currency;
 -- No tax liability, fees, payouts or true net revenue until reconciled to Stripe balance and tax reports.
+
+-- Additional provider payments: separate from canonical sales and revenue.
+-- These are latest known cumulative snapshots, not period flows, not net payouts.
+select o.slug,o.currency,count(*) as additional_payment_count,
+ count(*) filter(where x.state<>'refunded' or x.pending_refund) as unresolved_additional_payments,
+ sum(x.gross_cents) as additional_gross_cents,sum(x.refunded_cents) as additional_successful_refund_cents,
+ sum(x.gross_cents-x.refunded_cents) as additional_unreturned_cents
+from public.commerce_payment_exceptions x join public.commerce_orders o on o.id=x.order_id group by o.slug,o.currency order by o.slug,o.currency;

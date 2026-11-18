@@ -38,9 +38,9 @@ async function reconcile(sid:string,eventID:string,eventType:string) {
  if(!uuid.test(oid||""))throw Error("invalid_order_id");
  const o=await orderById(oid);
  if(!o)throw Error("order_missing");
- const {v,pendingRefund}=await providerSnapshot(stripe!,s.id,o);
+ const {v,pendingRefund,won}=await providerSnapshot(stripe!,s.id,o);
  const intent=idOf(s.payment_intent);
- if(eventType.startsWith("charge.dispute.")&&v.state==="paid")v.state="disputed";
+ if(eventType.startsWith("charge.dispute.")&&v.state==="paid"&&!won)v.state="disputed";
  if(eventType==="checkout.session.async_payment_failed"&&s.status==="complete"&&s.payment_status==="unpaid"&&intent){const failed=await stripe!.paymentIntents.retrieve(intent);if(["canceled","requires_payment_method"].includes(failed.status))v.state="failed";}
  // Failed card attempts can be retried in the same open session. Delayed methods
  // are disabled; if one somehow occurs, keep pending until provider expiry or human reconciliation.

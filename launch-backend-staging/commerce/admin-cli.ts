@@ -20,11 +20,27 @@ function must(r:any){if(r.error)throw Error("operation_failed:"+String(r.error.c
 function audit(){if(!apply||!uuid(ticket)||!uuid(operation)||!/^[a-zA-Z0-9_-]{3,32}$/.test(operator))throw Error("apply_ticket_operation_and_operator_required");return {p_operation:operation,p_ticket:ticket,p_operator:operator};}
 async function inspect(id:string){if(!uuid(id))throw Error("order_id_required");const o=must(await admin.from("commerce_orders").select("*").eq("id",id).maybeSingle());if(!o)throw Error("unknown_order");return o;}
 async function main(){
- if(["inspect","recover","restore","review","close-refund"].includes(cmd)){
+ if(["inspect","recover","restore","review","close-refund","reconcile-extras"].includes(cmd)){
   const o=await inspect(target);
   const sessions=await orderSessions(stripe,o);
   const paid=sessions.filter(s=>s.payment_status==="paid");
   console.log(JSON.stringify({status:o.status,review:o.review_required,scanSessions:sessions.length,paidSessions:paid.length,duplicate:paid.length>1}));
+  if(cmd==="reconcile-extras"){
+   // No automatic canonical reassignment. Require an existing bound session, and inspect every additional paid session.
+   if(!o.stripe_session_id)throw Error("canonical_session_not_bound");
+   if(!sessions.some(x=>x.id===o.stripe_session_id))throw Error("canonical_session_missing");
+   if(apply)audit();
+   let unresolved=0,observed=0;
+   for(const extra of paid.filter(x=>x.id!==o.stripe_session_id)){
+    const snap=await providerSnapshot(stripe,extra.id,{...o,stripe_session_id:null});
+    if(!snap.v.intent||!["paid","refunded","disputed"].includes(snap.v.state))throw Error("exception_snapshot_invalid");
+    if(snap.v.state!=="refunded"||snap.pendingRefund)unresolved++;
+    if(apply)must(await admin.rpc("commerce_record_exception",{p_order:o.id,p_session:extra.id,p_intent:snap.v.intent,p_gross:snap.v.total,p_refunded:snap.v.refunded,p_state:snap.v.state,p_pending:snap.pendingRefund}));
+    observed++;
+   }
+   if(apply)must(await admin.rpc("commerce_mark_review",{p_order:o.id,...audit(),p_duplicate:observed>0}));
+   console.log(JSON.stringify({additionalPayments:observed,unresolved,applied:apply,canonicalUnchanged:true}));return;
+  }
   if(cmd==="review"){
    if(apply)must(await admin.rpc("commerce_mark_review",{p_order:o.id,...audit(),p_duplicate:paid.length>1}));
    return;

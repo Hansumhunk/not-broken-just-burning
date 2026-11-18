@@ -1,0 +1,20 @@
+name: Validate draft commerce catalog
+on:
+  pull_request:
+    paths:
+      - 'store.html'
+      - 'js/commerce-*.js'
+      - 'scripts/test_commerce_catalog.js'
+      - '.github/workflows/validate-commerce.yml'
+permissions:
+  contents: read
+jobs:
+  commerce-catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/test_commerce_catalog.js
+      - run: node --check js/commerce-owned.js

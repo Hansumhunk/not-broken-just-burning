@@ -28,6 +28,10 @@ on:
       - 'scripts/test_member_search.js'
       - 'scripts/test_premium_editorial_review.js'
       - 'scripts/test_live_webhook_hardening.js'
+      - 'scripts/test_production_assurance.cjs'
+      - 'PRODUCTION_ASSURANCE_2026-11-18.md'
+      - 'PG_NET_MAINTENANCE_PLAN.md'
+      - 'CROSS_OPERATION_ACCEPTANCE_STANDARD.md'
       - 'scripts/test_membership_lifecycle.js'
       - 'MEMBERSHIP_LAUNCH_ACCEPTANCE_2026-11-16.md'
       - 'launch-backend-staging/stripe-live-webhook/**'
@@ -73,6 +77,10 @@ on:
       - 'scripts/test_member_search.js'
       - 'scripts/test_premium_editorial_review.js'
       - 'scripts/test_live_webhook_hardening.js'
+      - 'scripts/test_production_assurance.cjs'
+      - 'PRODUCTION_ASSURANCE_2026-11-18.md'
+      - 'PG_NET_MAINTENANCE_PLAN.md'
+      - 'CROSS_OPERATION_ACCEPTANCE_STANDARD.md'
       - 'scripts/test_membership_lifecycle.js'
       - 'MEMBERSHIP_LAUNCH_ACCEPTANCE_2026-11-16.md'
       - 'launch-backend-staging/stripe-live-webhook/**'
@@ -127,6 +135,10 @@ jobs:
         run: node --test scripts/test_premium_editorial_review.js
       - name: Verify staged live webhook signature and payment resilience
         run: node --test scripts/test_live_webhook_hardening.js
+      - name: Verify offline cryptographic signatures and production assurance reference cases
+        run: |
+          npm install --prefix "$RUNNER_TEMP/nbjb-stripe-qa" --no-audit --no-fund --ignore-scripts --no-package-lock --no-save stripe@22.6.2
+          NODE_PATH="$RUNNER_TEMP/nbjb-stripe-qa/node_modules" node --test scripts/test_production_assurance.cjs
       - name: Verify signup routing, expiring paid access and sandbox isolation
         run: node --test scripts/test_membership_lifecycle.js
       - name: Verify honest public Flamewalker Plus curriculum preview

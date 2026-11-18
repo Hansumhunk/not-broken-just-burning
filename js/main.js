@@ -71,16 +71,40 @@ if (analyticsHostnames.has(window.location.hostname) && !privacySignalEnabled &&
     capture_pageview: true,
     // Avoid collecting source/return URL credentials via automatic properties.
     before_send: (event) => {
-      if (!event?.properties) return event;
+      // Unknown event payloads (including custom tool fields) must never be
+      // forwarded by this public analytics surface.
+      if (!event?.properties || !['$pageview','$pageleave','nbjb_free_membership_cta_clicked','nbjb_membership_checkout_requested'].includes(event.event)) return null;
+      const safe = new Set(['$current_url','$pathname','$referrer','$referring_domain',
+        '$initial_current_url','$initial_referrer','$initial_referring_domain',
+        '$host','$browser','$browser_version','$os','$device_type','$screen_height','$screen_width',
+        '$viewport_height','$viewport_width','$session_id','$device_id','$lib','$lib_version',
+        '$time','$timezone','$insert_id','$process_person_profile','distinct_id',
+        'utm_source','utm_medium','utm_campaign','utm_content','utm_term','plan','placement',
+        '$prev_pageview_pathname','$prev_pageview_duration']);
       for (const key of Object.keys(event.properties)) {
-        if (!/(url|referrer)/i.test(key) || typeof event.properties[key] !== 'string') continue;
-        try {
-          const u = new URL(event.properties[key]);
-          if (!['http:', 'https:'].includes(u.protocol)) { delete event.properties[key]; continue; }
-          // No query, fragment or user-info; attribution comes from bounded UTM fields.
-          event.properties[key] = u.origin + u.pathname;
-        } catch (_) { delete event.properties[key]; }
+        const value = event.properties[key];
+        if (!safe.has(key) || (value !== null && !['string','number','boolean'].includes(typeof value))) {
+          delete event.properties[key]; continue;
+        }
+        if (key.startsWith('utm_')) {
+          // Retain only the bounded, explicitly approved campaign syntax.
+          if (typeof value !== 'string' || !/^[a-z0-9_-]{1,80}$/i.test(value)) delete event.properties[key];
+          continue;
+        }
+        if (['$current_url','$initial_current_url','$referrer','$initial_referrer'].includes(key)) {
+          if (typeof value !== 'string') { delete event.properties[key]; continue; }
+          try {
+            const u = new URL(value);
+            if (!['http:', 'https:'].includes(u.protocol)) { delete event.properties[key]; continue; }
+            // External paths can contain account identifiers; use origin only.
+            event.properties[key] = u.origin + (analyticsHostnames.has(u.hostname) && /^\/[a-z0-9_.-]*$/i.test(u.pathname) ? u.pathname : '/');
+          } catch (_) { delete event.properties[key]; }
+        }
+        if (['$pathname','$prev_pageview_pathname'].includes(key) && (typeof value !== 'string' || !/^\/[a-z0-9_.-]*$/i.test(value))) delete event.properties[key];
+        if (key === 'plan' && (event.event !== 'nbjb_membership_checkout_requested' || !['monthly','annual'].includes(value))) delete event.properties[key];
+        if (key === 'placement' && (event.event !== 'nbjb_free_membership_cta_clicked' || !['home_hero','home_lessons','join_signup'].includes(value))) delete event.properties[key];
       }
+      event.properties.$process_person_profile = false;
       return event;
     },
     disable_session_recording: true,

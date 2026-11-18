@@ -1,24 +1,10 @@
 import { withSupabase } from "npm:@supabase/server@1.7.0";
 import Stripe from "npm:stripe@22.6.2";
+import { lookupOffer, validPrice, checkoutConflict, sessionIdempotencyKey } from "./checkout-policy.mjs";
 
 const SITE_URL = (Deno.env.get("NBJB_SITE_URL") ?? "https://notbrokenjustburning.com").replace(/\/+$/, "");
 const stripeSecret = Deno.env.get("STRIPE_LIVE_SECRET_KEY");
 const stripe = stripeSecret ? new Stripe(stripeSecret) : null;
-
-const OFFERS = {
-  flamewalker_plus_monthly: {
-    lookupKey: "flamewalker_plus_monthly",
-    amount: 1499,
-    interval: "month",
-  },
-  flamewalker_plus_annual: {
-    lookupKey: "flamewalker_plus_annual",
-    amount: 14900,
-    interval: "year",
-  },
-} as const;
-
-type OfferSlug = keyof typeof OFFERS;
 
 function json(body: unknown, status = 200) {
   return Response.json(body, { status });
@@ -56,8 +42,8 @@ export default {
       return json({ error: "invalid_json" }, 400);
     }
 
-    const offerSlug = body.offer as OfferSlug;
-    const offer = OFFERS[offerSlug];
+    const offerSlug = body?.offer;
+    const offer = lookupOffer(offerSlug);
     if (!offer) return json({ error: "invalid_offer" }, 400);
 
     // Guard the merchant promise on the SERVER, not just with hidden client
@@ -79,7 +65,7 @@ export default {
       .single();
 
     if (entitlementError || !entitlement) {
-      console.error("checkout_entitlement_lookup_failed", entitlementError?.message ?? "missing row");
+      console.error("checkout_entitlement_lookup_failed");
       return json({ error: "membership_unavailable" }, 500);
     }
 
@@ -106,15 +92,9 @@ export default {
           status: "all",
           limit: 100,
         });
-        const blockingStatuses = new Set([
-          "active", "trialing", "past_due", "unpaid", "incomplete", "paused",
-        ]);
-        if (customerSubscriptions.has_more) {
-          return json({ error: "subscription_check_incomplete" }, 503);
-        }
-        if (customerSubscriptions.data.some((item) => blockingStatuses.has(item.status))) {
-          return json({ error: "already_subscribed", manage_in_portal: true }, 409);
-        }
+        const sessions = await stripe.checkout.sessions.list({ customer: customerId, status: "open", limit: 100 });
+        const conflict = checkoutConflict(customerSubscriptions, sessions);
+        if (conflict) return json({ error: conflict, manage_in_portal: conflict === "already_subscribed" }, conflict === "subscription_check_incomplete" ? 503 : 409);
       }
 
       if (!customerId) {
@@ -150,15 +130,7 @@ export default {
       });
 
       const price = prices.data[0];
-      if (
-        !price ||
-        price.lookup_key !== offer.lookupKey ||
-        price.currency !== "usd" ||
-        price.type !== "recurring" ||
-        price.unit_amount !== offer.amount ||
-        price.recurring?.interval !== offer.interval ||
-        !price.livemode
-      ) {
+      if (!validPrice(price, offer)) {
         console.error("checkout_offer_misconfigured", offer.lookupKey);
         return json({ error: "offer_not_configured" }, 503);
       }
@@ -172,21 +144,21 @@ export default {
         cancel_url: `${SITE_URL}/member-store.html?checkout=cancelled`,
         metadata: {
           nbjb_user_id: userId,
-          nbjb_offer: offerSlug,
+          nbjb_offer: offer.lookupKey,
           nbjb_environment: "live",
         },
         subscription_data: {
           metadata: {
             nbjb_user_id: userId,
-            nbjb_offer: offerSlug,
+            nbjb_offer: offer.lookupKey,
           },
         },
-      });
+      }, { idempotencyKey: sessionIdempotencyKey(customerId) });
 
       if (!session.url) return json({ error: "checkout_unavailable" }, 502);
       return json({ url: session.url });
     } catch (error) {
-      console.error("checkout_failed", error instanceof Error ? error.message : "unknown");
+      console.error("checkout_failed");
       return json({ error: "checkout_failed" }, 500);
     }
   }),

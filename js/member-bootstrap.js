@@ -51,6 +51,7 @@
     workshop: ["js/tool-member-history.js", "js/member-workshop.js"],
     "start-here": ["js/member-start-here.js"],
     feedback: ["js/member-feedback.js"],
+    settings: ["js/member-account-export.js"],
     "premium-lesson": ["js/member-chosen-code.js", "js/member-editorial-workbooks.js", "js/member-lesson-workspaces.js", "js/member-final-reflection-journal.js", "js/member-premium-lesson.js"],
     store: ["js/member-billing.js"]
   };
@@ -62,6 +63,8 @@
         ? src + '?v=member-qa-20261118'
         : ['js/member-service.js','js/member-platform.js','js/member-billing.js'].includes(src)
         ? src + '?v=member-p2-20261118'
+        : src === 'js/member-account-export.js'
+        ? src + '?v=account-export-v1'
         : src === 'js/member-search.js'
         ? src + '?v=find-resume-v1'
         : src === 'js/member-path-foundations.js' || src === 'js/member-path-stage.js'

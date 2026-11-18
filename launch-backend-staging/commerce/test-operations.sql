@@ -44,3 +44,36 @@ begin
  if (select count(*) from public.commerce_ops_audit where ticket_ref=t)<>6 then raise exception 'audit count mismatch';end if;
 end $$;
 reset role;
+
+-- Exceptional late payment already fully refunded: confirm closure and do not grant access.
+set role service_role;
+do $$
+declare o public.commerce_orders; u uuid:='22222222-2222-4222-8222-222222222222'; stamp timestamptz;
+begin
+ select * into o from public.commerce_orders where user_id=u and slug='boundary-builder-workbook' and status='pending';
+ perform public.commerce_reconcile(o.id,'evt_late_expired','cs_late',null,'expired',1499,0);
+ select * into o from public.commerce_orders where id=o.id;
+ perform public.commerce_ops_close_refund(o.id,o.updated_at,'cs_late','pi_late',1499,1499,gen_random_uuid(),gen_random_uuid(),'qa_operator');
+ if (select status from public.commerce_orders where id=o.id)<>'refunded' or exists(select 1 from public.product_entitlements where user_id=u and product_slug='boundary-builder-workbook') then raise exception 'late refund closeout incorrect';end if;
+end $$;
+reset role;
+-- Verify baseline ownership policy with synthetic auth.uid and SELECT-only permissions.
+insert into public.membership_entitlements(user_id,tier,status) values
+ ('11111111-1111-4111-8111-111111111111','paid_member','active'),
+ ('22222222-2222-4222-8222-222222222222','free_member','active');
+set role authenticated;
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);
+do $$ begin
+ if (select count(*) from public.membership_entitlements)<>1 or (select count(*) from public.product_entitlements)<>2 then raise exception 'own row policy mismatch';end if;
+ if has_table_privilege('authenticated','public.product_entitlements','UPDATE') then raise exception 'client write permission';end if;
+end $$;
+select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',false);
+do $$ begin
+ if (select count(*) from public.membership_entitlements)<>1 or (select count(*) from public.product_entitlements)<>0 then raise exception 'cross-account policy mismatch';end if;
+end $$;
+reset role;
+-- Simulate cancellation of membership: standalone purchases remain unchanged.
+update public.membership_entitlements set tier='free_member',status='canceled' where user_id='11111111-1111-4111-8111-111111111111';
+do $$ begin
+ if (select count(*) from public.product_entitlements where user_id='11111111-1111-4111-8111-111111111111' and status='active')<>2 then raise exception 'subscription cancellation altered product ownership';end if;
+end $$;

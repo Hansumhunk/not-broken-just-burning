@@ -97,7 +97,9 @@ begin
  paid_at=coalesce(paid_at,now()),review_required=(p_refunded>0),updated_at=clock_timestamp() where id=o.id;
  insert into public.product_entitlements(user_id,product_slug,status,source,provider,provider_entitlement_ref,valid_until)
  values(o.user_id,o.slug,'active','stripe_commerce','stripe',o.id::text,null)
- on conflict(user_id,product_slug) do update set status='active',source='stripe_commerce',provider='stripe',provider_entitlement_ref=o.id::text,valid_until=null,granted_at=now(),updated_at=now();
+ on conflict(user_id,product_slug) do update set status='active',source='stripe_commerce',provider='stripe',provider_entitlement_ref=o.id::text,valid_until=null,granted_at=now(),updated_at=now()
+ where (product_entitlements.status='active' and product_entitlements.provider_entitlement_ref=o.id::text) or (product_entitlements.status<>'active' and product_entitlements.provider_entitlement_ref is distinct from o.id::text) or (p_restore_won and product_entitlements.status='revoked' and product_entitlements.source='stripe_commerce' and product_entitlements.provider_entitlement_ref=o.id::text);
+ if not found then raise exception 'entitlement_race';end if;
  return 'recovered';
 end $$;
 create function public.commerce_mark_review(p_order uuid,p_operation uuid,p_ticket uuid,p_operator text,p_duplicate boolean) returns void language plpgsql security invoker set search_path='' as $$
@@ -119,4 +121,36 @@ begin
 end $$;
 revoke execute on function public.commerce_erasure_preflight(uuid),public.commerce_erasure_hold(uuid,boolean,uuid,uuid,text),public.commerce_ops_recover(uuid,timestamptz,text,text,integer,integer,boolean,uuid,uuid,text),public.commerce_mark_review(uuid,uuid,uuid,text,boolean),public.commerce_replace_asset(text,text,text,text,text,text,uuid,uuid,text) from public,anon,authenticated;
 grant execute on function public.commerce_erasure_preflight(uuid),public.commerce_erasure_hold(uuid,boolean,uuid,uuid,text),public.commerce_ops_recover(uuid,timestamptz,text,text,integer,integer,boolean,uuid,uuid,text),public.commerce_mark_review(uuid,uuid,uuid,text,boolean),public.commerce_replace_asset(text,text,text,text,text,text,uuid,uuid,text) to service_role;
+-- Provider-refund records are financial observations, not customer analytics.
+create table public.commerce_refund_observations(
+ refund_ref text primary key check(refund_ref ~ '^re_[A-Za-z0-9_]+),
+ order_id uuid not null references public.commerce_orders(id),
+ amount integer not null check(amount>0),
+ status text not null check(status in ('pending','requires_action','succeeded','failed','canceled')),
+ provider_created_at timestamptz not null,
+ succeeded_observed_at timestamptz,
+ observed_at timestamptz not null default now()
+);
+alter table public.commerce_refund_observations enable row level security;
+revoke all on public.commerce_refund_observations from public,anon,authenticated,service_role;
+grant select,insert,update on public.commerce_refund_observations to service_role;
+create function public.commerce_record_refunds(p_order uuid,p_session text,p_intent text,p_data jsonb) returns void language plpgsql security invoker set search_path='' as $
+declare o public.commerce_orders; f jsonb; a integer; st text; rid text; stamp timestamptz;
+begin
+ select * into o from public.commerce_orders where id=p_order for update;
+ if not found or o.stripe_session_id is distinct from p_session or o.stripe_payment_intent_id is distinct from p_intent then raise exception 'refund_order_mismatch';end if;
+ if jsonb_typeof(p_data)<>'array' or jsonb_array_length(p_data)>100 then raise exception 'refund_snapshot_invalid';end if;
+ for f in select value from jsonb_array_elements(p_data) loop
+  rid:=f->>'id';a:=(f->>'amount')::integer;st:=f->>'status';stamp:=to_timestamp((f->>'created')::double precision);
+  if f->>'currency' is distinct from o.currency or a<=0 or a>coalesce(o.total_amount,0) then raise exception 'refund_amount_mismatch';end if;
+  insert into public.commerce_refund_observations(refund_ref,order_id,amount,status,provider_created_at,succeeded_observed_at)
+  values(rid,o.id,a,st,stamp,case when st='succeeded' then now() end)
+  on conflict(refund_ref) do update set status=case when commerce_refund_observations.status in ('succeeded','failed','canceled') then commerce_refund_observations.status else excluded.status end,
+  succeeded_observed_at=coalesce(commerce_refund_observations.succeeded_observed_at,excluded.succeeded_observed_at),observed_at=now()
+  where commerce_refund_observations.order_id=o.id and commerce_refund_observations.amount=a;
+  if not found then raise exception 'refund_reference_conflict';end if;
+ end loop;
+end $;
+revoke execute on function public.commerce_record_refunds(uuid,text,text,jsonb) from public,anon,authenticated;
+grant execute on function public.commerce_record_refunds(uuid,text,text,jsonb) to service_role;
 commit;

@@ -8,6 +8,7 @@ on:
       - 'mens-personal-development.html'
       - 'flamewalker-plus.html'
       - 'scripts/seo_lab_summary.py'
+      - 'scripts/test_seo_phase_two.py'
       - '.github/workflows/seo-lab.yml'
 permissions:
   contents: read
@@ -27,6 +28,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Validate public SEO and structured data contracts
+        run: python scripts/test_seo_phase_two.py
       - name: Compare pre-phase-two and revised public page sources
         shell: bash
         run: |

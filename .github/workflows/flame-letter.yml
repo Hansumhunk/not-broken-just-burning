@@ -3,6 +3,13 @@ on:
   pull_request:
     paths:
       - 'flame-letter*.html'
+      - '.github/flame-letter/templates/**'
+      - 'FLAME_LETTER_OPERATIONS.md'
+      - 'privacy.html'
+      - 'js/main.js'
+      - 'index.html'
+      - 'join.html'
+      - 'resources.html'
       - 'js/flame-letter.js'
       - 'scripts/test_flame_letter.js'
       - 'tests/flame_letter_browser_test.py'
@@ -11,6 +18,13 @@ on:
     branches: [main]
     paths:
       - 'flame-letter*.html'
+      - '.github/flame-letter/templates/**'
+      - 'FLAME_LETTER_OPERATIONS.md'
+      - 'privacy.html'
+      - 'js/main.js'
+      - 'index.html'
+      - 'join.html'
+      - 'resources.html'
       - 'js/flame-letter.js'
       - 'scripts/test_flame_letter.js'
       - 'tests/flame_letter_browser_test.py'

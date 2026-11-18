@@ -2,11 +2,12 @@ const {test} = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const {CONFIG, approvedSignupUrl, captureSignupIntent, renderSignup} = require('../js/flame-letter.js');
-const valid = {enabled:true, privacyReviewed:true, hostedFormUrl:'https://test.sibforms.com/serve/example-not-a-real-form'};
-test('production defaults collect nothing; both release gates required', () => {
+const valid = {enabled:true, privacyReviewed:true, founderApproved:true, hostedFormUrl:'https://test.sibforms.com/serve/example-not-a-real-form'};
+test('production defaults collect nothing; all release gates required', () => {
   assert.equal(approvedSignupUrl(CONFIG),null);
   assert.equal(approvedSignupUrl({...valid,enabled:false}),null);
   assert.equal(approvedSignupUrl({...valid,privacyReviewed:false}),null);
+  assert.equal(approvedSignupUrl({...valid,founderApproved:false}),null);
   assert.equal(approvedSignupUrl({...valid,hostedFormUrl:''}),null);
 });
 test('only a clean HTTPS provider form URL can pass', () => {
@@ -45,3 +46,5 @@ test('public pages have no form, email field or provider iframe while gated', ()
   }
   for(const path of ['index.html','join.html','resources.html','privacy.html'])assert.match(fs.readFileSync(path,'utf8'),/flame-letter(?:-preferences)?\.html/);
 });
+
+test('seven generic template pairs only, no populated campaign archive',()=>{const path='.github/flame-letter/templates';const names=fs.readdirSync(path);assert.equal(names.filter(x=>x.endsWith('.html.txt')).length,7);assert.equal(names.filter(x=>x.endsWith('.plain.txt')).length,7);for(const name of names.filter(x=>x.endsWith('.txt'))){const s=fs.readFileSync(path+'/'+name,'utf8');assert.match(s,/\{\{ unsubscribe \}\}/);assert.match(s,/\[\[REPLACE_WITH_VERIFIED_BUSINESS_MAILING_ADDRESS\]\]/);assert.match(s,/privacy\.html/);assert.doesNotMatch(s,/\bsk_live_|\bxkeysib-/);}});

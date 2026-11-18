@@ -1,12 +1,12 @@
 /* Public configuration only. Do not enter API credentials, subscriber data or secret tokens.
    Release requires founder authorization, verified form, reviewed privacy notice and successful pilot.
-   Keep both gates false until the release PR is approved. */
+   Keep all three gates false until the release PR is approved. */
 (function () {
   'use strict';
-  const CONFIG = Object.freeze({ enabled: false, privacyReviewed: false, hostedFormUrl: '' });
+  const CONFIG = Object.freeze({ enabled: false, privacyReviewed: false, founderApproved: false, hostedFormUrl: '' });
 
   function approvedSignupUrl(config) {
-    if (!config || config.enabled !== true || config.privacyReviewed !== true ||
+    if (!config || config.enabled !== true || config.privacyReviewed !== true || config.founderApproved !== true ||
         typeof config.hostedFormUrl !== 'string' || !config.hostedFormUrl.trim()) return null;
     try {
       const url = new URL(config.hostedFormUrl);

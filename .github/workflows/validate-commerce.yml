@@ -87,6 +87,15 @@ jobs:
           ! grep -q 'plhbvtbvtxfzulsaxuim' /tmp/nbjb-commerce-preview/js/nbjb-config.js
           ! grep -q 'create-live-checkout-session' /tmp/nbjb-commerce-preview/js/member-billing.js
           test ! -d /tmp/nbjb-commerce-preview/launch-backend-staging
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj '/CN=localhost' -addext 'subjectAltName=DNS:localhost' -keyout /tmp/qa.key -out /tmp/qa.crt >/dev/null 2>&1
+          python launch-backend-staging/commerce/serve-qa-preview.py --dir /tmp/nbjb-commerce-preview --cert /tmp/qa.crt --key /tmp/qa.key >/tmp/qa-preview.log 2>&1 & preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+          curl --fail --silent --show-error --retry 5 --retry-connrefused --cacert /tmp/qa.crt https://localhost:8443/store.html > /tmp/qa-store.html
+          grep -q 'NBJB · Digital Store Preview' /tmp/qa-store.html
+          curl --fail --silent --show-error --cacert /tmp/qa.crt https://localhost:8443/member-library.html > /tmp/qa-library.html
+          grep -q 'nbjb-owned-products' /tmp/qa-library.html
+          curl --fail --silent --show-error --cacert /tmp/qa.crt https://localhost:8443/commerce-result.html > /tmp/qa-result.html
+          grep -q 'commerce-result-status' /tmp/qa-result.html
           if command -v pdfinfo >/dev/null; then find /tmp/nbjb-commerce-fixtures -name '*.pdf' -exec pdfinfo {} \; ; fi
       - uses: actions/upload-artifact@v4
         with:

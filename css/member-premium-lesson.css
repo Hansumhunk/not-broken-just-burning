@@ -301,3 +301,11 @@
   .premium-journal-answer{min-height:72px}
   .premium-journal-actions .button{width:100%;justify-content:center;text-align:center}
 }
+
+/* Mobile workbook: readable entry fields, reachable actions, no clipped text. */
+@media(max-width:690px){
+ .premium-journal-answer,.premium-exercise-form textarea,.premium-map-field textarea,.premium-map-field select{font-size:16px;min-height:96px;scroll-margin-block:96px}
+ .premium-lesson-content :is(button,.button,summary),.premium-control{min-height:44px;white-space:normal}
+ .premium-journal-row,.premium-map-field,.premium-exercise-form label{min-width:0;overflow-wrap:anywhere}
+}
+.premium-reader-progress :focus-visible,.premium-lesson-content :focus-visible{outline:2px solid var(--ember-bright,#ff995a);outline-offset:3px}

@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test scripts/test_commerce_catalog.js scripts/test_commerce_security.mjs
+      - run: node --test scripts/test_commerce_catalog.js scripts/test_commerce_security.mjs scripts/test_commerce_browser.js
       - run: for f in js/commerce-*.js; do node --check "$f"; done
   commerce-database:
     runs-on: ubuntu-latest
@@ -44,6 +44,9 @@ jobs:
           psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/test-fixture.sql
           psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/migration.sql
           psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/test-migration.sql
+          psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/operations.sql
+          psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/test-operations.sql
+          psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/financial-command-report.sql
           reserve="set role service_role; select (public.commerce_reserve('22222222-2222-4222-8222-222222222222','forge-workbook','draft-v1')).id;"
           psql -h localhost -U postgres -d commerce_fixture -qAt -v ON_ERROR_STOP=1 -c "$reserve" > /tmp/order-1 & p1=$!
           psql -h localhost -U postgres -d commerce_fixture -qAt -v ON_ERROR_STOP=1 -c "$reserve" > /tmp/order-2 & p2=$!
@@ -56,5 +59,30 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - run: deno check launch-backend-staging/commerce/index.ts
-      - run: deno test launch-backend-staging/commerce/signature_test.ts
+      - run: deno check launch-backend-staging/commerce/index.ts launch-backend-staging/commerce/admin-cli.ts
+      - run: deno test launch-backend-staging/commerce/signature_test.ts launch-backend-staging/commerce/provider_test.ts
+  commerce-qa-fixtures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate harmless private upload fixtures and isolated local preview
+        env:
+          NBJB_QA_PUBLISHABLE_KEY: sb_publishable_fixture_not_a_real_key
+        run: |
+          python launch-backend-staging/commerce/make-fixtures.py --out /tmp/nbjb-commerce-fixtures
+          python launch-backend-staging/commerce/build-qa-preview.py --out /tmp/nbjb-commerce-preview --project-ref abcdefghijklmnopqrst
+          test "$(find /tmp/nbjb-commerce-fixtures -name '*.pdf' | wc -l)" -eq 3
+          grep -q 'abcdefghijklmnopqrst.supabase.co' /tmp/nbjb-commerce-preview/js/nbjb-config.js
+          ! grep -q 'plhbvtbvtxfzulsaxuim' /tmp/nbjb-commerce-preview/js/nbjb-config.js
+          ! grep -q 'create-live-checkout-session' /tmp/nbjb-commerce-preview/js/member-billing.js
+          test ! -d /tmp/nbjb-commerce-preview/launch-backend-staging
+          if command -v pdfinfo >/dev/null; then find /tmp/nbjb-commerce-fixtures -name '*.pdf' -exec pdfinfo {} \; ; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nbjb-commerce-synthetic-pdfs
+          path: /tmp/nbjb-commerce-fixtures
+          retention-days: 7
+          if-no-files-found: error

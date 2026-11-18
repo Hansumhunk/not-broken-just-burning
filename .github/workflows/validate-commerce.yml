@@ -82,7 +82,7 @@ jobs:
         env:
           NBJB_QA_PUBLISHABLE_KEY: sb_publishable_fixture_not_a_real_key
         run: |
-          python -m py_compile launch-backend-staging/commerce/verify-customer-archive.py
+          python launch-backend-staging/commerce/test-customer-archive.py
           python launch-backend-staging/commerce/make-fixtures.py --out /tmp/nbjb-commerce-fixtures
           python launch-backend-staging/commerce/build-qa-preview.py --out /tmp/nbjb-commerce-preview --project-ref abcdefghijklmnopqrst
           test "$(find /tmp/nbjb-commerce-fixtures -name '*.pdf' | wc -l)" -eq 3

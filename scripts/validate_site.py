@@ -323,6 +323,7 @@ def main() -> int:
             "js/member-history-insights.js",
             "js/member-learning-progress.js",
             "js/member-feedback.js",
+            "js/member-account-export.js",
             "js/member-platform.js",
             "js/member-path-stage.js",
             "js/member-path-foundations.js",

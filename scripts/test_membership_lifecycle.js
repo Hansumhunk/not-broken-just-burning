@@ -230,7 +230,7 @@ test('membership intent telemetry has only allowlisted event and plan, URL prope
    {name:'nbjb_membership_checkout_requested',properties:{plan:'monthly',$process_person_profile:false}},
    {name:'nbjb_membership_checkout_requested',properties:{plan:'annual',$process_person_profile:false}}
  ]);
- const sanitized=result.config[0].before_send({properties:{$current_url:'https://notbrokenjustburning.com/member-store.html?checkout=success#sensitive', $referrer:'https://example.com/?token=synthetic',plan:'monthly'}});
+ const sanitized=result.config[0].before_send({event:'nbjb_membership_checkout_requested',properties:{$current_url:'https://notbrokenjustburning.com/member-store.html?checkout=success#sensitive', $referrer:'https://example.com/?token=synthetic',plan:'monthly'}});
  assert.equal(sanitized.properties.$current_url,'https://notbrokenjustburning.com/member-store.html');
  assert.equal(sanitized.properties.$referrer,'https://example.com/');
  assert.equal(sanitized.properties.plan,'monthly');
@@ -239,4 +239,19 @@ test('membership intent telemetry has only allowlisted event and plan, URL prope
  const billing=source('js/member-billing.js');
  assert.ok(billing.indexOf('if (!consent?.checked)')<billing.indexOf('window.NBJBTrackCheckoutIntent?.(offer)'));
  assert.ok(billing.indexOf("if (!['flamewalker_plus_monthly', 'flamewalker_plus_annual'].includes(offer))")<billing.indexOf('window.NBJBTrackCheckoutIntent?.(offer)'));
+});
+
+test('analytics allowlist discards unknown events, sensitive fields, and external referrer paths',()=>{
+ const result=evaluateAnalytics('member-store.html');
+ const redact=result.config[0].before_send;
+ assert.equal(redact({event:'reflection_saved',properties:{text:'synthetic private'}}),null);
+ const input={event:'nbjb_membership_checkout_requested',properties:{plan:'annual',placement:'home_hero',email:'synthetic@example.invalid',reflection:'synthetic secret',token:'mock',utm_campaign:'approved_campaign',utm_term:'not allowed!', $referrer:'https://example.com/private/identifier?x=secret',$current_url:'https://notbrokenjustburning.com/member-store.html?x=secret#private'}};
+ const out=redact(input);
+ assert.equal(out.properties.plan,'annual');
+ assert.equal(out.properties.$referrer,'https://example.com/');
+ assert.equal(out.properties.$current_url,'https://notbrokenjustburning.com/member-store.html');
+ assert.equal(out.properties.utm_campaign,'approved_campaign');
+ for(const name of ['placement','email','reflection','token','utm_term'])assert.ok(!Object.hasOwn(out.properties,name));
+ assert.equal(out.properties.$process_person_profile,false);
+ assert.equal(redact({event:'$pageview',properties:{plan:'annual'}}).properties.plan,undefined);
 });

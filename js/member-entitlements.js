@@ -6,7 +6,7 @@
   });
 
   function emptyState(tier = 'free') { return {
-    tier
+    tier,
     membershipStatus: 'active',
     cancelAtPeriodEnd: false,
     validUntil: null,

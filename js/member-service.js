@@ -328,9 +328,30 @@
   }
 
   function reset() {
+    const userId = currentUserId();
+    if (!userId) return false;
     try {
-      localStorage.removeItem(scopedKey(KEY_BASE));
-      localStorage.removeItem(scopedKey(LEGACY_KEY_BASE));
+      // Enumerate before deleting; restrict every key to this exact account.
+      const exact = new Set([scopedKey(KEY_BASE), scopedKey(LEGACY_KEY_BASE),
+        'nbjb.plus.lesson-progress.v1.' + userId, 'nbjb.plus.last-learning.v1.' + userId]);
+      const prefixes = ['nbjb.plus.reading-position.v1.' + userId + '.',
+        'nbjb.plus.editorial-review.v1.' + userId + '.'];
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && prefixes.some(prefix => key.startsWith(prefix))) keys.push(key);
+      }
+      if (currentUserId() !== userId) return false;
+      for (const key of [...exact, ...keys]) localStorage.removeItem(key);
+      // A failed handoff may contain private text; remove only this account's draft.
+      if (typeof sessionStorage !== 'undefined') {
+        const raw = sessionStorage.getItem('nbjb.pending-tool-save.v1');
+        if (raw) {
+          try {
+            if (JSON.parse(raw)?.ownerId === userId) sessionStorage.removeItem('nbjb.pending-tool-save.v1');
+          } catch (_) { /* Do not delete another user's malformed/unowned draft. */ }
+        }
+      }
       return true;
     } catch (error) {
       return false;

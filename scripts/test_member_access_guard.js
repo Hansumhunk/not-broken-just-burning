@@ -301,6 +301,12 @@ test('account sign-in, signup and recovery preserve password whitespace exactly'
   };
   await submit('sign-in-form');
   await submit('sign-up-form');
+  // A password update is not permitted without verified recovery identity.
+  await submit('new-password-form');
+  assert.equal(calls.filter(call => call[0] === 'updatePassword').length, 0);
+  auth.user = { id: 'synthetic-recovery-user' };
+  auth.refresh = async () => ({user: auth.user});
+  elements['#recovery-state'].hidden = false;
   await submit('new-password-form');
   assert.deepEqual(calls, [
     ['signIn', 'member@example.com', '  secret pass  '],
@@ -1136,4 +1142,43 @@ test('Learning Trail clears premium progress when access changes and ignores lat
   assert.equal(selectors['[data-learning-trail-count]'].textContent,'Flamewalker Free');
   assert.equal(selectors['[data-learning-trail-reading-link]'].href,'member-start-here.html');
   assert.ok(!JSON.stringify(selectors['[data-learning-trail-practiced]']).includes('Published Lesson'));
+});
+
+test('all protected member entry pages request a fresh QA bootstrap and changed scripts', () => {
+  for (const file of memberPages) {
+    assert.match(read(file), /member-bootstrap\.js\?[^"]*member-qa-20261118/, file);
+  }
+  const bootstrap=read('js/member-bootstrap.js');
+  assert.match(bootstrap,/\['js\/member-entitlements\.js', 'js\/member-learning-progress\.js', 'js\/tool-member-history\.js'\]\.includes\(src\)\s*\? src \+ '\?v=member-qa-20261118'/);
+});
+
+test('same-browser switch immediately hides old member page and reloads for new identity',async()=>{
+  const state=simulate({userId:'member-A'});
+  await settle();
+  assert.equal(state.body.dataset.memberAccess,'granted');
+  state.setUser('member-B');
+  assert.equal(state.body.dataset.memberAccess,undefined);
+  assert.equal(state.reloads(),1);
+});
+
+test('member UX P2 applies accessible focus, mobile targets, explicit data export and scoped reset',()=>{
+  const css=read('css/members.css');
+  const premium=read('css/member-premium-lesson.css');
+  const platform=read('js/member-platform.js');
+  const service=read('js/member-service.js');
+  assert.match(css,/data-member-motion="reduced"/);
+  assert.match(css,/focus-visible/);
+  assert.match(premium,/font-size:16px;min-height:96px/);
+  assert.match(platform,/Copy private local member data to the clipboard/);
+  assert.match(service,/nbjb\.plus\.reading-position\.v1\./);
+  assert.match(service,/nbjb\.plus\.last-learning\.v1\./);
+  assert.doesNotMatch(service,/localStorage\.clear\(/);
+});
+test('recovery flow deduplicates requests and validates session before updating password',()=>{
+  const auth=read('js/member-auth.js');
+  assert.match(auth,/if \(recoveryRequestPending\) return/);
+  assert.match(auth,/if \(passwordUpdatePending\) return/);
+  assert.match(auth,/if \(auth\.refresh\) await auth\.refresh\(\)/);
+  assert.match(auth,/if \(!auth\.user\?\.id \|\| recovery\?\.hidden\)/);
+  assert.match(auth,/If that account exists/);
 });

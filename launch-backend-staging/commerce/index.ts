@@ -38,7 +38,13 @@ async function reconcile(sid:string,eventID:string,eventType:string) {
  if(!uuid.test(oid||""))throw Error("invalid_order_id");
  const o=await orderById(oid);
  if(!o)throw Error("order_missing");
- const {v,pendingRefund,won,refundRecords}=await providerSnapshot(stripe!,s.id,o);
+ const extra=!!(o.stripe_session_id&&o.stripe_session_id!==s.id);
+ const {v,pendingRefund,won,refundRecords}=await providerSnapshot(stripe!,s.id,extra?{...o,stripe_session_id:null}:o);
+ if(extra){
+   // A verified additional charge must never overwrite canonical ownership.
+   if(["paid","refunded","disputed"].includes(v.state))must(await admin!.rpc("commerce_record_exception",{p_order:o.id,p_session:s.id,p_intent:v.intent,p_gross:v.total,p_refunded:v.refunded,p_state:v.state,p_pending:pendingRefund}));
+   return;
+ }
  const intent=idOf(s.payment_intent);
  if(eventType.startsWith("charge.dispute.")&&v.state==="paid"&&!won)v.state="disputed";
  if(eventType==="checkout.session.async_payment_failed"&&s.status==="complete"&&s.payment_status==="unpaid"&&intent){const failed=await stripe!.paymentIntents.retrieve(intent);if(["canceled","requires_payment_method"].includes(failed.status))v.state="failed";}
@@ -99,8 +105,9 @@ Deno.serve(async(req:Request)=>{
    if(!e?.provider_entitlement_ref||!uuid.test(e.provider_entitlement_ref))return json({error:"not_owned"},403);
    const o=await orderById(e.provider_entitlement_ref);
    if(!ownedDownload(o,e,user.id,slug))return json({error:"not_owned"},403);
-   const replacement=must(await admin.from("commerce_asset_replacements").select("asset_version,asset_key,download_name").eq("slug",slug).eq("original_version",o.asset_version).eq("original_asset_key",o.asset_key).maybeSingle());
-   const asset=replacement?{...o,...replacement}:o;
+   const resolved=must(await admin.rpc("commerce_resolve_asset",{p_slug:slug,p_version:o.asset_version,p_key:o.asset_key,p_name:o.download_name}));
+   if(!Array.isArray(resolved)||resolved.length!==1)throw Error("asset_resolution_failed");
+   const asset={...o,...resolved[0]};
    let signed;
    try {await productAsset(asset); signed=must(await admin.storage.from(bucket).createSignedUrl(asset.asset_key,60,{download:asset.download_name}));}
    catch {console.error("commerce_delivery_retry");return json({error:"download_unavailable",retryable:true},503);}
@@ -118,7 +125,7 @@ Deno.serve(async(req:Request)=>{
  validatePrice(price,p);
  if(typeof price.product==="string"||"deleted" in price.product||!price.product.active||idOf(price.product.tax_code)!==p.tax_code)return json({error:"tax_or_product_mismatch"},503);
  const reserve=await admin.rpc("commerce_reserve",{p_user:user.id,p_slug:slug,p_terms:p.terms_version});
- if(reserve.error){const m=reserve.error.message;return json({error:["already_owned","order_review","not_available","account_review"].includes(m)?m:"checkout_unavailable"},409);}
+ if(reserve.error){const m=reserve.error.message;return json({error:["already_owned","order_review","not_available","account_review","payment_exception_review"].includes(m)?m:"checkout_unavailable"},409);}
  const o=Array.isArray(reserve.data)?reserve.data[0]:reserve.data;
  if(!o)throw Error('order_not_reserved');
  if(o.stripe_price_id!==p.stripe_price_id||o.amount!==p.amount||o.tax_behavior!==p.tax_behavior)return json({error:"order_review"},409);

@@ -1137,3 +1137,20 @@ test('Learning Trail clears premium progress when access changes and ignores lat
   assert.equal(selectors['[data-learning-trail-reading-link]'].href,'member-start-here.html');
   assert.ok(!JSON.stringify(selectors['[data-learning-trail-practiced]']).includes('Published Lesson'));
 });
+
+test('all protected member entry pages request a fresh QA bootstrap and changed scripts', () => {
+  for (const file of memberPages) {
+    assert.match(read(file), /member-bootstrap\.js\?[^"]*member-qa-20261118/, file);
+  }
+  const bootstrap=read('js/member-bootstrap.js');
+  assert.match(bootstrap,/\['js\/member-entitlements\.js', 'js\/member-learning-progress\.js', 'js\/tool-member-history\.js'\]\.includes\(src\)\s*\? src \+ '\?v=member-qa-20261118'/);
+});
+
+test('same-browser switch immediately hides old member page and reloads for new identity',async()=>{
+  const state=simulate({userId:'member-A'});
+  await settle();
+  assert.equal(state.body.dataset.memberAccess,'granted');
+  state.setUser('member-B');
+  assert.equal(state.body.dataset.memberAccess,undefined);
+  assert.equal(state.reloads(),1);
+});

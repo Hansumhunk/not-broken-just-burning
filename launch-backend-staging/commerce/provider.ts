@@ -9,9 +9,12 @@ export async function providerSnapshot(stripe:Stripe,sid:string,o:any) {
  const charge=chargeId?await stripe.charges.retrieve(chargeId):null;
  const v=verifySession(session,items,o,pi,charge);
  let won=false,pendingRefund=false;
+ let refundRecords:{id:string,amount:number,status:string|null,currency:string,created:number}[]=[];
  if(charge && pi) {
   const refunds=await stripe.refunds.list({charge:charge.id,limit:100});
   if(refunds.has_more || refunds.data.some(x=>x.livemode!==false || idOf(x.charge)!==charge.id || x.currency!==o.currency))throw Error("refund_snapshot_incomplete");
+  refundRecords=refunds.data.map(({id,amount,status,currency,created})=>({id,amount,status:status??null,currency,created}));
+  if(refundRecords.some(x=>!["pending","requires_action","succeeded","failed","canceled"].includes(x.status||"")))throw Error("unknown_refund_status");
   const succeeded=refunds.data.filter(x=>x.status==="succeeded").reduce((sum,x)=>sum+x.amount,0);
   if(!Number.isSafeInteger(succeeded)||succeeded<0||succeeded>charge.amount)throw Error("refund_snapshot_mismatch");
   pendingRefund=refunds.data.some(x=>!["succeeded","failed","canceled"].includes(x.status||""));
@@ -23,7 +26,7 @@ export async function providerSnapshot(stripe:Stripe,sid:string,o:any) {
   v.refunded=succeeded;
   v.state=succeeded===charge.amount?"refunded":hold?"disputed":"paid";
  }
- return {session,v,won,pendingRefund};
+ return {session,v,won,pendingRefund,refundRecords};
 }
 // Explicitly bounded scan; if unable to enumerate all matching order sessions, fail closed.
 // Do not log or return Stripe customer details.

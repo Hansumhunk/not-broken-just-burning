@@ -58,7 +58,7 @@ async function main(){
       if(other.pendingRefund||!["refunded","expired"].includes(other.v.state))throw Error("additional_payment_unresolved");
     }
     const extraRows=must(await admin.from("commerce_payment_exceptions").select("session_ref,state,pending_refund").eq("order_id",o.id));
-    if(extraRows.some((x:any)=>x.state!=="refunded"||x.pending_refund||!sessions.some(y=>y.id===x.session_ref)))throw Error("additional_payment_records_unresolved");
+    if(extraRows.some((x:any)=>x.state!=="refunded"||x.pending_refund||!sessions.some(y=>y.id===x.session_ref))||paid.filter(x=>x.id!==bound.id).some(x=>!extraRows.some((row:any)=>row.session_ref===x.id&&row.state==="refunded"&&!row.pending_refund)))throw Error("additional_payment_records_unresolved");
   }else if(sessions.length!==1||paid.length!==1||o.stripe_session_id&&paid[0].id!==o.stripe_session_id){
    if(apply)must(await admin.rpc("commerce_mark_review",{p_order:o.id,...audit(),p_duplicate:paid.length>1}));
    return;

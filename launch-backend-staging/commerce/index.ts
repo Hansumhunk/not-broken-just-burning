@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2.116.0";
 import Stripe from "npm:stripe@22.6.2";
+import { verifiedStripeEvent } from "./signature.ts";
 import { sandboxAllowed, SKU, idOf, validatePrice, verifySession, ownedDownload } from "./commerce-core.mjs";
 const env=(k:string)=>Deno.env.get(k)||"";
 const url=env("SUPABASE_URL"), key=env("NBJB_COMMERCE_STRIPE_TEST_KEY"), ref=env("NBJB_COMMERCE_SANDBOX_REF");
@@ -51,8 +52,7 @@ async function webhook(req:Request) {
  const secret=env("NBJB_COMMERCE_STRIPE_TEST_WEBHOOK_SECRET"), signature=req.headers.get("stripe-signature");
  if(!secret.startsWith("whsec_")||!signature)return json({error:"signature_required"},400);
  let event:Stripe.Event;
- try {event=await stripe!.webhooks.constructEventAsync(await req.text(),signature,secret,undefined,Stripe.createSubtleCryptoProvider());}catch{return json({error:"invalid_signature"},400);}
- if(event.livemode)return json({error:"wrong_environment"},400);
+ try {event=await verifiedStripeEvent(stripe!,await req.text(),signature,secret);}catch{return json({error:"invalid_signature_or_environment"},400);}
  try{
  const obj:any=event.data.object;
  if(["checkout.session.completed","checkout.session.async_payment_succeeded","checkout.session.async_payment_failed","checkout.session.expired"].includes(event.type))await reconcile(obj.id,event.id,event.type);

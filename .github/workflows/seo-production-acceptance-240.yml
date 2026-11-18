@@ -1,0 +1,120 @@
+name: SEO production acceptance - PR 240
+on:
+  push:
+    branches: [qa/seo-production-acceptance-240]
+    paths: ['.github/workflows/seo-production-acceptance-240.yml']
+permissions:
+  contents: read
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check exact deployed public files and metadata
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib, json, re, time, urllib.request, xml.etree.ElementTree as ET
+          from html.parser import HTMLParser
+          from pathlib import Path
+          BASE="https://notbrokenjustburning.com/"
+          pages=["books-projects.html","divorce-recovery.html","flamewalker-plus.html","masculine-restoration-placeholder-wound.html","mens-mental-health.html","mens-personal-development.html","path-masculine-restoration-institutional-betrayal.html","path-masculine-restoration-steadiness.html","path-masculine-restoration.html"]
+          hubs={"divorce-recovery.html","masculine-restoration-placeholder-wound.html","mens-mental-health.html","mens-personal-development.html"}
+          def get(url):
+              req=urllib.request.Request(url,headers={"User-Agent":"NBJB approved production acceptance","Cache-Control":"no-cache","DNT":"1"})
+              with urllib.request.urlopen(req,timeout=20) as resp:
+                  assert resp.status==200,(url,resp.status)
+                  return resp.read(),resp.url
+          def exact(path):
+              expected=Path(path).read_bytes()
+              for attempt in range(4):
+                  try:
+                      data,final=get(BASE+path)
+                      if data==expected and final==BASE+path:
+                          print("PASS exact deployed bytes",path,hashlib.sha256(data).hexdigest(),flush=True)
+                          return data.decode("utf-8")
+                  except Exception as exc:
+                      print("retry",path,type(exc).__name__,flush=True)
+                  if attempt<3: time.sleep(8)
+              raise AssertionError("Deployed content does not match approved checkout: "+path)
+          class Doc(HTMLParser):
+              def __init__(self,html):
+                  super().__init__(); self.canonical=[];self.robots=[];self.links=[];self.schemas=[];self.inside=False;self.buf="";self.feed(html)
+              def handle_starttag(self,tag,attrs):
+                  a=dict(attrs)
+                  if tag=="link" and a.get("rel")=="canonical": self.canonical.append(a.get("href"))
+                  if tag=="meta" and a.get("name")=="robots": self.robots.append(a.get("content",""))
+                  if tag=="a" and a.get("href"): self.links.append(a["href"])
+                  if tag=="script" and a.get("type")=="application/ld+json": self.inside=True;self.buf=""
+              def handle_data(self,data):
+                  if self.inside: self.buf+=data
+              def handle_endtag(self,tag):
+                  if tag=="script" and self.inside: self.schemas.append(json.loads(self.buf));self.inside=False
+          urls=[x.text for x in ET.fromstring(exact("sitemap.xml")).findall(".//{http://www.sitemaps.org/schemas/sitemap/0.9}loc")]
+          assert len(urls)==98 and len(set(urls))==98 and all(x.startswith(BASE) for x in urls)
+          assert not any(re.search(r"/(?:member[^/]*|members|join)\.html$",x) for x in urls)
+          assert ("Sitemap: "+BASE+"sitemap.xml") in exact("robots.txt")
+          print("PASS sitemap 98 unique canonical HTTPS URLs, member/account exclusions",flush=True)
+          for path in pages:
+              doc=Doc(exact(path))
+              assert doc.canonical==[BASE+path],(path,doc.canonical)
+              assert not any("noindex" in x.lower() for x in doc.robots)
+              assert BASE+path in urls
+              if path in hubs:
+                  b=[x for x in doc.schemas if x.get("@type")=="BreadcrumbList"]
+                  assert len(b)==1 and b[0]["itemListElement"][-1]["item"]==BASE+path
+              if path=="flamewalker-plus.html":
+                  b=[x for x in doc.schemas if x.get("@type")=="ItemList"]
+                  assert len(b)==1 and len(b[0]["itemListElement"])==6
+                  assert all(x["item"]["@type"]=="LearningResource" for x in b[0]["itemListElement"])
+              for href in sorted(set(doc.links)):
+                  if href.startswith("http"): continue
+                  if href.split("#")[0].startswith("hawk-"):
+                      get(BASE+href.split("#")[0])
+              print("PASS canonical, public indexing directive, structured data and HAWK link checks",path,flush=True)
+          for path in ("member-premium-lesson.html","member-auth.html","member-store.html","members.html","join.html"):
+              doc=Doc(exact(path));assert any("noindex" in x.lower() for x in doc.robots),path
+          print("PASS protected/account source noindex; no account actions",flush=True)
+          for u in ("http://notbrokenjustburning.com/","https://www.notbrokenjustburning.com/"):
+              data,final=get(u);assert final==BASE,(u,final)
+          print("PASS HTTP and www canonical redirect",flush=True)
+          PY
+      - name: Test deployed responsive public navigation with analytics disabled
+        shell: bash
+        run: |
+          python -m pip install playwright==1.51.0
+          export CHROME_PATH="$(command -v google-chrome || command -v chromium)"
+          python - <<'PY'
+          import os,json
+          from playwright.sync_api import sync_playwright
+          BASE="https://notbrokenjustburning.com/"
+          PAGES=("divorce-recovery.html","masculine-restoration-placeholder-wound.html","mens-mental-health.html","mens-personal-development.html","flamewalker-plus.html")
+          with sync_playwright() as p:
+              browser=p.chromium.launch(executable_path=os.environ["CHROME_PATH"],args=["--no-sandbox"])
+              for width,height in ((390,844),(1280,800)):
+                  for name in PAGES:
+                      ctx=browser.new_context(viewport={"width":width,"height":height},reduced_motion="reduce",extra_http_headers={"DNT":"1"})
+                      # Explicitly block third-party analytics; do not initiate any member or payment action.
+                      ctx.route("**/*",lambda route: route.continue_() if route.request.url.startswith((BASE,"https://fonts.googleapis.com/","https://fonts.gstatic.com/")) else route.abort())
+                      page=ctx.new_page()
+                      res=page.goto(BASE+name,wait_until="domcontentloaded",timeout=30000)
+                      assert res and res.ok,name
+                      page.evaluate("document.fonts.ready")
+                      assert page.locator("h1").first.is_visible(),name
+                      assert page.evaluate("document.documentElement.scrollWidth-innerWidth")<=2,name
+                      page.keyboard.press("Tab")
+                      assert page.evaluate("document.activeElement.getAttribute('href')")=="#main-content",name
+                      page.keyboard.press("Enter")
+                      assert page.evaluate("location.hash")=="#main-content",name
+                      if width<600:
+                          t=page.locator(".nav-toggle")
+                          t.click();assert t.get_attribute("aria-expanded")=="true",name
+                          page.keyboard.press("Escape");assert t.get_attribute("aria-expanded")=="false",name
+                      data=[json.loads(x) for x in page.locator('script[type="application/ld+json"]').all_text_contents()]
+                      target="ItemList" if name=="flamewalker-plus.html" else "BreadcrumbList"
+                      assert sum(x.get("@type")==target for x in data)==1,name
+                      print("PASS production browser",name,width,"px; keyboard, navigation, rendered schema",flush=True)
+                      ctx.close()
+              browser.close()
+          PY

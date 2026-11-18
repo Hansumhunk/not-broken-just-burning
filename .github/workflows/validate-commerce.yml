@@ -44,6 +44,11 @@ jobs:
           psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/test-fixture.sql
           psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/migration.sql
           psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/test-migration.sql
+          reserve="set role service_role; select (public.commerce_reserve('22222222-2222-4222-8222-222222222222','forge-workbook','draft-v1')).id;"
+          psql -h localhost -U postgres -d commerce_fixture -qAt -v ON_ERROR_STOP=1 -c "$reserve" > /tmp/order-1 & p1=$!
+          psql -h localhost -U postgres -d commerce_fixture -qAt -v ON_ERROR_STOP=1 -c "$reserve" > /tmp/order-2 & p2=$!
+          wait "$p1"; wait "$p2"
+          test -s /tmp/order-1; diff /tmp/order-1 /tmp/order-2
   commerce-edge-typecheck:
     runs-on: ubuntu-latest
     steps:
@@ -52,3 +57,4 @@ jobs:
         with:
           deno-version: v2.x
       - run: deno check launch-backend-staging/commerce/index.ts
+      - run: deno test launch-backend-staging/commerce/signature_test.ts

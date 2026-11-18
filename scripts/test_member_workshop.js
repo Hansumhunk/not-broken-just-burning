@@ -139,7 +139,7 @@ function simulateMemberBootstrap({ initialUser = null, restoredUser = null, refr
     body: {
       dataset: { memberPage: 'workshop' },
       appendChild(node) {
-        loaded.push(node.src);
+        loaded.push(node.src.split('?')[0]);
         queueMicrotask(() => node.onload());
       }
     },

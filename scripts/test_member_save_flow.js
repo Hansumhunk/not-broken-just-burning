@@ -47,7 +47,7 @@ class Element {
   querySelector(selector) { return this.querySelectorAll(selector)[0] || null; }
 }
 
-function setup({ userId = '', dataStore = new Map(), sessionStore = new Map(), failSave = false } = {}) {
+function setup({ userId = '', dataStore = new Map(), sessionStore = new Map(), failSave = false, confirmHandoff = true } = {}) {
   const root = new Element('section');
   const fields = {
     '#stone-mountain': new Element('textarea'),
@@ -83,7 +83,7 @@ function setup({ userId = '', dataStore = new Map(), sessionStore = new Map(), f
       return { ok: true, entry };
     }
   };
-  const window = { NBJBMemberService: service, NBJBAuth: auth, setTimeout() {} };
+  const window = { NBJBMemberService: service, NBJBAuth: auth, confirm: () => confirmHandoff, setTimeout() {} };
   vm.runInNewContext(script, { window, document, sessionStorage, location, console, Date });
   const button = root.descendants().find((node) => node.dataset.memberWorkButton === 'stone');
   const consent = root.descendants().find((node) => node.dataset.memberWorkConsent === 'stone');
@@ -100,7 +100,7 @@ test('guest must opt in before a sign-in draft is created', async () => {
   assert.equal(scenario.redirect(), '');
 });
 
-test('consented guest draft is automatically saved into the signed-in user archive on return', async () => {
+test('consented guest draft is saved only after confirming the signed-in account', async () => {
   const sharedSessions = new Map();
   const sharedData = new Map();
   const guest = setup({ sessionStore: sharedSessions, dataStore: sharedData });
@@ -131,7 +131,7 @@ test('signed-in user saves directly and the record is readable under their accou
   assert.equal(member.redirect(), '');
 });
 
-test('failed automatic save keeps the consented pending draft for recovery', async () => {
+test('failed confirmed save keeps the account-bound pending draft for recovery', async () => {
   const sharedSessions = new Map();
   const guest = setup({ sessionStore: sharedSessions });
   guest.fields['#stone-now'].value = 'Write the list';
@@ -141,4 +141,56 @@ test('failed automatic save keeps the consented pending draft for recovery', asy
   assert.equal(sharedSessions.size, 1);
   assert.equal(member.fields['#stone-now'].value, 'Write the list');
   assert.match(member.status.textContent, /could not finish/i);
+});
+
+test('guest handoff decline writes no private reflection to the signed-in account', async () => {
+  const sharedSessions = new Map();
+  const sharedData = new Map();
+  const guest = setup({ sessionStore: sharedSessions, dataStore: sharedData });
+  guest.fields['#stone-now'].value = 'Synthetic private draft';
+  guest.consent.checked = true;
+  await guest.button.events.click();
+  const member = setup({ userId: 'another-user', confirmHandoff: false, sessionStore: sharedSessions, dataStore: sharedData });
+  assert.equal(sharedData.size, 0);
+  assert.equal(sharedSessions.size, 0);
+  assert.equal(member.fields['#stone-now'].value, '');
+  assert.match(member.status.textContent, /No reflection was saved/);
+});
+
+test('a failed handoff bound to account A must never be restored or archived under B', async () => {
+  const sharedSessions = new Map();
+  const sharedData = new Map();
+  const guest = setup({ sessionStore: sharedSessions, dataStore: sharedData });
+  guest.fields['#stone-now'].value = 'Synthetic account A draft';
+  guest.consent.checked = true;
+  await guest.button.events.click();
+  setup({ userId: 'account-A', sessionStore: sharedSessions, dataStore: sharedData, failSave: true });
+  assert.equal(JSON.parse([...sharedSessions.values()][0]).ownerId, 'account-A');
+  const other = setup({ userId: 'account-B', sessionStore: sharedSessions, dataStore: sharedData });
+  assert.equal(sharedData.size, 0);
+  assert.equal(sharedSessions.size, 0);
+  assert.equal(other.fields['#stone-now'].value, '');
+  assert.match(other.status.textContent, /another sign-in/);
+});
+
+test('actual local My Work service scopes reading, updates, exports and resets by identity', () => {
+  const storage = new Map();
+  const auth = { user: { id: 'account-A' } };
+  const window = { NBJBAuth: auth };
+  const localStorage = { getItem: k => storage.get(k) || null, setItem: (k,v) => storage.set(k,v), removeItem: k => storage.delete(k) };
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../js/member-service.js'),'utf8'), { window, localStorage, Date, Math });
+  const svc=window.NBJBMemberService;
+  const a=svc.recordToolEntry('One Stone',{title:'synthetic A',summary:'private A',data:{now:'private A'}}).entry;
+  assert.equal(svc.listEntries().length,1);
+  auth.user={id:'account-B'};
+  assert.equal(svc.listEntries().length,0);
+  assert.equal(svc.updateEntry(a.id,{summary:'overwrite'}).ok,false);
+  assert.ok(!svc.exportJson().includes('private A'));
+  svc.recordToolEntry('One Stone',{title:'synthetic B',summary:'private B'});
+  svc.reset();
+  auth.user=null;
+  assert.equal(svc.listEntries().length,0);
+  auth.user={id:'account-A'};
+  assert.equal(svc.listEntries()[0].summary,'private A');
+  assert.ok(!svc.exportJson().includes('private B'));
 });

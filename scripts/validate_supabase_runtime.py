@@ -91,6 +91,56 @@ def assert_redirect_origin(location: str, expected_origin: str, label: str) -> N
         raise RuntimeError(f"{label} points to {actual_origin}, expected {expected_origin}")
 
 
+def probe_premium_guest(base_url: str, publishable_key: str) -> None:
+    """A public client without a valid user JWT must not get a private lesson."""
+    for label, authorization in (("missing JWT", None), ("invalid JWT", "Bearer nbjb-ci-invalid-token")):
+        headers = {"apikey": publishable_key, "Content-Type": "application/json", "Accept": "application/json",
+                   "Origin": EXPECTED_ORIGIN, "User-Agent": "NBJB-Membership-QA-CI/1.0"}
+        if authorization:
+            headers["Authorization"] = authorization
+        req = Request(f"{base_url}/functions/v1/read-flamewalker-lesson",
+                      data=json.dumps({"slug": "father-wound"}).encode(), headers=headers, method="POST")
+        try:
+            with urlopen(req, timeout=20) as response:
+                # Never dump a potentially protected response body into CI logs.
+                raise RuntimeError(f"premium guest denial ({label}) unexpectedly returned HTTP {response.status}")
+        except HTTPError as exc:
+            if exc.code not in (401, 403):
+                raise RuntimeError(f"premium guest denial ({label}) returned HTTP {exc.code}, expected 401/403") from exc
+            raw = exc.read(65536)
+            # The body of an unauthorized response must never contain a lesson payload.
+            try:
+                payload = json.loads(raw)
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                payload = {}
+            if isinstance(payload, dict) and ("lesson" in payload or "content" in payload):
+                raise RuntimeError("premium denial returned a protected payload")
+            print(f"Premium endpoint — {label}: denied HTTP {exc.code}")
+        except URLError as exc:
+            raise RuntimeError(f"premium guest denial ({label}) was unreachable") from exc
+
+
+def probe_deployed_membership_assets() -> None:
+    """Read-only CDN diagnostics. PR CI can precede Pages deployment."""
+    cases = (
+        ("member-lessons.html", "awaiting catalog verification"),
+        ("js/member-entitlements.js", "requestVersion"),
+        ("js/member-learning-progress.js", "practiceRenderVersion"),
+        ("js/member-bootstrap.js", "member-qa-20261118"),
+        ("member-progress.html", "qa=member-qa-20261118"),
+    )
+    for path, marker in cases:
+        try:
+            req = Request(f"{EXPECTED_ORIGIN}/{path}?nbjb_qa=20261118",
+                          headers={"Cache-Control":"no-cache", "User-Agent":"NBJB-Membership-QA-CI/1.0"})
+            with urlopen(req, timeout=15) as response:
+                body = response.read(2000000).decode("utf-8", errors="replace")
+                outcome = "marker served" if marker in body else "marker not yet served"
+                print(f"Production asset {path}: HTTP {response.status}; {outcome}")
+        except (URLError, TimeoutError):
+            print(f"Production asset {path}: readback unavailable; independent verification pending")
+
+
 def main() -> int:
     if not CONFIG.exists():
         return fail("js/nbjb-config.js is missing")
@@ -168,6 +218,11 @@ def main() -> int:
     print("Supabase member-auth redirect: accepted")
     print("Browser key type: publishable")
     print("Secret browser credential check: passed")
+    try:
+        probe_premium_guest(base_url, publishable_key)
+    except RuntimeError as exc:
+        return fail(str(exc))
+    probe_deployed_membership_assets()
     return 0
 
 

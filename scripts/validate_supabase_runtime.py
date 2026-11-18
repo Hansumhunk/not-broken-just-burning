@@ -203,6 +203,30 @@ def probe_deployed_membership_assets() -> None:
             print(f"Production asset {path}: readback unavailable; independent verification pending")
 
 
+def probe_public_release_assets() -> None:
+    """Compare approved public H.A.W.K. and SEO assets against synchronized main."""
+    paths = (
+        "divorce-recovery.html", "mens-mental-health.html", "mens-personal-development.html",
+        "sitemap.xml", "robots.txt",
+        *("downloads/hawk-" + tool + "-offline.html" for tool in (
+            "dashboard", "communication-analyzer", "court-preparation", "documentation-checklist",
+            "evidence-index", "financial-organizer", "parenting-log", "support-network",
+            "timeline", "witness-observations")),
+    )
+    for path in paths:
+        try:
+            request = Request(f"{EXPECTED_ORIGIN}/{path}?nbjb_release_assurance=20261118",
+                              headers={"Cache-Control":"no-cache","User-Agent":"NBJB-Release-Assurance-CI/1.0"})
+            with urlopen(request,timeout=15) as response:
+                data=response.read(2_000_000)
+                match=data==(ROOT/path).read_bytes()
+                csp_ok=not path.startswith("downloads/") or b"connect-src 'none'" in data
+                outcome="exact match" if match and csp_ok else "DIFFERENT; investigate"
+                print(f"Public release asset {path}: HTTP {response.status}; {outcome}")
+        except (OSError, URLError, TimeoutError):
+            print(f"Public release asset {path}: unavailable; independent verification pending")
+
+
 def main() -> int:
     if not CONFIG.exists():
         return fail("js/nbjb-config.js is missing")
@@ -287,6 +311,7 @@ def main() -> int:
         return fail(str(exc))
     probe_net_schema_visibility(base_url, publishable_key)
     probe_deployed_membership_assets()
+    probe_public_release_assets()
     return 0
 
 

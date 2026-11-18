@@ -122,7 +122,7 @@ test('Version-controlled live webhook recognizes Stripe future cancel_at indepen
  assert.match(webhook,/typeof subscription\.cancel_at === "number"/);
  assert.match(webhook,/subscription\.cancel_at > Math\.floor\(Date\.now\(\) \/ 1000\)/);
  assert.match(webhook,/case "customer\.subscription\.deleted":/);
- assert.match(webhook,/membershipState\(subscription\.status\)/);
+ assert.match(webhook,/paymentBoundary\(subscription, prior, bounds\)/);
 });
 test('Public member pages must keep session and paid premium lessons behind server access',()=>{
  const bootstrap=source('js/member-bootstrap.js');

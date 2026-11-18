@@ -5,8 +5,11 @@
   const status = document.getElementById('nbjb-owned-status');
   const list = document.getElementById('nbjb-owned-products');
   if (!status || !list || !window.NBJBCommerceCatalog) return;
+  let renderedUser=null;
   function reset(message) { list.replaceChildren(); status.textContent = message; }
   function render() {
+    const current=window.NBJBAuth?.user?.id||null;
+    renderedUser=current;
     const state = window.NBJBEntitlements?.load();
     if (!window.NBJBAuth?.user || document.body.dataset.memberAccess !== 'granted') {
       reset('Sign in to view your separately owned products.'); return;
@@ -36,9 +39,16 @@
     }
   }
   window.addEventListener('nbjb:entitlements', render);
-  window.addEventListener('nbjb:auth', () => reset('Checking account access…'));
+  window.addEventListener('nbjb:auth', () => {
+    const current=window.NBJBAuth?.user?.id||null;
+    // Verified same-user refreshes occur before every download. Do not erase retry controls.
+    if(current!==renderedUser){renderedUser=current;reset('Checking account access…');}
+  });
   window.addEventListener('pagehide', () => reset('Checking account access…'));
   window.addEventListener('pageshow', render);
+  document.getElementById('nbjb-owned-refresh')?.addEventListener('click',async()=>{
+    try {await window.NBJBEntitlements?.refresh();render();}catch{reset('Unable to verify ownership. Retry or contact support.');}
+  });
   const access = new MutationObserver(render);
   access.observe(document.body, {attributes:true, attributeFilter:['data-member-access']});
   window.NBJBEntitlements?.ready?.then(render).catch(() => reset('Unable to verify product ownership.'));

@@ -46,6 +46,10 @@ grant select,insert,update on public.commerce_payment_exceptions to service_role
 create function public.commerce_record_exception(p_order uuid,p_session text,p_intent text,p_gross integer,p_refunded integer,p_state text,p_pending boolean) returns void language plpgsql security invoker set search_path='' as $q$
 declare o public.commerce_orders;
 begin
+ select * into o from public.commerce_orders where id=p_order;
+ if not found then raise exception 'unknown_order';end if;
+ perform pg_advisory_xact_lock(pg_catalog.hashtextextended('commerce-account:'||o.user_id::text,0));
+ perform pg_advisory_xact_lock(pg_catalog.hashtextextended(o.user_id::text||':'||o.slug,0));
  select * into o from public.commerce_orders where id=p_order for update;
  if not found or p_session is null or p_intent is null or p_gross<o.amount or p_refunded is null or p_pending is null then raise exception 'exception_snapshot_invalid';end if;
  if p_session=o.stripe_session_id or p_intent=o.stripe_payment_intent_id or exists(select 1 from public.commerce_orders where id<>p_order and (stripe_session_id=p_session or stripe_payment_intent_id=p_intent)) then raise exception 'exception_canonical_conflict';end if;

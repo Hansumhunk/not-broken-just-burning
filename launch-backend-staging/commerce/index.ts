@@ -60,6 +60,7 @@ async function webhook(req:Request) {
  let event:Stripe.Event;
  try {event=await verifiedStripeEvent(stripe!,await req.text(),signature,secret);}catch{return json({error:"invalid_signature_or_environment"},400);}
  try{
+ await verifySandboxAccount(stripe!,env("NBJB_COMMERCE_SANDBOX_STRIPE_ACCOUNT"));
  const obj:any=event.data.object;
  if(["checkout.session.completed","checkout.session.async_payment_succeeded","checkout.session.async_payment_failed","checkout.session.expired"].includes(event.type))await reconcile(obj.id,event.id,event.type);
  else if(["charge.refunded","charge.dispute.created","charge.dispute.updated","charge.dispute.closed","refund.created","refund.updated","refund.failed"].includes(event.type)){
@@ -76,7 +77,6 @@ async function webhook(req:Request) {
 }
 Deno.serve(async(req:Request)=>{
  if(!sandbox||!admin||!stripe)return json({error:"commerce_disabled"},503);
- if(req.method!=="OPTIONS"){try{await verifySandboxAccount(stripe,env("NBJB_COMMERCE_SANDBOX_STRIPE_ACCOUNT"));}catch{return json({error:"sandbox_provider_unavailable"},503);}}
  if(req.method==="POST" && new URL(req.url).pathname.endsWith("/webhook"))return webhook(req);
  if(req.method==="OPTIONS")return new Response(null,{status:204,headers});
  if(req.method!=="POST"||req.headers.get("origin")!==origin)return json({error:"not_allowed"},403);
@@ -119,6 +119,7 @@ Deno.serve(async(req:Request)=>{
  }
  if(body.action!=="checkout")return json({error:"unknown_action"},400);
  if(env("NBJB_COMMERCE_SANDBOX_CHECKOUT")!=="enabled")return json({error:"checkout_disabled"},503);
+ await verifySandboxAccount(stripe,env("NBJB_COMMERCE_SANDBOX_STRIPE_ACCOUNT"));
  const p=must(await admin.from("commerce_products").select("*").eq("slug",slug).eq("active",true).maybeSingle());
  if(!p||body.termsVersion!==p.terms_version||body.acceptTerms!==true)return json({error:"not_available_or_terms_required"},409);
  await productAsset(p);

@@ -90,7 +90,7 @@ begin
   insert into public.product_entitlements(user_id,product_slug,status,source,provider,provider_entitlement_ref,valid_until)
   values(o.user_id,o.slug,'active','stripe_commerce','stripe',o.id::text,null)
   on conflict(user_id,product_slug) do update set status='active',source='stripe_commerce',provider='stripe',provider_entitlement_ref=o.id::text,valid_until=null,granted_at=now(),updated_at=now()
-  where product_entitlements.status in ('expired','refunded','revoked') or product_entitlements.provider_entitlement_ref=o.id::text;
+  where (product_entitlements.status in ('expired','refunded','revoked') and product_entitlements.provider_entitlement_ref is distinct from o.id::text) or (product_entitlements.status='active' and product_entitlements.provider_entitlement_ref=o.id::text);
  elsif p_state in ('refunded','disputed') then
   update public.product_entitlements set status=case when p_state='refunded' then 'refunded' else 'revoked' end,updated_at=now()
   where user_id=o.user_id and product_slug=o.slug and source='stripe_commerce' and provider_entitlement_ref=o.id::text;

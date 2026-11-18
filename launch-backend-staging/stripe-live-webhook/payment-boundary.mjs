@@ -14,8 +14,15 @@ export function paymentBoundary(subscription, prior, bounds, now = Date.now()) {
   // No change to established trial behavior; checkout currently sells no trial.
   if (subscription.status === 'trialing') return {tier:'paid_member',status:'trialing',...bounds};
   const invoice = subscription.latest_invoice;
+  const item = subscription.items?.data?.[0];
+  const through = Date.parse(bounds.validUntil ?? '');
   const paid = invoice && typeof invoice === 'object' && invoice.livemode === true &&
-    invoice.status === 'paid';
+    invoice.status === 'paid' && Number.isFinite(through) &&
+    (invoice.lines?.data ?? []).some(line => {
+      const lineItem = line.parent?.subscription_item_details?.subscription_item ?? line.subscription_item;
+      return item?.id && lineItem === item.id && Number.isFinite(line.period?.end) &&
+        line.period.end * 1000 >= through;
+    });
   if (subscription.status === 'active' && paid && !subscription.pause_collection) {
     return {tier:'paid_member',status:'active',...bounds};
   }
@@ -35,4 +42,16 @@ export function subscriptionConflict(subscription, prior, customerId) {
   if (!['active','trialing','past_due'].includes(subscription.status)) return true;
   return prior.tier === 'paid_member' && ['active','trialing','past_due'].includes(prior.status) &&
     Date.parse(prior.valid_until ?? '') > Date.now();
+}
+
+// Report refund/cancellation mismatches without taking a financial action.
+// Only a confirmed succeeded full subscription refund with a verified invoice
+// mapping is eligible. A refund alone does NOT cancel a Stripe agreement.
+export function refundReview({scope, status, refundedAmount, chargeAmount, mappingVerified, subscriptionStatus, scheduledCancellation, entitlementPaid}) {
+  if (status !== 'succeeded') return 'pending_or_failed';
+  if (scope !== 'subscription' || !mappingVerified) return 'manual_mapping_review';
+  if (!Number.isFinite(refundedAmount) || !Number.isFinite(chargeAmount) || chargeAmount <= 0 || refundedAmount < 0 || refundedAmount > chargeAmount) return 'manual_amount_review';
+  if (refundedAmount < chargeAmount) return 'partial_refund_review';
+  if (['canceled','incomplete_expired'].includes(subscriptionStatus)) return entitlementPaid ? 'entitlement_mismatch' : 'resolved';
+  return scheduledCancellation ? 'full_refund_scheduled_exit_review' : 'full_refund_renewal_still_active';
 }

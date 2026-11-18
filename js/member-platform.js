@@ -4,6 +4,10 @@
 
   const page = document.body.dataset.memberPage || '';
   const state = service.load();
+  function applyMotion(preference) {
+    document.body.dataset.memberMotion = preference === 'reduced' ? 'reduced' : 'system';
+  }
+  applyMotion(state.preferences?.motion);
 
   const memberRoutes = [
     ['dashboard', 'members.html', 'Dashboard'],
@@ -517,10 +521,12 @@
         motion: motion?.value || 'system'
       }
     });
+    if (result.ok) applyMotion(motion?.value);
     status(result.ok ? 'Preferences saved on this device.' : 'Your browser blocked local saving.');
   });
 
   document.querySelector('#export-member-data')?.addEventListener('click', async () => {
+    if (!window.confirm('Copy private local member data to the clipboard? Anyone who can access the clipboard may see it.')) return;
     const copied = await copyText(service.exportJson());
     status(copied ? 'Device-local member data copied as JSON.' : 'Copy failed.');
   });

@@ -657,8 +657,10 @@ test('live checkout checks returning customer Stripe subscription status before 
   const source = read('launch-backend-staging/create-live-checkout-session/index.ts');
   assert.match(source, /stripe\.subscriptions\.list\(/);
   assert.match(source, /status: "all"/);
-  assert.match(source, /"active", "trialing", "past_due", "unpaid", "incomplete", "paused"/);
-  assert.match(source, /customerSubscriptions\.has_more/);
+  const policy = read('launch-backend-staging/create-live-checkout-session/checkout-policy.mjs');
+  assert.match(policy, /'active','trialing','past_due','unpaid','incomplete','paused'/);
+  assert.match(policy, /subscriptions\?\.has_more/);
+  assert.match(source, /checkoutConflict\(customerSubscriptions, sessions\)/);
   assert.match(source, /already_subscribed/);
   assert.ok(source.indexOf('stripe.subscriptions.list(') < source.indexOf('stripe.checkout.sessions.create('));
 });

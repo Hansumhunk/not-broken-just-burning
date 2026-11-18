@@ -1182,3 +1182,44 @@ test('recovery flow deduplicates requests and validates session before updating 
   assert.match(auth,/if \(!auth\.user\?\.id \|\| recovery\?\.hidden\)/);
   assert.match(auth,/If that account exists/);
 });
+
+function accountExportFixture({wrongOwner=false,switchDuring=false,readError=false,signedOut=false}={}) {
+ const requests=[];const id='synthetic-owner';const user={id,email:'synthetic@example.invalid'};
+ const auth={user:signedOut?null:user,refresh:async()=>({user:auth.user}),client:{from(table){
+   let owner='',cols='',ordering=[];return {select(value){cols=value;return this;},eq(k,v){assert.equal(k,'user_id');owner=v;return this;},order(k){ordering.push(k);return this;},async range(start,end){
+     requests.push({table,owner,cols,ordering,start,end});
+     if(switchDuring)auth.user={id:'synthetic-other'};
+     return {data:[{user_id:wrongOwner?'synthetic-other':id,display_name:'synthetic profile',provider_customer_ref:'never_export_this',access_token:'never_export_this'}],error:readError?{message:'synthetic error'}:null};
+   }};
+ }}};
+ const window={NBJBAuth:auth};
+ const document={body:{dataset:{memberAccess:signedOut?'':'granted'}},getElementById:()=>null};
+ vm.runInNewContext(read('js/member-account-export.js'),{window,document,Date,Object,Error});
+ return {api:window.NBJBAccountExport,requests,auth};
+}
+test('account export requests nine own-account datasets with explicit columns and strips unrequested properties',async()=>{
+ const {api,requests}=accountExportFixture();
+ const result=await api.collectAccountExport();
+ assert.equal(result.account.id,'synthetic-owner');
+ assert.equal(Object.keys(result.records).length,9);
+ assert.equal(requests.length,9);
+ for(const request of requests){
+   assert.equal(request.owner,'synthetic-owner');
+   assert.ok(request.cols.startsWith('user_id,'));
+   assert.ok(!request.cols.includes('*'));
+ }
+ assert.ok(JSON.stringify(result).includes('synthetic profile'));
+ assert.ok(!JSON.stringify(result).includes('never_export_this'));
+ assert.ok(!JSON.stringify(result).includes('provider_customer_ref'));
+});
+test('account export refuses missing authentication, wrong owner, read failures and identity changes',async()=>{
+ for(const opts of [{signedOut:true},{wrongOwner:true},{readError:true},{switchDuring:true}]){
+   const {api}=accountExportFixture(opts);
+   await assert.rejects(api.collectAccountExport());
+ }
+ const html=read('member-settings.html');
+ assert.match(html,/id="download-account-data"/);
+ assert.match(html,/Request Account Deletion/);
+ assert.match(html,/does not immediately delete data or stop renewal/);
+ assert.match(read('js/member-bootstrap.js'),/settings: \["js\/member-account-export.js"\]/);
+});

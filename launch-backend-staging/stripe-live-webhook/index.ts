@@ -1,6 +1,7 @@
 import { withSupabase } from "npm:@supabase/server@1.7.0";
 import Stripe from "npm:stripe@22.6.2";
 import { claimReceipt } from "./receipt-lease.mjs";
+import { paymentBoundary, subscriptionConflict } from "./payment-boundary.mjs";
 
 const stripeSecret = Deno.env.get("STRIPE_LIVE_SECRET_KEY");
 const webhookSecret = Deno.env.get("STRIPE_LIVE_WEBHOOK_SECRET");
@@ -93,7 +94,7 @@ export default {
     let receiptObjectRef: string | null = null;
 
     const syncSubscription = async (subscriptionId: string, hintedUserId?: string | null) => {
-      const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId, { expand: ["latest_invoice"] });
       if (!subscription.livemode) throw new Error("test_subscription_not_allowed");
       const customerId = idOf(subscription.customer);
       if (!customerId) throw new Error("missing_customer_id");
@@ -119,10 +120,22 @@ export default {
 
       if (!userId || (sandboxTestUserId && userId === sandboxTestUserId)) return null;
 
-      const mappedState = membershipState(subscription.status);
+      // Only the known recurring membership offer may set membership access.
+      const item = subscription.items?.data?.[0];
+      const offer = subscription.metadata?.nbjb_offer;
+      if (subscription.items?.data?.length !== 1 ||
+          !["flamewalker_plus_monthly", "flamewalker_plus_annual"].includes(offer ?? "") ||
+          item?.price?.lookup_key !== offer) throw new Error("membership_offer_mismatch");
+      const { data: prior, error: priorError } = await ctx.supabaseAdmin
+        .from("membership_entitlements")
+        .select("tier,status,provider,provider_customer_ref,provider_subscription_ref,valid_from,valid_until")
+        .eq("user_id", userId).maybeSingle();
+      if (priorError) throw priorError;
+      if (subscriptionConflict(subscription, prior, customerId)) throw new Error("membership_subscription_conflict");
       const bounds = periodBounds(subscription);
+      const mappedState = paymentBoundary(subscription, prior, bounds);
       const paid = mappedState.tier === "paid_member";
-      if (paid && !bounds.validUntil) throw new Error("missing_paid_through_date");
+      if (paid && !mappedState.validUntil) throw new Error("missing_paid_through_date");
 
       const { error: entitlementError } = await ctx.supabaseAdmin
         .from("membership_entitlements")
@@ -135,8 +148,8 @@ export default {
             provider: "stripe",
             provider_customer_ref: customerId,
             provider_subscription_ref: subscription.id,
-            valid_from: paid ? bounds.validFrom : new Date().toISOString(),
-            valid_until: paid ? bounds.validUntil : null,
+            valid_from: mappedState.validFrom,
+            valid_until: mappedState.validUntil,
             // Stripe flexible billing schedules Customer Portal cancellation using cancel_at,
             // even when cancel_at_period_end is false. Treat any future cancel_at as scheduled.
             cancel_at_period_end: paid ? Boolean(subscription.cancel_at_period_end ||
@@ -189,7 +202,10 @@ export default {
         }
 
         case "invoice.paid":
-        case "invoice.payment_failed": {
+        case "invoice.payment_failed":
+        case "invoice.payment_action_required":
+        case "invoice.marked_uncollectible":
+        case "invoice.voided": {
           const subscriptionId = invoiceSubscriptionId(event.data.object);
           if (subscriptionId) {
             const synced = await syncSubscription(subscriptionId);
@@ -225,7 +241,8 @@ export default {
 
       return json({ received: true, status: finalStatus });
     } catch (error) {
-      const message = error instanceof Error ? error.message.slice(0, 1000) : "unknown webhook processing error";
+      const code = error instanceof Error ? error.message : "";
+      const message = /^[a-z_]{1,80}$/.test(code) ? code : "webhook_processing_error";
       console.error("stripe_webhook_processing_failed", message);
 
       await ctx.supabaseAdmin

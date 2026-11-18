@@ -1,0 +1,56 @@
+// QA service operator only. No browser-facing admin route. No charge/refund creation.
+import {createClient} from "npm:@supabase/supabase-js@2.116.0";
+import Stripe from "npm:stripe@22.6.2";
+import {sandboxAllowed,SKU} from "./commerce-core.mjs";
+import {orderSessions,providerSnapshot} from "./provider.ts";
+const env=(k:string)=>Deno.env.get(k)||"";
+const url=env("SUPABASE_URL"),ref=env("NBJB_COMMERCE_SANDBOX_REF"),key=env("NBJB_COMMERCE_STRIPE_TEST_KEY");
+if(!sandboxAllowed({mode:env("NBJB_COMMERCE_MODE"),key,url,expectedRef:ref}))throw Error("isolated_QA_only");
+const service=env("SUPABASE_SERVICE_ROLE_KEY");
+if(!service)throw Error("QA_service_key_required");
+const admin=createClient(url,service,{auth:{persistSession:false,autoRefreshToken:false}});
+const stripe=new Stripe(key);
+const operator=env("NBJB_COMMERCE_OPERATOR");
+const [cmd,target,...args]=Deno.args;
+const apply=args.includes("--apply");
+const arg=(name:string)=>{const i=args.indexOf(name);return i>=0?args[i+1]||"":""};
+const uuid=(x:string)=>/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(x||"");
+const ticket=arg("--ticket"), operation=arg("--operation");
+function must(r:any){if(r.error)throw Error("operation_failed:"+String(r.error.code||"unknown"));return r.data;}
+function audit(){if(!apply||!uuid(ticket)||!uuid(operation)||!/^[a-zA-Z0-9_-]{3,32}$/.test(operator))throw Error("apply_ticket_operation_and_operator_required");return {p_operation:operation,p_ticket:ticket,p_operator:operator};}
+async function inspect(id:string){if(!uuid(id))throw Error("order_id_required");const o=must(await admin.from("commerce_orders").select("*").eq("id",id).maybeSingle());if(!o)throw Error("unknown_order");return o;}
+async function main(){
+ if(["inspect","recover","restore","review"].includes(cmd)){
+  const o=await inspect(target);
+  const sessions=await orderSessions(stripe,o);
+  const paid=sessions.filter(s=>s.payment_status==="paid");
+  console.log(JSON.stringify({status:o.status,review:o.review_required,scanSessions:sessions.length,paidSessions:paid.length,duplicate:paid.length>1}));
+  if(cmd==="review"){
+   if(apply)must(await admin.rpc("commerce_mark_review",{p_order:o.id,...audit(),p_duplicate:paid.length>1}));
+   return;
+  }
+  if(sessions.length!==1||paid.length!==1||o.stripe_session_id&&paid[0].id!==o.stripe_session_id){
+   if(apply)must(await admin.rpc("commerce_mark_review",{p_order:o.id,...audit(),p_duplicate:paid.length>1}));
+   return;
+  }
+  const snap=await providerSnapshot(stripe,paid[0].id,o);
+  console.log(JSON.stringify({verifiedState:snap.v.state,grossCents:snap.v.total,successfulRefundCents:snap.v.refunded,disputeWon:snap.won,pendingRefund:snap.pendingRefund}));
+  if(cmd==="inspect"||!apply)return;
+  if(snap.pendingRefund||snap.v.state==="refunded"||!(cmd==="recover"&&snap.v.state==="paid"||cmd==="restore"&&snap.v.state==="disputed"&&snap.won))throw Error("manual_review_required");
+  must(await admin.rpc("commerce_ops_recover",{p_order:o.id,p_expected_updated:o.updated_at,p_session:snap.session.id,p_intent:snap.v.intent,p_total:snap.v.total,p_refunded:snap.v.refunded,p_restore_won:cmd==="restore",...audit()}));
+  console.log("QA recovery committed");
+ }else if(["erasure-check","erasure-hold","erasure-cancel"].includes(cmd)){
+  if(!uuid(target))throw Error("user_uuid_required");
+  const data=cmd==="erasure-check"||!apply?must(await admin.rpc("commerce_erasure_preflight",{p_user:target})):must(await admin.rpc("commerce_erasure_hold",{p_user:target,p_hold:cmd==="erasure-hold",...audit()}));
+  console.log(JSON.stringify(data));
+ }else if(cmd==="replace-asset"){
+  if(!SKU.has(target))throw Error("known_slug_required");
+  const oldVersion=arg("--old-version"),oldKey=arg("--old-key"),version=arg("--new-version"),path=arg("--new-key"),name=arg("--name");
+  if(!path.startsWith(target+"/"+version+"/")||!oldKey.startsWith(target+"/"+oldVersion+"/")||path.includes("..")||oldKey.includes("..")||!(/^[a-zA-Z0-9._-]+\.(pdf|zip)$/.test(name)))throw Error("invalid_asset");
+  const ix=path.lastIndexOf("/"),files=must(await admin.storage.from("nbjb-private-products").list(path.slice(0,ix),{search:path.slice(ix+1),limit:100}));
+  if(!files?.some((f:any)=>f.name===path.slice(ix+1)&&f.id&&Number(f.metadata?.size)>0))throw Error("replacement_missing");
+  if(apply)must(await admin.rpc("commerce_replace_asset",{p_slug:target,p_old_version:oldVersion,p_old_key:oldKey,p_new_version:version,p_new_key:path,p_name:name,...audit()}));
+  console.log(JSON.stringify({replacementVerified:true,applied:apply}));
+ }else throw Error("unknown_command");
+}
+await main().catch(e=>{console.error(e instanceof Error?e.message:"operation_failed");Deno.exit(1);});

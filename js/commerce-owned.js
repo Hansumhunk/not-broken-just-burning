@@ -15,10 +15,23 @@
       reset('Your product access could not yet be verified. Reload or contact support if this continues.'); return;
     }
     const owned = window.NBJBCommerceCatalog.ownedProducts(state);
-    reset(owned.length ? 'Verified product ownership. File delivery is not enabled in this preview; contact NBJB for access questions.' : 'No products from this collection are currently confirmed on your account. Sales are not open.');
+    reset(owned.length ? 'Verified product ownership. Select Download where sandbox delivery is enabled.' : 'No products from this collection are currently confirmed on your account. Sales are not open.');
     for (const product of owned) {
       const item = document.createElement('li');
-      item.textContent = product.title + ' — Owned; delivery unavailable';
+      item.textContent = product.title + ' — Owned ';
+      if (window.NBJBCommerce?.enabled) {
+        const btn = document.createElement('button');
+        btn.type='button'; btn.className='button button-ghost'; btn.textContent='Download';
+        btn.addEventListener('click',async()=>{
+          btn.disabled=true;
+          try {
+            const data=await window.NBJBCommerce.call('download',{slug:product.slug});
+            location.assign(window.NBJBCommerce.downloadUrl(data.url));
+          } catch { status.textContent='Unable to authorize download. Refresh or contact support.'; }
+          finally { btn.disabled=false; }
+        });
+        item.appendChild(btn);
+      } else item.append('· Delivery unavailable');
       list.appendChild(item);
     }
   }

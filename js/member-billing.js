@@ -117,6 +117,8 @@
         message('That membership option is unavailable.', true);
         return;
       }
+      // Request intent is not payment success or an entitlement grant.
+      try { window.NBJBTrackCheckoutIntent?.(offer); } catch (_) { /* optional analytics */ }
       invokeAndRedirect('create-live-checkout-session', { offer }, 'checkout');
     });
   }

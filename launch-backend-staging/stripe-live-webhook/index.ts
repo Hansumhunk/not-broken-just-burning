@@ -122,7 +122,11 @@ export default {
         });
 
       if (insertError) {
-        if (insertError.code === "23505") return json({ received: true, duplicate: true });
+        // Another delivery inserted the same receipt after our lookup. A
+        // unique constraint does not establish successful processing.
+        // Ask Stripe to retry; the next read will acknowledge only terminal
+        // processed/ignored events, never an unfinished receipt.
+        if (insertError.code === "23505") return json({ error: "event_still_processing" }, 503);
         console.error("webhook_receipt_insert_failed", insertError.message);
         return json({ error: "receipt_insert_failed" }, 500);
       }

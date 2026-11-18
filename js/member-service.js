@@ -329,8 +329,15 @@
 
   function reset() {
     try {
-      localStorage.removeItem(scopedKey(KEY_BASE));
-      localStorage.removeItem(scopedKey(LEGACY_KEY_BASE));
+      const id = currentUserId();
+      if (!id) return false;
+      // Collect first: removing storage entries shifts the numeric key index.
+      const exact = new Set([scopedKey(KEY_BASE), scopedKey(LEGACY_KEY_BASE),
+        'nbjb.plus.lesson-progress.v1.' + id, 'nbjb.plus.last-learning.v1.' + id]);
+      const prefixes = ['nbjb.plus.reading-position.v1.' + id + '.', 'nbjb.plus.editorial-review.v1.' + id + '.'];
+      const keys = Array.from({ length: localStorage.length }, (_, i) => localStorage.key(i));
+      for (const key of exact) localStorage.removeItem(key);
+      for (const key of keys) if (key && prefixes.some(prefix => key.startsWith(prefix))) localStorage.removeItem(key);
       return true;
     } catch (error) {
       return false;

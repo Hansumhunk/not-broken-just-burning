@@ -46,7 +46,19 @@ const privacySignalEnabled =
   navigator.doNotTrack === '1' ||
   window.doNotTrack === '1';
 
-if (analyticsHostnames.has(window.location.hostname) && !privacySignalEnabled) {
+// Never load third-party analytics in authentication, private member
+// writing, recovery or other authenticated workspaces. Membership checkout
+// alone gets aggregate intent measurements, with tightly bounded URL inputs.
+const memberSurface = currentPage === 'members.html' || currentPage.startsWith('member-');
+const isMembershipStore = currentPage === 'member-store.html';
+const analyticsQuery = new URLSearchParams(window.location.search);
+const safeQuery = Array.from(analyticsQuery.entries()).every(([key, value]) =>
+  isMembershipStore
+    ? key === 'checkout' && ['success', 'cancelled'].includes(value)
+    : ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].includes(key) && /^[a-z0-9_-]{1,80}$/i.test(value));
+const safeHash = !window.location.hash || /^#[a-z0-9_-]+$/i.test(window.location.hash);
+const safeAnalyticsSurface = (!memberSurface || isMembershipStore) && safeQuery && safeHash;
+if (analyticsHostnames.has(window.location.hostname) && !privacySignalEnabled && safeAnalyticsSurface) {
   !function(t,e){var o,n,p,r;e.__SV||(window.posthog&&window.posthog.__loaded)||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2===o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}p||((p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",p.onerror=function(){p=null},(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r));var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],Object.defineProperty(u,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e}}),Object.defineProperty(u.people,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(){return u.toString(1)+".people (stub)"}}),o="init capture register register_once register_for_session unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group identify setPersonProperties setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags resetGroups onFeatureFlags addFeatureFlagsHandler onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey getNextSurveyStep".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
 
   posthog.init('phc_AnVpuc8EtDx6gsTSnyYHMnRHQwtYzrAbPFn4ZUozcrxR', {
@@ -57,9 +69,33 @@ if (analyticsHostnames.has(window.location.hostname) && !privacySignalEnabled) {
     person_profiles: 'identified_only',
     autocapture: false,
     capture_pageview: true,
+    // Avoid collecting source/return URL credentials via automatic properties.
+    before_send: (event) => {
+      if (!event?.properties) return event;
+      for (const key of Object.keys(event.properties)) {
+        if (!/(url|referrer)/i.test(key) || typeof event.properties[key] !== 'string') continue;
+        try {
+          const u = new URL(event.properties[key]);
+          if (!['http:', 'https:'].includes(u.protocol)) { delete event.properties[key]; continue; }
+          // No query, fragment or user-info; attribution comes from bounded UTM fields.
+          event.properties[key] = u.origin + u.pathname;
+        } catch (_) { delete event.properties[key]; }
+      }
+      return event;
+    },
     disable_session_recording: true,
     capture_exceptions: false
   });
+  // Fixed event/plan allowlist, no member identity or transaction metadata.
+  window.NBJBTrackCheckoutIntent = (offer) => {
+    if (!isMembershipStore || !['flamewalker_plus_monthly', 'flamewalker_plus_annual'].includes(offer)) return;
+    try {
+      window.posthog?.capture?.('nbjb_membership_checkout_requested', {
+        plan: offer === 'flamewalker_plus_monthly' ? 'monthly' : 'annual',
+        $process_person_profile: false
+      });
+    } catch (_) { /* analytics must never block payment */ }
+  };
   // Anonymous, aggregate only: record intent to begin a free membership.
   // Never attach email, account ID, reflection text, or session identity.
   document.addEventListener('click', (event) => {

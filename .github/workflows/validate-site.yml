@@ -29,6 +29,7 @@ on:
       - 'scripts/test_premium_editorial_review.js'
       - 'scripts/test_live_webhook_hardening.js'
       - 'scripts/test_production_assurance.cjs'
+      - 'scripts/test_account_export_browser.py'
       - 'PRODUCTION_ASSURANCE_2026-11-18.md'
       - 'PG_NET_MAINTENANCE_PLAN.md'
       - 'CROSS_OPERATION_ACCEPTANCE_STANDARD.md'
@@ -78,6 +79,7 @@ on:
       - 'scripts/test_premium_editorial_review.js'
       - 'scripts/test_live_webhook_hardening.js'
       - 'scripts/test_production_assurance.cjs'
+      - 'scripts/test_account_export_browser.py'
       - 'PRODUCTION_ASSURANCE_2026-11-18.md'
       - 'PG_NET_MAINTENANCE_PLAN.md'
       - 'CROSS_OPERATION_ACCEPTANCE_STANDARD.md'
@@ -139,6 +141,11 @@ jobs:
         run: |
           npm install --prefix "$RUNNER_TEMP/nbjb-stripe-qa" --no-audit --no-fund --ignore-scripts --no-package-lock --no-save stripe@22.6.2
           NODE_PATH="$RUNNER_TEMP/nbjb-stripe-qa/node_modules" node --test scripts/test_production_assurance.cjs
+      - name: Verify account export in Chromium with synthetic sessions
+        run: |
+          python -m pip install playwright==1.51.0
+          export CHROME_PATH="$(command -v google-chrome || command -v chromium)"
+          python scripts/test_account_export_browser.py
       - name: Verify signup routing, expiring paid access and sandbox isolation
         run: node --test scripts/test_membership_lifecycle.js
       - name: Verify honest public Flamewalker Plus curriculum preview

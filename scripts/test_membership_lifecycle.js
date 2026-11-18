@@ -132,3 +132,64 @@ test('Public member pages must keep session and paid premium lessons behind serv
  assert.match(lessonClient,/read-flamewalker-lesson/);
  assert.match(bootstrap,/redirectToLogin\(\)/);
 });
+
+test('Account switch immediately discards old paid, product and event state and late responses',async()=>{
+ const paidRow=activePaid();
+ const freeRow={tier:'free_member',status:'active'};
+ let releasePaid;
+ let requestA=0;
+ const auth={user:{id:'A'},client:{from(table){
+   let id;
+   const result=()=>({data: table==='membership_entitlements'
+     ? (id==='A'?paidRow:freeRow)
+     : id==='A' ? [{product_slug:'paid-book',event_slug:'paid-event',valid_until:iso(10)}] : [],error:null});
+   return {select(){return this;},eq(key,value){if(key==='user_id')id=value;return this;},
+     single(){if(id==='A'&&++requestA===2)return new Promise(resolve=>{releasePaid=()=>resolve(result());});return Promise.resolve(result());},
+     then(resolve,reject){return Promise.resolve(result()).then(resolve,reject);}
+   };
+ }}};
+ const win={NBJBAuth:auth,dispatchEvent(){}};
+ const ctx={window:win,document:{querySelectorAll(){return [];}},
+   console:{error(){}},CustomEvent:class{constructor(type,opts){this.type=type;this.detail=opts?.detail;}}};
+ vm.runInNewContext(source('js/member-entitlements.js'),ctx);
+ const api=win.NBJBEntitlements;
+ await api.ready;
+ assert.equal(api.load().tier,'paid');
+ assert.equal(api.hasProduct('paid-book'),true);
+ assert.equal(api.hasEvent('paid-event'),true);
+ const late=api.refresh();
+ auth.user={id:'B'};
+ assert.equal(api.load().tier,'free');
+ assert.equal(api.hasProduct('paid-book'),false);
+ assert.equal(api.hasEvent('paid-event'),false);
+ assert.equal(api.load().hasStripeBilling,false);
+ await api.refresh();
+ releasePaid();
+ await late;
+ assert.equal(api.load().tier,'free');
+ assert.equal(api.hasProduct('paid-book'),false);
+ auth.user=null;
+ await api.refresh();
+ assert.equal(api.load().tier,'guest');
+ assert.equal(api.load().validUntil,null);
+ assert.equal(api.load().cancelAtPeriodEnd,false);
+});
+
+test('Catalog access status never substitutes seven for an unverified server count',()=>{
+ const html=source('member-lessons.html');
+ assert.match(html,/const published = catalog \? catalog\.filter\(item => item\.status === 'published'\)\.length : null/);
+ assert.match(html,/published === null/);
+ assert.match(html,/awaiting catalog verification/);
+ assert.doesNotMatch(html,/const published = catalog[^;]+: 7;/);
+});
+
+test('Reader links and catalog cards describe the same unique premium lesson slugs',()=>{
+ const catalog=source('member-lessons.html');
+ const reader=source('member-premium-lesson.html');
+ const slugs=(s,re)=>Array.from(s.matchAll(re),m=>m[1]);
+ const catalogSlugs=new Set([...slugs(catalog,/data-editorial-preview="([a-z0-9-]+)"/g),...slugs(catalog,/member-premium-lesson\.html\?lesson=([a-z0-9-]+)"/g)]);
+ const readerSlugs=slugs(reader,/data-premium-lesson-link="([a-z0-9-]+)"/g);
+ assert.equal(readerSlugs.length,new Set(readerSlugs).size);
+ assert.ok(catalogSlugs.size>=44);
+ assert.deepEqual([...catalogSlugs].sort(),[...new Set(readerSlugs)].sort());
+});

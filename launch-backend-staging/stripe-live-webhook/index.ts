@@ -1,5 +1,6 @@
 import { withSupabase } from "npm:@supabase/server@1.7.0";
 import Stripe from "npm:stripe@22.6.2";
+import { claimReceipt } from "./receipt-lease.mjs";
 
 const stripeSecret = Deno.env.get("STRIPE_LIVE_SECRET_KEY");
 const webhookSecret = Deno.env.get("STRIPE_LIVE_WEBHOOK_SECRET");
@@ -79,54 +80,14 @@ export default {
     // Keep sandbox QA membership separate from real paying customers.
     const sandboxTestUserId = Deno.env.get("NBJB_SANDBOX_TEST_USER_ID");
 
-    const { data: existing, error: existingError } = await ctx.supabaseAdmin
-      .from("stripe_webhook_events")
-      .select("status")
-      .eq("event_id", event.id)
-      .maybeSingle();
-
-    if (existingError) {
-      console.error("webhook_receipt_lookup_failed", existingError.message);
-      return json({ error: "receipt_lookup_failed" }, 500);
-    }
-
-    if (existing && ["processed", "ignored"].includes(existing.status)) {
-      return json({ received: true, duplicate: true });
-    }
-    // A concurrent or interrupted handler has NOT fulfilled the event yet.
-    // Signal retry instead of falsely acknowledging it to Stripe.
-    if (existing?.status === "processing") {
-      return json({ error: "event_still_processing" }, 503);
-    }
-
-    if (existing?.status === "failed") {
-      const { error: resetError } = await ctx.supabaseAdmin
-        .from("stripe_webhook_events")
-        .update({ status: "processing", error_message: null, processed_at: null, received_at: new Date().toISOString() })
-        .eq("event_id", event.id);
-      if (resetError) {
-        console.error("webhook_receipt_reset_failed", resetError.message);
-        return json({ error: "receipt_update_failed" }, 500);
-      }
-    } else {
-      const object = event.data.object as { id?: string };
-      const { error: insertError } = await ctx.supabaseAdmin
-        .from("stripe_webhook_events")
-        .insert({
-          event_id: event.id,
-          event_type: event.type,
-          event_created_at: new Date(event.created * 1000).toISOString(),
-          livemode: event.livemode,
-          object_ref: typeof object?.id === "string" ? object.id : null,
-          status: "processing",
-        });
-
-      if (insertError) {
-        if (insertError.code === "23505") return json({ received: true, duplicate: true });
-        console.error("webhook_receipt_insert_failed", insertError.message);
-        return json({ error: "receipt_insert_failed" }, 500);
-      }
-    }
+    // A claim is exclusive. Interrupted attempts may be reclaimed only after
+    // a lease far exceeding the hosted worker's maximum wall-clock runtime.
+    const receipts = ctx.supabaseAdmin.from("stripe_webhook_events");
+    const claim = await claimReceipt(receipts, event);
+    if (claim.kind === "terminal") return json({ received: true, duplicate: true });
+    if (claim.kind === "retry") return json({ error: "event_still_processing" }, 503);
+    if (claim.kind !== "claimed") return json({ error: "receipt_claim_failed" }, 500);
+    const receiptLease = claim.lease;
 
     let receiptUserId: string | null = null;
     let receiptObjectRef: string | null = null;
@@ -244,7 +205,7 @@ export default {
       }
 
       const finalStatus = handled ? "processed" : "ignored";
-      const { error: finishError } = await ctx.supabaseAdmin
+      const { data: finished, error: finishError } = await ctx.supabaseAdmin
         .from("stripe_webhook_events")
         .update({
           status: finalStatus,
@@ -253,9 +214,14 @@ export default {
           processed_at: new Date().toISOString(),
           error_message: null,
         })
-        .eq("event_id", event.id);
+        .eq("event_id", event.id)
+        .eq("status", "processing")
+        .eq("received_at", receiptLease)
+        .select("event_id")
+        .maybeSingle();
 
       if (finishError) throw finishError;
+      if (!finished) return json({ error: "receipt_lease_lost" }, 503);
 
       return json({ received: true, status: finalStatus });
     } catch (error) {
@@ -269,7 +235,9 @@ export default {
           error_message: message,
           processed_at: new Date().toISOString(),
         })
-        .eq("event_id", event.id);
+        .eq("event_id", event.id)
+        .eq("status", "processing")
+        .eq("received_at", receiptLease);
 
       return json({ error: "webhook_processing_failed" }, 500);
     }

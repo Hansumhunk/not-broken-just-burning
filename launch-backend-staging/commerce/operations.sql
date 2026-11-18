@@ -2,7 +2,7 @@
 begin;
 create table public.commerce_ops_audit (
  operation_id uuid primary key, order_id uuid references public.commerce_orders(id),
- action text not null check(action in ('recover_payment','restore_dispute','mark_review','record_duplicate','replace_asset','request_erasure','cancel_erasure')),
+ action text not null check(action in ('recover_payment','restore_dispute','mark_review','record_duplicate','resolve_refund','replace_asset','request_erasure','cancel_erasure')),
  reason_code text not null check(reason_code ~ '^[a-z0-9_]{3,64}$'),
  operator_alias text not null check(operator_alias ~ '^[a-zA-Z0-9_-]{3,32}$'),
  ticket_ref uuid not null, slug text references public.commerce_products(slug),
@@ -153,4 +153,22 @@ begin
 end $;
 revoke execute on function public.commerce_record_refunds(uuid,text,text,jsonb) from public,anon,authenticated;
 grant execute on function public.commerce_record_refunds(uuid,text,text,jsonb) to service_role;
+-- Record a confirmed full refund even when a late successful payment hit an expired local order.
+-- No Stripe money movement. Only an exact provider-verified full refund may close the record.
+create function public.commerce_ops_close_refund(p_order uuid,p_expected_updated timestamptz,p_session text,p_intent text,p_total integer,p_refunded integer,p_operation uuid,p_ticket uuid,p_operator text) returns void language plpgsql security invoker set search_path='' as $
+declare o public.commerce_orders;
+begin
+ select * into o from public.commerce_orders where id=p_order for update;
+ if not found or o.updated_at<>p_expected_updated then raise exception 'provider_snapshot_stale';end if;
+ if p_total is null or p_total<o.amount or p_refunded is distinct from p_total or p_session is null or p_intent is null or
+ (o.stripe_session_id is not null and o.stripe_session_id<>p_session) or (o.stripe_payment_intent_id is not null and o.stripe_payment_intent_id<>p_intent) or
+ (o.total_amount is not null and o.status in ('paid','disputed','refunded') and o.total_amount<>p_total) then raise exception 'refund_snapshot_mismatch';end if;
+ insert into public.commerce_ops_audit(operation_id,order_id,action,reason_code,operator_alias,ticket_ref,slug)
+ values(p_operation,o.id,'resolve_refund','provider_verified',p_operator,p_ticket,o.slug);
+ update public.commerce_orders set stripe_session_id=p_session,stripe_payment_intent_id=p_intent,status='refunded',total_amount=p_total,
+ refunded_amount=p_refunded,paid_at=coalesce(paid_at,now()),review_required=false,updated_at=clock_timestamp() where id=o.id;
+ update public.product_entitlements set status='refunded',updated_at=now() where user_id=o.user_id and product_slug=o.slug and source='stripe_commerce' and provider_entitlement_ref=o.id::text;
+end $;
+revoke execute on function public.commerce_ops_close_refund(uuid,timestamptz,text,text,integer,integer,uuid,uuid,text) from public,anon,authenticated;
+grant execute on function public.commerce_ops_close_refund(uuid,timestamptz,text,text,integer,integer,uuid,uuid,text) to service_role;
 commit;

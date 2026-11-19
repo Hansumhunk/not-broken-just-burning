@@ -1,0 +1,37 @@
+name: Membership atomic candidate QA
+on:
+  pull_request:
+    paths:
+      - 'launch-backend-staging/membership-atomic/**'
+      - 'launch-backend-staging/create-live-checkout-session/**'
+      - 'launch-backend-staging/stripe-live-webhook/**'
+      - 'scripts/test_membership_atomic*'
+      - '.github/workflows/validate-membership-atomic.yml'
+permissions:
+  contents: read
+jobs:
+  candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exercise staged reservation logic
+        run: node --test scripts/test_membership_atomic.mjs
+      - name: Start disposable PostgreSQL
+        run: |
+          docker run -d --name nbjb-atomic-fixture -e POSTGRES_PASSWORD=fixture-only -e POSTGRES_DB=nbjb_membership_fixture postgres:17.12
+          for attempt in $(seq 1 30); do
+            if docker exec nbjb-atomic-fixture pg_isready -U postgres -d nbjb_membership_fixture; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Test actual candidate SQL with concurrent connections
+        env:
+          NBJB_QA_POSTGRES_CONTAINER: nbjb-atomic-fixture
+        run: python scripts/test_membership_atomic_postgres.py
+      - name: Remove fixture container
+        if: always()
+        run: docker rm -f nbjb-atomic-fixture || true

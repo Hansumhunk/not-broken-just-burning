@@ -4,6 +4,7 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - 'first-seven-days.html'
+      - 'sitemap.xml'
       - 'css/first-seven-days.css'
       - 'js/first-seven-days.js'
       - 'tests/first_seven_days_browser_test.py'
@@ -33,6 +34,8 @@ jobs:
           npm install --prefix "$RUNNER_TEMP/fsd-a11y" --no-save --ignore-scripts --no-audit --no-fund axe-core@4.10.3
       - name: Verify candidate browser experience
         run: FSD_AXE_PATH="$RUNNER_TEMP/fsd-a11y/node_modules/axe-core/axe.min.js" python tests/first_seven_days_browser_test.py
+      - name: Verify existing production resource destinations (read-only)
+        run: FSD_AXE_PATH="$RUNNER_TEMP/fsd-a11y/node_modules/axe-core/axe.min.js" python tests/first_seven_days_browser_test.py --production-resources
       - name: Retain founder review screenshots and print output
         if: always()
         uses: actions/upload-artifact@v4

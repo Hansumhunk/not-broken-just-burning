@@ -7,6 +7,11 @@ from urllib.parse import urlsplit
 import os
 import re
 import shutil
+import sys
+from urllib.request import Request, urlopen
+from concurrent.futures import ThreadPoolExecutor
+from html.parser import HTMLParser
+from xml.etree import ElementTree as ET
 from playwright.sync_api import sync_playwright
 from pypdf import PdfReader
 
@@ -20,6 +25,27 @@ DAY_TITLES = ["Understand the chaos", "Separate facts, emotions and assumptions"
 RESOURCES = ["check-in.html", "lesson-clarity-before-certainty.html", "six-sacred-questions.html",
     "lesson-boundaries-are-actions.html", "path-masculine-restoration-steadiness.html",
     "lesson-other-person-not-your-measure.html", "story-one-stone.html"]
+
+PUBLIC_ORIGIN = "https://notbrokenjustburning.com"
+PUBLIC_ROUTES = RESOURCES + ["support.html", "path.html", "join.html", "flamewalker-plus.html", "members.html",
+    "index.html", "forge.html", "fire.html", "movement.html", "resources.html", "founder.html", "contact.html", "terms.html", "privacy.html"]
+
+def probe_production_resources():
+    """Read only existing public/static entry URLs, never a signed-in session."""
+    def check(path):
+        destination = PUBLIC_ORIGIN + "/" + path
+        req = Request(destination, headers={"User-Agent": "NBJB-First-Seven-Days-release-preflight/1.0", "Accept-Encoding": "identity"})
+        with urlopen(req, timeout=12) as response:
+            body = response.read(1024 * 1024).decode("utf-8", errors="replace")
+            final = response.geturl()
+            assert response.status == 200 and response.headers.get_content_type() == "text/html", (path, response.status)
+            assert final == destination or (path == "index.html" and final == PUBLIC_ORIGIN + "/"), (path, final)
+            assert re.search(r"<title[^>]*>\\s*[^<]+", body, re.I), path
+            assert re.search(r"<h1(?:\\s|>)", body, re.I), path
+            print("Production existing route PASS:", path, response.status, final)
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        list(pool.map(check, PUBLIC_ROUTES))
+    print(f"Existing production resource destinations PASS ({len(PUBLIC_ROUTES)}/{len(PUBLIC_ROUTES)}); not candidate deployment or authenticated access")
 
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *a, **kw):
@@ -43,7 +69,11 @@ def check_content(page):
     assert page.locator("main h1").count() == 1
     assert page.locator("main article.fsd-day").count() == 7
     assert page.locator("form, input, textarea, iframe").count() == 0
-    assert page.locator('meta[name="robots"]').get_attribute("content") == "noindex,nofollow"
+    assert page.locator('meta[name="robots"]').get_attribute("content") == "index,follow"
+    assert page.locator('link[rel="canonical"]').get_attribute("href") == PUBLIC_ORIGIN + "/first-seven-days.html"
+    urls = [el.text for el in ET.parse(ROOT / "sitemap.xml").getroot().findall("{http://www.sitemaps.org/schemas/sitemap/0.9}url/{http://www.sitemaps.org/schemas/sitemap/0.9}loc")]
+    assert urls.count(PUBLIC_ORIGIN + "/first-seven-days.html") == 1
+    assert len(urls) == len(set(urls))
     assert page.locator("#welcome").is_visible() and page.locator("#complete").is_visible()
     for i, (title, resource) in enumerate(zip(DAY_TITLES, RESOURCES), 1):
         section = page.locator(f"#day-{i}")
@@ -162,6 +192,8 @@ def main():
         audit_accessibility(page,"desktop")
         check_reflow(page,390)
         page.goto(url)
+        assert page.locator(".fsd-site-header").bounding_box()["height"] < 260
+        assert page.locator('a.fsd-primary[href="#day-1"]').first.bounding_box()["y"] < 710
         page.screenshot(path=str(ARTIFACTS / "mobile.png"))
         page.evaluate("document.getElementById('day-5').scrollIntoView()")
         page.screenshot(path=str(ARTIFACTS / "mobile-day5.png"))
@@ -187,6 +219,19 @@ def main():
         plain.locator('#day-4 nav a[href="#day-5"]').click()
         assert plain.url.endswith("#day-5")
         plain.screenshot(path=str(ARTIFACTS / "mobile-no-js.png"))
+        # Mobile touch-emulation, separate from physical device acceptance.
+        touch = browser.new_context(**pw.devices["Pixel 7"], reduced_motion="reduce")
+        tp = touch.new_page()
+        assert tp.goto(url).status == 200
+        tp.locator('a.fsd-primary[href="#day-1"]').first.tap()
+        assert tp.url.endswith("#day-1")
+        tp.locator('[data-day-mark="1"]').tap()
+        assert tp.locator('[data-day-mark="1"]').get_attribute("aria-pressed") == "true"
+        tp.locator('#day-1 nav a[href="#day-2"]').tap()
+        assert tp.url.endswith("#day-2")
+        tp.screenshot(path=str(ARTIFACTS / "mobile-touch-day2.png"))
+        touch.close()
+        print("Mobile touch emulation PASS; physical device approval remains separate")
         # Print: true paginated PDF, text extract confirms every teaching heading,
         # seven exercises/short versions and closing content.
         page.set_viewport_size({"width":1440,"height":900})
@@ -204,9 +249,13 @@ def main():
             assert text.count(label) == 7, (label, text.count(label))
         assert "what you carry forward" in text
         assert 8 <= len(doc.pages) <= 30, len(doc.pages)
+        assert len((doc.pages[-1].extract_text() or "").split()) >= 75, "Sparse closing print page"
         print(f"No-JS/mobile navigation PASS; printable PDF content PASS ({len(doc.pages)} pages)")
         browser.close()
     print("First Seven Days staged browser acceptance PASS")
 
 if __name__ == "__main__":
-    main()
+    if "--production-resources" in sys.argv:
+        probe_production_resources()
+    else:
+        main()

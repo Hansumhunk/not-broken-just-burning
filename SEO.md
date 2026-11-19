@@ -229,3 +229,8 @@ Completed in response to early production traffic disproportionately landing on 
 - refreshed sitemap lastmod dates only for pages changed in this hardening pass
 
 External recrawl/index-removal timing remains controlled by the search engines. The repository can send clean signals immediately; search-result replacement still depends on each engine revisiting the affected URLs.
+
+
+## November 19, 2026 — production delivery probe
+
+PR #253 makes the read-only public delivery probe fail closed. Run `python scripts/seo_production_probe.py --self-test` for deterministic positive and negative fixtures, then `python scripts/seo_production_probe.py` for actual public delivery. A failed or unverified target exits nonzero; an offline fixture intentionally produces failure output but passes the test only when failure is detected. The probe checks response status, final canonical URL, MIME, title/description/H1, public noindex directives, sitemap uniqueness and member/account exclusions (including members.html), robots sitemap reference and the PNG signature. It does not establish search-engine indexing, field performance, or authenticated member access. Run alongside the existing static-site release gate, not in place of it. Do not modify DNS, public content, tracking settings or account access in response to a probe failure without investigation and approval. Operational tracking: #241; production QA coordination: #249. Native Google Search Console ownership was verified November 18; obtain current indexing and search reports from the founder without purchasing connector access.

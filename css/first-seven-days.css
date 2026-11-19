@@ -46,6 +46,7 @@ html:has(body.fsd) { scroll-behavior: auto; }
 .fsd .fsd-objective { background: #1f2421; border-left-color: #b9d2b9; }
 .fsd .fsd-resource { background: #101014; }
 .fsd .fsd-mark { margin-top: 1.4rem; }
+.fsd .fsd-mark-label { display: inline-flex; align-items: center; padding: .4rem .6rem; color: #d4e7d4; font-size: .95rem; font-weight: 700; }
 .fsd .fsd-local-note, .fsd .fsd-safety { font-size: .9rem !important; color: var(--muted); }
 .fsd .fsd-day-nav { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .25rem .75rem; border-top: 1px solid var(--line-hot); padding: .7rem 0 0; margin-top: 1.5rem; }
 .fsd .fsd-day-nav a { display: inline-flex; min-height: 44px; align-items: center; }

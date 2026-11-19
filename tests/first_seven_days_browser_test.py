@@ -117,9 +117,11 @@ def main():
             assert button.get_attribute("aria-pressed") == "true"
             assert page.locator("#fsd-status").inner_text() == f"{i} of 7 days marked practiced."
             assert page.locator(f'[data-index-mark="{i}"]').is_visible()
+            assert page.locator(f'[data-local-mark="{i}"]').is_visible()
         page.locator('[data-day-mark="4"]').click()
         assert page.locator("#fsd-status").inner_text() == "6 of 7 days marked practiced."
         assert page.locator('[data-index-mark="4"]').is_hidden()
+        assert page.locator('[data-local-mark="4"]').is_hidden()
         page.locator('[data-day-mark="4"]').click()
         page.locator("#fsd-clear").click()
         assert page.locator("#fsd-status").inner_text() == "0 of 7 days marked practiced."
@@ -158,6 +160,10 @@ def main():
         page.screenshot(path=str(ARTIFACTS / "mobile-day5.png"))
         audit_accessibility(page,"mobile")
         check_reflow(page,320)
+        # Text sizing stress test at 200%, in addition to narrow reflow.
+        page.evaluate("document.documentElement.style.fontSize = '200%'")
+        check_reflow(page,1280)
+        page.evaluate("document.documentElement.style.fontSize = ''")
         # 320 CSS px is the equivalent reflow width at 400% on a 1280px viewport.
         assert page.evaluate("getComputedStyle(document.documentElement).scrollBehavior") == "auto"
         assert not errors, errors
@@ -187,7 +193,7 @@ def main():
         text = re.sub(r"\s+", " ", " ".join(p.extract_text() or "" for p in doc.pages)).lower()
         for title in DAY_TITLES:
             assert title.lower() in text, title
-        for label in ["completion objective", "two-minute option", "optional nbjb resource"]:
+        for label in ["completion objective:", "two-minute option:", "optional nbjb resource:"]:
             assert text.count(label) == 7, (label, text.count(label))
         assert "what you carry forward" in text
         assert 8 <= len(doc.pages) <= 30, len(doc.pages)

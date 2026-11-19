@@ -18,6 +18,8 @@
       button.classList.toggle('is-marked', marked);
       const indicator = document.querySelector('[data-index-mark="' + day + '"]');
       if (indicator) indicator.hidden = !marked;
+      const localIndicator = document.querySelector('[data-local-mark="' + day + '"]');
+      if (localIndicator) localIndicator.hidden = !marked;
     }
     status.textContent = marks.size + ' of 7 days marked practiced.';
     clear.disabled = marks.size === 0;

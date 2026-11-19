@@ -1,6 +1,7 @@
 import { withSupabase } from "npm:@supabase/server@1.7.0";
 import Stripe from "npm:stripe@22.6.2";
-import { lookupOffer, validPrice, checkoutConflict, sessionIdempotencyKey } from "./checkout-policy.mjs";
+import { lookupOffer, validPrice } from "./checkout-policy.mjs";
+import { reservedCheckout } from "./reserved-checkout.mjs";
 
 const SITE_URL = (Deno.env.get("NBJB_SITE_URL") ?? "https://notbrokenjustburning.com").replace(/\/+$/, "");
 const stripeSecret = Deno.env.get("STRIPE_LIVE_SECRET_KEY");
@@ -82,21 +83,6 @@ export default {
           ? entitlement.provider_customer_ref
           : null;
 
-      if (customerId) {
-        // A historic Stripe customer reference must not trigger a new charge
-        // while a live Stripe subscription is still active. The local
-        // entitlement can be free when its paid access has ended or drifted;
-        // Stripe remains authoritative on existing billing agreements.
-        const customerSubscriptions = await stripe.subscriptions.list({
-          customer: customerId,
-          status: "all",
-          limit: 100,
-        });
-        const sessions = await stripe.checkout.sessions.list({ customer: customerId, status: "open", limit: 100 });
-        const conflict = checkoutConflict(customerSubscriptions, sessions);
-        if (conflict) return json({ error: conflict, manage_in_portal: conflict === "already_subscribed" }, conflict === "subscription_check_incomplete" ? 503 : 409);
-      }
-
       if (!customerId) {
         const customer = await stripe.customers.create(
           {
@@ -135,7 +121,7 @@ export default {
         return json({ error: "offer_not_configured" }, 503);
       }
 
-      const session = await stripe.checkout.sessions.create({
+      const request = {
         mode: "subscription",
         customer: customerId,
         client_reference_id: userId,
@@ -153,10 +139,10 @@ export default {
             nbjb_offer: offer.lookupKey,
           },
         },
-      }, { idempotencyKey: sessionIdempotencyKey(customerId) });
-
-      if (!session.url) return json({ error: "checkout_unavailable" }, 502);
-      return json({ url: session.url });
+      };
+      const result = await reservedCheckout(ctx.supabaseAdmin, stripe, { userId, customerId, offerSlug, request });
+      if (result.error) return json({ error: result.error, manage_in_portal: result.error === "already_subscribed" }, result.status);
+      return json({ url: result.url });
     } catch (error) {
       console.error("checkout_failed");
       return json({ error: "checkout_failed" }, 500);

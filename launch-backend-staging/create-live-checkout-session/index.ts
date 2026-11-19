@@ -81,7 +81,7 @@ export default {
     }
 
     try {
-      if (!environment.live && (await stripe.accounts.retrieve()).id !== environment.account) return json({ error: "qa_stripe_account_mismatch" }, 503);
+      if (!environment.live && (await stripe.accounts.retrieveCurrent()).id !== environment.account) return json({ error: "qa_stripe_account_mismatch" }, 503);
       let customerId =
         entitlement.provider === "stripe" && entitlement.provider_customer_ref
           ? entitlement.provider_customer_ref

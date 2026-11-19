@@ -88,7 +88,7 @@ function uid(){let id;do{id='T-'+Array.from(crypto.getRandomValues(new Uint8Arra
 function syncPrecision(){const p=$('precision').value;$('date-wrap').hidden=p==='unknown';$('date').disabled=p==='unknown';$('time-wrap').hidden=p!=='day';$('time').disabled=p!=='day';$('date').placeholder=p==='month'?'YYYY-MM':'YYYY-MM-DD';$('date-help').textContent=p==='month'?'Use YYYY-MM; explain the estimate in context.':'Use YYYY-MM-DD. Use context to explain uncertainty.';}
 function reset(){editing=null;$('entry-form').reset();$('editor-title').textContent='Add an incident';$('save').textContent='Add incident to session';$('cancel').textContent='Reset form';$('error').textContent='';syncPrecision();}
 function message(s){$('status').textContent=s;}
-function formHasText(){return ['summary','context','references','impact','unknowns','correction','date','time'].some(k=>$(k).value.trim()!=='');}
+function formHasText(){return Object.keys(keys).some(k=>{const el=$(k);if(el.tagName==='SELECT'){const options=Array.from(el.options);const initial=options.find(o=>o.defaultSelected)||options[0];return !!initial&&el.value!==initial.value;}return el.value.trim()!=='';});}
 function confirmForm(){return !formHasText()||confirm('Discard the current unsubmitted form?');}
 function node(tag,txt,cls){const el=document.createElement(tag);if(txt!==undefined)el.textContent=txt;if(cls)el.className=cls;return el;}
 function sortKey(e){return e.precision==='unknown'?'9999-99-99-99:99':e.precision==='month'?e.date+'-00-00:00':e.date+'-'+(e.time||'99:99');}

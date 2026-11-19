@@ -121,6 +121,95 @@ def race_forget(page, data, selector, forget, status_id):
     page.wait_for_timeout(300)
     expect(page.locator(status_id)).to_contain_text("No ")
 
+
+def choice_only_discard(context):
+    # A changed select is unsubmitted work even if no text has been entered.
+    # Support already guards choice-only drafts; include it as a control.
+    for slug, name, _ in MODULES:
+        if name == "COMMUNICATION":
+            continue
+        p = context.new_page()
+        dialogs = []
+        def handle(dialog):
+            if dialog.type == "confirm":
+                dialogs.append(dialog.message)
+                if len(dialogs) == 1:
+                    dialog.dismiss()
+                else:
+                    dialog.accept()
+            else:
+                dialog.accept()
+        p.on("dialog", handle)
+        p.goto(path(slug))
+        select = p.locator("#entry-form select").first
+        original = select.input_value()
+        select.select_option(index=1)
+        changed = select.input_value()
+        assert changed != original, slug
+        p.locator("#cancel").click()
+        assert len(dialogs) == 1 and "unsubmitted" in dialogs[0], (slug, dialogs)
+        expect(select).to_have_value(changed)
+        p.locator("#cancel").click()
+        assert len(dialogs) == 2, (slug, dialogs)
+        expect(select).to_have_value(original)
+        p.locator("#cancel").click()
+        assert len(dialogs) == 2, (slug, "untouched reset should not prompt")
+        p.close()
+    print("PASS choice-only draft discard safeguards in all eight record editors")
+
+def financial_edges(page, folder):
+    page.goto(path("financial-organizer"))
+    base = {"period": "Fictional May", "title": "Fictional receipt", "source": "Fictional source", "next": "Review"}
+    def add(amount, **extra):
+        put(page, {**base, "amount": amount, **extra})
+        page.locator("#save").click()
+    for amount in ("-1", "1.001"):
+        add(amount)
+        assert page.locator("#error").inner_text(), amount
+        expect(page.locator("#count")).to_contain_text("0 of 0")
+        page.locator("#cancel").click()
+    add("0", status="Unknown")
+    expect(page.locator("#error")).to_contain_text("Unknown amounts")
+    page.locator("#cancel").click()
+    for amount, extra in [("0.10", {}), ("0.20", {}), ("0.00", {}), ("0.30", {"currency":"EUR"}), ("0.40", {"status":"Estimated"}), ("", {"status":"Unknown"})]:
+        add(amount, **extra)
+        expect(page.locator("#error")).to_have_text("")
+    expect(page.locator("#count")).to_contain_text("6 of 6")
+    groups = page.locator("#totals .entry").all_text_contents()
+    assert len(groups) == 4, groups
+    assert any("USD 0.30" in g and "3 entry(s)" in g for g in groups), groups
+    assert any("EUR 0.30" in g for g in groups), groups
+    assert any("USD 0.40" in g and "Estimated" in g for g in groups), groups
+    assert any("1 unknown amount(s)" in g for g in groups), groups
+    page.locator("#currency-filter").select_option("EUR")
+    expect(page.locator("#count")).to_contain_text("1 of 6")
+    expect(page.locator("#totals")).to_contain_text("EUR 0.30")
+    assert "USD" not in page.locator("#totals").inner_text()
+    data, _ = save_json(page, "#export", folder, "financial-edges")
+    assert len(data["entries"]) == 6
+    malformed = json.loads(json.dumps(data))
+    malformed["entries"][0]["amount"] = "1.001"
+    upload(page, malformed)
+    expect(status(page)).to_contain_text("Import not applied")
+    reopened, _ = save_json(page, "#export", folder, "financial-after-rejected-import")
+    assert reopened == data
+    print("PASS financial: exact cent grouping, known zero/unknown, invalid amounts, filtered totals, atomic rejection")
+
+def communication_edges(page):
+    page.goto(path("communication-analyzer"))
+    put(page, {"safety":"clear","channel":"restricted","need":"needed","purpose":"Fictional scheduling"})
+    expect(page.locator("#workspace")).to_be_hidden()
+    expect(page.locator("#export")).to_be_disabled()
+    expect(page.locator("#gate")).to_contain_text("restricted")
+    put(page, {"channel":"permitted","safety":"danger"})
+    expect(page.locator("#workspace")).to_be_hidden()
+    expect(page.locator("#gate")).to_contain_text("emergency services")
+    put(page, {"safety":"clear","original":"Fictional scheduling question"})
+    expect(page.locator("#workspace")).to_be_visible()
+    expect(page.locator("#export")).to_be_enabled()
+    print("PASS communication: restricted contact and immediate-danger blocks")
+
+
 def main():
     with tempfile.TemporaryDirectory() as tmp, sync_playwright() as pw:
         folder = Path(tmp)
@@ -270,6 +359,11 @@ def main():
         expect(page.locator("#list")).to_contain_text('<img src=x onerror="window.hawkInjected=true">')
         assert page.locator("#list img").count()==0
         assert page.evaluate("window.hawkInjected !== true")
+        assert not errors, errors
+        assert not network, network
+        choice_only_discard(context)
+        financial_edges(page, folder)
+        communication_edges(page)
         assert not errors, errors
         assert not network, network
         browser.close()

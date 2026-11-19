@@ -46,7 +46,7 @@ return {...a,id:r.id,createdAt:r.createdAt,updatedAt:r.updatedAt};}
 function uid(){let id;do{id='L-'+Array.from(crypto.getRandomValues(new Uint8Array(8)),n=>n.toString(16).padStart(2,'0')).join('').toUpperCase();}while(entries.some(e=>e.id===id));return id;}
 function node(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;}
 function msg(s){$('status-text').textContent=s;}
-function formText(){return Object.keys(keys).filter(k=>!(k in choices)).some(k=>$(k).value.trim());}
+function formText(){return Object.keys(keys).some(k=>{const el=$(k);if(el.tagName==='SELECT'){const options=Array.from(el.options);const initial=options.find(o=>o.defaultSelected)||options[0];return !!initial&&el.value!==initial.value;}return el.value.trim()!=='';});}
 function reset(){editing=null;$('entry-form').reset();$('editor-title').textContent='Add a parenting entry';$('save').textContent='Add entry';$('cancel').textContent='Reset form';$('error').textContent='';}
 function mayDiscard(){return !formText()||confirm('Discard the current unsubmitted form?');}
 function updateChildren(){const s=$('child-filter'),old=s.value;const vals=[...new Set(entries.map(e=>e.child))].sort((a,b)=>a.localeCompare(b));const first=node('option','All aliases');first.value='';s.replaceChildren(first);for(const v of vals){const n=node('option',v);n.value=v;s.append(n);}s.value=vals.includes(old)?old:'';}

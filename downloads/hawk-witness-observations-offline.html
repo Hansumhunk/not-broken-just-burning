@@ -44,7 +44,7 @@ return {...a,id:r.id,createdAt:r.createdAt,updatedAt:r.updatedAt};}
 function uid(){let id;do{id='W-'+Array.from(crypto.getRandomValues(new Uint8Array(8)),n=>n.toString(16).padStart(2,'0')).join('').toUpperCase();}while(entries.some(e=>e.id===id));return id;}
 function node(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;}
 function msg(s){$('status-text').textContent=s;}
-function formText(){return Object.keys(keys).filter(k=>!(k in choices)).some(k=>$(k).value.trim());}
+function formText(){return Object.keys(keys).some(k=>{const el=$(k);if(el.tagName==='SELECT'){const options=Array.from(el.options);const initial=options.find(o=>o.defaultSelected)||options[0];return !!initial&&el.value!==initial.value;}return el.value.trim()!=='';});}
 function reset(){editing=null;$('entry-form').reset();$('editor-title').textContent='Add a working observation';$('save').textContent='Add entry';$('cancel').textContent='Reset form';$('error').textContent='';}
 function mayDiscard(){return !formText()||confirm('Discard the current unsubmitted form?');}
 const filters=['alias','recorder','basis','status'];

@@ -41,3 +41,5 @@ Executable browser suite and existing validation are the pre-release evidence. T
 - A18: voluntary pilot after approved production release.
 
 Release status: staged, not operationally complete. No launch until editorial founder review, green checks, owner coordination and production/post-release acceptance.
+
+Initial full-page browser run 44545418281 stopped at a case-sensitive test assertion on a CSS-uppercase day label; corrected to compare DOM text, no learner-copy or UI change. Subsequent tests use the available runner Chrome first and capture initial screenshots before assertions. Latest exact-SHA run is authoritative; the former failure is not a pass. Local exact-JS component fixture (Git blob 935963430ae5bf46fa84b29878f817d3c06711d2) passed all seven toggles, visible marks, clear/focus, fresh document reset, synthetic bfcache event reset, no external requests and JS-disabled control hiding. Local HTTP/file navigation blocked by browser policy, so full-page evidence remains the isolated Actions run.

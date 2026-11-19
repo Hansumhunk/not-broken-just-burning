@@ -6,6 +6,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlsplit
 import os
 import re
+import shutil
 from playwright.sync_api import sync_playwright
 from pypdf import PdfReader
 
@@ -48,7 +49,7 @@ def check_content(page):
         section = page.locator(f"#day-{i}")
         assert section.is_visible()
         assert section.locator("h2").inner_text() == title
-        assert section.locator(".eyebrow").inner_text() == f"Day {i} of 7"
+        assert section.locator(".eyebrow").text_content().strip() == f"Day {i} of 7"
         for selector in [".fsd-outcome", ".fsd-quick", ".fsd-objective", ".fsd-resource"]:
             assert section.locator(selector).count() == 1
             assert section.locator(selector).is_visible()
@@ -81,7 +82,8 @@ def audit_accessibility(page, name):
 def main():
     with server() as origin, sync_playwright() as pw:
         url = origin + "/first-seven-days.html"
-        browser = pw.chromium.launch()
+        installed_chrome = shutil.which("google-chrome") or shutil.which("google-chrome-stable") or shutil.which("chromium")
+        browser = pw.chromium.launch(executable_path=installed_chrome) if installed_chrome else pw.chromium.launch()
         # Block third-party requests; this page must not request any.
         context = browser.new_context(viewport={"width":1440,"height":900}, reduced_motion="reduce")
         page = context.new_page()
@@ -97,6 +99,11 @@ def main():
             }
         })()""")
         assert page.goto(url).status == 200
+        # Always retain representative screenshots even if a later assertion fails.
+        page.screenshot(path=str(ARTIFACTS / "desktop.png"))
+        page.set_viewport_size({"width":390,"height":844})
+        page.screenshot(path=str(ARTIFACTS / "mobile.png"))
+        page.set_viewport_size({"width":1440,"height":900})
         check_content(page)
         assert page.locator("#fsd-status").inner_text() == "0 of 7 days marked practiced."
         # Keyboard skip link and native anchor navigation.

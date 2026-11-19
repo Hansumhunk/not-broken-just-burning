@@ -29,7 +29,7 @@ jobs:
       - name: Install pinned browser QA dependencies
         run: |
           python -m pip install playwright==1.51.0 pypdf==5.4.0
-          python -m playwright install --with-deps chromium
+          if ! command -v google-chrome && ! command -v google-chrome-stable && ! command -v chromium; then python -m playwright install --with-deps chromium; fi
           npm install --prefix "$RUNNER_TEMP/fsd-a11y" --no-save --ignore-scripts --no-audit --no-fund axe-core@4.10.3
       - name: Verify candidate browser experience
         run: FSD_AXE_PATH="$RUNNER_TEMP/fsd-a11y/node_modules/axe-core/axe.min.js" python tests/first_seven_days_browser_test.py

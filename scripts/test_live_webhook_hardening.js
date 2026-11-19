@@ -163,8 +163,8 @@ test('staged billing handlers use the tested policies',()=>{
  const checkout=fs.readFileSync(path.join(__dirname,'../launch-backend-staging/create-live-checkout-session/index.ts'),'utf8');
  assert.match(checkout,/lookupOffer\(offerSlug\)/);
  assert.match(checkout,/validPrice\(price, offer\)/);
- assert.match(checkout,/checkoutConflict\(customerSubscriptions, sessions\)/);
- assert.match(checkout,/idempotencyKey: sessionIdempotencyKey\(customerId\)/);
+ assert.match(checkout,/reservedCheckout\(ctx\.supabaseAdmin, stripe,/);
+ assert.doesNotMatch(checkout,/sessionIdempotencyKey\(customerId\)/);
  assert.match(webhook,/expand: \["latest_invoice"\]/);
  assert.match(webhook,/paymentBoundary\(subscription, prior, bounds\)/);
  assert.match(webhook,/subscriptionConflict\(subscription, prior, customerId\)/);

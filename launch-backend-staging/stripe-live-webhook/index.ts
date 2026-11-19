@@ -3,9 +3,10 @@ import Stripe from "npm:stripe@22.6.2";
 import { claimReceipt } from "./receipt-lease.mjs";
 import { paymentBoundary, subscriptionConflict } from "./payment-boundary.mjs";
 
-const stripeSecret = Deno.env.get("STRIPE_LIVE_SECRET_KEY");
-const webhookSecret = Deno.env.get("STRIPE_LIVE_WEBHOOK_SECRET");
-const stripe = stripeSecret ? new Stripe(stripeSecret) : null;
+import { billingEnvironment } from "../membership-atomic/billing-environment.mjs";
+const environment = billingEnvironment(k=>Deno.env.get(k));
+const webhookSecret = environment?.endpointSecret;
+const stripe = environment ? new Stripe(environment.key) : null;
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -62,7 +63,7 @@ function membershipState(status: Stripe.Subscription.Status) {
 export default {
   fetch: withSupabase({ auth: "none", cors: "disabled" }, async (req, ctx) => {
     if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
-    if (!stripe || !webhookSecret || !(stripeSecret?.startsWith("sk_live_") || stripeSecret?.startsWith("rk_live_"))) return json({ error: "live_billing_not_configured" }, 503);
+    if (!stripe || !environment || !webhookSecret) return json({ error: "live_billing_not_configured" }, 503);
 
     const signature = req.headers.get("stripe-signature");
     if (!signature) return json({ error: "missing_signature" }, 400);
@@ -77,7 +78,12 @@ export default {
     }
 
     // Prevent test-only entitlements from being changed by live Stripe events.
-    if (!event.livemode) return json({ error: "test_event_not_allowed" }, 400);
+    if (environment.live && !event.livemode) return json({ error: "test_event_not_allowed" }, 400);
+    if (!environment.live && event.livemode) return json({ error: "qa_live_event_not_allowed" }, 400);
+    if (!environment.live) {
+      try { if ((await stripe.accounts.retrieve()).id !== environment.account) return json({ error: "qa_stripe_account_mismatch" }, 503); }
+      catch { return json({ error: "qa_stripe_account_unavailable" }, 503); }
+    }
     // Keep sandbox QA membership separate from real paying customers.
     const sandboxTestUserId = Deno.env.get("NBJB_SANDBOX_TEST_USER_ID");
 
@@ -95,7 +101,8 @@ export default {
 
     const syncSubscription = async (subscriptionId: string, hintedUserId?: string | null) => {
       let subscription = await stripe.subscriptions.retrieve(subscriptionId, { expand: ["latest_invoice"] });
-      if (!subscription.livemode) throw new Error("test_subscription_not_allowed");
+      if (subscription.livemode !== environment.live) throw new Error("test_subscription_not_allowed");
+      if (!environment.live && subscription.metadata?.nbjb_environment !== "qa") return null;
       const customerId = idOf(subscription.customer);
       if (!customerId) throw new Error("missing_customer_id");
 
@@ -118,7 +125,7 @@ export default {
         if (mapped?.user_id) userId = mapped.user_id;
       }
 
-      if (!userId || (sandboxTestUserId && userId === sandboxTestUserId)) return null;
+      if (!userId || (environment.live && sandboxTestUserId && userId === sandboxTestUserId) || (!environment.live && !environment.users.includes(userId))) return null;
 
       // Only the known recurring membership offer may set membership access.
       const item = subscription.items?.data?.[0];
@@ -133,10 +140,10 @@ export default {
       if (priorError || !prior) throw new Error("membership_prior_unavailable");
       // Re-fetch after reading the revision. Concurrent writers invalidate this snapshot.
       subscription = await stripe.subscriptions.retrieve(subscriptionId, { expand: ["latest_invoice"] });
-      if (!subscription.livemode || idOf(subscription.customer) !== customerId || subscription.metadata?.nbjb_user_id !== userId || subscription.items?.data?.length !== 1 || subscription.metadata?.nbjb_offer !== offer || subscription.items.data[0]?.price?.lookup_key !== offer) throw new Error("membership_mapping_changed");
+      if (subscription.livemode !== environment.live || (!environment.live && subscription.metadata?.nbjb_environment !== "qa") || idOf(subscription.customer) !== customerId || subscription.metadata?.nbjb_user_id !== userId || subscription.items?.data?.length !== 1 || subscription.metadata?.nbjb_offer !== offer || subscription.items.data[0]?.price?.lookup_key !== offer) throw new Error("membership_mapping_changed");
       if (subscriptionConflict(subscription, prior, customerId)) throw new Error("membership_subscription_conflict");
       const bounds = periodBounds(subscription);
-      const mappedState = paymentBoundary(subscription, prior, bounds);
+      const mappedState = paymentBoundary(subscription, prior, bounds, Date.now(), environment.live);
       const paid = mappedState.tier === "paid_member";
       if (paid && (!Number.isFinite(Date.parse(mappedState.validUntil ?? "")) || !Number.isFinite(Date.parse(mappedState.validFrom ?? "")) || Date.parse(mappedState.validUntil ?? "") <= Date.parse(mappedState.validFrom ?? ""))) throw new Error("missing_paid_through_date");
 
@@ -176,6 +183,7 @@ export default {
           const session = event.data.object as Stripe.Checkout.Session;
           // Checkout completion alone does not prove that an async payment cleared.
           // Do not grant a paid entitlement unless Stripe reports a paid session.
+          if (session.mode !== "subscription" || (!environment.live && session.metadata?.nbjb_environment !== "qa")) { handled = false; break; }
           if (session.payment_status !== "paid") {
             handled = false;
             break;

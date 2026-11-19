@@ -1,0 +1,107 @@
+name: Lesson discovery production acceptance - PR 237
+on:
+  push:
+    branches: [qa/seo-production-acceptance-240]
+    paths: ['.github/workflows/seo-lesson-production-acceptance-237.yml']
+permissions:
+  contents: read
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 983435aeff79ea7ec8f46f9afad6a0e527de0f08
+      - name: Verify exact live release, canonical and sitemap
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib, time, urllib.request, xml.etree.ElementTree as ET
+          from pathlib import Path
+          from html.parser import HTMLParser
+          base="https://notbrokenjustburning.com/"
+          links=["lesson-clarity-before-certainty.html","lesson-boundaries-are-actions.html","lesson-shame-not-accountability.html","lesson-patterns-are-questions.html","lesson-voice-needs-discipline.html","lesson-peace-is-still-a-life.html"]
+          def fetch(path):
+              req=urllib.request.Request(base+path,headers={"User-Agent":"NBJB approved production acceptance","Cache-Control":"no-cache","DNT":"1"})
+              with urllib.request.urlopen(req,timeout=20) as res:
+                  assert res.status==200 and res.url==base+path,(path,res.status,res.url)
+                  return res.read()
+          def exact(path):
+              expected=Path(path).read_bytes()
+              for attempt in range(12):
+                  try:
+                      data=fetch(path)
+                      if data==expected:
+                          print("PASS exact live bytes",path,hashlib.sha256(data).hexdigest(),flush=True)
+                          return data
+                  except Exception as exc:
+                      print("retry",path,type(exc).__name__,flush=True)
+                  if attempt<11: time.sleep(8)
+              raise AssertionError("Live content does not match approved commit: "+path)
+          class Doc(HTMLParser):
+              def __init__(self,data):
+                  super().__init__();self.canonical=[];self.robots=[];self.hrefs=[];self.feed(data.decode("utf-8"))
+              def handle_starttag(self,tag,attrs):
+                  a=dict(attrs)
+                  if tag=="link" and a.get("rel")=="canonical": self.canonical.append(a.get("href"))
+                  if tag=="meta" and a.get("name")=="robots": self.robots.append(a.get("content",""))
+                  if tag=="a": self.hrefs.append(a.get("href",""))
+          doc=Doc(exact("lessons.html"))
+          assert doc.canonical==[base+"lessons.html"]
+          assert not any("noindex" in x.lower() for x in doc.robots)
+          for path in links:
+              assert path in doc.hrefs,path
+              target=Doc(exact(path))
+              assert target.canonical==[base+path],(path,target.canonical)
+              assert not any("noindex" in x.lower() for x in target.robots)
+              print("PASS public lesson and canonical",path,flush=True)
+          urls=[x.text for x in ET.fromstring(exact("sitemap.xml")).findall(".//{http://www.sitemaps.org/schemas/sitemap/0.9}loc")]
+          assert len(urls)==98 and len(set(urls))==98
+          assert all(base+p in urls for p in ["lessons.html"]+links)
+          assert not any("/member" in u or u.endswith("/join.html") for u in urls)
+          exact("robots.txt")
+          print("PASS unchanged 98-URL public sitemap and robots policy",flush=True)
+          PY
+      - name: Click all six live lesson routes in desktop and mobile browsers
+        shell: bash
+        run: |
+          python -m pip install playwright==1.51.0
+          export CHROME_PATH="$(command -v google-chrome || command -v chromium)"
+          python - <<'PY'
+          import os
+          from playwright.sync_api import sync_playwright
+          base="https://notbrokenjustburning.com/"
+          links=["lesson-clarity-before-certainty.html","lesson-boundaries-are-actions.html","lesson-shame-not-accountability.html","lesson-patterns-are-questions.html","lesson-voice-needs-discipline.html","lesson-peace-is-still-a-life.html"]
+          with sync_playwright() as p:
+              browser=p.chromium.launch(executable_path=os.environ["CHROME_PATH"],args=["--no-sandbox"])
+              for width,height in ((390,844),(1280,900)):
+                  ctx=browser.new_context(viewport={"width":width,"height":height},reduced_motion="reduce",extra_http_headers={"DNT":"1"})
+                  ctx.route("**/*",lambda route: route.continue_() if route.request.url.startswith((base,"https://fonts.googleapis.com/","https://fonts.gstatic.com/")) else route.abort())
+                  page=ctx.new_page()
+                  res=page.goto(base+"lessons.html",wait_until="domcontentloaded",timeout=30000)
+                  assert res and res.ok
+                  page.evaluate("document.fonts.ready")
+                  assert page.evaluate("document.documentElement.scrollWidth-innerWidth")<=2
+                  section=page.locator('section[aria-labelledby="founder-lesson-heading"]')
+                  assert section.count()==1 and section.get_by_role("link").count()==6
+                  page.keyboard.press("Tab")
+                  assert page.evaluate("document.activeElement.getAttribute('href')")=="#main-content"
+                  page.keyboard.press("Enter")
+                  assert page.evaluate("location.hash")=="#main-content"
+                  if width==390:
+                      toggle=page.locator(".nav-toggle")
+                      toggle.click();assert toggle.get_attribute("aria-expanded")=="true"
+                      page.keyboard.press("Escape");assert toggle.get_attribute("aria-expanded")=="false"
+                  for link in links:
+                      a=section.locator(f'a[href="{link}"]')
+                      assert a.count()==1 and a.inner_text().strip()
+                      a.click()
+                      page.wait_for_url(base+link,timeout=15000)
+                      assert page.locator("h1").first.is_visible(),link
+                      print("PASS live lesson navigation",width,link,flush=True)
+                      page.go_back(wait_until="domcontentloaded")
+                  print("PASS live responsive layout and keyboard navigation",width,flush=True)
+                  ctx.close()
+              browser.close()
+          PY

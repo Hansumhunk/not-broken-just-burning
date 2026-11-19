@@ -25,7 +25,7 @@ test('only grant paid entitlement after payment and handle async completion', ()
   assert.ok(webhook.indexOf('session.payment_status !== "paid"') < webhook.indexOf('syncSubscription(subscriptionId, session.client_reference_id)'), 'payment gate precedes access update');
 });
 test('preserves separation from sandbox and signed entitlement sync', () => {
-  assert.match(webhook, /if \(!event\.livemode\)/);
+  assert.match(webhook, /if \(environment\.live && !event\.livemode\)/);
   assert.match(webhook, /NBJB_SANDBOX_TEST_USER_ID/);
   assert.match(webhook, /from\("membership_entitlements"\)/);
   assert.match(webhook, /provider_subscription_ref: subscription\.id/);
@@ -162,10 +162,10 @@ test('checkout simulations reject prototype offers, wrong prices, duplicate sess
 test('staged billing handlers use the tested policies',()=>{
  const checkout=fs.readFileSync(path.join(__dirname,'../launch-backend-staging/create-live-checkout-session/index.ts'),'utf8');
  assert.match(checkout,/lookupOffer\(offerSlug\)/);
- assert.match(checkout,/validPrice\(price, offer\)/);
+ assert.match(checkout,/validPrice\(price, offer, environment\.live\)/);
  assert.match(checkout,/reservedCheckout\(ctx\.supabaseAdmin, stripe,/);
  assert.doesNotMatch(checkout,/sessionIdempotencyKey\(customerId\)/);
  assert.match(webhook,/expand: \["latest_invoice"\]/);
- assert.match(webhook,/paymentBoundary\(subscription, prior, bounds\)/);
+ assert.match(webhook,/paymentBoundary\(subscription, prior, bounds, Date.now\(\), environment\.live\)/);
  assert.match(webhook,/subscriptionConflict\(subscription, prior, customerId\)/);
 });

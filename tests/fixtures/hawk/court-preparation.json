@@ -1,0 +1,29 @@
+{
+  "format": "NBJB-HAWK-PREPARATION",
+  "version": 1,
+  "entries": [
+    {
+      "plan": "FICTIONAL May consultation",
+      "appointment": "Attorney meeting",
+      "type": "Question for counsel",
+      "title": "Clarify scheduling and expenses",
+      "status": "Open",
+      "priority": "Routine",
+      "context": "Pickup changed by agreement and two supply receipts exist.",
+      "unknown": "What records, if any, are relevant?",
+      "action": "Ask qualified counsel about appropriate documentation.",
+      "date": "2026-05-20",
+      "time": "10:00",
+      "basis": "Professional confirmation — verify",
+      "source": "Fictional appointment notice; confirm independently",
+      "events": "T-0000000000000001",
+      "evidence": "E-0000000000000002",
+      "tasks": "C-0000000000000001",
+      "outcome": "",
+      "revision": "",
+      "id": "P-0000000000000001",
+      "createdAt": "2026-05-13T12:00:00.000Z",
+      "updatedAt": "2026-05-13T12:00:00.000Z"
+    }
+  ]
+}

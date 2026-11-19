@@ -90,7 +90,7 @@ export default {
     // A claim is exclusive. Interrupted attempts may be reclaimed only after
     // a lease far exceeding the hosted worker's maximum wall-clock runtime.
     const receipts = ctx.supabaseAdmin.from("stripe_webhook_events");
-    const claim = await claimReceipt(receipts, event);
+    const claim = await claimReceipt(receipts, event, Date.now(), environment.live);
     if (claim.kind === "terminal") return json({ received: true, duplicate: true });
     if (claim.kind === "retry") return json({ error: "event_still_processing" }, 503);
     if (claim.kind !== "claimed") return json({ error: "receipt_claim_failed" }, 500);

@@ -31,6 +31,24 @@ export async function reservedCheckout(admin,stripe,{userId,customerId,offerSlug
    row=claim.data;
  }
  if(row.customer_ref!==customerId||row.user_id!==userId) return reject('checkout_mapping_review',503);
+ if(!row.session_ref){
+   // Recover a lost response from Stripe's authoritative session list, including
+   // expired/completed sessions. Never infer absence from a truncated page.
+   const historical=await stripe.checkout.sessions.list({customer:customerId,limit:100});
+   if(historical.has_more||!Array.isArray(historical.data)) return reject('checkout_outcome_review',503);
+   const matches=historical.data.filter(s=>ownedSession(s,row));
+   if(matches.length>1) return reject('checkout_outcome_review',503);
+   if(matches.length===1){
+     const known=matches[0];
+     const saved=await table().update({session_ref:known.id}).eq('attempt_id',row.attempt_id).is('released_at',null).is('session_ref',null).select('session_ref').maybeSingle();
+     if(saved.error) throw saved.error;
+     if(!saved.data){
+       const current=await table().select('session_ref,released_at').eq('attempt_id',row.attempt_id).single();
+       if(current.error||current.data?.session_ref!==known.id||current.data?.released_at) return reject('checkout_outcome_review',503);
+     }
+     row={...row,session_ref:known.id};
+   }
+ }
  if(row.session_ref){
    const session=await stripe.checkout.sessions.retrieve(row.session_ref);
    if(!ownedSession(session,row)) return reject('checkout_mapping_review',503);

@@ -5,6 +5,9 @@ on:
     paths:
       - 'downloads/hawk-*-offline.html'
       - 'tests/hawk_browser_test.py'
+      - 'tests/hawk_acceptance_test.py'
+      - 'tests/fixtures/hawk/**'
+      - 'hawk-*.html'
       - '.github/workflows/hawk-browser.yml'
 permissions:
   contents: read
@@ -30,3 +33,23 @@ jobs:
         run: npm install --prefix "$RUNNER_TEMP/hawk-a11y" --no-save --ignore-scripts --no-audit --no-fund axe-core@4.10.3
       - name: Verify offline HAWK tools in real Chromium
         run: HAWK_AXE_PATH="$RUNNER_TEMP/hawk-a11y/node_modules/axe-core/axe.min.js" python tests/hawk_browser_test.py
+      - name: Final fictional fixture acceptance in Chromium
+        run: HAWK_AXE_PATH="$RUNNER_TEMP/hawk-a11y/node_modules/axe-core/axe.min.js" HAWK_ENGINE=chromium python tests/hawk_acceptance_test.py
+  firefox:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned Playwright Firefox
+        run: |
+          python -m pip install playwright==1.51.0
+          python -m playwright install --with-deps firefox
+      - name: Install pinned accessibility test dependency
+        run: npm install --prefix "$RUNNER_TEMP/hawk-a11y" --no-save --ignore-scripts --no-audit --no-fund axe-core@4.10.3
+      - name: Final fictional fixture acceptance in Firefox
+        run: HAWK_AXE_PATH="$RUNNER_TEMP/hawk-a11y/node_modules/axe-core/axe.min.js" HAWK_ENGINE=firefox python tests/hawk_acceptance_test.py

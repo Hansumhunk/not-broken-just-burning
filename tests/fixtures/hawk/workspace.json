@@ -1,0 +1,342 @@
+{
+  "format": "NBJB-HAWK-WORKSPACE",
+  "version": 1,
+  "modules": {
+    "NBJB-HAWK-TIMELINE": {
+      "format": "NBJB-HAWK-TIMELINE",
+      "version": 1,
+      "entries": [
+        {
+          "precision": "day",
+          "date": "2026-05-08",
+          "time": "16:20",
+          "category": "Parenting",
+          "source": "Record reviewed",
+          "summary": "FICTIONAL: Morgan received a request to move pickup from 17:00 to 18:30; confirmed by message.",
+          "context": "Fictional local time; reason not supplied.",
+          "references": "E-0000000000000001",
+          "impact": "Adjusted transportation.",
+          "unknowns": "Reason for request not known.",
+          "correction": "",
+          "id": "T-0000000000000001",
+          "createdAt": "2026-05-13T12:00:00.000Z",
+          "updatedAt": "2026-05-13T12:00:00.000Z"
+        },
+        {
+          "precision": "day",
+          "date": "2026-05-08",
+          "time": "18:35",
+          "category": "Parenting",
+          "source": "Direct observation",
+          "summary": "FICTIONAL: Child A was picked up at 18:35 and settled into the evening routine.",
+          "context": "",
+          "references": "E-0000000000000001",
+          "impact": "Five minutes after revised plan.",
+          "unknowns": "",
+          "correction": "",
+          "id": "T-0000000000000002",
+          "createdAt": "2026-05-13T12:00:00.000Z",
+          "updatedAt": "2026-05-13T12:00:00.000Z"
+        },
+        {
+          "precision": "day",
+          "date": "2026-05-09",
+          "time": "",
+          "category": "Finances",
+          "source": "Record reviewed",
+          "summary": "FICTIONAL: Two school supply receipts of $12.40 and $7.60.",
+          "context": "",
+          "references": "E-0000000000000002",
+          "impact": "",
+          "unknowns": "No reimbursement agreement inferred.",
+          "correction": "",
+          "id": "T-0000000000000003",
+          "createdAt": "2026-05-13T12:00:00.000Z",
+          "updatedAt": "2026-05-13T12:00:00.000Z"
+        }
+      ]
+    },
+    "NBJB-HAWK-EVIDENCE": {
+      "format": "NBJB-HAWK-EVIDENCE",
+      "version": 1,
+      "entries": [
+        {
+          "title": "FICTIONAL pickup message",
+          "category": "Communication",
+          "kind": "Message or email",
+          "status": "Original/source as received",
+          "date": "2026-05-08",
+          "received": "",
+          "origin": "Morgan's fictional message export",
+          "locator": "Practice folder A",
+          "summary": "Requested and confirmed changed pickup time.",
+          "limits": "Does not establish motive.",
+          "events": "T-0000000000000001, T-0000000000000002",
+          "alias": "",
+          "correction": "",
+          "id": "E-0000000000000001",
+          "createdAt": "2026-05-13T12:00:00.000Z",
+          "updatedAt": "2026-05-13T12:00:00.000Z"
+        },
+        {
+          "title": "FICTIONAL supply receipts",
+          "category": "Finances",
+          "kind": "Financial record",
+          "status": "Original/source as received",
+          "date": "2026-05-09",
+          "received": "",
+          "origin": "Morgan's fictional receipts",
+          "locator": "Practice folder B",
+          "summary": "Two paid supply amounts.",
+          "limits": "No reimbursement entitlement established.",
+          "events": "T-0000000000000003",
+          "alias": "",
+          "correction": "",
+          "id": "E-0000000000000002",
+          "createdAt": "2026-05-13T12:00:00.000Z",
+          "updatedAt": "2026-05-13T12:00:00.000Z"
+        }
+      ]
+    },
+    "NBJB-HAWK-CHECKLIST": {
+      "format": "NBJB-HAWK-CHECKLIST",
+      "version": 1,
+      "entries": [
+        {
+          "title": "FICTIONAL confirm next pickup",
+          "category": "Parenting",
+          "priority": "Routine",
+          "status": "Not started",
+          "purpose": "Predictable care",
+          "route": "Permitted scheduling channel, if independently confirmed",
+          "next": "Ask for next pickup time",
+          "target": "2026-05-15",
+          "dateBasis": "Personal planning target",
+          "requestDate": "",
+          "events": "T-0000000000000001",
+          "evidence": "E-0000000000000001",
+          "outcome": "",
+          "correction": "",
+          "id": "C-0000000000000001",
+          "createdAt": "2026-05-13T12:00:00.000Z",
+          "updatedAt": "2026-05-13T12:00:00.000Z"
+        }
+      ]
+    },
+    "NBJB-HAWK-COMMUNICATION": {
+      "format": "NBJB-HAWK-COMMUNICATION",
+      "version": 1,
+      "review": {
+        "safety": "clear",
+        "channel": "permitted",
+        "need": "needed",
+        "purpose": "FICTIONAL confirm next pickup",
+        "refs": "T-0000000000000001, E-0000000000000001, C-0000000000000001",
+        "original": "You always change everything! Confirm Friday pickup.",
+        "revised": "Please confirm whether Friday pickup is at 17:00.",
+        "fact": "The fictional schedule lists Friday pickup at 17:00.",
+        "request": "Please confirm the pickup time.",
+        "next": ""
+      },
+      "checks": {
+        "accurate": false,
+        "necessary": false,
+        "appropriate": false,
+        "respectful": false,
+        "privacy": false,
+        "obligations": false
+      }
+    },
+    "NBJB-HAWK-PREPARATION": {
+      "format": "NBJB-HAWK-PREPARATION",
+      "version": 1,
+      "entries": [
+        {
+          "plan": "FICTIONAL May consultation",
+          "appointment": "Attorney meeting",
+          "type": "Question for counsel",
+          "title": "Clarify scheduling and expenses",
+          "status": "Open",
+          "priority": "Routine",
+          "context": "Pickup changed by agreement and two supply receipts exist.",
+          "unknown": "What records, if any, are relevant?",
+          "action": "Ask qualified counsel about appropriate documentation.",
+          "date": "2026-05-20",
+          "time": "10:00",
+          "basis": "Professional confirmation — verify",
+          "source": "Fictional appointment notice; confirm independently",
+          "events": "T-0000000000000001",
+          "evidence": "E-0000000000000002",
+          "tasks": "C-0000000000000001",
+          "outcome": "",
+          "revision": "",
+          "id": "P-0000000000000001",
+          "createdAt": "2026-05-13T12:00:00.000Z",
+          "updatedAt": "2026-05-13T12:00:00.000Z"
+        }
+      ]
+    },
+    "NBJB-HAWK-PARENTING": {
+      "format": "NBJB-HAWK-PARENTING",
+      "version": 1,
+      "entries": [
+        {
+          "child": "Child A",
+          "category": "Parenting schedule / exchange",
+          "status": "Occurred",
+          "title": "FICTIONAL evening pickup",
+          "date": "2026-05-08",
+          "time": "18:35",
+          "source": "Personal observation or action",
+          "observation": "Child A arrived and ate dinner.",
+          "care": "Maintained bedtime routine.",
+          "context": "Pickup changed by prior agreement.",
+          "followup": "Confirm upcoming schedule without involving Child A.",
+          "events": "T-0000000000000002",
+          "evidence": "E-0000000000000001",
+          "tasks": "C-0000000000000001",
+          "revision": "",
+          "id": "L-0000000000000001",
+          "createdAt": "2026-05-13T12:00:00.000Z",
+          "updatedAt": "2026-05-13T12:00:00.000Z"
+        }
+      ]
+    },
+    "NBJB-HAWK-FINANCIAL": {
+      "format": "NBJB-HAWK-FINANCIAL",
+      "version": 1,
+      "entries": [
+        {
+          "period": "Fictional May",
+          "category": "Expense",
+          "basis": "Actual cash activity",
+          "status": "Documented",
+          "title": "FICTIONAL school supplies A",
+          "currency": "USD",
+          "amount": "12.40",
+          "date": "2026-05-09",
+          "source": "Fictional receipt A",
+          "context": "",
+          "next": "Retain receipt",
+          "events": "T-0000000000000003",
+          "evidence": "E-0000000000000002",
+          "tasks": "",
+          "revision": "",
+          "id": "F-0000000000000001",
+          "createdAt": "2026-05-13T12:00:00.000Z",
+          "updatedAt": "2026-05-13T12:00:00.000Z"
+        },
+        {
+          "period": "Fictional May",
+          "category": "Expense",
+          "basis": "Actual cash activity",
+          "status": "Documented",
+          "title": "FICTIONAL school supplies B",
+          "currency": "USD",
+          "amount": "7.60",
+          "date": "2026-05-09",
+          "source": "Fictional receipt B",
+          "context": "",
+          "next": "Retain receipt",
+          "events": "",
+          "evidence": "E-0000000000000002",
+          "tasks": "",
+          "revision": "",
+          "id": "F-0000000000000002",
+          "createdAt": "2026-05-13T12:00:00.000Z",
+          "updatedAt": "2026-05-13T12:00:00.000Z"
+        },
+        {
+          "period": "Fictional May",
+          "category": "Expense",
+          "basis": "Future plan",
+          "status": "Estimated",
+          "title": "FICTIONAL future supplies",
+          "currency": "USD",
+          "amount": "15.00",
+          "date": "",
+          "source": "Fictional estimate",
+          "context": "",
+          "next": "Confirm actual cost",
+          "events": "",
+          "evidence": "",
+          "tasks": "",
+          "revision": "",
+          "id": "F-0000000000000003",
+          "createdAt": "2026-05-13T12:00:00.000Z",
+          "updatedAt": "2026-05-13T12:00:00.000Z"
+        },
+        {
+          "period": "Fictional May",
+          "category": "Discrepancy / question",
+          "basis": "Information only",
+          "status": "Unknown",
+          "title": "FICTIONAL unconfirmed reimbursement",
+          "currency": "USD",
+          "amount": "",
+          "date": "",
+          "source": "No agreement available",
+          "context": "",
+          "next": "Ask counsel if relevant",
+          "events": "",
+          "evidence": "",
+          "tasks": "",
+          "revision": "",
+          "id": "F-0000000000000004",
+          "createdAt": "2026-05-13T12:00:00.000Z",
+          "updatedAt": "2026-05-13T12:00:00.000Z"
+        }
+      ]
+    },
+    "NBJB-HAWK-WITNESS": {
+      "format": "NBJB-HAWK-WITNESS",
+      "version": 1,
+      "entries": [
+        {
+          "alias": "Observer A",
+          "role": "Fictional adult present at pickup",
+          "title": "FICTIONAL limited pickup observation",
+          "recorder": "Account reported to me",
+          "basis": "Firsthand observation",
+          "status": "Recorded for review",
+          "eventDate": "2026-05-08",
+          "accountDate": "2026-05-09",
+          "observation": "Observer A said pickup occurred around 18:35.",
+          "context": "Observer did not see the earlier messages; account not independently verified.",
+          "impact": "",
+          "handling": "Voluntary fictional account; no witness contact or coaching.",
+          "next": "Ask counsel whether relevant.",
+          "events": "T-0000000000000002",
+          "evidence": "E-0000000000000001",
+          "tasks": "",
+          "revision": "",
+          "id": "W-0000000000000001",
+          "createdAt": "2026-05-13T12:00:00.000Z",
+          "updatedAt": "2026-05-13T12:00:00.000Z"
+        }
+      ]
+    },
+    "NBJB-HAWK-SUPPORT": {
+      "format": "NBJB-HAWK-SUPPORT",
+      "version": 1,
+      "entries": [
+        {
+          "need": "FICTIONAL transportation contingency",
+          "role": "Practical assistance",
+          "alias": "Support A",
+          "status": "Identified — not agreed",
+          "priority": "Routine",
+          "request": "Ask if available for backup transport.",
+          "boundary": "Respect choice; no case details or child information required.",
+          "confirmation": "",
+          "fallback": "Plan alternative transportation.",
+          "reviewDate": "2026-05-15",
+          "revision": "",
+          "id": "S-0000000000000001",
+          "createdAt": "2026-05-13T12:00:00.000Z",
+          "updatedAt": "2026-05-13T12:00:00.000Z"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "format": "NBJB-HAWK-CHECKLIST",
+  "version": 1,
+  "entries": [
+    {
+      "title": "FICTIONAL confirm next pickup",
+      "category": "Parenting",
+      "priority": "Routine",
+      "status": "Not started",
+      "purpose": "Predictable care",
+      "route": "Permitted scheduling channel, if independently confirmed",
+      "next": "Ask for next pickup time",
+      "target": "2026-05-15",
+      "dateBasis": "Personal planning target",
+      "requestDate": "",
+      "events": "T-0000000000000001",
+      "evidence": "E-0000000000000001",
+      "outcome": "",
+      "correction": "",
+      "id": "C-0000000000000001",
+      "createdAt": "2026-05-13T12:00:00.000Z",
+      "updatedAt": "2026-05-13T12:00:00.000Z"
+    }
+  ]
+}

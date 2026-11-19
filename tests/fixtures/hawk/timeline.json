@@ -1,0 +1,54 @@
+{
+  "format": "NBJB-HAWK-TIMELINE",
+  "version": 1,
+  "entries": [
+    {
+      "precision": "day",
+      "date": "2026-05-08",
+      "time": "16:20",
+      "category": "Parenting",
+      "source": "Record reviewed",
+      "summary": "FICTIONAL: Morgan received a request to move pickup from 17:00 to 18:30; confirmed by message.",
+      "context": "Fictional local time; reason not supplied.",
+      "references": "E-0000000000000001",
+      "impact": "Adjusted transportation.",
+      "unknowns": "Reason for request not known.",
+      "correction": "",
+      "id": "T-0000000000000001",
+      "createdAt": "2026-05-13T12:00:00.000Z",
+      "updatedAt": "2026-05-13T12:00:00.000Z"
+    },
+    {
+      "precision": "day",
+      "date": "2026-05-08",
+      "time": "18:35",
+      "category": "Parenting",
+      "source": "Direct observation",
+      "summary": "FICTIONAL: Child A was picked up at 18:35 and settled into the evening routine.",
+      "context": "",
+      "references": "E-0000000000000001",
+      "impact": "Five minutes after revised plan.",
+      "unknowns": "",
+      "correction": "",
+      "id": "T-0000000000000002",
+      "createdAt": "2026-05-13T12:00:00.000Z",
+      "updatedAt": "2026-05-13T12:00:00.000Z"
+    },
+    {
+      "precision": "day",
+      "date": "2026-05-09",
+      "time": "",
+      "category": "Finances",
+      "source": "Record reviewed",
+      "summary": "FICTIONAL: Two school supply receipts of $12.40 and $7.60.",
+      "context": "",
+      "references": "E-0000000000000002",
+      "impact": "",
+      "unknowns": "No reimbursement agreement inferred.",
+      "correction": "",
+      "id": "T-0000000000000003",
+      "createdAt": "2026-05-13T12:00:00.000Z",
+      "updatedAt": "2026-05-13T12:00:00.000Z"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 name: QA bootstrap 005B offline validation
 on:
-  push:
-    branches: [qa/p0-membership-provisioning-005b]
+  pull_request:
+    branches: [qa/p0-membership-atomic-acceptance-20261119]
 permissions:
   contents: read
 jobs:

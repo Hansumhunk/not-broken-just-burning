@@ -35,6 +35,10 @@ revoke all on function public.claim_membership_checkout(uuid,uuid,text,text,json
 grant execute on function public.claim_membership_checkout(uuid,uuid,text,text,jsonb) to service_role;
 -- Monotonic database revision fences all writers, including earlier deployed code.
 alter table public.membership_entitlements add column membership_revision bigint not null default 0;
+alter table public.membership_entitlements add constraint membership_stripe_finite_period check (
+ provider is distinct from 'stripe' or tier <> 'paid_member' or
+ (valid_until is not null and isfinite(valid_until) and isfinite(valid_from) and valid_until>valid_from)
+);
 create function public.bump_membership_revision() returns trigger language plpgsql security invoker set search_path='' as $$
 begin new.membership_revision := old.membership_revision+1; return new; end;
 $$;

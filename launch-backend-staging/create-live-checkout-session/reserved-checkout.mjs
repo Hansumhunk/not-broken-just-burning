@@ -11,7 +11,7 @@ export function ownedSession(session,row) {
  session.client_reference_id===row.user_id && session.metadata?.nbjb_attempt===row.attempt_id &&
  session.metadata?.nbjb_offer===row.offer;
 }
-export async function reservedCheckout(admin,stripe,{userId,customerId,offerSlug,request},now=Date.now()) {
+export async function reservedCheckout(admin,stripe,{userId,customerId,offerSlug,request},clock=Date.now) {
  const table=()=>admin.from('membership_checkout_attempts');
  const reject=(error,status=409)=>({error,status});
  const read=await table().select('*').eq('user_id',userId).is('released_at',null).maybeSingle();
@@ -48,7 +48,7 @@ export async function reservedCheckout(admin,stripe,{userId,customerId,offerSlug
  }
  if(row.offer!==offerSlug) return reject('checkout_already_open');
  if(sessions.data.some(s=>s.mode==='subscription'&&s.status==='open'&&!ownedSession(s,row))) return reject('checkout_already_open');
- if(!retryAllowed(row,now)) return reject('checkout_outcome_review',503);
+ if(!retryAllowed(row,clock())) return reject('checkout_outcome_review',503);
  // If response is lost, the same immutable Stripe request/key is retried.
  // No new UUID or changed price/URL is generated for an existing claim.
  const session=await stripe.checkout.sessions.create(row.request_body,{idempotencyKey:row.provider_key});

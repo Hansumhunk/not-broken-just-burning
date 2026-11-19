@@ -49,9 +49,14 @@ def seed(page, slug, name):
     page.locator("#search").fill(MARK)
 
 def check(context, slug, name, url, strict, folder):
-    p=context.new_page()
-    p.on("dialog",lambda d:d.accept())
     failures=[]
+    neutral=folder/"neutral.html"
+    neutral.write_text("<!doctype html><html lang='en'><title>Local navigation control</title><p>Fictional test control page.</p></html>",encoding="utf-8")
+    neutral_url=neutral.as_uri()
+    def new_page():
+        page=context.new_page()
+        page.on("dialog",lambda d:d.accept())
+        return page
     def inspect(label,baseline):
         now=snapshot(p)
         if now!=baseline:
@@ -63,7 +68,8 @@ def check(context, slug, name, url, strict, folder):
         else:
             print("CLEAN",ENGINE,"candidate" if strict else "released-source",slug,label,flush=True)
     for action in ("reload","back","forward","persisted-lifecycle"):
-        p.goto("about:blank")
+        p=new_page()
+        p.goto(neutral_url)
         p.goto(url)
         baseline=snapshot(p)
         seed(p,slug,name)
@@ -71,7 +77,7 @@ def check(context, slug, name, url, strict, folder):
         if action=="reload":
             p.reload()
         elif action=="back":
-            p.goto("about:blank")
+            p.goto(neutral_url)
             p.go_back()
         elif action=="forward":
             p.go_back()
@@ -84,8 +90,10 @@ def check(context, slug, name, url, strict, folder):
             }""")
         p.wait_for_load_state("load")
         p.wait_for_timeout(150)
+        assert p.url==url,(slug,action,p.url)
         inspect(action,baseline)
-    p.goto("about:blank")
+        p.close()
+    p=new_page()
     p.goto(url)
     if name=="DASHBOARD":
         p.locator("#allow-communication").check()

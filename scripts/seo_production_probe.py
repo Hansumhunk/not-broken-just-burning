@@ -105,7 +105,7 @@ def validate(data, kind, expected, status, final, content_type, xrobots=""):
             if not url.startswith(ORIGIN + "/") or parts.query or parts.fragment:
                 errors.append("noncanonical sitemap URL: " + url)
             path = parts.path.lower()
-            if path.startswith("/member-") or path in ("/join.html", "/account.html"):
+            if path.startswith("/member-") or path in ("/join.html", "/account.html", "/members.html"):
                 errors.append("private/account route in public sitemap: " + path)
         for p in ("", *HUBS):
             if ORIGIN + "/" + p not in urls:
@@ -173,7 +173,11 @@ class ProbeTests(unittest.TestCase):
         xml = lambda us: (base + "".join(f"<url><loc>{u}</loc></url>" for u in us) + "</urlset>").encode()
         validate_xml = lambda us: validate(xml(us), "xml", ORIGIN + "/sitemap.xml", 200, ORIGIN + "/sitemap.xml", "application/xml")
         self.assertEqual([], validate_xml(urls))
-        self.assertTrue(validate_xml(urls + [urls[0], ORIGIN + "/member-premium-lesson.html"]))
+        self.assertTrue(validate_xml(urls + [urls[0]]))
+        for private in ("/member-premium-lesson.html", "/members.html", "/join.html", "/account.html"):
+            with self.subTest(private=private):
+                errors = validate_xml(urls + [ORIGIN + private])
+                self.assertIn("private/account route in public sitemap: " + private, errors)
 
     def test_robots_missing_sitemap(self):
         self.assertTrue(validate(b"User-agent: *\nDisallow: /", "robots", ORIGIN + "/robots.txt", 200, ORIGIN + "/robots.txt", "text/plain"))

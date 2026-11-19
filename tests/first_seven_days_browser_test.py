@@ -30,6 +30,27 @@ PUBLIC_ORIGIN = "https://notbrokenjustburning.com"
 PUBLIC_ROUTES = RESOURCES + ["support.html", "path.html", "join.html", "flamewalker-plus.html", "members.html",
     "index.html", "forge.html", "fire.html", "movement.html", "resources.html", "founder.html", "contact.html", "terms.html", "privacy.html"]
 
+class RouteMetadata(HTMLParser):
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.title = ""
+        self.in_title = False
+        self.has_h1 = False
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "title":
+            self.in_title = True
+        elif tag == "h1":
+            self.has_h1 = True
+
+    def handle_endtag(self, tag):
+        if tag == "title":
+            self.in_title = False
+
+    def handle_data(self, data):
+        if self.in_title:
+            self.title += data
+
 def probe_production_resources():
     """Read only existing public/static entry URLs, never a signed-in session."""
     def check(path):
@@ -40,8 +61,10 @@ def probe_production_resources():
             final = response.geturl()
             assert response.status == 200 and response.headers.get_content_type() == "text/html", (path, response.status)
             assert final == destination or (path == "index.html" and final == PUBLIC_ORIGIN + "/"), (path, final)
-            assert re.search(r"<title[^>]*>\\s*[^<]+", body, re.I), path
-            assert re.search(r"<h1(?:\\s|>)", body, re.I), path
+            metadata = RouteMetadata()
+            metadata.feed(body)
+            metadata.close()
+            assert metadata.title.strip() and metadata.has_h1, (path, "missing title or H1")
             print("Production existing route PASS:", path, response.status, final)
     with ThreadPoolExecutor(max_workers=4) as pool:
         list(pool.map(check, PUBLIC_ROUTES))

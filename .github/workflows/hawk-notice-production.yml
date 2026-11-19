@@ -1,0 +1,17 @@
+name: HAWK notice production acceptance
+on:
+  pull_request:
+    paths: ['tests/hawk_notice_production.py', '.github/workflows/hawk-notice-production.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify live corrective notice and unchanged download bytes
+        run: python3 tests/hawk_notice_production.py

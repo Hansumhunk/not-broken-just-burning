@@ -1,0 +1,43 @@
+name: First Seven Days staged browser review
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'first-seven-days.html'
+      - 'css/first-seven-days.css'
+      - 'js/first-seven-days.js'
+      - 'tests/first_seven_days_browser_test.py'
+      - '.github/workflows/first-seven-days-review.yml'
+permissions:
+  contents: read
+concurrency:
+  group: first-seven-days-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  candidate-browser:
+    if: github.head_ref == 'staging/first-seven-days'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned browser QA dependencies
+        run: |
+          python -m pip install playwright==1.51.0 pypdf==5.4.0
+          python -m playwright install --with-deps chromium
+          npm install --prefix "$RUNNER_TEMP/fsd-a11y" --no-save --ignore-scripts --no-audit --no-fund axe-core@4.10.3
+      - name: Verify candidate browser experience
+        run: FSD_AXE_PATH="$RUNNER_TEMP/fsd-a11y/node_modules/axe-core/axe.min.js" python tests/first_seven_days_browser_test.py
+      - name: Retain founder review screenshots and print output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: first-seven-days-review
+          path: test-results/first-seven-days/
+          if-no-files-found: warn
+          retention-days: 7

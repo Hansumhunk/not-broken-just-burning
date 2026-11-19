@@ -18,8 +18,8 @@ def verify(path,record):
             if not data.startswith(b"%PDF-") or len(data)!=e["bytes"] or hashlib.sha256(data).hexdigest()!=e["sha256"]:raise ValueError("member_checksum_or_type")
     return True
 def main():
-    p=argparse.ArgumentParser();p.add_argument("--slug",required=True);p.add_argument("--file",required=True,type=Path);a=p.parse_args()
-    m=json.loads(MANIFEST.read_text());record=next((x for x in m["products"] if x["slug"]==a.slug),None)
+    p=argparse.ArgumentParser();p.add_argument("--manifest",type=Path,required=True,help="Explicit versioned inventory manifest; no implicit historical selection");p.add_argument("--slug",required=True);p.add_argument("--file",required=True,type=Path);a=p.parse_args()
+    m=json.loads(a.manifest.read_text());record=next((x for x in m["products"] if x["slug"]==a.slug),None)
     if not record:raise SystemExit("Unknown SKU")
     verify(a.file,record)
     print("Customer-only archive verified locally. Release authorization remains separate; nothing uploaded.")

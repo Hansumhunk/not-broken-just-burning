@@ -1,0 +1,28 @@
+{
+  "format": "NBJB-HAWK-WITNESS",
+  "version": 1,
+  "entries": [
+    {
+      "alias": "Observer A",
+      "role": "Fictional adult present at pickup",
+      "title": "FICTIONAL limited pickup observation",
+      "recorder": "Account reported to me",
+      "basis": "Firsthand observation",
+      "status": "Recorded for review",
+      "eventDate": "2026-05-08",
+      "accountDate": "2026-05-09",
+      "observation": "Observer A said pickup occurred around 18:35.",
+      "context": "Observer did not see the earlier messages; account not independently verified.",
+      "impact": "",
+      "handling": "Voluntary fictional account; no witness contact or coaching.",
+      "next": "Ask counsel whether relevant.",
+      "events": "T-0000000000000002",
+      "evidence": "E-0000000000000001",
+      "tasks": "",
+      "revision": "",
+      "id": "W-0000000000000001",
+      "createdAt": "2026-05-13T12:00:00.000Z",
+      "updatedAt": "2026-05-13T12:00:00.000Z"
+    }
+  ]
+}

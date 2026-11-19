@@ -1,0 +1,24 @@
+{
+  "format": "NBJB-HAWK-COMMUNICATION",
+  "version": 1,
+  "review": {
+    "safety": "clear",
+    "channel": "permitted",
+    "need": "needed",
+    "purpose": "FICTIONAL confirm next pickup",
+    "refs": "T-0000000000000001, E-0000000000000001, C-0000000000000001",
+    "original": "You always change everything! Confirm Friday pickup.",
+    "revised": "Please confirm whether Friday pickup is at 17:00.",
+    "fact": "The fictional schedule lists Friday pickup at 17:00.",
+    "request": "Please confirm the pickup time.",
+    "next": ""
+  },
+  "checks": {
+    "accurate": false,
+    "necessary": false,
+    "appropriate": false,
+    "respectful": false,
+    "privacy": false,
+    "obligations": false
+  }
+}

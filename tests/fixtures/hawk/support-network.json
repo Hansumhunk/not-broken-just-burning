@@ -1,0 +1,22 @@
+{
+  "format": "NBJB-HAWK-SUPPORT",
+  "version": 1,
+  "entries": [
+    {
+      "need": "FICTIONAL transportation contingency",
+      "role": "Practical assistance",
+      "alias": "Support A",
+      "status": "Identified — not agreed",
+      "priority": "Routine",
+      "request": "Ask if available for backup transport.",
+      "boundary": "Respect choice; no case details or child information required.",
+      "confirmation": "",
+      "fallback": "Plan alternative transportation.",
+      "reviewDate": "2026-05-15",
+      "revision": "",
+      "id": "S-0000000000000001",
+      "createdAt": "2026-05-13T12:00:00.000Z",
+      "updatedAt": "2026-05-13T12:00:00.000Z"
+    }
+  ]
+}

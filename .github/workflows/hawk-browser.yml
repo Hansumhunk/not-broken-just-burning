@@ -7,6 +7,7 @@ on:
       - 'tests/hawk_browser_test.py'
       - 'tests/hawk_acceptance_test.py'
       - 'tests/hawk_privacy_test.py'
+      - 'tests/hawk_production_smoke.py'
       - 'tests/fixtures/hawk/**'
       - 'hawk-*.html'
       - '.github/workflows/hawk-browser.yml'
@@ -33,6 +34,8 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Install pinned accessibility test dependency
         run: npm install --prefix "$RUNNER_TEMP/hawk-a11y" --no-save --ignore-scripts --no-audit --no-fund axe-core@4.10.3
+      - name: Verify live public downloads and guide links against approved corrective release
+        run: python tests/hawk_production_smoke.py
       - name: Verify offline HAWK tools in real Chromium
         run: HAWK_AXE_PATH="$RUNNER_TEMP/hawk-a11y/node_modules/axe-core/axe.min.js" python tests/hawk_browser_test.py
       - name: Compare released-source and candidate privacy in Chromium
@@ -56,6 +59,8 @@ jobs:
           python -m playwright install --with-deps firefox
       - name: Install pinned accessibility test dependency
         run: npm install --prefix "$RUNNER_TEMP/hawk-a11y" --no-save --ignore-scripts --no-audit --no-fund axe-core@4.10.3
+      - name: Verify live public downloads and guide links against approved corrective release
+        run: python tests/hawk_production_smoke.py
       - name: Compare released-source and candidate privacy in Firefox
         run: HAWK_ENGINE=firefox python tests/hawk_privacy_test.py
       - name: Final fictional fixture acceptance in Firefox

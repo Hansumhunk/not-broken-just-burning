@@ -81,7 +81,8 @@ test('Malformed or missing entitlement dates fail closed for paid membership',as
  const a=await evaluateMembership(activePaid({valid_from:'not-a-date'}));
  const b=await evaluateMembership(activePaid({valid_until:'not-a-date'}));
  const c=await evaluateMembership(null);
- assert.deepEqual([a.tier,b.tier,c.tier],['free','free','free']);
+ const d=await evaluateMembership(activePaid({valid_until:null}));
+ assert.deepEqual([a.tier,b.tier,c.tier,d.tier],['free','free','free','free']);
 });
 test('Errors reading the database do not promote the member',async()=>{
  const state=await evaluateMembership(activePaid(),{readError:true});

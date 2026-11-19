@@ -3,9 +3,10 @@ import Stripe from "npm:stripe@22.6.2";
 import { lookupOffer, validPrice } from "./checkout-policy.mjs";
 import { reservedCheckout } from "./reserved-checkout.mjs";
 
-const SITE_URL = (Deno.env.get("NBJB_SITE_URL") ?? "https://notbrokenjustburning.com").replace(/\/+$/, "");
-const stripeSecret = Deno.env.get("STRIPE_LIVE_SECRET_KEY");
-const stripe = stripeSecret ? new Stripe(stripeSecret) : null;
+import { billingEnvironment } from "../membership-atomic/billing-environment.mjs";
+const environment = billingEnvironment(k=>Deno.env.get(k));
+const SITE_URL = environment?.site;
+const stripe = environment ? new Stripe(environment.key) : null;
 
 function json(body: unknown, status = 200) {
   return Response.json(body, { status });
@@ -14,7 +15,7 @@ function json(body: unknown, status = 200) {
 export default {
   fetch: withSupabase({ auth: "user" }, async (req, ctx) => {
     if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
-    if (!stripe || !(stripeSecret?.startsWith("sk_live_") || stripeSecret?.startsWith("rk_live_"))) return json({ error: "live_billing_not_configured" }, 503);
+    if (!stripe || !environment) return json({ error: "live_billing_not_configured" }, 503);
 
     const userId = ctx.userClaims?.id;
     const email = ctx.userClaims?.email;
@@ -28,11 +29,12 @@ export default {
     // flags are enabled in the reviewed release code, not by a browser request.
     // Canary mode remains available whenever public release is disabled again.
     const PUBLIC_LIVE_CHECKOUT_ENABLED = true;
-    if (!PUBLIC_LIVE_CHECKOUT_ENABLED && !isCanary) {
+    if (environment.live && !PUBLIC_LIVE_CHECKOUT_ENABLED && !isCanary) {
       return json({ error: "live_checkout_not_enabled" }, 503);
     }
     // The sandbox QA identity must not contaminate real customer billing.
-    if (userId === Deno.env.get("NBJB_SANDBOX_TEST_USER_ID")) {
+    if (!environment.live && !environment.users.includes(userId)) return json({ error: "qa_identity_not_allowed" }, 403);
+    if (environment.live && userId === Deno.env.get("NBJB_SANDBOX_TEST_USER_ID")) {
       return json({ error: "sandbox_test_account_not_eligible" }, 403);
     }
 
@@ -79,6 +81,7 @@ export default {
     }
 
     try {
+      if (!environment.live && (await stripe.accounts.retrieve()).id !== environment.account) return json({ error: "qa_stripe_account_mismatch" }, 503);
       let customerId =
         entitlement.provider === "stripe" && entitlement.provider_customer_ref
           ? entitlement.provider_customer_ref
@@ -91,10 +94,10 @@ export default {
             metadata: {
               nbjb_user_id: userId,
               nbjb_source: "flamewalker_account",
-              nbjb_environment: "live",
+              nbjb_environment: environment.tag,
             },
           },
-          { idempotencyKey: `nbjb-live-customer-${userId}` },
+          { idempotencyKey: `nbjb-${environment.tag}-customer-${userId}` },
         );
 
         customerId = customer.id;
@@ -117,7 +120,7 @@ export default {
       });
 
       const price = prices.data[0];
-      if (!validPrice(price, offer)) {
+      if (!validPrice(price, offer, environment.live)) {
         console.error("checkout_offer_misconfigured", offer.lookupKey);
         return json({ error: "offer_not_configured" }, 503);
       }
@@ -132,12 +135,13 @@ export default {
         metadata: {
           nbjb_user_id: userId,
           nbjb_offer: offer.lookupKey,
-          nbjb_environment: "live",
+          nbjb_environment: environment.tag,
         },
         subscription_data: {
           metadata: {
             nbjb_user_id: userId,
             nbjb_offer: offer.lookupKey,
+            nbjb_environment: environment.tag,
           },
         },
       };

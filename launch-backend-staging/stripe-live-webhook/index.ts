@@ -81,7 +81,7 @@ export default {
     if (environment.live && !event.livemode) return json({ error: "test_event_not_allowed" }, 400);
     if (!environment.live && event.livemode) return json({ error: "qa_live_event_not_allowed" }, 400);
     if (!environment.live) {
-      try { if ((await stripe.accounts.retrieve()).id !== environment.account) return json({ error: "qa_stripe_account_mismatch" }, 503); }
+      try { if ((await stripe.accounts.retrieveCurrent()).id !== environment.account) return json({ error: "qa_stripe_account_mismatch" }, 503); }
       catch { return json({ error: "qa_stripe_account_unavailable" }, 503); }
     }
     // Keep sandbox QA membership separate from real paying customers.
@@ -203,8 +203,8 @@ export default {
         case "customer.subscription.deleted":
         case "customer.subscription.paused":
         case "customer.subscription.resumed":
-        case "customer.subscription.collection_paused":
-        case "customer.subscription.collection_resumed": {
+        case "customer.subscription.pending_update_applied":
+        case "customer.subscription.pending_update_expired": {
           const subscription = event.data.object as Stripe.Subscription;
           const synced = await syncSubscription(subscription.id, subscription.metadata?.nbjb_user_id);
           if (!synced) handled = false;

@@ -1,0 +1,98 @@
+name: Front door 250 isolated acceptance
+on:
+  push:
+    branches: ['qa/front-door-250']
+    paths: ['.github/workflows/front-door-250-qa.yml']
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install playwright
+      - run: python -m playwright install --with-deps chromium
+      - name: Static and browser acceptance
+        run: |
+          git show 983435aeff79ea7ec8f46f9afad6a0e527de0f08:index.html > /tmp/baseline-home.html
+          git show 983435aeff79ea7ec8f46f9afad6a0e527de0f08:join.html > /tmp/baseline-join.html
+          python -m http.server 8765 --bind 127.0.0.1 >/tmp/front-door-server.log 2>&1 &
+          mkdir -p qa-captures
+          python - <<'PY'
+          import re, pathlib, urllib.request, time
+          from playwright.sync_api import sync_playwright
+          root='http://127.0.0.1:8765/'
+          routes=['divorce-recovery.html','masculine-restoration-placeholder-wound.html','path-masculine-restoration-steadiness.html','mens-mental-health.html','mens-personal-development.html','lesson-boundaries-are-actions.html']
+          for name, old in [('index.html','/tmp/baseline-home.html'),('join.html','/tmp/baseline-join.html')]:
+              baseline=pathlib.Path(old).read_text(); candidate=pathlib.Path(name).read_text()
+              assert baseline.split('</head>')[0]==candidate.split('</head>')[0],name+' head changed'
+              assert baseline[baseline.index('<footer'):]==candidate[candidate.index('<footer'):],name+' footer changed'
+              ctas=lambda s: re.findall(r'href="([^"]+)" data-growth-cta="([^"]+)"',s)
+              assert ctas(baseline)==ctas(candidate),name+' tracking changed'
+          for route in routes+['support.html','member-auth.html','path.html']:
+              assert pathlib.Path(route).is_file(), route
+          time.sleep(1)
+          with sync_playwright() as p:
+              browser=p.chromium.launch()
+              for w,h in [(320,800),(390,844),(1280,900)]:
+                  for js in [True,False]:
+                      context=browser.new_context(viewport={'width':w,'height':h},java_script_enabled=js, reduced_motion='reduce')
+                      context.route('**/*',lambda r:r.continue_() if r.request.url.startswith(root) else r.abort())
+                      page=context.new_page()
+                      response=page.goto(root)
+                      assert response.status==200
+                      hero=page.locator('.nbjb-front-door-hero')
+                      start=hero.get_by_role('link',name='Find My Starting Point')
+                      assert start.is_visible()
+                      assert start.bounding_box()['width']>=44 and start.bounding_box()['height']>=44
+                      page.screenshot(path=f'qa-captures/home-{w}-js{js}.png')
+                      start.focus()
+                      page.keyboard.press('Enter')
+                      assert page.url.endswith('#start-here')
+                      section=page.locator('#start-here')
+                      assert section.get_by_role('heading',name='A two-minute reset').is_visible()
+                      assert section.locator('input,textarea,form').count()==0
+                      assert section.locator('.nbjb-start-card').count()==6
+                      assert section.locator('#first-seven-days').get_by_text('It is not available yet.',exact=False).is_visible()
+                      assert section.locator('#first-seven-days a').get_attribute('href')=='path.html'
+                      assert page.locator('html').evaluate('(el) => el.scrollWidth <= window.innerWidth+1')
+                      section.screenshot(path=f'qa-captures/start-{w}-js{js}.png')
+                      for idx,path in enumerate(routes):
+                          page.goto(root+'#start-here')
+                          card=page.locator('.nbjb-start-card').nth(idx)
+                          link=card.get_by_role('link')
+                          assert link.get_attribute('href')==path
+                          assert link.bounding_box()['height']>=44
+                          link.click()
+                          assert page.url==root+path, page.url
+                          assert page.locator('h1').count()==1
+                      page.goto(root+'join.html?utm_source=qa&utm_medium=organic_social&utm_campaign=qa')
+                      assert page.locator('.nbjb-join-hero').get_by_role('link',name='Create My Free Account').get_attribute('href')=='member-auth.html'
+                      assert page.locator('.nbjb-join-hero').get_by_role('link',name='Sign in').get_attribute('href')=='member-auth.html'
+                      assert page.locator('html').evaluate('(el) => el.scrollWidth <= window.innerWidth+1')
+                      page.screenshot(path=f'qa-captures/join-{w}-js{js}.png')
+                      page.get_by_role('link',name='Try Free Guidance Without Signing Up').click()
+                      assert page.url.endswith('index.html#start-here')
+                      print(f'PASS {w}px JS={js}: hero keyboard navigation, six public routes, no form, planned program, signup and sign-in hrefs, join escape route, overflow')
+                      context.close()
+              browser.close()
+          # Read-only public production check, no signup/analytics/browser JS.
+          for path, filename, expected in [('', '/tmp/baseline-home.html','Start Free Flamewalker'),('join.html','/tmp/baseline-join.html','Create My Free Account')]:
+              req=urllib.request.Request('https://notbrokenjustburning.com/'+path,headers={'User-Agent':'NBJB front door release QA'})
+              with urllib.request.urlopen(req,timeout=20) as response:
+                  live=response.read().decode('utf-8')
+                  assert response.status==200 and expected in live,path
+                  print('LIVE',path or '/', 'exact baseline bytes:', live==pathlib.Path(filename).read_text())
+          print('PASS: read-only live homepage and join smoke')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: front-door-250-captures
+          path: qa-captures/

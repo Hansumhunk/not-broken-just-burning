@@ -1,0 +1,70 @@
+name: SEO release diagnostics
+on:
+  pull_request:
+    paths:
+      - 'scripts/seo_release_diagnostics.py'
+      - '.github/workflows/seo-release-diagnostics.yml'
+      - 'divorce-recovery.html'
+permissions:
+  contents: read
+concurrency:
+  group: seo-release-diagnostics-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  diagnose:
+    if: github.event.pull_request.head.ref == 'growth/seo-p1-foundation' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser test dependency
+        run: python -m pip install playwright==1.51.0
+      - name: Controlled rendering and repeated desktop Lighthouse
+        shell: bash
+        run: |
+          set -euo pipefail
+          git worktree add --detach "$RUNNER_TEMP/prior" 0713b580674cdd9e9ca4905861f1511e1b106ac3
+          export SEO_DIAGNOSTICS_DIR="$RUNNER_TEMP/seo-release-diagnostics"
+          mkdir -p "$SEO_DIAGNOSTICS_DIR"
+          python -m http.server 8765 --bind 127.0.0.1 --directory "$RUNNER_TEMP/prior" >/dev/null 2>&1 &
+          before=$!
+          python -m http.server 8766 --bind 127.0.0.1 --directory "$GITHUB_WORKSPACE" >/dev/null 2>&1 &
+          after=$!
+          trap 'kill "$before" "$after" || true' EXIT
+          for port in 8765 8766; do
+            for i in {1..10}; do
+              if curl -fsS "http://127.0.0.1:$port/divorce-recovery.html" >/dev/null; then break; fi
+              sleep 1
+            done
+            curl -fsS "http://127.0.0.1:$port/divorce-recovery.html" >/dev/null
+          done
+          export CHROME_PATH="$(command -v google-chrome || command -v chromium)"
+          python scripts/seo_release_diagnostics.py | tee -a "$GITHUB_STEP_SUMMARY"
+          for rep in 1 2 3; do
+            ports="8765 8766"; if [ "$rep" = 2 ]; then ports="8766 8765"; fi
+            for port in $ports; do
+              npm exec --yes --package lighthouse@13.6.0 -- lighthouse "http://127.0.0.1:$port/divorce-recovery.html" --preset=desktop --quiet --only-categories=performance --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --output=json --output-path="$SEO_DIAGNOSTICS_DIR/lh-$port-$rep.json"
+            done
+          done
+          python - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
+          import os,json,statistics,pathlib
+          root=pathlib.Path(os.environ["SEO_DIAGNOSTICS_DIR"])
+          for port in (8765,8766):
+              rows=[json.loads((root/f"lh-{port}-{i}.json").read_text()) for i in (1,2,3)]
+              assert not any(x.get("runtimeError") for x in rows)
+              for key in ("largest-contentful-paint","first-contentful-paint","total-blocking-time","cumulative-layout-shift"):
+                  vals=[round(x["audits"][key]["numericValue"],3) for x in rows]
+                  print(f"Desktop Lighthouse {port} {key}: {vals}; median {statistics.median(vals)}")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: seo-release-diagnostics
+          path: ${{ runner.temp }}/seo-release-diagnostics/
+          retention-days: 14

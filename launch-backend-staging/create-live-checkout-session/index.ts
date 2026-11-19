@@ -61,7 +61,7 @@ export default {
 
     const { data: entitlement, error: entitlementError } = await ctx.supabaseAdmin
       .from("membership_entitlements")
-      .select("tier,status,provider,provider_customer_ref,provider_subscription_ref,cancel_at_period_end")
+      .select("tier,status,provider,provider_customer_ref,provider_subscription_ref,cancel_at_period_end,valid_until")
       .eq("user_id", userId)
       .single();
 
@@ -72,7 +72,8 @@ export default {
 
     if (
       entitlement.tier === "paid_member" &&
-      ["active", "trialing", "past_due"].includes(entitlement.status)
+      ["active", "trialing", "past_due"].includes(entitlement.status) &&
+      Number.isFinite(Date.parse(entitlement.valid_until ?? "")) && Date.parse(entitlement.valid_until ?? "") > Date.now()
     ) {
       return json({ error: "already_subscribed", manage_in_portal: true }, 409);
     }

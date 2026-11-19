@@ -655,21 +655,22 @@ test('live subscription UI is prepared but closed until explicit final launch ap
 
 test('live checkout checks returning customer Stripe subscription status before opening a new session', () => {
   const source = read('launch-backend-staging/create-live-checkout-session/index.ts');
-  assert.match(source, /stripe\.subscriptions\.list\(/);
-  assert.match(source, /status: "all"/);
+  const reservation = read('launch-backend-staging/create-live-checkout-session/reserved-checkout.mjs');
+  assert.match(reservation, /stripe\.subscriptions\.list\(/);
+  assert.match(reservation, /status:'all'/);
   const policy = read('launch-backend-staging/create-live-checkout-session/checkout-policy.mjs');
   assert.match(policy, /'active','trialing','past_due','unpaid','incomplete','paused'/);
   assert.match(policy, /subscriptions\?\.has_more/);
-  assert.match(source, /checkoutConflict\(customerSubscriptions, sessions\)/);
+  assert.match(source, /reservedCheckout\(ctx\.supabaseAdmin, stripe,/);
   assert.match(source, /already_subscribed/);
-  assert.ok(source.indexOf('stripe.subscriptions.list(') < source.indexOf('stripe.checkout.sessions.create('));
+  assert.ok(reservation.indexOf('stripe.subscriptions.list(') < reservation.indexOf('stripe.checkout.sessions.create('));
 });
 
 test('deployed live checkout source requires a real published library before Stripe customer creation', () => {
   const source = read('launch-backend-staging/create-live-checkout-session/index.ts');
   assert.match(source, /NBJB_LIVE_BILLING_MODE/);
   assert.match(source, /const PUBLIC_LIVE_CHECKOUT_ENABLED = true;/);
-  assert.match(source, /if \(!PUBLIC_LIVE_CHECKOUT_ENABLED && !isCanary\)/);
+  assert.match(source, /if \(environment\.live && !PUBLIC_LIVE_CHECKOUT_ENABLED && !isCanary\)/);
   assert.match(source, /flamewalker_premium_lessons/);
   assert.match(source, /count: "exact", head: true/);
   assert.match(source, /\.eq\("status", "published"\)/);

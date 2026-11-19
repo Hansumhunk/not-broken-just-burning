@@ -1,0 +1,21 @@
+name: SEO production probe acceptance
+on:
+  pull_request:
+    paths:
+      - 'scripts/seo_production_probe.py'
+      - '.github/workflows/seo-production-probe.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Exercise deterministic positive and negative fixtures
+        run: python scripts/seo_production_probe.py --self-test
+      - name: Read-only production baseline (not candidate deployment)
+        run: python scripts/seo_production_probe.py

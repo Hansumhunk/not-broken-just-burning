@@ -49,3 +49,12 @@ test('provider-confirmed expired session releases reservation, next attempt gets
  assert.ok(f.row.released_at);
  await reservedCheckout(f.admin,f.stripe,input(annual),()=>now);assert.notEqual(f.row.provider_key,key);
 });
+
+import {billingEnvironment} from '../launch-backend-staging/membership-atomic/billing-environment.mjs';
+test('QA mode fails closed on wrong project, live key, production callback or missing second identity',()=>{
+ const qa={SUPABASE_URL:'https://fgpkejlmpfkxgpktgdzm.supabase.co',NBJB_MEMBERSHIP_MODE:'qa',NBJB_MEMBERSHIP_QA_USER_IDS:'00000000-0000-4000-8000-000000000001,00000000-0000-4000-8000-000000000002',NBJB_MEMBERSHIP_QA_STRIPE_SECRET_KEY:'sk_test_fixture',NBJB_MEMBERSHIP_QA_STRIPE_ACCOUNT:'acct_fixture',NBJB_MEMBERSHIP_QA_SITE_URL:'http://localhost:8080'};
+ const cfg=env=>billingEnvironment(k=>env[k]);
+ assert.equal(cfg(qa).live,false);
+ for(const overrides of [{SUPABASE_URL:'https://plhbvtbvtxfzulsaxuim.supabase.co'},{NBJB_MEMBERSHIP_QA_STRIPE_SECRET_KEY:'sk_live_fixture'},{NBJB_MEMBERSHIP_QA_SITE_URL:'https://notbrokenjustburning.com'},{NBJB_MEMBERSHIP_QA_USER_IDS:'00000000-0000-4000-8000-000000000001'},{NBJB_MEMBERSHIP_MODE:'live'}])assert.equal(cfg({...qa,...overrides}),null);
+ assert.equal(cfg({SUPABASE_URL:'https://plhbvtbvtxfzulsaxuim.supabase.co',STRIPE_LIVE_SECRET_KEY:'sk_live_fixture'}).live,true);
+});

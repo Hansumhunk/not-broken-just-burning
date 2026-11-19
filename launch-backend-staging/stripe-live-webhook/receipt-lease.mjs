@@ -3,14 +3,14 @@
 export const RECEIPT_LEASE_MS = 15 * 60 * 1000;
 
 /** @param {any} receipts @param {any} event @param {number} now */
-export async function claimReceipt(receipts, event, now = Date.now()) {
-  if (event?.livemode !== true || typeof event.id !== "string" || !event.id) return { kind: "error" };
+export async function claimReceipt(receipts, event, now = Date.now(), live = true) {
+  if (event?.livemode !== live || typeof event.id !== "string" || !event.id) return { kind: "error" };
   const lease = new Date(now).toISOString();
   const { data: existing, error: readError } = await receipts
     .select("status,received_at,livemode").eq("event_id", event.id).maybeSingle();
   if (readError) return { kind: "error" };
   if (existing) {
-    if (existing.livemode !== true) return { kind: "error" };
+    if (existing.livemode !== live) return { kind: "error" };
     if (["processed", "ignored"].includes(existing.status)) return { kind: "terminal" };
     const since = Date.parse(existing.received_at);
     if (!Number.isFinite(since)) return { kind: "error" };
@@ -21,7 +21,7 @@ export async function claimReceipt(receipts, event, now = Date.now()) {
     const { data: claimed, error } = await receipts
       .update({ status: "processing", error_message: null, processed_at: null, received_at: lease })
       .eq("event_id", event.id)
-      .eq("livemode", true)
+      .eq("livemode", live)
       .eq("status", existing.status)
       .eq("received_at", existing.received_at)
       .select("event_id").maybeSingle();
@@ -31,7 +31,7 @@ export async function claimReceipt(receipts, event, now = Date.now()) {
   const { error } = await receipts.insert({
     event_id: event.id, event_type: event.type,
     event_created_at: new Date(event.created * 1000).toISOString(),
-    livemode: true, object_ref: typeof event.data?.object?.id === "string" ? event.data.object.id : null,
+    livemode: live, object_ref: typeof event.data?.object?.id === "string" ? event.data.object.id : null,
     status: "processing", received_at: lease,
   });
   if (error?.code === "23505") return { kind: "retry" };

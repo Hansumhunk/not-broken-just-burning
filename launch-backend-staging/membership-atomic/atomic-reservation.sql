@@ -15,7 +15,7 @@ create table public.membership_checkout_attempts (
 );
 create unique index membership_one_active_attempt on public.membership_checkout_attempts(user_id) where released_at is null;
 alter table public.membership_checkout_attempts enable row level security;
-revoke all on public.membership_checkout_attempts from public, anon, authenticated;
+revoke all on public.membership_checkout_attempts from public, anon, authenticated, service_role;
 grant select, insert on public.membership_checkout_attempts to service_role;
 grant update (session_ref,released_at) on public.membership_checkout_attempts to service_role;
 -- No client can call this; SECURITY INVOKER uses service_role privileges.

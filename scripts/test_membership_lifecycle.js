@@ -106,12 +106,12 @@ test('Live checkout excludes designated sandbox identity and prevents duplicate 
  assert.match(checkout,/NBJB_SANDBOX_TEST_USER_ID/);
  assert.match(checkout,/sandbox_test_account_not_eligible/);
  assert.match(checkout,/already_subscribed/);
- assert.match(checkout,/stripe\.subscriptions\.list\(/);
+ assert.match(source('launch-backend-staging/create-live-checkout-session/reserved-checkout.mjs'),/stripe\.subscriptions\.list\(/);
  assert.match(checkout,/PUBLIC_LIVE_CHECKOUT_ENABLED/);
 });
 test('Version-controlled live webhook rejects test Stripe events and requires paid session',()=>{
  const webhook=source('launch-backend-staging/stripe-live-webhook/index.ts');
- assert.match(webhook,/if\s*\(!event\.livemode\)/);
+ assert.match(webhook,/if\s*\(environment\.live && !event\.livemode\)/);
  assert.match(webhook,/test_event_not_allowed/);
  assert.match(webhook,/NBJB_SANDBOX_TEST_USER_ID/);
  assert.match(webhook,/session\.payment_status\s*!==\s*"paid"/);
@@ -122,7 +122,7 @@ test('Version-controlled live webhook recognizes Stripe future cancel_at indepen
  assert.match(webhook,/typeof subscription\.cancel_at === "number"/);
  assert.match(webhook,/subscription\.cancel_at > Math\.floor\(Date\.now\(\) \/ 1000\)/);
  assert.match(webhook,/case "customer\.subscription\.deleted":/);
- assert.match(webhook,/paymentBoundary\(subscription, prior, bounds\)/);
+ assert.match(webhook,/paymentBoundary\(subscription, prior, bounds, Date.now\(\), environment\.live\)/);
 });
 test('Public member pages must keep session and paid premium lessons behind server access',()=>{
  const bootstrap=source('js/member-bootstrap.js');

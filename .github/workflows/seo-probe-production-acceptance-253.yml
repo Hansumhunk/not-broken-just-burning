@@ -1,0 +1,44 @@
+name: SEO diagnostic production acceptance - PR 253
+on:
+  push:
+    branches: [qa/seo-production-acceptance-240]
+    paths: ['.github/workflows/seo-probe-production-acceptance-253.yml']
+permissions:
+  contents: read
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: bf3cd4ac0d7ed9ff93746b04c4608b8fb030af32
+      - name: Verify merged repair fixtures
+        run: python scripts/seo_production_probe.py --self-test
+      - name: Run merged probe against actual production
+        run: python scripts/seo_production_probe.py
+      - name: Verify released public pages, sitemap and account source unchanged
+        shell: bash
+        run: |
+          python - <<'PY'
+          import urllib.request, time, hashlib
+          from pathlib import Path
+          base="https://notbrokenjustburning.com/"
+          paths=["index.html","divorce-recovery.html","masculine-restoration-placeholder-wound.html","mens-mental-health.html","mens-personal-development.html","lessons.html","lesson-clarity-before-certainty.html","lesson-boundaries-are-actions.html","lesson-shame-not-accountability.html","lesson-patterns-are-questions.html","lesson-voice-needs-discipline.html","lesson-peace-is-still-a-life.html","flamewalker-plus.html","member-auth.html","member-premium-lesson.html","members.html","join.html","robots.txt","sitemap.xml"]
+          for path in paths:
+              url=base if path=="index.html" else base+path
+              req=urllib.request.Request(url,headers={"User-Agent":"NBJB approved diagnostic release acceptance","Cache-Control":"no-cache","DNT":"1"})
+              expected=Path(path).read_bytes()
+              for attempt in range(4):
+                  try:
+                      with urllib.request.urlopen(req,timeout=15) as res:
+                          data=res.read()
+                          if res.status==200 and res.url==url and data==expected:
+                              print("PASS exact live bytes",path,hashlib.sha256(data).hexdigest(),flush=True)
+                              break
+                  except Exception as exc:
+                      print("retry",path,type(exc).__name__,flush=True)
+                  if attempt==3: raise AssertionError("Live delivery mismatch: "+path)
+                  time.sleep(5)
+          print("PASS all 19 live file checks; no authenticated requests or payment actions.",flush=True)
+          PY

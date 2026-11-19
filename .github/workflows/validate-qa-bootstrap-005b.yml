@@ -1,0 +1,27 @@
+name: QA bootstrap 005B offline validation
+on:
+  pull_request:
+    branches: [qa/p0-membership-atomic-acceptance-20261119]
+permissions:
+  contents: read
+jobs:
+  disposable:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start disposable PostgreSQL
+        run: |
+          docker run -d --name nbjb-005b-fixture -e POSTGRES_PASSWORD=fixture-only -e POSTGRES_DB=nbjb_005b_fixture postgres:17.12
+          for attempt in $(seq 1 30); do
+            if docker exec nbjb-005b-fixture pg_isready -U postgres -d nbjb_005b_fixture; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Execute schema and fictional fixture smoke
+        env:
+          NBJB_QA_PG: nbjb-005b-fixture
+        run: python scripts/test_qa_bootstrap_005b.py
+      - name: Remove fixture container
+        if: always()
+        run: docker rm -f nbjb-005b-fixture || true

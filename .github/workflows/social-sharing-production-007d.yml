@@ -1,0 +1,80 @@
+name: 007-D social sharing production acceptance
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/social-sharing-production-007d.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    if: github.head_ref == 'qa/007-d-social-sharing-production' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: aff607f56a7407b79944045f0f8aed56545b6aa4
+          persist-credentials: false
+      - name: Install pinned image decoder
+        run: python -m pip install Pillow==11.3.0
+      - name: Verify deployed public site against approved source
+        run: |
+          python scripts/seo_production_probe.py
+          PYTHONPATH=scripts python - <<'PY'
+          from pathlib import Path
+          from html.parser import HTMLParser
+          from hashlib import sha256
+          from concurrent.futures import ThreadPoolExecutor
+          from urllib.request import Request, urlopen
+          from social_share_image import SOCIAL_PATH, SOCIAL_URL, SOCIAL_SIZE, validate_social_image
+          BASE = 'https://notbrokenjustburning.com/'
+          AGENT = 'NBJB-007D-Production-QA/1.0'
+          FB = 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)'
+          def fetch(path, mime, agent=AGENT):
+              url = BASE + path
+              request = Request(url, headers={'User-Agent':agent,'Accept-Encoding':'identity','Cache-Control':'no-cache'})
+              with urlopen(request, timeout=15) as response:
+                  assert response.status == 200, (url,response.status)
+                  assert response.url == url, (url,response.url)
+                  assert response.headers.get_content_type() == mime, (url,response.headers.get_content_type())
+                  result = response.read(1024*1024+1)
+                  assert 0 < len(result) <= 1024*1024, (url,'empty or oversized')
+                  return result
+          class Tags(HTMLParser):
+              def __init__(self, data):
+                  super().__init__()
+                  self.meta = {}
+                  self.canonical = []
+                  self.feed(data.decode('utf-8'))
+              def handle_starttag(self, tag, attrs):
+                  a = dict(attrs)
+                  if tag == 'meta':
+                      key = a.get('property') or a.get('name')
+                      if key in ('og:image','twitter:image'):
+                          self.meta.setdefault(key,[]).append(a.get('content'))
+                  if tag == 'link' and a.get('rel') == 'canonical':
+                      self.canonical.append(a.get('href'))
+          local = Path(SOCIAL_PATH).read_bytes()
+          for agent in (AGENT, FB):
+              data = fetch(SOCIAL_PATH,'image/jpeg',agent)
+              assert validate_social_image(data) == SOCIAL_SIZE
+              assert data == local
+              print('PUBLIC JPEG PASS', agent, 'HTTP 200 image/jpeg', len(data), sha256(data).hexdigest(), flush=True)
+          def check(path):
+              local = path.read_bytes()
+              route = '' if path.name == 'index.html' else path.name
+              live = fetch(route,'text/html')
+              tags = Tags(live)
+              assert tags.meta == {'og:image':[SOCIAL_URL], 'twitter:image':[SOCIAL_URL]}, route
+              assert live == local, (route,'public page bytes differ from approved release')
+              return path.name
+          paths = [p for p in Path('.').glob('*.html') if SOCIAL_URL.encode() in p.read_bytes() and Tags(p.read_bytes()).meta.get('og:image') == [SOCIAL_URL]]
+          assert len(paths) == 99, len(paths)
+          with ThreadPoolExecutor(max_workers=4) as pool:
+              done = list(pool.map(check,paths))
+          print('PUBLIC METADATA PASS',len(done),'pages exactly match approved bytes; 198 OG/Twitter tags',flush=True)
+          home = fetch('','text/html',FB)
+          assert Tags(home).meta == {'og:image':[SOCIAL_URL],'twitter:image':[SOCIAL_URL]}
+          assert home == Path('index.html').read_bytes()
+          print('Crawler-user-agent homepage PASS; this is not an authenticated Meta Sharing Debugger scrape.',flush=True)
+          PY

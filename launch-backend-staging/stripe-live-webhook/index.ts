@@ -1,12 +1,13 @@
 import { withSupabase } from "npm:@supabase/server@1.7.0";
 import Stripe from "npm:stripe@22.6.2";
 import { claimReceipt } from "./receipt-lease.mjs";
+import { retryMembershipRevision } from "./revision-retry.mjs";
 import { paymentBoundary, subscriptionConflict } from "./payment-boundary.mjs";
 
 import { billingEnvironment } from "../membership-atomic/billing-environment.mjs";
 const environment = billingEnvironment(k=>Deno.env.get(k));
 const webhookSecret = environment?.endpointSecret;
-const stripe = environment ? new Stripe(environment.key) : null;
+const stripe = environment ? new Stripe(environment.key, { timeout: 8000, maxNetworkRetries: 0 }) : null;
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -133,41 +134,46 @@ export default {
       if (subscription.items?.data?.length !== 1 ||
           !["flamewalker_plus_monthly", "flamewalker_plus_annual"].includes(offer ?? "") ||
           item?.price?.lookup_key !== offer) throw new Error("membership_offer_mismatch");
-      const { data: prior, error: priorError } = await ctx.supabaseAdmin
-        .from("membership_entitlements")
-        .select("tier,status,provider,provider_customer_ref,provider_subscription_ref,valid_from,valid_until,membership_revision")
-        .eq("user_id", userId).maybeSingle();
-      if (priorError || !prior) throw new Error("membership_prior_unavailable");
-      // Re-fetch after reading the revision. Concurrent writers invalidate this snapshot.
-      subscription = await stripe.subscriptions.retrieve(subscriptionId, { expand: ["latest_invoice"] });
-      if (subscription.livemode !== environment.live || (!environment.live && subscription.metadata?.nbjb_environment !== "qa") || idOf(subscription.customer) !== customerId || subscription.metadata?.nbjb_user_id !== userId || subscription.items?.data?.length !== 1 || subscription.metadata?.nbjb_offer !== offer || subscription.items.data[0]?.price?.lookup_key !== offer) throw new Error("membership_mapping_changed");
-      if (subscriptionConflict(subscription, prior, customerId)) throw new Error("membership_subscription_conflict");
-      const bounds = periodBounds(subscription);
-      const mappedState = paymentBoundary(subscription, prior, bounds, Date.now(), environment.live);
-      const paid = mappedState.tier === "paid_member";
-      if (paid && (!Number.isFinite(Date.parse(mappedState.validUntil ?? "")) || !Number.isFinite(Date.parse(mappedState.validFrom ?? "")) || Date.parse(mappedState.validUntil ?? "") <= Date.parse(mappedState.validFrom ?? ""))) throw new Error("missing_paid_through_date");
-
-      const { data: applied, error: entitlementError } = await ctx.supabaseAdmin
-        .from("membership_entitlements")
-        .update(
-          {
-            tier: mappedState.tier,
-            status: mappedState.status,
-            source: "stripe_subscription",
-            provider: "stripe",
-            provider_customer_ref: customerId,
-            provider_subscription_ref: subscription.id,
-            valid_from: mappedState.validFrom,
-            valid_until: mappedState.validUntil,
-            // Stripe flexible billing schedules Customer Portal cancellation using cancel_at,
-            // even when cancel_at_period_end is false. Treat any future cancel_at as scheduled.
-            cancel_at_period_end: paid ? Boolean(subscription.cancel_at_period_end ||
-              (typeof subscription.cancel_at === "number" && subscription.cancel_at > Math.floor(Date.now() / 1000))) : false,
-          },
-        ).eq("user_id", userId).eq("membership_revision", prior.membership_revision).select("user_id").maybeSingle();
-
-      if (entitlementError) throw entitlementError;
-      if (!applied) throw new Error("membership_revision_conflict");
+      // A lost CAS race is expected when Stripe emits sibling events. Each retry
+      // must read the current revision, retrieve Stripe again, and recompute.
+      await retryMembershipRevision(async () => {
+        const { data: prior, error: priorError } = await ctx.supabaseAdmin
+          .from("membership_entitlements")
+          .select("tier,status,provider,provider_customer_ref,provider_subscription_ref,valid_from,valid_until,membership_revision")
+          .eq("user_id", userId).maybeSingle();
+        if (priorError || !prior) throw new Error("membership_prior_unavailable");
+        // Re-fetch after reading the revision. Concurrent writers invalidate this snapshot.
+        subscription = await stripe.subscriptions.retrieve(subscriptionId, { expand: ["latest_invoice"] });
+        if (subscription.livemode !== environment.live || (!environment.live && subscription.metadata?.nbjb_environment !== "qa") || idOf(subscription.customer) !== customerId || subscription.metadata?.nbjb_user_id !== userId || subscription.items?.data?.length !== 1 || subscription.metadata?.nbjb_offer !== offer || subscription.items.data[0]?.price?.lookup_key !== offer) throw new Error("membership_mapping_changed");
+        if (subscriptionConflict(subscription, prior, customerId)) throw new Error("membership_subscription_conflict");
+        const bounds = periodBounds(subscription);
+        const mappedState = paymentBoundary(subscription, prior, bounds, Date.now(), environment.live);
+        const paid = mappedState.tier === "paid_member";
+        if (paid && (!Number.isFinite(Date.parse(mappedState.validUntil ?? "")) || !Number.isFinite(Date.parse(mappedState.validFrom ?? "")) || Date.parse(mappedState.validUntil ?? "") <= Date.parse(mappedState.validFrom ?? ""))) throw new Error("missing_paid_through_date");
+  
+        const { data: applied, error: entitlementError } = await ctx.supabaseAdmin
+          .from("membership_entitlements")
+          .update(
+            {
+              tier: mappedState.tier,
+              status: mappedState.status,
+              source: "stripe_subscription",
+              provider: "stripe",
+              provider_customer_ref: customerId,
+              provider_subscription_ref: subscription.id,
+              valid_from: mappedState.validFrom,
+              valid_until: mappedState.validUntil,
+              // Stripe flexible billing schedules Customer Portal cancellation using cancel_at,
+              // even when cancel_at_period_end is false. Treat any future cancel_at as scheduled.
+              cancel_at_period_end: paid ? Boolean(subscription.cancel_at_period_end ||
+                (typeof subscription.cancel_at === "number" && subscription.cancel_at > Math.floor(Date.now() / 1000))) : false,
+            },
+          ).eq("user_id", userId).eq("membership_revision", prior.membership_revision).select("user_id").maybeSingle();
+  
+        if (entitlementError) throw entitlementError;
+        return Boolean(applied);
+  
+      });
 
       receiptUserId = userId;
       receiptObjectRef = subscription.id;
@@ -266,7 +272,7 @@ export default {
         .eq("status", "processing")
         .eq("received_at", receiptLease);
 
-      return json({ error: "webhook_processing_failed" }, 500);
+      return json({ error: "webhook_processing_failed" }, code === "membership_revision_conflict" ? 503 : 500);
     }
   }),
 };

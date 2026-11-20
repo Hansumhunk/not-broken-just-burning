@@ -194,7 +194,7 @@ if (!document.querySelector('meta[name="twitter:card"]')) {
 const SITE_NAME = 'Not Broken Just Burning';
 const FOUNDER_NAME = 'Rickey Partin Jr.';
 const FOUNDER_URL = `${SITE_ORIGIN}/founder.html`;
-const SOCIAL_IMAGE_URL = `${SITE_ORIGIN}/assets/social-share.png`;
+const SOCIAL_IMAGE_URL = `${SITE_ORIGIN}/assets/social-share-v2.jpg`;
 
 function addStructuredData(id, data) {
   if (document.querySelector(`script[data-schema="${id}"]`)) return;

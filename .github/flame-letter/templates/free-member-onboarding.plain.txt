@@ -1,0 +1,23 @@
+[[FREE_MEMBER_SUBJECT]]
+[[PREHEADER]]
+
+Your free workspace: [[FEATURE_EXPLANATION]]
+
+One practice: [[EXERCISE]]
+
+Your question: [[QUESTION]]
+
+Privacy and next step: [[PRIVACY_AND_OPTIONAL_NEXT_STEP]]
+
+[[RESOURCE_LABEL]]: [[VERIFIED_HTTPS_RESOURCE_URL]]
+
+— Rickey Partin Jr.
+Founder, Not Broken Just Burning
+See clearly. Burn clean. Build deliberately.
+
+NBJB LLC · Educational and personal-development content only. Not medical, mental-health, legal or emergency services.
+Support & safety: https://notbrokenjustburning.com/support.html
+You receive this voluntary email because you confirmed your subscription. Some messages include optional promotional invitations.
+[[REPLACE_WITH_VERIFIED_BUSINESS_MAILING_ADDRESS]]
+Privacy & data use: https://notbrokenjustburning.com/privacy.html
+Unsubscribe: {{ unsubscribe }}

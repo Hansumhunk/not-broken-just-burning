@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   isolated-sdk:
-    if: github.event.pull_request.head.ref == 'fix/004-e-privacy-analytics' && github.event.pull_request.head.repo.full_name == github.repository
+    if: (github.event.pull_request.head.ref == 'fix/004-e-privacy-analytics' || github.event.pull_request.head.ref == 'fix/004-f-cookieless-ingestion') && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:

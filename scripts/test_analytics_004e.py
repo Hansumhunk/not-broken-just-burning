@@ -13,13 +13,15 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parents[1]
 BASE = os.environ["ANALYTICS_BASE_SHA"]
 KEY = "phc_nbjb_isolated_fixture_not_a_real_project"
+DEPLOYED_262 = "25e65d73e111bba5563bca9ae4ea619ed6f6e3e7"
+FIXTURE_UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
 SDK = Path(os.environ["ANALYTICS_SDK_FILE"]).read_bytes()
 ORIGIN = "https://notbrokenjustburning.com"
 CANARY = "FAKECLICKIDENTIFIER_004E"
 SECRET = "FAKE_PRIVATE_VALUE_004E"
 SENTINEL = "$posthog_cookieless"
 EVENTS = {"$pageview", "$pageleave", "nbjb_free_membership_cta_clicked", "nbjb_membership_checkout_requested"}
-ALLOWED = {"token", "$cookieless_mode", "$current_url", "$pathname", "$referrer", "$referring_domain",
+ALLOWED = {"token", "$cookieless_mode", "$raw_user_agent", "$current_url", "$pathname", "$referrer", "$referring_domain",
  "$initial_current_url", "$initial_referrer", "$initial_referring_domain", "$host", "$browser",
  "$browser_version", "$os", "$device_type", "$screen_height", "$screen_width", "$viewport_height",
  "$viewport_width", "$session_id", "$device_id", "$lib", "$lib_version", "$time", "$timezone",
@@ -52,7 +54,7 @@ def decode(raw):
 
 def isolated(browser, src, path, *, gpc=False, dnt=False, foreign=False, interactive=False, expect=True):
     ctx = browser.new_context(service_workers="block",
-        user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
+        user_agent=FIXTURE_UA)
     # PostHog excludes WebDriver/HeadlessChrome. Override only in this wholly
     # intercepted fixture, never on production or in the application.
     ctx.add_init_script("""Object.defineProperty(navigator, 'webdriver', {get:()=>false});
@@ -114,6 +116,8 @@ def isolated(browser, src, path, *, gpc=False, dnt=False, foreign=False, interac
             page.evaluate("""() => { const p=window.posthog;
                 p.capture('nbjb_free_membership_cta_clicked', {placement:'home_hero', email:'FAKE_PRIVATE_VALUE_004E', fbclid:'FAKECLICKIDENTIFIER_004E', access_token:'FAKE_PRIVATE_VALUE_004E'});
                 p.capture('forbidden_fixture_event', {email:'FAKE_PRIVATE_VALUE_004E'});
+                p.capture('nbjb_free_membership_cta_clicked', {placement:'home_hero', $raw_user_agent:'FAKE_PRIVATE_VALUE_004E'});
+                
                 }""")
         # Allow actual SDK request batching to flush; no forced production capture.
         for _ in range(30):
@@ -138,6 +142,16 @@ def assert_payloads(payloads, expected_path):
         assert e["event"] in EVENTS
         assert p["token"]==KEY and p["$cookieless_mode"] is True and p["distinct_id"]==SENTINEL
         assert p["$process_person_profile"] is False
+        assert p["$raw_user_agent"] == FIXTURE_UA
+        assert p.get("$host") == "notbrokenjustburning.com"
+        # Upstream cookieless-manager.ts getProperties() / doBatchInner():
+        # timestamp (envelope), raw UA, IP from capture transport, host required.
+        # IP is intentionally not sent by JS; synthetic server-side IP is only
+        # provided to this local invariant check, never transmitted.
+        assert e.get("timestamp") or e.get("sent_at") or e.get("now"), "Missing SDK timestamp"
+        assert "$ip" not in p and "$cookieless_extra" not in p and "$initial_raw_user_agent" not in p
+        server_side_input = {**p, "$ip": "192.0.2.1"}
+        assert all(server_side_input.get(k) for k in ("$raw_user_agent","$ip","$host"))
         assert set(p) <= ALLOWED, set(p)-ALLOWED
         assert "$set" not in e and "$set_once" not in e
         assert p.get("$session_id") is None and p.get("$device_id") is None
@@ -151,6 +165,7 @@ def assert_payloads(payloads, expected_path):
 def main():
     old=fixture_source(subprocess.check_output(["git","show",BASE+":js/main.js"], text=True))
     new=fixture_source((ROOT/"js/main.js").read_text())
+    deployed=fixture_source(subprocess.check_output(["git","show",DEPLOYED_262+":js/main.js"], text=True))
     print("SDK SHA256",hashlib.sha256(SDK).hexdigest(), flush=True)
     with sync_playwright() as pw:
         browser=pw.chromium.launch(channel="chrome", headless=True, args=["--disable-background-networking"])
@@ -166,6 +181,19 @@ def main():
         _,no_token,_,_=isolated(browser,ablated,"/")
         assert not any(e.get("event")=="$pageview" for e in no_token), "Token-only ablation no longer reproduces transport suppression"
         print("PASS token-only ablation: removing SDK project token suppresses pageview transport",flush=True)
+        # Production #262 restored transport, but the server requires raw UA.
+        # Verify actual SDK outbound payload lacks it in previous deployed code.
+        _,deployed_events,_,_=isolated(browser,deployed,"/")
+        deployed_views=[e for e in deployed_events if e.get("event")=="$pageview"]
+        assert len(deployed_views)==1 and not deployed_views[0]["properties"].get("$raw_user_agent")
+        assert deployed_views[0]["properties"]["$cookieless_mode"] is True
+        print("PASS deployed #262 reproduction: actual SDK transport contains no raw user agent; upstream cookieless_missing_user_agent drop condition",flush=True)
+        # Reproduce only the missing field in the candidate, with everything else unchanged.
+        ua_ablated = new.replace(anchor, anchor+"\n      delete event.properties.$raw_user_agent;")
+        _,missing_ua,_,_=isolated(browser,ua_ablated,"/")
+        ua_views=[e for e in missing_ua if e.get("event")=="$pageview"]
+        assert len(ua_views)==1 and not ua_views[0]["properties"].get("$raw_user_agent")
+        print("PASS UA-only ablation: capture still transmits but violates server hash contract",flush=True)
         old_req,_,_,_=isolated(browser,old,"/join.html?fbclid="+CANARY,expect=False)
         assert not any(h and "posthog.com" in h for h,_,_ in old_req), "Baseline social URL not excluded"
         cases=[("/",None),("/resources.html",None),

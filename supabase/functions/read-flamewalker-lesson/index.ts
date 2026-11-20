@@ -41,7 +41,7 @@ export default {
     // Entitlement comes only from the privileged database record, never caller-controlled metadata.
     const { data: member, error: memberError } = await ctx.supabaseAdmin
       .from("membership_entitlements")
-      .select("tier,status,valid_from,valid_until")
+      .select("tier,status,valid_from,valid_until,provider")
       .eq("user_id", userId)
       .maybeSingle();
 
@@ -56,6 +56,7 @@ export default {
     const entitled = member?.tier === "paid_member"
       && ["active", "trialing", "past_due"].includes(member.status)
       && goodDate(member.valid_from, false)
+      && (member.provider !== "stripe" || member.valid_until != null)
       && goodDate(member.valid_until, true);
 
     // Only the nominated internal test account may review unpublished drafts.

@@ -22,6 +22,8 @@ on:
       - 'FLAMEWALKER_ACCESS.md'
       - 'SUPABASE_PRODUCTION_AUTH.md'
       - 'scripts/validate_site.py'
+      - 'scripts/social_share_image.py'
+      - 'scripts/test_social_share.py'
       - 'scripts/test_member_save_flow.js'
       - 'scripts/test_member_workshop.js'
       - 'scripts/test_member_access_guard.js'
@@ -67,6 +69,8 @@ on:
       - 'README.md'
       - 'FLAMEWALKER_FREE_BETA_LAUNCH.md'
       - 'scripts/validate_site.py'
+      - 'scripts/social_share_image.py'
+      - 'scripts/test_social_share.py'
       - 'scripts/test_member_save_flow.js'
       - 'scripts/test_member_workshop.js'
       - 'scripts/test_member_access_guard.js'
@@ -144,3 +148,27 @@ jobs:
       - name: Smoke-test live Flamewalker Supabase Auth
         if: ${{ github.base_ref == 'main' || github.ref_name == 'main' || startsWith(github.ref_name, 'release/') }}
         run: python scripts/validate_supabase_runtime.py
+
+  social-sharing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned image and browser test dependencies
+        run: python -m pip install Pillow==11.3.0 playwright==1.51.0
+      - name: Verify image integrity, static metadata and browser decode
+        run: python scripts/test_social_share.py --browser
+      - name: Verify SEO and production-probe fixtures on the exact candidate
+        run: |
+          python scripts/validate_site.py
+          python scripts/test_seo_phase_two.py
+          python scripts/seo_production_probe.py --self-test
+      - name: Verify narrow 007-D diff against immutable baseline
+        if: github.event_name == 'pull_request' && github.head_ref == 'growth/007-d-social-share-correction'
+        run: python scripts/test_social_share.py --compare-base 21f2ec9b3ef802a819523befb75dd165b86ce0c7

@@ -31,6 +31,6 @@ test('wrong ownership or nonstripe historical reference fails closed',async()=>{
  const g=fixture({row:{provider:'legacy',provider_customer_ref:'cus_other'}});await assert.rejects(bindMembershipCustomer(g.admin,g.stripe,args),/customer_mapping_review/);assert.equal(g.calls,0);
 });
 test('server hold overrides canary and canonical binding precedes reservation',async()=>{
- const {readFileSync}=await import('node:fs');const code=readFileSync('launch-backend-staging/create-live-checkout-session/index.ts','utf8');assert.match(code,/Deno.env.get\("NBJB_LIVE_CHECKOUT_PAUSED"\) === "true" \|\|/);
+ const {readFileSync}=await import('node:fs');const code=readFileSync('launch-backend-staging/create-live-checkout-session/index.ts','utf8');assert.match(code,/if \(environment\.live && Deno\.env\.get\("NBJB_LIVE_CHECKOUT_PAUSED"\) === "true"\)/); assert.ok(code.indexOf('Deno.env.get("NBJB_LIVE_CHECKOUT_PAUSED")')<code.indexOf('if (environment.live && !PUBLIC_LIVE_CHECKOUT_ENABLED && !isCanary)'));
  assert.ok(code.indexOf('await bindMembershipCustomer')<code.indexOf('await reservedCheckout'));
 });

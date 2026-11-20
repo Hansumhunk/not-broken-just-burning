@@ -53,6 +53,11 @@ def decode(raw):
 def isolated(browser, src, path, *, gpc=False, dnt=False, foreign=False, interactive=False, expect=True):
     ctx = browser.new_context(service_workers="block",
         user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
+    # PostHog excludes WebDriver/HeadlessChrome. Override only in this wholly
+    # intercepted fixture, never on production or in the application.
+    ctx.add_init_script("""Object.defineProperty(navigator, 'webdriver', {get:()=>false});
+        if (navigator.userAgentData) Object.defineProperty(navigator.userAgentData,'brands',
+            {get:()=>[{brand:'Chromium',version:'131'},{brand:'Google Chrome',version:'131'}]});""")
     ctx.add_init_script("Object.defineProperty(navigator,'globalPrivacyControl',{get:()=>%s});"
         "Object.defineProperty(navigator,'doNotTrack',{get:()=>%s});" % (str(gpc).lower(), "'1'" if dnt else "'0'"))
     requests, payloads, errors = [], [], []
@@ -91,6 +96,8 @@ def isolated(browser, src, path, *, gpc=False, dnt=False, foreign=False, interac
             route.abort()
     ctx.route("**/*", route_request)
     page=ctx.new_page()
+    diagnostics=[]
+    page.on('console', lambda msg: diagnostics.append(msg.text[:200]) if 'PostHog' in msg.text else None)
     page.goto(("https://fixture.invalid" if foreign else ORIGIN)+path, wait_until="load")
     if expect:
         page.wait_for_function("window.posthog && window.posthog.__loaded === true", timeout=15000)
@@ -105,6 +112,8 @@ def isolated(browser, src, path, *, gpc=False, dnt=False, foreign=False, interac
             page.wait_for_timeout(400)
             if any(p.get("event")=="$pageview" for p in payloads) and (not interactive or any(p.get("event")=="nbjb_free_membership_cta_clicked" for p in payloads)):
                 break
+        if not any(p.get("event")=="$pageview" for p in payloads):
+            print("NO PAGEVIEW diagnostic", version, page.evaluate("({capturing:posthog.is_capturing(), webdriver:navigator.webdriver, brands:navigator.userAgentData?.brands})"), requests, diagnostics, flush=True)
         storage=page.evaluate("() => ({local:Object.keys(localStorage),session:Object.keys(sessionStorage),cookie:document.cookie})")
     else:
         page.wait_for_timeout(900)

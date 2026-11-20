@@ -1,0 +1,30 @@
+name: 004-E isolated analytics acceptance
+on:
+  pull_request:
+    paths:
+      - 'js/main.js'
+      - 'scripts/test_analytics_004e.py'
+      - '.github/workflows/analytics-004e.yml'
+permissions:
+  contents: read
+jobs:
+  isolated-sdk:
+    if: github.event.pull_request.head.ref == 'fix/004-e-privacy-analytics' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Install browser test dependency
+        run: python -m pip install playwright==1.51.0
+      - name: Download the actual public SDK asset (GET only)
+        run: curl -fsSL --max-time 60 https://us-assets.i.posthog.com/static/array.js -o "$RUNNER_TEMP/analytics-array.js"
+      - name: Compare baseline and candidate in intercepted Chromium
+        env:
+          ANALYTICS_BASE_SHA: aff607f56a7407b79944045f0f8aed56545b6aa4
+          ANALYTICS_SDK_FILE: ${{ runner.temp }}/analytics-array.js
+        run: |
+          node --check js/main.js
+          python scripts/test_analytics_004e.py

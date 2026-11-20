@@ -676,7 +676,9 @@ test('deployed live checkout source requires a real published library before Str
   assert.match(source, /\.eq\("status", "published"\)/);
   assert.match(source, /publishedLessons < 7/);
   assert.match(source, /premium_library_not_ready/);
-  assert.ok(source.indexOf('publishedLessons < 7') < source.indexOf('stripe.customers.create('),
+  const binding = read('launch-backend-staging/create-live-checkout-session/customer-binding.mjs');
+  assert.match(binding, /stripe\.customers\.create\(/);
+  assert.ok(source.indexOf('await bindMembershipCustomer(') > source.indexOf('publishedLessons < 7'),
     'content availability must be checked before customer creation');
 });
 

@@ -67,6 +67,14 @@ def isolated(browser, src, path, *, gpc=False, dnt=False, foreign=False, interac
         req = route.request
         u = urlsplit(req.url)
         requests.append((u.hostname, u.path, req.method))
+        if u.hostname in ("us-assets.i.posthog.com","us.i.posthog.com"):
+            # Check non-event transports as well as sanitized event bodies.
+            metadata = req.url + json.dumps(req.all_headers())
+            if CANARY in metadata or SECRET in metadata:
+                errors.append("Sensitive fixture value in analytics request URL or headers")
+            if req.post_data_buffer and not (u.path.endswith("/e/") or u.path in ("/e","/batch/","/capture/")):
+                if CANARY.encode() in req.post_data_buffer or SECRET.encode() in req.post_data_buffer:
+                    errors.append("Sensitive fixture value in non-capture analytics body")
         if u.hostname in ("notbrokenjustburning.com","www.notbrokenjustburning.com","fixture.invalid"):
             if u.path == "/js/main.js":
                 route.fulfill(status=200, content_type="application/javascript", body=src)
@@ -150,11 +158,20 @@ def main():
         old_views=[e for e in old_events if e.get("event")=="$pageview"]
         assert not old_views or all(not e["properties"].get("token") or e["properties"].get("$cookieless_mode") is not True for e in old_views), "Baseline did not reproduce invalid transport; investigate"
         print("BASELINE SDK",version,"pageview requests",len(old_views),"missing valid protocol metadata",flush=True)
+        # Ablation: candidate unchanged except remove the SDK project routing
+        # token AFTER the sanitizer. Same SDK, privacy mode, route and config.
+        anchor = "      event.properties.$process_person_profile = false;"
+        assert new.count(anchor)==1
+        ablated = new.replace(anchor, anchor+"\n      delete event.properties.token;")
+        _,no_token,_,_=isolated(browser,ablated,"/")
+        assert not any(e.get("event")=="$pageview" for e in no_token), "Token-only ablation no longer reproduces transport suppression"
+        print("PASS token-only ablation: removing SDK project token suppresses pageview transport",flush=True)
         old_req,_,_,_=isolated(browser,old,"/join.html?fbclid="+CANARY,expect=False)
         assert not any(h and "posthog.com" in h for h,_,_ in old_req), "Baseline social URL not excluded"
         cases=[("/",None),("/resources.html",None),
                ("/join.html?utm_source=facebook&utm_medium=organic_social&utm_campaign=flamewalker_first10&utm_content=boundaries_paid_nov20&fbclid="+CANARY+"#exercise","facebook"),
-               ("/?utm_source=chatgpt.com&utm_campaign=flamewalker_first10","chatgpt.com")]
+               ("/?utm_source=chatgpt.com&utm_campaign=flamewalker_first10","chatgpt.com"),
+               ("/member-store.html?checkout=success",None)]
         for path,source in cases:
             req,events,storage,version=isolated(browser,new,path,interactive=path=="/")
             p=assert_payloads(events,urlsplit(path).path)

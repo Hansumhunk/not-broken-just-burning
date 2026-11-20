@@ -88,10 +88,18 @@ if (analyticsHostnames.has(window.location.hostname) && !privacySignalEnabled &&
       // the SDK's public project token or cookieless marker cannot be safely ingested.
       if (event.properties.token !== analyticsProjectToken || event.properties.$cookieless_mode !== true ||
           event.properties.distinct_id !== '$posthog_cookieless') return null;
+      // PostHog's server-side cookieless hash requires the genuine SDK user
+      // agent. Accept only the browser's own nonempty value, not custom data.
+      // The upstream cookieless ingestion step strips this and the server IP
+      // before storing the processed event. Never add a client IP or hash extra.
+      const rawUserAgent = event.properties.$raw_user_agent;
+      if (typeof rawUserAgent !== 'string' || !rawUserAgent.trim() ||
+          rawUserAgent.length > 2048 || rawUserAgent !== navigator.userAgent ||
+          /[\x00-\x1f\x7f]/.test(rawUserAgent)) return null;
       // Prevent top-level person updates from bypassing the property allowlist.
       delete event.$set;
       delete event.$set_once;
-      const safe = new Set(['token','$cookieless_mode','$current_url','$pathname','$referrer','$referring_domain',
+      const safe = new Set(['token','$cookieless_mode','$raw_user_agent','$current_url','$pathname','$referrer','$referring_domain',
         '$initial_current_url','$initial_referrer','$initial_referring_domain',
         '$host','$browser','$browser_version','$os','$device_type','$screen_height','$screen_width',
         '$viewport_height','$viewport_width','$session_id','$device_id','$lib','$lib_version',

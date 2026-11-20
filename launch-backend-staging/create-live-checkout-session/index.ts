@@ -2,6 +2,7 @@ import { withSupabase } from "npm:@supabase/server@1.7.0";
 import Stripe from "npm:stripe@22.6.2";
 import { lookupOffer, validPrice } from "./checkout-policy.mjs";
 import { reservedCheckout } from "./reserved-checkout.mjs";
+import { bindMembershipCustomer } from "./customer-binding.mjs";
 
 import { billingEnvironment } from "../membership-atomic/billing-environment.mjs";
 const environment = billingEnvironment(k=>Deno.env.get(k));
@@ -29,7 +30,7 @@ export default {
     // flags are enabled in the reviewed release code, not by a browser request.
     // Canary mode remains available whenever public release is disabled again.
     const PUBLIC_LIVE_CHECKOUT_ENABLED = true;
-    if (environment.live && !PUBLIC_LIVE_CHECKOUT_ENABLED && !isCanary) {
+    if (environment.live && (Deno.env.get("NBJB_LIVE_CHECKOUT_PAUSED") === "true" || (!PUBLIC_LIVE_CHECKOUT_ENABLED && !isCanary))) {
       return json({ error: "live_checkout_not_enabled" }, 503);
     }
     // The sandbox QA identity must not contaminate real customer billing.
@@ -82,36 +83,7 @@ export default {
 
     try {
       if (!environment.live && (await stripe.accounts.retrieveCurrent()).id !== environment.account) return json({ error: "qa_stripe_account_mismatch" }, 503);
-      let customerId =
-        entitlement.provider === "stripe" && entitlement.provider_customer_ref
-          ? entitlement.provider_customer_ref
-          : null;
-
-      if (!customerId) {
-        const customer = await stripe.customers.create(
-          {
-            email: typeof email === "string" ? email : undefined,
-            metadata: {
-              nbjb_user_id: userId,
-              nbjb_source: "flamewalker_account",
-              nbjb_environment: environment.tag,
-            },
-          },
-          { idempotencyKey: `nbjb-${environment.tag}-customer-${userId}` },
-        );
-
-        customerId = customer.id;
-
-        const { error: customerSaveError } = await ctx.supabaseAdmin
-          .from("membership_entitlements")
-          .update({
-            provider: "stripe",
-            provider_customer_ref: customerId,
-          })
-          .eq("user_id", userId);
-
-        if (customerSaveError) throw customerSaveError;
-      }
+      const customerId = await bindMembershipCustomer(ctx.supabaseAdmin, stripe, {userId,email,entitlement,environment});
 
       const prices = await stripe.prices.list({
         active: true,
@@ -150,6 +122,8 @@ export default {
       return json({ url: result.url });
     } catch (error) {
       console.error("checkout_failed");
+      const code = error instanceof Error ? error.message : "";
+      if (["customer_mapping_review","customer_mapping_unavailable"].includes(code)) return json({ error: code }, 503);
       return json({ error: "checkout_failed" }, 500);
     }
   }),

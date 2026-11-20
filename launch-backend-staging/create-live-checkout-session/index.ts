@@ -30,7 +30,10 @@ export default {
     // flags are enabled in the reviewed release code, not by a browser request.
     // Canary mode remains available whenever public release is disabled again.
     const PUBLIC_LIVE_CHECKOUT_ENABLED = true;
-    if (environment.live && (Deno.env.get("NBJB_LIVE_CHECKOUT_PAUSED") === "true" || (!PUBLIC_LIVE_CHECKOUT_ENABLED && !isCanary))) {
+    if (environment.live && Deno.env.get("NBJB_LIVE_CHECKOUT_PAUSED") === "true") {
+      return json({ error: "live_checkout_not_enabled" }, 503);
+    }
+    if (environment.live && !PUBLIC_LIVE_CHECKOUT_ENABLED && !isCanary) {
       return json({ error: "live_checkout_not_enabled" }, 503);
     }
     // The sandbox QA identity must not contaminate real customer billing.

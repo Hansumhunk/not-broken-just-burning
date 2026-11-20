@@ -20,6 +20,12 @@ jobs:
           node-version: '22'
       - name: Exercise staged reservation logic
         run: node --test scripts/test_membership_atomic.mjs
+      - name: Install pinned Stripe SDK for offline signature tests
+        run: npm install --prefix /tmp/nbjb-offline-sdk --no-save --ignore-scripts stripe@22.6.2
+      - name: Test actual signed handler and server-clock reader offline
+        env:
+          NODE_PATH: /tmp/nbjb-offline-sdk/node_modules
+        run: node --test scripts/test_membership_atomic_handler.mjs
       - name: Start disposable PostgreSQL
         run: |
           docker run -d --name nbjb-atomic-fixture -e POSTGRES_PASSWORD=fixture-only -e POSTGRES_DB=nbjb_membership_fixture postgres:17.12

@@ -200,11 +200,11 @@ function evaluateAnalytics(page, search='', hash='', navigator={}) {
  const start=script.indexOf('const analyticsHostnames');
  const end=script.indexOf('// V0.8 launch metadata fallback',start);
  assert.ok(start>=0&&end>start);
- const events=[],config=[];
- const posthog={__loaded:true,init(_key,options){config.push(options)},capture(name,properties){events.push({name,properties})}};
+ const events=[],config=[],keys=[];
+ const posthog={__loaded:true,init(key,options){keys.push(key);config.push(options)},capture(name,properties){events.push({name,properties})}};
  const window={location:{hostname:'notbrokenjustburning.com',search,hash},posthog};
  vm.runInNewContext(script.slice(start,end),{currentPage:page,window,posthog,navigator,URL,URLSearchParams,document:{addEventListener(){}}});
- return {window,events,config};
+ return {window,events,config,keys};
 }
 test('membership analytics refuses private workspaces, token-bearing URLs and opt-out',()=>{
  for(const [page,search,hash,navigator] of [
@@ -231,7 +231,7 @@ test('membership intent telemetry has only allowlisted event and plan, URL prope
    {name:'nbjb_membership_checkout_requested',properties:{plan:'monthly',$process_person_profile:false}},
    {name:'nbjb_membership_checkout_requested',properties:{plan:'annual',$process_person_profile:false}}
  ]);
- const sanitized=result.config[0].before_send({event:'nbjb_membership_checkout_requested',properties:{$current_url:'https://notbrokenjustburning.com/member-store.html?checkout=success#sensitive', $referrer:'https://example.com/?token=synthetic',plan:'monthly'}});
+ const sanitized=result.config[0].before_send({event:'nbjb_membership_checkout_requested',properties:{token:result.keys[0],$cookieless_mode:true,distinct_id:'$posthog_cookieless',$current_url:'https://notbrokenjustburning.com/member-store.html?checkout=success#sensitive', $referrer:'https://example.com/?token=synthetic',plan:'monthly'}});
  assert.equal(sanitized.properties.$current_url,'https://notbrokenjustburning.com/member-store.html');
  assert.equal(sanitized.properties.$referrer,'https://example.com/');
  assert.equal(sanitized.properties.plan,'monthly');
@@ -246,13 +246,25 @@ test('analytics allowlist discards unknown events, sensitive fields, and externa
  const result=evaluateAnalytics('member-store.html');
  const redact=result.config[0].before_send;
  assert.equal(redact({event:'reflection_saved',properties:{text:'synthetic private'}}),null);
- const input={event:'nbjb_membership_checkout_requested',properties:{plan:'annual',placement:'home_hero',email:'synthetic@example.invalid',reflection:'synthetic secret',token:'mock',utm_campaign:'approved_campaign',utm_term:'not allowed!', $referrer:'https://example.com/private/identifier?x=secret',$current_url:'https://notbrokenjustburning.com/member-store.html?x=secret#private'}};
+ const input={event:'nbjb_membership_checkout_requested',properties:{token:result.keys[0],$cookieless_mode:true,distinct_id:'$posthog_cookieless',plan:'annual',placement:'home_hero',email:'synthetic@example.invalid',reflection:'synthetic secret',access_token:'mock',fbclid:'fake-click-id',$device_id:'fake-device',$session_id:'fake-session',utm_campaign:'approved_campaign',utm_term:'not allowed!', $referrer:'https://example.com/private/identifier?x=secret',$current_url:'https://notbrokenjustburning.com/member-store.html?x=secret#private'}};
  const out=redact(input);
  assert.equal(out.properties.plan,'annual');
  assert.equal(out.properties.$referrer,'https://example.com/');
  assert.equal(out.properties.$current_url,'https://notbrokenjustburning.com/member-store.html');
  assert.equal(out.properties.utm_campaign,'approved_campaign');
- for(const name of ['placement','email','reflection','token','utm_term'])assert.ok(!Object.hasOwn(out.properties,name));
+ for(const name of ['placement','email','reflection','access_token','fbclid','$device_id','$session_id','utm_term'])assert.ok(!Object.hasOwn(out.properties,name));
  assert.equal(out.properties.$process_person_profile,false);
- assert.equal(redact({event:'$pageview',properties:{plan:'annual'}}).properties.plan,undefined);
+ assert.equal(out.properties.token,result.keys[0]);
+ assert.equal(out.properties.$cookieless_mode,true);
+ assert.equal(out.properties.distinct_id,'$posthog_cookieless');
+ const protocol={token:result.keys[0],$cookieless_mode:true,distinct_id:'$posthog_cookieless'};
+ assert.equal(redact({event:'$pageview',properties:{...protocol,plan:'annual'}}).properties.plan,undefined);
+ assert.equal(redact({event:'$pageview',properties:{...protocol,token:'auth-token'}}),null);
+ assert.equal(redact({event:'$pageview',properties:{...protocol,$cookieless_mode:false}}),null);
+ assert.equal(redact({event:'$pageview',properties:{...protocol,distinct_id:'actual-user-id'}}),null);
+ assert.equal(redact({event:'$pageview',properties:{}}),null);
+ assert.equal(evaluateAnalytics('join.html','?fbclid=fixture_identifier&utm_source=facebook').config.length,1);
+ assert.equal(evaluateAnalytics('join.html','?utm_source=chatgpt.com').config.length,1);
+ assert.equal(evaluateAnalytics('join.html','?fbclid=fixture_identifier&access_token=secret').config.length,0);
+ assert.equal(evaluateAnalytics('join.html','?utm_source=private.example.com').config.length,0);
 });

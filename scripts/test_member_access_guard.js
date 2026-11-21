@@ -1236,7 +1236,7 @@ test('dashboard Path focus shortcut stays in the authenticated Path practice', (
     ['Sacred Mirror Work', 'sacred-mirror'],
     ['Masculine Restoration', 'masculine-restoration'],
     ['Voice of Fire', 'voice-of-fire'],
-    ['Circle of the Flame', 'circle-of-the-flame']
+    ['Circle of the Flame', 'circle-of-flame']
   ];
   for (const [name, slug] of expected) {
     const line = mapping.split('\n').find((value) => value.includes(name));

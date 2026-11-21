@@ -1,0 +1,109 @@
+name: Commerce genuine Stripe sandbox acceptance
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/commerce-provider-qa.yml'
+      - 'scripts/commerce_qa_browser_acceptance.py'
+      - 'launch-backend-staging/commerce/build-qa-preview.py'
+      - 'launch-backend-staging/commerce/serve-qa-preview.py'
+      - 'store.html'
+      - 'js/commerce-*.js'
+permissions:
+  contents: read
+concurrency:
+  group: commerce-provider-qa-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+jobs:
+  qa-local-preview-chromium:
+    # Run only on the existing controlled integration PR; never on forks or production.
+    if: github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check automation script syntax
+        run: python -m py_compile scripts/commerce_qa_browser_acceptance.py
+      - name: Install previously approved pinned Chromium browser framework
+        run: |
+          python -m pip install playwright==1.51.0
+          python -m playwright install --with-deps chromium
+      - name: Launch existing isolated QA preview on runner localhost
+        env:
+          NBJB_QA_PUBLISHABLE_KEY: sb_publishable_Ayqf6-ZoFGIDscFq6RWfcw_eQ5p_etR
+        run: |
+          set -euo pipefail
+          python launch-backend-staging/commerce/build-qa-preview.py --out "$RUNNER_TEMP/nbjb-commerce-preview" --project-ref fgpkejlmpfkxgpktgdzm
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1" -keyout "$RUNNER_TEMP/qa-key.pem" -out "$RUNNER_TEMP/qa-cert.pem" >/dev/null 2>&1
+          nohup python launch-backend-staging/commerce/serve-qa-preview.py --dir "$RUNNER_TEMP/nbjb-commerce-preview" --cert "$RUNNER_TEMP/qa-cert.pem" --key "$RUNNER_TEMP/qa-key.pem" --port 8443 > "$RUNNER_TEMP/commerce-qa-server.log" 2>&1 &
+          for i in {1..25}; do
+            if curl -fsS --cacert "$RUNNER_TEMP/qa-cert.pem" https://localhost:8443/store.html > /dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS --cacert "$RUNNER_TEMP/qa-cert.pem" https://localhost:8443/store.html >/dev/null
+      - name: Real Chromium validates HTTPS preview and isolated QA browser routing
+        run: python scripts/commerce_qa_browser_acceptance.py --mode smoke
+      - name: Record genuine-provider status separately from browser smoke
+        run: echo 'Browser preview acceptance is NOT Stripe provider payment acceptance.' >> "$GITHUB_STEP_SUMMARY"
+  qa-genuine-provider-checkout:
+    needs: qa-local-preview-chromium
+    if: github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      NBJB_QA_EXISTING_EMAIL: ${{ secrets.NBJB_QA_EXISTING_EMAIL }}
+      NBJB_QA_EXISTING_PASSWORD: ${{ secrets.NBJB_QA_EXISTING_PASSWORD }}
+      NBJB_QA_SECONDARY_EMAIL: ${{ secrets.NBJB_QA_SECONDARY_EMAIL }}
+      NBJB_QA_SECONDARY_PASSWORD: ${{ secrets.NBJB_QA_SECONDARY_PASSWORD }}
+      NBJB_QA_PUBLISHABLE_KEY: sb_publishable_Ayqf6-ZoFGIDscFq6RWfcw_eQ5p_etR
+      NBJB_QA_EVIDENCE_PATH: ${{ runner.temp }}/commerce-provider-evidence.json
+    steps:
+      - name: Securely verify existing QA identity secret availability
+        shell: bash
+        run: |
+          if [ -z "$NBJB_QA_EXISTING_EMAIL" ] || [ -z "$NBJB_QA_EXISTING_PASSWORD" ]; then
+            echo 'BLOCKED: Existing approved QA identity credentials are not available to this GitHub Actions runner. No checkout or payment was attempted.' | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 78
+          fi
+          echo 'Approved existing QA identity credential inputs are present (contents withheld).' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify browser test implementation
+        run: python -m py_compile scripts/commerce_qa_browser_acceptance.py
+      - name: Install pinned Playwright and Chromium
+        run: |
+          python -m pip install playwright==1.51.0
+          python -m playwright install --with-deps chromium
+      - name: Start existing exact-origin SSL preview in runner
+        run: |
+          set -euo pipefail
+          python launch-backend-staging/commerce/build-qa-preview.py --out "$RUNNER_TEMP/nbjb-commerce-preview" --project-ref fgpkejlmpfkxgpktgdzm
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1" -keyout "$RUNNER_TEMP/qa-key.pem" -out "$RUNNER_TEMP/qa-cert.pem" >/dev/null 2>&1
+          nohup python launch-backend-staging/commerce/serve-qa-preview.py --dir "$RUNNER_TEMP/nbjb-commerce-preview" --cert "$RUNNER_TEMP/qa-cert.pem" --key "$RUNNER_TEMP/qa-key.pem" --port 8443 > "$RUNNER_TEMP/commerce-qa-server.log" 2>&1 &
+          for i in {1..25}; do
+            if curl -fsS --cacert "$RUNNER_TEMP/qa-cert.pem" https://localhost:8443/store.html >/dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS --cacert "$RUNNER_TEMP/qa-cert.pem" https://localhost:8443/store.html >/dev/null
+      - name: Genuine Stripe cs_test payments, signed event reconciliation, SKU delivery and second-account isolation
+        run: python scripts/commerce_qa_browser_acceptance.py --mode provider
+      - name: Upload sanitized evidence ONLY after genuine provider success
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: commerce-genuine-provider-qa
+          path: ${{ runner.temp }}/commerce-provider-evidence.json
+          retention-days: 7
+          if-no-files-found: error
+      - name: Indicate provider browser payment result
+        if: success()
+        run: echo 'Provider acceptance browser completed; independently inspect sandbox Stripe sessions and QA order/receipt ledger before acceptance signoff.' >> "$GITHUB_STEP_SUMMARY"

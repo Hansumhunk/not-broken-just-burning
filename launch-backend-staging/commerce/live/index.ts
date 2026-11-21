@@ -80,7 +80,8 @@ Deno.serve(async(req:Request)=>{
  if(req.method==="POST" && new URL(req.url).pathname.endsWith("/webhook"))return webhook(req);
  if(req.method==="OPTIONS")return new Response(null,{status:204,headers});
  if(req.method!=="POST"||req.headers.get("origin")!==origin)return json({error:"not_allowed"},403);
- const user=await verifiedUser(req);if(!user)return json({error:"unauthorized"},401);
+ // Public catalog exposes only SKU, USD price, tax behavior and terms version.
+ // Every account, checkout, order-status and asset action remains JWT authenticated.
  let body:any;try{body=await req.json();}catch{return json({error:"invalid_request"},400);}
  if(!body||typeof body!=="object")return json({error:"invalid_request"},400);
  try{
@@ -88,6 +89,7 @@ Deno.serve(async(req:Request)=>{
    const products=must(await admin.from("commerce_products").select("slug,amount,currency,terms_version,tax_behavior").eq("active",true));
    return json({products:products.filter((p:any)=>SKU.get(p.slug)===p.amount)});
  }
+ const user=await verifiedUser(req);if(!user)return json({error:"unauthorized"},401);
  if(body.action==="status"){
    if(!uuid.test(body.order||""))return json({error:"invalid_order"},400);
    const o=await orderById(body.order);

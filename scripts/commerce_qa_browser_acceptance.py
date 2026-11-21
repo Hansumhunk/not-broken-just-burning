@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# QA rerun checkpoint 2026-11-20: trigger new PR workflow queue to read founder-configured temporary QA-only Actions secrets.
 """Real Chromium-to-Stripe QA acceptance. Existing QA identities and existing product SKUs ONLY.
 
 Smoke needs no identity. Provider mode requires a preexisting, confirmed QA account's

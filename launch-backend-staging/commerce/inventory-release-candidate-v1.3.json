@@ -1,0 +1,133 @@
+{
+  "source": "PR #242 manufacturing handoff comment 7017532437; verified Wave One customer archive and exact member bytes; v1.0 snapshot retained",
+  "catalogVersion": "1.3",
+  "releaseStatus": "Wave One candidate only; not authorized for activation",
+  "productionActivation": false,
+  "products": [
+    {
+      "slug": "boundary-builder-workbook",
+      "sku": "NBJB-BB-001",
+      "version": "1.3",
+      "priceCents": 1499,
+      "wave": 1,
+      "approved": false,
+      "archive": {
+        "filename": "NBJB-BB-001_v1.3_customer.zip",
+        "bytes": 405023,
+        "sha256": "8de5f26a6abd19b69d86b7d44d9125c07702b3f5a2fbfcf4adcee204ec2c68b9"
+      },
+      "allowedContents": [
+        {
+          "filename": "boundary_customer_v1.3.pdf",
+          "bytes": 512802,
+          "sha256": "8612a86c3bb4585356fb982790c8aede37972421f09eb3209cf27619523d3fb3"
+        },
+        {
+          "filename": "boundary_print_v1.3.pdf",
+          "bytes": 378256,
+          "sha256": "938ff26cfbe2cb1d659e6ea3864befdc1e06a510dc10026febf972e2d671b2e1"
+        }
+      ]
+    },
+    {
+      "slug": "forge-workbook",
+      "sku": "NBJB-FG-002",
+      "version": "1.3",
+      "priceCents": 1999,
+      "wave": 1,
+      "approved": false,
+      "archive": {
+        "filename": "NBJB-FG-002_v1.3_customer.zip",
+        "bytes": 450968,
+        "sha256": "7cf406c893fa1029c7cb7c84178696cbc902ce205e4edf461eae90057acaa7fd"
+      },
+      "allowedContents": [
+        {
+          "filename": "forge_customer_v1.3.pdf",
+          "bytes": 604086,
+          "sha256": "bd12e874ec45a0fa1937caa9f366ff813376d3d4008a4ddea81f3d9e092cfd6c"
+        },
+        {
+          "filename": "forge_print_v1.3.pdf",
+          "bytes": 485307,
+          "sha256": "a9e6342b02e3788cd28f2feaf720d0ff6e0f94be51c8c3a99ab085eff974a7bb"
+        }
+      ]
+    },
+    {
+      "slug": "30-days-through-the-fire",
+      "sku": "NBJB-FT-003",
+      "version": "1.0",
+      "priceCents": 2499,
+      "wave": 2,
+      "approved": false,
+      "archive": {
+        "filename": "NBJB-FT-003_v1.0_customer.zip",
+        "bytes": 565116,
+        "sha256": "008f50de6643417aaf61c0477784f64847567967d218a3ea88a4df4ffa86d438"
+      },
+      "allowedContents": [
+        {
+          "filename": "fire30_customer_v1.0.pdf",
+          "bytes": 783949,
+          "sha256": "02c1eef1f2edfbc3d2654a6b6679b6d84bbf8149712e57aa61e477217bfba8b3"
+        },
+        {
+          "filename": "fire30_print_v1.0.pdf",
+          "bytes": 295293,
+          "sha256": "59f7318cecb0c5ce7607b47537f6fd090a0a7528be614ecad994af402a571748"
+        }
+      ]
+    },
+    {
+      "slug": "masculine-restoration-guide",
+      "sku": "NBJB-MR-004",
+      "version": "1.0",
+      "priceCents": 2999,
+      "wave": 2,
+      "approved": false,
+      "archive": {
+        "filename": "NBJB-MR-004_v1.0_customer.zip",
+        "bytes": 654993,
+        "sha256": "6934eef9fe9eb01bada2ea3f346291342101020a1fa5ced5690a7ba164b38fc3"
+      },
+      "allowedContents": [
+        {
+          "filename": "masculine_customer_v1.0.pdf",
+          "bytes": 914993,
+          "sha256": "ae76fd4798004fd231d26d89e15a3b31b796730a3deec535bcd7dcd437aab23b"
+        },
+        {
+          "filename": "masculine_print_v1.0.pdf",
+          "bytes": 338272,
+          "sha256": "8fc44d0ca6a684982e61d3978e04b42d4f5577b08a627d6828bea5b77c3d6608"
+        }
+      ]
+    },
+    {
+      "slug": "hawk-complete-toolkit",
+      "sku": "NBJB-HK-005",
+      "version": "1.0",
+      "priceCents": 4999,
+      "wave": 3,
+      "approved": false,
+      "archive": {
+        "filename": "NBJB-HK-005_v1.0_customer.zip",
+        "bytes": 736751,
+        "sha256": "7732169d040d1aaad7be27537de1d18105eaeee39607d57bc4abd15a51995646"
+      },
+      "allowedContents": [
+        {
+          "filename": "hawk_customer_v1.0.pdf",
+          "bytes": 1087435,
+          "sha256": "b2b37d8966a4a38ff417493307636df8270f20c927e648b0b5f82ff945b39246"
+        },
+        {
+          "filename": "hawk_print_v1.0.pdf",
+          "bytes": 376034,
+          "sha256": "d8fac1e0191464d2afee24b0a21f3da17ed04c3939713c1f312bf0f5e74d3b33"
+        }
+      ]
+    }
+  ]
+}

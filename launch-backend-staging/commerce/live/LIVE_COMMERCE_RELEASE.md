@@ -1,0 +1,58 @@
+# NBJB Live commerce — four-product candidate release adapter (draft)
+
+**Stage:** source-only, fail-closed. **DO NOT DEPLOY, MERGE INTO MAIN, SET LIVE SECRETS, CREATE LIVE CHECKOUT OR CHARGE A CARD WITHOUT SEPARATE RELEASE APPROVAL.** Stacked on PR #242, so the QA implementation and exact-head acceptance records remain intact. This operation does **not** modify the deployed Flamewalker+ subscription backend.
+
+## Verified production facts — November 20, 2026
+
+- Stripe live payee: `acct_1UIHnYGyOSBYVfGl`, card charges and payouts enabled; explicit live context `livemode=true`.
+- Separate sandbox `acct_1UIHnhGxoOD2zUCj`, `livemode=false`; it must never be used for actual storefront sales.
+- Production Supabase: `plhbvtbvtxfzulsaxuim`, active. QA Supabase: `fgpkejlmpfkxgpktgdzm`, active. Distinct data, user accounts, function endpoints and credentials.
+- Stripe live catalog has recurring Flamewalker+ and an annual membership product/price. **No standalone product live prices for any of the four candidates.** The existing `$149` one-time membership price is NOT either standalone product.
+- Live Stripe Tax reports `active`; merchant-specific tax registrations, SKU tax treatment, live price behavior and refund/support policy still need founder/qualified review. Sandbox tax choice is not an automatic live approval.
+- Production has `product_entitlements` but not `commerce_products` or `commerce_orders`. There is no private `nbjb-private-products` bucket or deployed dedicated commerce function in production. Live membership endpoint `/functions/v1/stripe-live-webhook` is active and must not be changed.
+- QA has two mapped test products, three private synthetic PDFs, isolated sandbox receiver, authenticated test accounts, and unsigned webhook rejection (HTTP 400 `signature_required`). **No successful genuine signed sandbox checkout, fulfillment, refund, concurrency or cross-account delivery acceptance yet**. Do not mark this passed.
+- Wave One customer ZIPs v1.3 and MR/HK customer ZIPs v1.1 were independently SHA-256 verified against PR #242 comments 7017532437 and 7022404166. They remain private, not live-uploaded. MR/HK editorial/price approval and HAWK legal-scope/binder usability acceptance are pending.
+
+## Code package (NOT active in production)
+
+`live/index.ts`, `live/provider.ts`, `live/signature.ts`, and `live/commerce-core.mjs` are derived from the accepted sandbox worker with an explicitly different live boundary:
+1. `LIVE_RUNTIME_REVIEWED=false` is the source-level hard stop. Merely setting `NBJB_COMMERCE_LIVE_CHECKOUT=enabled` cannot open it.
+2. `productionAllowed` requires **all** of: `NBJB_COMMERCE_MODE=production`; `sk_live_` or `rk_live_` prefix; production ref and URL exactly `plhbvtbvtxfzulsaxuim`; origin exactly `https://notbrokenjustburning.com`; expected Stripe account exactly `acct_1UIHnYGyOSBYVfGl`. No localhost or sandbox accepted.
+3. Every signed Stripe webhook must be `livemode=true`, cryptographically validated with the **dedicated live commerce endpoint signing secret**. Every reconciled Checkout Session, PaymentIntent and Charge must be `livemode=true` and tagged `nbjb_commerce=v1-live`. A verified Stripe account lookup runs before checkout or webhook processing.
+4. Only these FOUR candidate slugs/prices may pass the live SKU/Price shape: `boundary-builder-workbook` $14.99, `forge-workbook` $19.99, `masculine-restoration-guide` $29.99 proposed and `hawk-complete-toolkit` $49.99 proposed. `30-days-through-the-fire` remains outside this release. Candidate allowlisting does NOT authorize a SKU sale; every product must also be independently active in the signed-off production registry and pass exact live provider checks. One-time, USD, exact live Product and Price IDs, exact tax behavior and no mismatched SKU.
+5. Worker retains owned-order status, signed private storage download with 60-second expiry, deterministic order reservation/idempotency, provider reconciliation, refund and dispute controls. No stored or public card details.
+6. The shared `js/commerce-client.js` accepts the existing sandbox preview only when matched to a separate QA project, or the exact public production origin and production Supabase URL only with independent live release flag; `catalog` may be public, but purchase/order/download actions require authenticated customers. The server is authoritative regardless of browser flags.
+7. `js/commerce-release.js` defaults `enabled:false`. The existing gated `js/commerce-store.js` supports both the local QA preview and genuine one-time purchases only when final approved page, backend and terms are installed. No production HTML, deployed JS or checkout activation has been changed.
+8. `live/live-guard.test.mjs` supplies isolated live-account, mode, price, payment and ownership regression fixtures; it is **not** evidence of actual provider acceptance.
+
+## Required isolated release sequence
+
+1. Finish and independently attest provider-level sandbox acceptance: two real **test** Checkouts and signed events, duplicate/session recovery, failed/expired payment, 60-second asset delivery, cross-SKU/user denial, full successful refund/revoke, partial/dispute review, and membership unaffected. #249 records case evidence, not guessed outcomes. Use Work Cloud Browser or authorized test harness, not repeated founder screenshots.
+2. Confirm founder-approved final price/version/manuscripts, digital goods tax classification and actual registration treatment, applicable taxes, purchase/refund/privacy/retention/support terms, physical-print and accessibility disposition. Reconcile any legislation with qualified advice where relevant.
+3. Review the production SQL as a **separate migration** against the production schema, backups, auth deletion lifecycle, RLS/grants, signed storage policies and existing membership functions. Do not execute QA-staged scripts blindly; perform dry-run/review then apply once to exact live ref under explicit release authorization.
+4. Create the exact separately approved live **one-time** Stripe products/prices (first Boundary Builder and Forge, subsequently MR and HAWK only after their specific approvals) in `acct_1UIHnYGyOSBYVfGl`, with founder-confirmed tax code and exclusive/inclusive behavior per SKU; do not reuse sandbox `prod_`/`price_` IDs and do not modify Flamewalker+ prices. Keep live products/checkout unavailable before launch.
+5. Verify and privately upload **only** the individually authorized buyer ZIPs: v1.3 for Boundary/Forge and later v1.1 for MR/HAWK; never include products awaiting approval, immutable versioned object keys, expected checksums and private bucket with no client read/list. Keep older v1.0 immutable and do not upload the aggregate manufacturing archive.
+6. Deploy a dedicated **commerce-live** function (not `stripe-live-webhook`) to production with Stripe signatures verified in handler and JWT independently checked on customer actions. Configure only production-only secrets, via secure dashboard; no chat, repo, public JS or logs. Create a separate live Stripe event destination only once the worker is deployed and ready. Do not touch membership webhooks.
+7. Run independent production preflight: `/commerce-live/webhook` rejects unsigned/wrong-mode events, live account ID is attested, no live checkout route without source release and env gate, all unapproved products inactive; HAWK/MR remain inactive until their own approvals, private assets gated. Reconcile all checkout events and ledger before unlock.
+8. Prepare a dedicated release PR that switches `LIVE_RUNTIME_REVIEWED` to true and replaces storefront-only JS/terms with founder-approved live copy. Verify `https://notbrokenjustburning.com` after separately approved deploy; never allow a sandbox public link.
+9. Activate one SKU at a time only after exact-head founder approval. A live **paid canary transaction requires separate explicit authorization**; do not automatically create or refund one. Verify actual receipt, signed event, one active owner/SKU, private download, membership unaffected, payout/payee context.
+10. Rollback: disable new storefront checkouts and affected SKU, leave signed webhook processing and legitimate existing downloads alive, preserve ledger and refunds, restore reviewed compatible code if needed. Do not delete production migration, orders or private archives.
+
+## Additional candidate products — explicit release order
+
+The founder requested Masculine Restoration Guide and H.A.W.K. Complete Toolkit in the same store, using the existing shared payment/fulfillment infrastructure. **No separate storefront, project or payment account.** Preserve the independently verified four-SKU candidate manifest `inventory-release-candidate-v1.5-four-product-review.json` (all product approvals false, productionActivation false) and the immutable original v1.3 Wave One manifest.
+
+- `NBJB-MR-004` — Masculine Restoration Guide v1.1; 96-page reading PDF + 95-page print edition; customer ZIP SHA-256 `831b1ea4f5922f4775287bc21eed5fdade27c9671e51b13119c17921e771da4b`; proposed $29.99. Technical archive and all inner-file SHA checks PASS; exact editorial, price, print and accessibility approval still needed.
+- `NBJB-HK-005` — H.A.W.K. Complete Toolkit v1.1; 121-page reading PDF + 120-page print edition; customer ZIP SHA-256 `e47071901f5b59ac26409e3fe21391c2eea47aa128b2bbd2c0d67c2af8f26ec7`; proposed $49.99. Technical archive and inner-file SHA checks PASS. Before approving sale, complete qualified professional review of legal-scope claims, private/child-data handling, and binder usability/value. All existing ten free H.A.W.K. tools remain free.
+- Source private archive SHA-256 `b19ed50734188f55e964b3d4dd9e26f416759cd7ca8f933996fae27be3f9d876`, manifest v1.5 SHA-256 `5df73241a1428a17660e01ee51bf6cc13cd0498851f68a3fad24daf23103d4e3`; recovered from owner-only Drive and reverified. These assets and the paid manuscripts are NOT committed to Git, QA or production buckets.
+- The four candidates share a single backend. Execute additional MR/HK synthetic QA identity/SKU/secure-download/refund acceptance after Wave One provider acceptance, before MR/HK enablement. Never use old v1.0, synthetic QA PDFs or the private all-products archive for live customer delivery.
+- Buyer-ready descriptions and price-provisional copies are staged in `store.html` and `js/commerce-catalog.js`. Public free previews are local review artifacts and have NOT been published.
+- Release one product at a time: Boundary Builder → The Forge → Masculine Restoration Guide → H.A.W.K. Toolkit, each subject to exact-head and per-product acceptance. Existing `30 Days Through the Fire` stays held in this release (its separate previously accepted v1.1 candidate is unchanged).
+
+## Evidence and tracked blockers
+
+- **Passed:** live merchant charges/payouts capability; separate sandbox/live account identities; QA two SKU configuration; QA synthetic storage; QA unsigned webhook rejection; exact v1.3 archive fingerprints; local QA preview starts and authenticated free test account works.
+- **Not passed:** actual signed sandbox payment/fulfillment/refund cases, production SQL and bucket, production live Stripe products/prices and tax registration decision, dedicated live webhook signed acceptance, site release integration, customer live canary.
+- **Current launch state:** production checkout remains off, all live sales disabled by code, **no production changes, no real charges, no new recurring spend**.
+
+User-facing progress should state the difference between *live account exists and can collect* versus *standalone product checkout is released and proven*. Never call a sandbox price a live sale.

@@ -67,8 +67,12 @@ jobs:
       - name: Record genuine-provider status separately from browser smoke
         run: echo 'Browser preview acceptance is NOT Stripe provider payment acceptance.' >> "$GITHUB_STEP_SUMMARY"
   qa-genuine-provider-checkout:
+    # Founder Directive 004-E: sandbox card UI automation explicitly paused.
+    # Do NOT access the temporary QA identity secrets on PR pushes or charge test cards.
+    # Preserve this job as archived harness code, not a release acceptance claim.
+    # Re-enable only in a separately reviewed, explicitly authorized QA change.
     needs: qa-local-preview-chromium
-    if: github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository
+    if: false
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:

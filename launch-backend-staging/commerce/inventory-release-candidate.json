@@ -1,0 +1,133 @@
+{
+  "source": "Operation 05 NBJB_catalog_manifest_v1.0.json",
+  "catalogVersion": "1.0",
+  "releaseStatus": "Founder review; not authorized for activation",
+  "productionActivation": false,
+  "products": [
+    {
+      "slug": "boundary-builder-workbook",
+      "sku": "NBJB-BB-001",
+      "version": "1.0",
+      "priceCents": 1499,
+      "wave": 1,
+      "approved": false,
+      "archive": {
+        "filename": "NBJB-BB-001_v1.0_customer.zip",
+        "bytes": 448981,
+        "sha256": "46de4b61a98582b843b4497f054004e51d03c0b78784f40f1b3779e6947952f4"
+      },
+      "allowedContents": [
+        {
+          "filename": "boundary_customer_v1.0.pdf",
+          "bytes": 458102,
+          "sha256": "3e3f01b2d747cb9e0862f5f5e0ab84a070916d89ed3acd61a498e826e40c84c6"
+        },
+        {
+          "filename": "boundary_print_v1.0.pdf",
+          "bytes": 241203,
+          "sha256": "8bf907ad852693ee67bf58b2d9ccd7c28b11a03c835203a236994b137b642232"
+        }
+      ]
+    },
+    {
+      "slug": "forge-workbook",
+      "sku": "NBJB-FG-002",
+      "version": "1.0",
+      "priceCents": 1999,
+      "wave": 1,
+      "approved": false,
+      "archive": {
+        "filename": "NBJB-FG-002_v1.0_customer.zip",
+        "bytes": 475123,
+        "sha256": "c55cd7968575371979063ac39667baa23b8fb03b99767f30cae842efd87f7958"
+      },
+      "allowedContents": [
+        {
+          "filename": "forge_customer_v1.0.pdf",
+          "bytes": 532459,
+          "sha256": "522dafd9f451df4b5e3d2266755148d5ce181de81ffab504d2e584dda3704082"
+        },
+        {
+          "filename": "forge_print_v1.0.pdf",
+          "bytes": 252903,
+          "sha256": "fee00b77fd38c391869329e81a1a595f172eaeedbb7ea50e0c258d73b49c584f"
+        }
+      ]
+    },
+    {
+      "slug": "30-days-through-the-fire",
+      "sku": "NBJB-FT-003",
+      "version": "1.0",
+      "priceCents": 2499,
+      "wave": 2,
+      "approved": false,
+      "archive": {
+        "filename": "NBJB-FT-003_v1.0_customer.zip",
+        "bytes": 565116,
+        "sha256": "008f50de6643417aaf61c0477784f64847567967d218a3ea88a4df4ffa86d438"
+      },
+      "allowedContents": [
+        {
+          "filename": "fire30_customer_v1.0.pdf",
+          "bytes": 783949,
+          "sha256": "02c1eef1f2edfbc3d2654a6b6679b6d84bbf8149712e57aa61e477217bfba8b3"
+        },
+        {
+          "filename": "fire30_print_v1.0.pdf",
+          "bytes": 295293,
+          "sha256": "59f7318cecb0c5ce7607b47537f6fd090a0a7528be614ecad994af402a571748"
+        }
+      ]
+    },
+    {
+      "slug": "masculine-restoration-guide",
+      "sku": "NBJB-MR-004",
+      "version": "1.0",
+      "priceCents": 2999,
+      "wave": 2,
+      "approved": false,
+      "archive": {
+        "filename": "NBJB-MR-004_v1.0_customer.zip",
+        "bytes": 654993,
+        "sha256": "6934eef9fe9eb01bada2ea3f346291342101020a1fa5ced5690a7ba164b38fc3"
+      },
+      "allowedContents": [
+        {
+          "filename": "masculine_customer_v1.0.pdf",
+          "bytes": 914993,
+          "sha256": "ae76fd4798004fd231d26d89e15a3b31b796730a3deec535bcd7dcd437aab23b"
+        },
+        {
+          "filename": "masculine_print_v1.0.pdf",
+          "bytes": 338272,
+          "sha256": "8fc44d0ca6a684982e61d3978e04b42d4f5577b08a627d6828bea5b77c3d6608"
+        }
+      ]
+    },
+    {
+      "slug": "hawk-complete-toolkit",
+      "sku": "NBJB-HK-005",
+      "version": "1.0",
+      "priceCents": 4999,
+      "wave": 3,
+      "approved": false,
+      "archive": {
+        "filename": "NBJB-HK-005_v1.0_customer.zip",
+        "bytes": 736751,
+        "sha256": "7732169d040d1aaad7be27537de1d18105eaeee39607d57bc4abd15a51995646"
+      },
+      "allowedContents": [
+        {
+          "filename": "hawk_customer_v1.0.pdf",
+          "bytes": 1087435,
+          "sha256": "b2b37d8966a4a38ff417493307636df8270f20c927e648b0b5f82ff945b39246"
+        },
+        {
+          "filename": "hawk_print_v1.0.pdf",
+          "bytes": 376034,
+          "sha256": "d8fac1e0191464d2afee24b0a21f3da17ed04c3939713c1f312bf0f5e74d3b33"
+        }
+      ]
+    }
+  ]
+}

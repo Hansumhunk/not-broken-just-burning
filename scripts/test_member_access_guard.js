@@ -1228,7 +1228,7 @@ test('dashboard Path focus shortcut stays in the authenticated Path practice', (
   const dashboard = read('js/member-dashboard.js');
   const stagePage = read('member-path-stage.html');
   const stageScript = read('js/member-path-stage.js');
-  const mapping = dashboard.match(/const pathRoutes = Object\\.freeze\\(\\{([\\s\\S]*?)\\}\\);/)?.[1];
+  const mapping = dashboard.match(/const pathRoutes = Object\.freeze\(\{([\s\S]*?)\}\);/)?.[1];
   assert.ok(mapping, 'Dashboard must define Path focus routes');
   const expected = [
     ['Fire Reclamation', 'fire-reclamation'],
@@ -1239,10 +1239,10 @@ test('dashboard Path focus shortcut stays in the authenticated Path practice', (
     ['Circle of the Flame', 'circle-of-the-flame']
   ];
   for (const [name, slug] of expected) {
-    const line = mapping.split('\\n').find((value) => value.includes(name));
+    const line = mapping.split('\n').find((value) => value.includes(name));
     assert.ok(line?.includes('member-path-stage.html?stage=' + slug), name + ' must open authenticated practice');
     assert.ok(stageScript.includes("slug:'" + slug + "'"), name + ' requires a recognized stage slug');
   }
-  assert.doesNotMatch(mapping, /:\\s*['"]path-[^'"]+\\.html/, 'Member shortcut must not silently exit to public overview');
+  assert.doesNotMatch(mapping, /:\s*['"]path-[^'"]+\.html/, 'Member shortcut must not silently exit to public overview');
   assert.match(stagePage, /id="nbjb-member-access-gate"/);
 });

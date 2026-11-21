@@ -141,7 +141,7 @@ def exact_private_download(page, slug, expected_sha):
 
 def provider_purchase(page, email, slug, cents, sha):
     page.goto(QA_ORIGIN + "/store.html",wait_until="domcontentloaded")
-    page.wait_for_function("document.querySelector('[data-commerce-buy=\"'+slug+'\"]')?.disabled===false",timeout=25000)
+    page.wait_for_function("""slug => { const button = document.querySelector('[data-commerce-buy="'+slug+'"]'); return !!button && !button.disabled; }""",arg=slug,timeout=25000)
     # Before buying, ownership of this SKU must be denied.
     deny=qa_request(page,"download",slug=slug)
     check(not deny["ok"] and deny["error"]=="not_owned","UNOWNED_DOWNLOAD_NOT_DENIED")

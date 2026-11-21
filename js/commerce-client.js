@@ -3,7 +3,15 @@
  const cfg=window.NBJBCommercePreview;
  const url=window.NBJBConfig?.supabaseUrl;
  const ref=cfg?.sandboxRef;
- const enabled=cfg?.enabled===true && /^[a-z0-9]{20}$/.test(ref||'') && ref!=='plhbvtbvtxfzulsaxuim' && url==='https://'+ref+'.supabase.co' && !['notbrokenjustburning.com','www.notbrokenjustburning.com'].includes(location.hostname);
+ // QA preview only: separate test project and never the public website.
+ const qa=cfg?.enabled===true && /^[a-z0-9]{20}$/.test(ref||'')
+   && ref!=='plhbvtbvtxfzulsaxuim' && url==='https://'+ref+'.supabase.co'
+   && !['notbrokenjustburning.com','www.notbrokenjustburning.com'].includes(location.hostname);
+ // Independently gated LIVE storefront. The backend must separately verify this context.
+ const live=window.NBJBCommerceLive?.enabled===true && !qa && !cfg
+   && location.origin==='https://notbrokenjustburning.com'
+   && url==='https://plhbvtbvtxfzulsaxuim.supabase.co';
+ const enabled=qa||live;
  async function call(action,body={}) {
   if(!enabled)throw Error('commerce_disabled');
   const auth=window.NBJBAuth;
@@ -17,5 +25,5 @@
  }
  function checkoutUrl(value){const u=new URL(value);if(u.protocol!=='https:'||u.hostname!=='checkout.stripe.com')throw Error('unsafe_checkout_url');return u.href;}
  function downloadUrl(value){const u=new URL(value);if(u.origin!==url||!u.pathname.startsWith('/storage/v1/object/sign/nbjb-private-products/'))throw Error('unsafe_download_url');return u.href;}
- window.NBJBCommerce=Object.freeze({enabled,call,checkoutUrl,downloadUrl});
+ window.NBJBCommerce=Object.freeze({enabled,mode:qa?'sandbox':live?'live':'off',call,checkoutUrl,downloadUrl});
 })();

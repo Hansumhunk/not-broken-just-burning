@@ -4,7 +4,12 @@
 export const LIVE_RUNTIME_REVIEWED = false;
 export const VERIFIED_LIVE_ACCOUNT = "acct_1UIHnYGyOSBYVfGl";
 export const LIVE_ORIGIN = "https://notbrokenjustburning.com";
-export const WAVE_ONE = new Set(["boundary-builder-workbook","forge-workbook"]);
+// Candidate release scope, NOT blanket commercial approval. Each SKU must be individually
+// active in the production product registry after exact-head founder authorization.
+export const RELEASE_CANDIDATES = new Set([
+  "boundary-builder-workbook","forge-workbook",
+  "masculine-restoration-guide","hawk-complete-toolkit"
+]);
 export const PRODUCTION_REF = 'plhbvtbvtxfzulsaxuim';
 export const SKU = new Map([['boundary-builder-workbook',1499],['forge-workbook',1999],['30-days-through-the-fire',2499],['masculine-restoration-guide',2999],['hawk-complete-toolkit',4999]]);
 export function liveConfigurationMatches({mode,key,url,expectedRef,origin,account}) {
@@ -17,7 +22,7 @@ export function productionAllowed(context) {
 }
 export function idOf(x){return typeof x==='string'?x:x?.id||null;}
 export function validatePrice(price,p) {
- if (!price || price.livemode!==true || !price.active || price.type!=='one_time' || price.currency!==p.currency || price.unit_amount!==p.amount || price.id!==p.stripe_price_id || idOf(price.product)!==p.stripe_product_id || price.tax_behavior!==p.tax_behavior || (!WAVE_ONE.has(p.slug) || SKU.get(p.slug)!==p.amount)) throw Error('price_mismatch');
+ if (!price || price.livemode!==true || !price.active || price.type!=='one_time' || price.currency!==p.currency || price.unit_amount!==p.amount || price.id!==p.stripe_price_id || idOf(price.product)!==p.stripe_product_id || price.tax_behavior!==p.tax_behavior || (!RELEASE_CANDIDATES.has(p.slug) || SKU.get(p.slug)!==p.amount)) throw Error('price_mismatch');
 }
 export function verifySession(s,items,o,pi,charge) {
  if(s.livemode!==true || s.mode!=='payment' || s.metadata?.nbjb_commerce!=='v1-live' || s.metadata?.order_id!==o.id || s.client_reference_id!==o.id || s.metadata?.slug!==o.slug || (o.stripe_session_id && s.id!==o.stripe_session_id) || s.currency!==o.currency || items.has_more || items.data.length!==1) throw Error('session_mismatch');

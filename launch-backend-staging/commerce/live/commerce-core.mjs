@@ -7,10 +7,13 @@ export const LIVE_ORIGIN = "https://notbrokenjustburning.com";
 export const WAVE_ONE = new Set(["boundary-builder-workbook","forge-workbook"]);
 export const PRODUCTION_REF = 'plhbvtbvtxfzulsaxuim';
 export const SKU = new Map([['boundary-builder-workbook',1499],['forge-workbook',1999],['30-days-through-the-fire',2499],['masculine-restoration-guide',2999],['hawk-complete-toolkit',4999]]);
-export function productionAllowed({mode,key,url,expectedRef,origin,account}) {
- return LIVE_RUNTIME_REVIEWED && mode==="production" && /^(sk_live_|rk_live_)/.test(key||"")
+export function liveConfigurationMatches({mode,key,url,expectedRef,origin,account}) {
+ return mode==="production" && /^(sk_live_|rk_live_)/.test(key||"")
    && expectedRef===PRODUCTION_REF && url==="https://"+PRODUCTION_REF+".supabase.co"
    && origin===LIVE_ORIGIN && account===VERIFIED_LIVE_ACCOUNT;
+}
+export function productionAllowed(context) {
+ return LIVE_RUNTIME_REVIEWED && liveConfigurationMatches(context);
 }
 export function idOf(x){return typeof x==='string'?x:x?.id||null;}
 export function validatePrice(price,p) {

@@ -55,7 +55,7 @@ def login(page, email, password):
     # Wait for the landing page before inspecting its auth state; evaluating
     # on member-auth.html races a document teardown after successful sign-in.
     try:
-        page.wait_for_url(re.compile(r"^https://localhost:8443/members\\.html(?:[?#].*)?$"), timeout=25000)
+        page.wait_for_url(re.compile(r"^https://localhost:8443/members\.html(?:[?#].*)?$"), timeout=25000)
     except BrowserTimeout:
         raise AssertionError("BLOCKED_QA_SIGN_IN_DID_NOT_REACH_MEMBERS")
     page.wait_for_function("window.NBJBAuth?.user?.id", timeout=25000)

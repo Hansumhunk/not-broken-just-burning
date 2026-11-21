@@ -28,7 +28,13 @@ test("Wave One Stripe Price requires a live one-time exact price",()=>{
  for(const bad of [{livemode:false},{type:"recurring"},{unit_amount:1599},{tax_behavior:"inclusive"},{product:"prod_OTHER"},{id:"price_SANDBOX"}]){
   assert.throws(()=>validatePrice({...price,...bad},p),/price_mismatch/);
  }
- assert.throws(()=>validatePrice(price,{...p,slug:"hawk-complete-toolkit"}),/price_mismatch/);
+ for(const [slug,amount] of [["masculine-restoration-guide",2999],["hawk-complete-toolkit",4999]]) {
+  const candidate={...p,slug,amount,stripe_price_id:"price_"+slug,stripe_product_id:"prod_"+slug};
+  const provider={...price,id:candidate.stripe_price_id,product:candidate.stripe_product_id,unit_amount:amount};
+  assert.doesNotThrow(()=>validatePrice(provider,candidate),slug);
+  assert.throws(()=>validatePrice({...provider,unit_amount:amount+100},candidate),/price_mismatch/);
+ }
+ assert.throws(()=>validatePrice({...price,unit_amount:2499},{...p,slug:"30-days-through-the-fire",amount:2499}),/price_mismatch/);
 });
 
 test("live checkout reconciliation rejects test sessions, test payment intents and test charges",()=>{

@@ -1,0 +1,56 @@
+/* Read-only presentation of the existing authorized entitlement state.
+ * Never grants access or constructs download URLs. The future delivery endpoint
+ * must independently check account identity and ownership. */
+(() => {
+  const status = document.getElementById('nbjb-owned-status');
+  const list = document.getElementById('nbjb-owned-products');
+  if (!status || !list || !window.NBJBCommerceCatalog) return;
+  let renderedUser=null;
+  function reset(message) { list.replaceChildren(); status.textContent = message; }
+  function render() {
+    const current=window.NBJBAuth?.user?.id||null;
+    renderedUser=current;
+    const state = window.NBJBEntitlements?.load();
+    if (!window.NBJBAuth?.user || document.body.dataset.memberAccess !== 'granted') {
+      reset('Sign in to view your separately owned products.'); return;
+    }
+    if (state?.source !== 'server' || !state.updatedAt) {
+      reset('Your product access could not yet be verified. Reload or contact support if this continues.'); return;
+    }
+    const owned = window.NBJBCommerceCatalog.ownedProducts(state);
+    reset(owned.length ? 'Verified product ownership. Select Download where sandbox delivery is enabled.' : 'No products from this collection are currently confirmed on your account. Sales are not open.');
+    for (const product of owned) {
+      const item = document.createElement('li');
+      item.textContent = product.title + ' — Owned ';
+      if (window.NBJBCommerce?.enabled) {
+        const btn = document.createElement('button');
+        btn.type='button'; btn.className='button button-ghost'; btn.textContent='Download'; btn.setAttribute('aria-label','Download '+product.title);
+        btn.addEventListener('click',async()=>{
+          btn.disabled=true; btn.textContent='Preparing download…';
+          try {
+            const data=await window.NBJBCommerce.call('download',{slug:product.slug});
+            location.assign(window.NBJBCommerce.downloadUrl(data.url));
+          } catch(e) { status.textContent=e.message==='download_unavailable'?'Your purchase is still owned. File delivery is temporarily unavailable. Retry Download for a fresh link or contact support.':'Unable to authorize download. Refresh your Library or contact support.'; }
+          finally { btn.disabled=false; btn.textContent='Download'; }
+        });
+        item.appendChild(btn);
+      } else item.append('· Delivery unavailable');
+      list.appendChild(item);
+    }
+  }
+  window.addEventListener('nbjb:entitlements', render);
+  window.addEventListener('nbjb:auth', () => {
+    const current=window.NBJBAuth?.user?.id||null;
+    // Verified same-user refreshes occur before every download. Do not erase retry controls.
+    if(current!==renderedUser){renderedUser=current;reset('Checking account access…');}
+  });
+  window.addEventListener('pagehide', () => reset('Checking account access…'));
+  window.addEventListener('pageshow', render);
+  document.getElementById('nbjb-owned-refresh')?.addEventListener('click',async()=>{
+    try {await window.NBJBEntitlements?.refresh();render();}catch{reset('Unable to verify ownership. Retry or contact support.');}
+  });
+  const access = new MutationObserver(render);
+  access.observe(document.body, {attributes:true, attributeFilter:['data-member-access']});
+  window.NBJBEntitlements?.ready?.then(render).catch(() => reset('Unable to verify product ownership.'));
+  render();
+})();

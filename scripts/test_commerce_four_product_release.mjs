@@ -40,9 +40,9 @@ test("public storefront prepares verified product listings but cannot activate v
  const page=read("store.html"),client=read("js/commerce-client.js"),switchCode=read("js/commerce-release.js");
  assert.match(page,/96-page PDF guide/);
  assert.match(page,/121-page PDF toolkit/);
- assert.match(page,/ten existing H\\.A\\.W\\.K\\. guides and offline tools remain free/i);
+ assert.ok(page.includes("ten existing H.A.W.K. guides and offline tools remain free"));
  assert.match(page,/data-commerce-buy="masculine-restoration-guide" disabled/);
  assert.match(page,/data-commerce-buy="hawk-complete-toolkit" disabled/);
  assert.match(switchCode,/enabled:false/);
- assert.match(client,/location\\.origin==='https:\\/\\/notbrokenjustburning\\.com'/);
+ assert.ok(client.includes("location.origin==='https://notbrokenjustburning.com'"));
 });

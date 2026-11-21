@@ -16,10 +16,13 @@
   if(!enabled)throw Error('commerce_disabled');
   const auth=window.NBJBAuth;
   const current=await auth?.refresh();
-  if(!current?.user?.id||!current.session?.access_token)throw Error('sign_in_required');
-  const res=await fetch(url+'/functions/v1/commerce',{method:'POST',headers:{Authorization:'Bearer '+current.session.access_token,apikey:window.NBJBConfig.supabasePublishableKey,'Content-Type':'application/json'},body:JSON.stringify({...body,action}),cache:'no-store'});
+  const publicCatalog=live&&action==='catalog';
+  if(!publicCatalog&&(!current?.user?.id||!current.session?.access_token))throw Error('sign_in_required');
+  const requestHeaders={apikey:window.NBJBConfig.supabasePublishableKey,'Content-Type':'application/json'};
+  if(current?.session?.access_token)requestHeaders.Authorization='Bearer '+current.session.access_token;
+  const res=await fetch(url+'/functions/v1/commerce',{method:'POST',headers:requestHeaders,body:JSON.stringify({...body,action}),cache:'no-store'});
   const data=await res.json();
-  if(window.NBJBAuth?.user?.id!==current.user.id)throw Error('account_changed');
+  if(!publicCatalog&&window.NBJBAuth?.user?.id!==current.user.id)throw Error('account_changed');
   if(!res.ok){const e=Error(data.error||'commerce_unavailable');e.order=data.order;throw e;}
   return data;
  }

@@ -158,7 +158,7 @@ jobs:
           psql $db -f launch-backend-staging/commerce/test-fixture.sql
           psql $db -f launch-backend-staging/commerce/qa-entitlement-baseline.sql
           psql $db -f launch-backend-staging/commerce/live/production-schema-staged.sql
-          psql $db -qAt -c "select (select count(*)=5 from commerce_products) and (select count(*)=0 from commerce_products where active) and (select public=false from storage.buckets where id='nbjb-private-products') and to_regclass('public.membership_entitlements') is not null;" | grep -Fx true
+          psql $db -qAt -c "select (select count(*)=5 from commerce_products) and (select count(*)=0 from commerce_products where active) and (select public=false from storage.buckets where id='nbjb-private-products') and to_regclass('public.membership_entitlements') is not null;" | grep -Fx t
           psql $db -f launch-backend-staging/commerce/test-migration.sql
           psql $db -f launch-backend-staging/commerce/test-operations.sql
           psql $db -f launch-backend-staging/commerce/test-phase-four.sql

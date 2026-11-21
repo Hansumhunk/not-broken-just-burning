@@ -1,0 +1,45 @@
+name: Search Dominion SD01-SD03 publication review
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'guide-*.html'
+      - 'divorce-recovery.html'
+      - 'mens-personal-development.html'
+      - 'mens-mental-health.html'
+      - 'sitemap.xml'
+      - 'tests/search_dominion_browser_acceptance.py'
+      - '.github/workflows/search-dominion-publication.yml'
+permissions:
+  contents: read
+concurrency:
+  group: sd-guide-publication
+  cancel-in-progress: true
+jobs:
+  candidate-browser:
+    if: github.head_ref == 'seo/search-dominion-wave-one-guides-20261120'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned test-only dependencies
+        run: |
+          python -m pip install playwright==1.51.0
+          if ! command -v google-chrome && ! command -v google-chrome-stable && ! command -v chromium; then python -m playwright install --with-deps chromium; fi
+          npm install --prefix "$RUNNER_TEMP/sd-axe" --no-save --ignore-scripts --no-audit --no-fund axe-core@4.10.3
+      - name: Validate responsive articles, source navigation and accessibility without production traffic
+        run: SD_AXE_PATH="$RUNNER_TEMP/sd-axe/node_modules/axe-core/axe.min.js" python tests/search_dominion_browser_acceptance.py
+      - name: Retain mobile/desktop screenshots for founder review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: search-dominion-sd01-sd03-review
+          path: test-results/search-dominion/
+          if-no-files-found: warn
+          retention-days: 7

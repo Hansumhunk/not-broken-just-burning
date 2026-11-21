@@ -20,7 +20,7 @@
     'Sacred Mirror Work': 'member-path-stage.html?stage=sacred-mirror',
     'Masculine Restoration': 'member-path-stage.html?stage=masculine-restoration',
     'Voice of Fire': 'member-path-stage.html?stage=voice-of-fire',
-    'Circle of the Flame': 'member-path-stage.html?stage=circle-of-the-flame'
+    'Circle of the Flame': 'member-path-stage.html?stage=circle-of-flame'
   });
 
   const outcomeLabels = Object.freeze({

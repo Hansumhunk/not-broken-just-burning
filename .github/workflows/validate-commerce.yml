@@ -116,7 +116,7 @@ jobs:
           node-version: '22'
       - name: Check live account isolation, exact SKU payment shape, and refund access gates
         run: |
-          node --test launch-backend-staging/commerce/live/live-guard.test.mjs
+          node --test launch-backend-staging/commerce/live/live-guard.test.mjs scripts/test_commerce_four_product_release.mjs
           node --check launch-backend-staging/commerce/live/commerce-core.mjs
           node --check js/commerce-client.js
           node --check js/commerce-store.js

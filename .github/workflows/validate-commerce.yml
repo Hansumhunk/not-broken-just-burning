@@ -18,12 +18,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test scripts/test_commerce_catalog.js scripts/test_commerce_security.mjs scripts/test_commerce_browser.js scripts/test_commerce_release.js scripts/test_commerce_phase_four.mjs
+      - run: node --test scripts/test_commerce_catalog.js scripts/test_commerce_security.mjs scripts/test_commerce_browser.js scripts/test_commerce_release.js scripts/test_commerce_phase_four.mjs scripts/test_commerce_stage_release.js
       - run: for f in js/commerce-*.js; do node --check "$f"; done
       - name: Assert unapproved production manifest stays blocked
         run: |
           set +e
           node scripts/check_commerce_release.js launch-backend-staging/commerce/release-review.json
+          result=$?
+          set -e
+          test "$result" -eq 2
+      - name: Assert separate checkout-disabled staging review is not silently authorized
+        run: |
+          set +e
+          node scripts/check_commerce_stage_release.js launch-backend-staging/commerce/stage-review.json
           result=$?
           set -e
           test "$result" -eq 2

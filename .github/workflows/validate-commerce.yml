@@ -106,3 +106,63 @@ jobs:
           path: /tmp/nbjb-commerce-fixtures
           retention-days: 7
           if-no-files-found: error
+
+  commerce-live-isolation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check live account isolation, exact SKU payment shape, and refund access gates
+        run: |
+          node --test launch-backend-staging/commerce/live/live-guard.test.mjs scripts/test_commerce_four_product_release.mjs
+          node --check launch-backend-staging/commerce/live/commerce-core.mjs
+          node --check js/commerce-client.js
+          node --check js/commerce-store.js
+          node --check js/commerce-release.js
+          grep -Fq 'LIVE_RUNTIME_REVIEWED = false' launch-backend-staging/commerce/live/commerce-core.mjs
+          grep -Fq 'enabled:false' js/commerce-release.js
+          if grep -Eq '(NBJB_COMMERCE_STRIPE_TEST_KEY|NBJB_COMMERCE_SANDBOX_REF|verifySandboxAccount|nbjb_commerce:"v1")' launch-backend-staging/commerce/live/index.ts; then
+            echo 'Sandbox wiring leaked into the live handler' >&2; exit 1
+          fi
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Typecheck independently locked LIVE handler and providers
+        run: deno check launch-backend-staging/commerce/live/index.ts launch-backend-staging/commerce/live/provider.ts launch-backend-staging/commerce/live/signature.ts
+
+  commerce-production-schema-dryrun:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: fixture-only
+          POSTGRES_DB: commerce_production_dryrun
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply the production candidate ONLY in disposable Postgres
+        env:
+          PGPASSWORD: fixture-only
+        run: |
+          set -e
+          db="-h localhost -U postgres -d commerce_production_dryrun -v ON_ERROR_STOP=1"
+          psql $db -f launch-backend-staging/commerce/test-fixture.sql
+          psql $db -f launch-backend-staging/commerce/qa-entitlement-baseline.sql
+          psql $db -f launch-backend-staging/commerce/live/production-schema-staged.sql
+          psql $db -qAt -c "select (select count(*)=5 from commerce_products) and (select count(*)=0 from commerce_products where active) and (select public=false from storage.buckets where id='nbjb-private-products') and to_regclass('public.membership_entitlements') is not null;" | grep -Fx t
+          psql $db -f launch-backend-staging/commerce/test-migration.sql
+          psql $db -f launch-backend-staging/commerce/test-operations.sql
+          psql $db -f launch-backend-staging/commerce/test-phase-four.sql
+          if psql $db -f launch-backend-staging/commerce/live/production-schema-staged.sql >/tmp/duplicate-apply.log 2>&1; then
+            echo 'FAIL: migration unexpectedly applied twice' >&2; exit 1
+          fi
+          grep -q 'COMMERCE_ALREADY_INSTALLED' /tmp/duplicate-apply.log

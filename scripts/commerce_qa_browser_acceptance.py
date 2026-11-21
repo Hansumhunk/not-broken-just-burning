@@ -14,7 +14,7 @@ import re
 import sys
 import time
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 from playwright.sync_api import sync_playwright, TimeoutError as BrowserTimeout
 
 QA_ORIGIN = "https://localhost:8443"
@@ -154,13 +154,11 @@ def provider_purchase(page, email, slug, cents, sha):
     deny=qa_request(page,"download",slug=slug)
     check(not deny["ok"] and deny["error"]=="not_owned","UNOWNED_DOWNLOAD_NOT_DENIED")
     page.locator("#commerce-terms input[type=checkbox]").check()
-    order={}
     errors=[]
     def inspect_response(response):
         if response.url.endswith("/functions/v1/commerce") and response.request.method=="POST":
             try:
                 body=response.json()
-                if body.get("order"):order["id"]=body["order"]
                 if body.get("error"):errors.append(body["error"])
             except Exception:pass
     page.on("response",inspect_response)
@@ -171,12 +169,15 @@ def provider_purchase(page, email, slug, cents, sha):
     except BrowserTimeout:
         # A disabled server gate is a precise provider blocker; don't create retries.
         raise AssertionError("NO_STRIPE_CHECKOUT_"+(errors[-1] if errors else "NO_REDIRECT"))
-    check(bool(re.fullmatch(r"[a-f0-9-]{36}",order.get("id",""))),"MISSING_QA_ORDER_REFERENCE")
+    # The server places its authenticated order UUID in Stripe's success return URL.
+    # Read it after Stripe redirects; avoid a race reading the checkout response as the page navigates.
     stripe_test_payment(page,email,cents)
-    wait_verified_order(page,order["id"])
+    order_id=parse_qs(urlparse(page.url).query).get("order",[""])[0]
+    check(bool(re.fullmatch(r"[a-f0-9-]{36}",order_id)),"MISSING_QA_ORDER_REFERENCE")
+    wait_verified_order(page,order_id)
     download=exact_private_download(page,slug,sha)
     # Verify SKU-specific grant, not subscription entitlement or cross-SKU permission.
-    return {"sku":slug,"order_id":order["id"],"checkout":"cs_test_ verified in browser",
+    return {"sku":slug,"order_id":order_id,"checkout":"cs_test_ verified in browser",
             "status":"paid","entitlement":"active_verified_through_authenticated_ledger",
             **download}
 

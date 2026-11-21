@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/commerce-provider-qa.yml'
       - 'scripts/commerce_qa_browser_acceptance.py'
+      - 'scripts/commerce_qa_hosted_probe.py'
       - 'launch-backend-staging/commerce/build-qa-preview.py'
       - 'launch-backend-staging/commerce/serve-qa-preview.py'
       - 'store.html'
@@ -15,6 +16,21 @@ concurrency:
   group: commerce-provider-qa-${{ github.event.pull_request.number }}
   cancel-in-progress: false
 jobs:
+  qa-hosted-security-probe:
+    if: github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Probe actual isolated QA webhook signature/JWT/origin enforcement
+        run: python scripts/commerce_qa_hosted_probe.py
+      - name: Mark as security-only, not successful payment
+        run: echo 'Real QA HTTPS security probes passed. These do NOT establish signed provider payment acceptance.' >> "$GITHUB_STEP_SUMMARY"
   qa-local-preview-chromium:
     # Run only on the existing controlled integration PR; never on forks or production.
     if: github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository

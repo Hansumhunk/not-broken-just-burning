@@ -49,15 +49,11 @@
         feelings: feelingText,
         control: controlText
       }
-    });
+    }, { nextAction: controlText });
 
     if (!result.ok) {
       setStatus('This browser could not save the reflection. Nothing was uploaded.', true);
       return;
-    }
-
-    if (controlText) {
-      service.update({ journey: { nextAction: controlText } });
     }
 
     setStatus('Saved to My Work on this device. Your account did not upload the reflection body.');

@@ -13,8 +13,9 @@ class InventoryTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         catalog=json.loads((DIR/"catalog.json").read_text())["topics"]
+        held=set(json.loads((DIR/"manifest.json").read_text())["suppressedIds"])
         cls.first_four=[{"id":x["id"],"title":x["title"],"source":x["source"]}
-                        for x in catalog[:4]]
+                        for x in catalog if x["id"] not in held][:4]
 
     def full(self):
         data=[]

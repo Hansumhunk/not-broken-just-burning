@@ -65,7 +65,7 @@ _NOIDENTITY = re.compile(r"@|https?://|email|phone",re.I)
 
 def evidence_is_acceptable(proof):
     """Validate sanitized provenance; NEVER transform a test fixture into provider PASS."""
-    if not isinstance(proof,dict):
+    if not isinstance(proof,dict) or proof.get("case_id") not in ORIGINAL:
         return False
     if proof.get("kind") not in PROOF_TYPES or not _VALID_REF.fullmatch(str(proof.get("ref",""))):
         return False
@@ -105,7 +105,7 @@ def reconcile(evidence=(), *, current_authentication_verified=False, founder_pub
         "case_count":len(rows),
         "status_counts":{status:sum(x["status"]==status for x in rows)
                          for status in ("PARTIAL","NOT_RUN","WITHHELD","REQUIRES_SEPARATE_PROVIDER_EXECUTION")},
-        "current_authenticated_brevo_inspection_verified":bool(current_authentication_verified and False),
+        "current_authenticated_brevo_inspection_verified":False,  # requires independent real provider audit
         "synthetic_tests_counted_as_provider_passes":0,
         "rejected_untrusted_evidence_records":rejects,
         "cases":rows,

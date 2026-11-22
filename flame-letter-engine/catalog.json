@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "policy": "Public NBJB educational pages only. Editorial candidates, not sendable campaigns.",
+  "topics": [
+    {
+      "id": "boundaries-hurt",
+      "title": "A Boundary Can Hurt and Still Be Necessary",
+      "theme": "boundaries",
+      "source": "story-boundaries.html",
+      "idea": "A limit can be appropriate even when it leaves you sad. Grieving a relationship or a hoped-for repair does not automatically mean you made the wrong decision. A boundary is about what you will do to protect your time, participation, and dignity; it is not a tool for punishing or forcing another adult.",
+      "question": "Am I reconsidering this limit because it is unfair, or because honoring it is uncomfortable?",
+      "tool": "Write the behavior that concerns you, what you can control, and the specific action you will take if it happens again. Make the action realistic, proportionate, and yours to carry out.",
+      "action": "Choose one boundary sentence and check that it describes your behavior, not a demand for somebody else's obedience."
+    },
+    {
+      "id": "one-stone",
+      "title": "When the Mountain Is Too Large, Move One Stone",
+      "theme": "overwhelm",
+      "source": "story-one-stone.html",
+      "idea": "Overwhelm tends to compress a dozen separate responsibilities into one impossible-looking problem. You do not need a perfect life plan before you can act. Breaking the pile into urgent, later, and not-yours-to-solve categories turns an emotional mountain back into individual decisions.",
+      "question": "Which part of this problem truly needs a decision today, and which part simply feels loud?",
+      "tool": "Write three columns: must happen today, can wait, and not within my control. Under the first column, define a step that can be completed in twenty minutes or less.",
+      "action": "Complete the smallest legitimate first step, then reevaluate without promising to solve everything tonight."
+    },
+    {
+      "id": "shame-action",
+      "title": "Accountability Is Not a Verdict on Your Worth",
+      "theme": "shame",
+      "source": "story-shame.html",
+      "idea": "After a difficult experience, people may mistake hindsight for evidence that they were foolish or defective. You can examine choices, repair mistakes, and learn new boundaries without turning one painful chapter into a permanent identity. Shame asks who is bad; accountability asks what can be understood or done differently.",
+      "question": "What specific action deserves review, and what global judgment about myself can I set aside?",
+      "tool": "Write one self-critical sentence. Separate the observable behavior from the identity label. Replace the label with a responsible, concrete repair or prevention step.",
+      "action": "Choose a single repair or learning action that does not require condemning who you are."
+    },
+    {
+      "id": "survival-off-switch",
+      "title": "The Useful Survival Skill That Needs an Off Switch",
+      "theme": "regulation",
+      "source": "story-survival-skill-off-switch.html",
+      "idea": "Being alert, analyzing patterns, documenting events, and preparing for problems can be useful under pressure. If those habits never switch off, they can also consume the time and attention needed for ordinary life. Strength includes recognizing when an emergency skill is no longer needed at full power.",
+      "question": "Which protective habit helped me earlier but is now running past its useful hours?",
+      "tool": "Name one survival habit, the situations in which it helps, and the signs that it is costing too much. Design a clear start and stop condition rather than demanding that you stop noticing everything.",
+      "action": "Give yourself one short period today when you deliberately stop scanning and do something ordinary."
+    },
+    {
+      "id": "timeline-first",
+      "title": "Build the Timeline Before the Theory",
+      "theme": "discernment",
+      "source": "story-timeline-before-theory.html",
+      "idea": "When multiple difficult events cluster together, our minds rapidly create explanations. A reliable timeline makes room for genuine patterns without treating sequence as proof of causation or motive. Observation, pattern, hypothesis, and conclusion are different categories of claim.",
+      "question": "Which sentence in my account describes something observable, and which sentence interprets why it happened?",
+      "tool": "Draw four labeled rows: Observed, Repeated, Possible explanation, Supported conclusion. Place each claim in exactly one row and mark where you need more information.",
+      "action": "Correct one overstated conclusion into a question you can investigate or leave open."
+    },
+    {
+      "id": "strength-restraint",
+      "title": "Strength Can Look Like Restraint",
+      "theme": "masculine-restoration",
+      "source": "story-strength-restraint.html",
+      "idea": "Power and volume are not the same as leadership. When anger rises, strength often means holding enough choice to avoid harm, intimidation, or an irreversible message. Restraint does not require tolerating danger or accepting mistreatment; it means choosing an effective response when more than one safe option exists.",
+      "question": "What reaction would feel powerful for ten seconds but create a bigger problem tomorrow?",
+      "tool": "Before a difficult reply, draft two versions: the immediate reaction and a response focused on the outcome you actually want. Remove threats, mind-reading, and unnecessary escalation from the second version.",
+      "action": "Use the calmer version or postpone the conversation until you can make a deliberate choice."
+    },
+    {
+      "id": "father-off-days",
+      "title": "Fatherhood Is More Than the Days on the Calendar",
+      "theme": "fatherhood",
+      "source": "guide-dad-days-without-kids.html",
+      "idea": "Separation can leave a father staring at a house that still looks like his children were just there. Missing them can be painful without needing to turn every day apart into proof of devotion. Rest, reliable routines, and age-appropriate connection can support fatherhood without placing adult distress on children.",
+      "question": "What can I do on a day apart that supports the next good day together?",
+      "tool": "Make a short off-day plan: one necessary responsibility, one small act of self-care, and one appropriate connection or preparation step that does not burden the children.",
+      "action": "Complete one item from the plan and let the rest of the day be a day, not a verdict."
+    },
+    {
+      "id": "clarity-not-certainty",
+      "title": "Clarity Before Certainty",
+      "theme": "clarity",
+      "source": "lesson-clarity-before-certainty.html",
+      "idea": "A powerful feeling deserves attention, but the explanation attached to it may still contain guesses. Separating what is felt, what is observed, what is inferred, and what needs evidence creates a more reliable basis for decisions. This does not require dismissing intuition or minimizing possible danger.",
+      "question": "What part of my conclusion do I know, and what part am I predicting?",
+      "tool": "Divide one troubling thought into four lines: Emotion, Known fact, Interpretation, Unknown. Keep each line brief and add one action you can take without pretending the unknown is settled.",
+      "action": "Make the next decision from the known facts, while keeping your interpretation open to revision."
+    }
+  ]
+}

@@ -4,11 +4,12 @@ import {readFileSync} from "node:fs";
 const read=p=>readFileSync(new URL("../"+p,import.meta.url),"utf8");
 
 test("the canary is a noindex page with explicit click and optional existing account sign in",()=>{
- const html=read("commerce-live-canary.html"), js=read("js/commerce-live-canary.js");
+ const html=read("commerce-live-canary.html"), js=read("js/commerce-live-canary.js"), auth=read("js/member-auth.js");
  assert.match(html,/noindex,nofollow/);
  assert.match(html,/id="canary-start"[^>]+disabled/);
  assert.match(html,/id="canary-terms"[^>]+type="checkbox"/);
  assert.match(html,/member-auth\.html\?next=commerce-live-canary\.html/);
+ assert.ok(auth.includes("next === 'commerce-live-canary.html'"),"The sign-in flow returns only to this exact safe relative canary page");
  assert.match(js,/auth\?\.refresh\(\)/);
  assert.match(js,/if\(!consent\.checked\)/);
  assert.match(js,/window\.NBJBCommerceLive\?\.enabled!==true/);

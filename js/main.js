@@ -52,21 +52,31 @@ const privacySignalEnabled =
 const memberSurface = currentPage === 'members.html' || currentPage.startsWith('member-');
 const isMembershipStore = currentPage === 'member-store.html';
 const analyticsQuery = new URLSearchParams(window.location.search);
+// Allow conventional campaign labels and known domain-valued source labels,
+// not arbitrary dotted values or identity-bearing query fields.
+const safeCampaignValue = (key, value) => typeof value === 'string' &&
+  (/^[a-z0-9_-]{1,80}$/i.test(value) ||
+   (key === 'utm_source' && ['chatgpt.com','facebook.com','instagram.com','threads.net','tiktok.com','google.com','youtube.com','pinterest.com'].includes(value.toLowerCase())));
+const analyticsProjectToken = 'phc_AnVpuc8EtDx6gsTSnyYHMnRHQwtYzrAbPFn4ZUozcrxR';
 const safeQuery = Array.from(analyticsQuery.entries()).every(([key, value]) =>
   isMembershipStore
     ? key === 'checkout' && ['success', 'cancelled'].includes(value)
-    : ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].includes(key) && /^[a-z0-9_-]{1,80}$/i.test(value));
+    : (key === 'fbclid' && /^[a-z0-9_-]{1,500}$/i.test(value)) ||
+      (['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].includes(key) && safeCampaignValue(key, value)));
 const safeHash = !window.location.hash || /^#[a-z0-9_-]+$/i.test(window.location.hash);
 const safeAnalyticsSurface = (!memberSurface || isMembershipStore) && safeQuery && safeHash;
 if (analyticsHostnames.has(window.location.hostname) && !privacySignalEnabled && safeAnalyticsSurface) {
   !function(t,e){var o,n,p,r;e.__SV||(window.posthog&&window.posthog.__loaded)||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2===o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}p||((p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",p.onerror=function(){p=null},(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r));var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],Object.defineProperty(u,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e}}),Object.defineProperty(u.people,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(){return u.toString(1)+".people (stub)"}}),o="init capture register register_once register_for_session unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group identify setPersonProperties setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags resetGroups onFeatureFlags addFeatureFlagsHandler onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey getNextSurveyStep".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
 
-  posthog.init('phc_AnVpuc8EtDx6gsTSnyYHMnRHQwtYzrAbPFn4ZUozcrxR', {
+  posthog.init(analyticsProjectToken, {
     api_host: 'https://us.i.posthog.com',
     ui_host: 'https://us.posthog.com',
     defaults: '2026-05-30',
     cookieless_mode: 'always',
     person_profiles: 'identified_only',
+    disable_persistence: true,
+    advanced_disable_flags: true,
+    disable_capture_url_hashes: true,
     autocapture: false,
     capture_pageview: true,
     // Avoid collecting source/return URL credentials via automatic properties.
@@ -74,7 +84,22 @@ if (analyticsHostnames.has(window.location.hostname) && !privacySignalEnabled &&
       // Unknown event payloads (including custom tool fields) must never be
       // forwarded by this public analytics surface.
       if (!event?.properties || !['$pageview','$pageleave','nbjb_free_membership_cta_clicked','nbjb_membership_checkout_requested'].includes(event.event)) return null;
-      const safe = new Set(['$current_url','$pathname','$referrer','$referring_domain',
+      // SDK protocol fields, not account/Auth tokens. A v1 cookieless event without
+      // the SDK's public project token or cookieless marker cannot be safely ingested.
+      if (event.properties.token !== analyticsProjectToken || event.properties.$cookieless_mode !== true ||
+          event.properties.distinct_id !== '$posthog_cookieless') return null;
+      // PostHog's server-side cookieless hash requires the genuine SDK user
+      // agent. Accept only the browser's own nonempty value, not custom data.
+      // The upstream cookieless ingestion step strips this and the server IP
+      // before storing the processed event. Never add a client IP or hash extra.
+      const rawUserAgent = event.properties.$raw_user_agent;
+      if (typeof rawUserAgent !== 'string' || !rawUserAgent.trim() ||
+          rawUserAgent.length > 2048 || rawUserAgent !== navigator.userAgent ||
+          /[\x00-\x1f\x7f]/.test(rawUserAgent)) return null;
+      // Prevent top-level person updates from bypassing the property allowlist.
+      delete event.$set;
+      delete event.$set_once;
+      const safe = new Set(['token','$cookieless_mode','$raw_user_agent','$current_url','$pathname','$referrer','$referring_domain',
         '$initial_current_url','$initial_referrer','$initial_referring_domain',
         '$host','$browser','$browser_version','$os','$device_type','$screen_height','$screen_width',
         '$viewport_height','$viewport_width','$session_id','$device_id','$lib','$lib_version',
@@ -86,9 +111,14 @@ if (analyticsHostnames.has(window.location.hostname) && !privacySignalEnabled &&
         if (!safe.has(key) || (value !== null && !['string','number','boolean'].includes(typeof value))) {
           delete event.properties[key]; continue;
         }
+        // In cookieless mode the server assigns anonymous session identity.
+        // Never forward client-side persistent device/session IDs.
+        if (['$session_id','$device_id'].includes(key) && value !== null) {
+          delete event.properties[key]; continue;
+        }
         if (key.startsWith('utm_')) {
           // Retain only the bounded, explicitly approved campaign syntax.
-          if (typeof value !== 'string' || !/^[a-z0-9_-]{1,80}$/i.test(value)) delete event.properties[key];
+          if (!safeCampaignValue(key, value)) delete event.properties[key];
           continue;
         }
         if (['$current_url','$initial_current_url','$referrer','$initial_referrer'].includes(key)) {
@@ -194,7 +224,7 @@ if (!document.querySelector('meta[name="twitter:card"]')) {
 const SITE_NAME = 'Not Broken Just Burning';
 const FOUNDER_NAME = 'Rickey Partin Jr.';
 const FOUNDER_URL = `${SITE_ORIGIN}/founder.html`;
-const SOCIAL_IMAGE_URL = `${SITE_ORIGIN}/assets/social-share.png`;
+const SOCIAL_IMAGE_URL = `${SITE_ORIGIN}/assets/social-share-v2.jpg`;
 
 function addStructuredData(id, data) {
   if (document.querySelector(`script[data-schema="${id}"]`)) return;

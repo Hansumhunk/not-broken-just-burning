@@ -1,7 +1,7 @@
 // Pure policy used by the Stripe webhook. No network, IDs, or money movement.
 // For a failed or not-yet-paid renewal, never move the confirmed paid-through
 // boundary forward. Stripe's current period can advance before payment clears.
-export function paymentBoundary(subscription, prior, bounds, now = Date.now()) {
+export function paymentBoundary(subscription, prior, bounds, now = Date.now(), live = true) {
   const same = prior?.provider === 'stripe' && prior.provider_subscription_ref === subscription.id;
   const priorStart = Date.parse(prior?.valid_from ?? '');
   const priorEnd = Date.parse(prior?.valid_until ?? '');
@@ -16,7 +16,7 @@ export function paymentBoundary(subscription, prior, bounds, now = Date.now()) {
   const invoice = subscription.latest_invoice;
   const item = subscription.items?.data?.[0];
   const through = Date.parse(bounds.validUntil ?? '');
-  const paid = invoice && typeof invoice === 'object' && invoice.livemode === true &&
+  const paid = invoice && typeof invoice === 'object' && invoice.livemode === live &&
     invoice.status === 'paid' && Number.isFinite(through) &&
     (invoice.lines?.data ?? []).some(line => {
       const lineItem = line.parent?.subscription_item_details?.subscription_item ?? line.subscription_item;

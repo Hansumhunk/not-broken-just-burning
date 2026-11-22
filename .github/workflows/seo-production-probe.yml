@@ -1,0 +1,30 @@
+name: SEO production probe acceptance
+on:
+  pull_request:
+    paths:
+      - 'scripts/seo_production_probe.py'
+      - 'scripts/social_share_image.py'
+      - 'assets/social-share-v2.jpg'
+      - '.github/workflows/seo-production-probe.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Install image decoder
+        run: python -m pip install Pillow==11.3.0
+      - name: Exercise deterministic positive and negative fixtures
+        run: python scripts/seo_production_probe.py --self-test
+      - name: Read-only production baseline (not candidate deployment)
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git show "$BASE_SHA:scripts/seo_production_probe.py" > "$RUNNER_TEMP/seo-live-baseline.py"
+          PYTHONPATH="$GITHUB_WORKSPACE/scripts" python "$RUNNER_TEMP/seo-live-baseline.py"

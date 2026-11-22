@@ -1,0 +1,26 @@
+{
+  "format": "NBJB-HAWK-PARENTING",
+  "version": 1,
+  "entries": [
+    {
+      "child": "Child A",
+      "category": "Parenting schedule / exchange",
+      "status": "Occurred",
+      "title": "FICTIONAL evening pickup",
+      "date": "2026-05-08",
+      "time": "18:35",
+      "source": "Personal observation or action",
+      "observation": "Child A arrived and ate dinner.",
+      "care": "Maintained bedtime routine.",
+      "context": "Pickup changed by prior agreement.",
+      "followup": "Confirm upcoming schedule without involving Child A.",
+      "events": "T-0000000000000002",
+      "evidence": "E-0000000000000001",
+      "tasks": "C-0000000000000001",
+      "revision": "",
+      "id": "L-0000000000000001",
+      "createdAt": "2026-05-13T12:00:00.000Z",
+      "updatedAt": "2026-05-13T12:00:00.000Z"
+    }
+  ]
+}

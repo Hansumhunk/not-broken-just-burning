@@ -196,6 +196,11 @@ def check_onboarding(browser, origin, mobile=False):
         assert len(saved_after["activity"]["entries"]) == 1
         assert saved_after["activity"]["entries"][0]["data"]["facts"] == "A meeting is scheduled."
         assert saved_after["journey"]["nextAction"] == "Prepare one question."
+        saved_writes = page.evaluate("window.__qaMemberWrites || 0")
+        page.locator("#start-here-form button[type=submit]").dblclick()
+        assert "no duplicate" in page.locator("#start-here-status").inner_text().lower()
+        assert page.evaluate("window.__qaMemberWrites || 0") == saved_writes
+        assert page.evaluate("""() => JSON.parse(localStorage.getItem('nbjb.member.v2.fixture-alpha')).activity.entries.length""") == 1
         ready(page, origin, "members.html")
         assert "Fire Reclamation" in page.locator('[data-dashboard-focus-name]').inner_text()
         assert "Prepare one question." in page.locator('[data-dashboard-action-state]').inner_text()

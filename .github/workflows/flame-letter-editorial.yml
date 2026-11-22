@@ -43,6 +43,8 @@ jobs:
         run: node scripts/flame_letter_editorial.mjs --weeks=4 --out=flame-letter-staging
       - name: Confirm structural/editorial draft parity and write approval report
         run: python flame-letter-engine/review_staged.py . flame-letter-staging
+      - name: Write sanitized Phase IV provider acceptance holds
+        run: python flame-letter-engine/phase4_report.py flame-letter-staging/phase4-readiness.json
       - name: Archive editorial REVIEW artifacts, never send
         uses: actions/upload-artifact@v4
         with:

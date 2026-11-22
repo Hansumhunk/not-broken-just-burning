@@ -1,0 +1,40 @@
+# Public-repo-safe Origin Vault synthetic unit checks ONLY.
+# Never configure provider keys, read private Drive archives, upload CI artifacts,
+# or create a hosted vault from this workflow.
+name: Origin Vault synthetic policy QA
+
+on:
+  pull_request:
+    paths:
+      - 'internal/origin_vault/**'
+      - 'tests/test_origin_vault_phase2.py'
+      - 'docs/ORIGIN_VAULT_*.md'
+      - 'docs/origin_vault_schema_PROPOSAL.sql'
+      - '.github/workflows/origin-vault-synthetic-qa.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-only:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout synthetic code only (no persisted credentials)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Validate standalone reference engine and unit test syntax
+        run: python -m py_compile internal/origin_vault/policy.py tests/test_origin_vault_phase2.py
+      - name: Verify full non-networked synthetic security suite
+        run: python -m unittest discover -s tests -p 'test_origin_vault_phase2.py' -v
+      - name: Record bounded acceptance scope
+        run: |
+          echo 'Origin Vault Phase 2 synthetic policy tests only. This run does not validate original Phase 1 prototype, real founder identity, hosted storage, cross-account Supabase permissions, secure backup, publication or rights ownership.' >> "$GITHUB_STEP_SUMMARY"

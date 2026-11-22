@@ -24,6 +24,7 @@ _CAPABILITIES = {
     "viewer": {"inspect"},
     "editor": {"inspect", "review"},
     "approver": {"inspect", "approve"},
+    "campaign_approver": {"inspect", "authorize_campaign_simulation"},
     "dispatcher": {"inspect", "queue_simulated", "claim_simulated"},
     "incident_admin": {"inspect", "emergency_stop", "simulation_reset"},
     "data_custodian": {"inspect", "backup", "restore_rehearsal", "prune_backups"},
@@ -193,12 +194,40 @@ class PrivateRuntime:
         actor=self._actor(token,"approve",now_epoch)
         self.ledger.approve(edition_id,actor,evidence,now)
 
+    def authorize_campaign_simulation(self,token,edition_id,campaign,audience,start,end,evidence,now,*,now_epoch=None):
+        actor=self._actor(token,"authorize_campaign_simulation",now_epoch)
+        check(evidence,_EVIDENCE,"campaign approval reference")
+        dt(now)
+        if dt(start)>=dt(end):
+            raise LedgerHold("invalid dispatch window")
+        with self.ledger._tx() as db:
+            row=self.ledger._get(db,edition_id)
+            if row["state"]!="approved" or not row["approval_ref"]:
+                raise LedgerHold("content must first receive separate editorial approval")
+            # This makes the simulated founder campaign decision durable and immutable.
+            db.execute("INSERT INTO dispatch_authorizations(edition_id,content_sha256,provider_campaign_ref,"
+                       "audience_ref,window_start,window_end,approval_ref,approver_ref,approved_at) "
+                       "VALUES(?,?,?,?,?,?,?,?,?)",
+                       (edition_id,row["content_sha256"],campaign,audience,start,end,evidence,actor,now))
+            self._record(db,"campaign_simulation_authorized",actor,now,evidence)
+
     def queue_simulated(self,token,edition_id,campaign,audience,start,end,now,*,now_epoch=None):
         actor=self._actor(token,"queue_simulated",now_epoch)
         with self.ledger._db() as db:
             stop=db.execute("SELECT halted FROM runtime_control WHERE singleton=1").fetchone()
             if not stop or stop["halted"]:
                 raise LedgerHold("emergency stop engaged")
+            ed=self.ledger._get(db,edition_id)
+            authorization=db.execute("SELECT * FROM dispatch_authorizations WHERE edition_id=?",
+                                    (edition_id,)).fetchone()
+            if (authorization is None or authorization["content_sha256"]!=ed["content_sha256"]
+                or authorization["provider_campaign_ref"]!=campaign
+                or authorization["audience_ref"]!=audience
+                or authorization["window_start"]!=start
+                or authorization["window_end"]!=end):
+                raise LedgerHold("separate immutable campaign authorization required")
+            if authorization["approver_ref"]==actor:
+                raise LedgerHold("campaign approver cannot act as dispatcher")
         self.ledger.queue(edition_id,campaign,audience,start,end,actor,now)
 
     def claim_simulated(self,token,edition_id,provider_snapshot,now,*,now_epoch=None):

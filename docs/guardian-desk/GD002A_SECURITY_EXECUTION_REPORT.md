@@ -45,3 +45,19 @@ Source snapshot `940b180e11d5cd5d447803eaff2f14a80ebcc4a8`:
 Only aggregate counts with source, source revision, UTC time, period/coverage, disjoint/exhaustive group categories and complementary suppression. No case IDs, HMACs, email addresses, journals, summary text, billing identities, operational secrets or small cohorts in public GitHub. Current QA/production ticket metrics are **NOT OPERATIONAL**, not a fabricated resolved count.
 
 **Disposition:** Source-only QA candidate improved and inspectable. Production unchanged; approval and hosted acceptance blocked.
+
+
+## Independent native CI acceptance — additive checkpoint, 2026-11-22
+
+The earlier 44/44 V8 source execution remains historical. New automated tests on **GitHub's public-repository read-only runners**, using only synthetic data and disposable local Docker PostgreSQL 17.12, have independently executed the branch's code and SQL:
+
+- **50/50 native Node 22 `node --experimental-strip-types --test` tests passed.**
+- **23/23 real PostgreSQL 17.12 fixture checks passed**, including schema apply, column permissions, service-only RPC execution, own-vs-other-row RLS, eight concurrent same-account submissions deduplicating correctly, the five-new-tickets/hour cap, duplicate retry at quota, failed-audit transactional rollback and account erasure redaction constraints.
+- Both jobs were **SUCCESS** in Actions run [45058064160](https://github.com/Hansumhunk/not-broken-just-burning/actions/runs/45058064160) for exact tested head `11c54168a18410419978da35978b494da0d47cc8`. The SQL was applied **only** to the disposable Docker fixture, never to Commerce QA or production.
+- First CI attempt [45057882152](https://github.com/Hansumhunk/not-broken-just-burning/actions/runs/45057882152): PostgreSQL 23/23 PASS, Node 49/50; corrected a stale aggregate test fixture with complete category totals at commit `61296995e11a572d1758fda6d6085d8aaf6a5d5e`.
+- Second attempt [45058004890](https://github.com/Hansumhunk/not-broken-just-burning/actions/runs/45058004890): Node 50/50 PASS; Docker's `pg_isready` raced with creation of the fixture database (test infrastructure startup, not a SQL logic failure). Corrected CI readiness to perform a real query against `guardian_fixture` at `11c54168a18410419978da35978b494da0d47cc8`.
+- Erasure follow-up fix `eb117e5f7daffa0e2ac3c5dbd3133d693dd489b5` requires `CLOSED` status before zero-fingerprint orphan redaction, preventing two open tickets from colliding on the active-issue unique index; the real PostgreSQL fixture independently verified deleting an owner after scrubbing two cases.
+
+**Verification scope is intentionally narrow:** Real PostgreSQL concurrency/RLS in a disposable container is stronger than static analysis, but it is still not Supabase's hosted Auth/Edge/Data API/security environment. Hosted JWT admission, provider key compatibility, actual QA backup/restore, retention execution, multi-region consumer rights, human escalation staffing and full GD01–GD30 release acceptance remain **BLOCKED / NOT RUN**.
+
+A subsequent documentation-only update may move the draft PR head beyond the tested commit; distinguish last **code-tested SHA** `11c54168...` from the final documentation head. The existing test workflow reruns automatically for this document path.

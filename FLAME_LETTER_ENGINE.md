@@ -27,7 +27,7 @@ Commands (Node 22, only standard library):
     node --test scripts/test_flame_letter_editorial.mjs scripts/test_flame_letter_send_guard.mjs
     node scripts/flame_letter_editorial.mjs --as-of=2026-11-21 --weeks=4 --out=.flame-letter-staging
 
-The output includes four draft HTML files, four plain-text files, four content-hash/metadata JSON files, a reviewable proposed draft-ledger manifest, and one report. Proposed Wednesdays are for editorial planning only. **They are not an authorized marketing schedule.**
+The output includes four draft HTML files, four plain-text files, four content-hash/metadata JSON files, a reviewable proposed draft-ledger manifest, and one report. The proposed-manifest.json is a review artifact; an editor must reconcile it with the private provider inventory and commit accepted pending-draft records to durable version control before later runs can avoid re-drafting them. Proposed Wednesdays are for editorial planning only. **They are not an authorized marketing schedule.**
 
 The output deliberately retains a non-sendable draft banner, native unsubscribe placeholder and unresolved verified-business-address placeholder. It must never be pasted directly into a live scheduled campaign.
 

@@ -11,6 +11,7 @@ No subscriber import, no Brevo API credentials, no send adapter, no live form re
 - Recovered Nov 20 provider evidence: hosted DOI positive path; one controlled marketing campaign delivered; real unsubscribe; email-marketing blocklist with transactional permission left subscribed. Existing two Brevo workflows inactive; no active entries shown in inspected views. The provider's whole outbound queue and attempted-send suppression enforcement are **unverified**.
 - The repository remains public. Do not commit subscriber information, campaigns from private archives, sensitive source documents, credentials, paid content or internal subscriber/financial data here.
 - Current Brevo state, daily quota, live campaigns and subscriber totals have **not** been independently read from an authenticated provider in this engineering change. Provider observations are historical.
+- A fresh read-only Supabase public-table inventory shows no separate newsletter subscription or campaign-delivery tables in the exposed public schema. It does not establish Brevo subscriber totals and is not a reason to copy marketing records into member tables.
 - PR #230 is source-divergent from main and overlaps other drafts in index/join/privacy/resources; this change does not touch those paths.
 
 ## What this branch actually builds
@@ -26,7 +27,7 @@ Commands (Node 22, only standard library):
     node --test scripts/test_flame_letter_editorial.mjs scripts/test_flame_letter_send_guard.mjs
     node scripts/flame_letter_editorial.mjs --as-of=2026-11-21 --weeks=4 --out=.flame-letter-staging
 
-The output includes four draft HTML files, four plain-text files, four content-hash/metadata JSON files, and one report. Proposed Wednesdays are for editorial planning only. **They are not an authorized marketing schedule.**
+The output includes four draft HTML files, four plain-text files, four content-hash/metadata JSON files, a reviewable proposed draft-ledger manifest, and one report. Proposed Wednesdays are for editorial planning only. **They are not an authorized marketing schedule.**
 
 The output deliberately retains a non-sendable draft banner, native unsubscribe placeholder and unresolved verified-business-address placeholder. It must never be pasted directly into a live scheduled campaign.
 

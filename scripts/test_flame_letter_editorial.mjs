@@ -18,12 +18,13 @@ function fixture(){
  return dir;
 }
 test("actual current public NBJB source pages pass controlled catalog review",()=>{
- assert.equal(inspectInventory(catalog,manifest,ROOT).reservedTopicIds.size,0);
+ assert.equal(inspectInventory(catalog,manifest,ROOT).reservedTopicIds.size,manifest.suppressedIds.length);
 });
 test("four source-grounded DRAFTS, future planning dates, and no send capability",()=>{
  const {drafts,report}=plan({root:ROOT,catalog,manifest,asOf:"2026-11-21",weeks:4});
  assert.deepEqual(drafts.map(d=>d.proposedDate),["2026-11-25","2026-12-02","2026-12-09","2026-12-16"]);
  assert.equal(drafts.length,4);
+ assert.deepEqual(drafts.map(d=>d.topicId),["boundaries-hurt","survival-off-switch","healthy-validation","reciprocity-early"]);
  assert.equal(report.productionDistribution,"DISABLED");
  assert.equal(report.existingApprovedUpcoming,0);
  assert.ok(report.warnings.some(s=>s.includes("Fewer than four")));
@@ -85,7 +86,7 @@ test("missing, private, noindex or traversal inputs fail closed",()=>{
 });
 test("when source topics run out, hold remaining planned weeks instead of generating filler",()=>{
  const m=clone(manifest);
- m.suppressedIds=catalog.topics.slice(0,7).map(x=>x.id);
+ m.suppressedIds=catalog.topics.slice(0,-1).map(x=>x.id);
  const {drafts,report}=plan({catalog,manifest:m,root:ROOT,asOf:"2026-11-21",weeks:4});
  assert.equal(drafts.length,1);
  assert.equal(report.missingSlots.length,3);

@@ -37,7 +37,7 @@ function manifestEntry(item){
  assert(SAFE_DATE.test(item.proposedDate||""),"Manifest proposedDate missing");
  utcDay(item.proposedDate);
  assert(SHA.test(item.contentSha256||""),"Manifest hash invalid");
- assert(["approved","published"].includes(item.status),"Manifest status invalid");
+ assert(["draft","approved","published"].includes(item.status),"Manifest status invalid");
  if(item.status==="approved"){
    assert(typeof item.reviewedBy==="string"&&item.reviewedBy.trim().length>3,"Approval requires editor attribution");
    assert(typeof item.approvalEvidence==="string"&&item.approvalEvidence.trim().length>5,"Approval requires external evidence");
@@ -45,7 +45,7 @@ function manifestEntry(item){
 }
 export function inspectInventory(catalog,manifest,root=ROOT){
  assert(catalog?.schema===1&&Array.isArray(catalog.topics),"Catalog schema invalid");
- assert(manifest?.schema===1&&Array.isArray(manifest.approved)&&Array.isArray(manifest.published),"Manifest schema invalid");
+ assert(manifest?.schema===1&&Array.isArray(manifest.approved)&&Array.isArray(manifest.published)&&Array.isArray(manifest.drafts),"Manifest schema invalid");
  const p=manifest.publicationPolicy;
  assert(p&&p.enabled===false&&p.founderApproved===false&&p.weeklyAudienceAuthorized===false&&p.approvedDispatchEnabled===false,
    "PUBLICATION HOLD BREACHED: engine requires all delivery gates false");
@@ -65,7 +65,7 @@ export function inspectInventory(catalog,manifest,root=ROOT){
  }
  const reservedTopicIds=new Set();
  const reservedDates=new Set();
- for(const item of [...manifest.approved,...manifest.published]){
+ for(const item of [...manifest.drafts,...manifest.approved,...manifest.published]){
    manifestEntry(item);
    assert(ids.has(item.topicId),"Manifest references missing topic "+item.topicId);
    assert(!reservedTopicIds.has(item.topicId),"Duplicate approval/publication topic");
@@ -172,6 +172,8 @@ export function run({root=ROOT,out=path.join(ROOT,".flame-letter-staging"),asOf=
    const {html,plain,...metadata}=d;
    fs.writeFileSync(path.join(out,d.id+".json"),JSON.stringify(metadata,null,2)+"\n");
  }
+ const proposed={...manifest,drafts:[...manifest.drafts,...drafts.map(d=>({topicId:d.topicId,proposedDate:d.proposedDate,status:"draft",contentSha256:d.contentSha256}))]};
+ fs.writeFileSync(path.join(out,"proposed-manifest.json"),JSON.stringify(proposed,null,2)+"\n");
  fs.writeFileSync(path.join(out,"editorial-report.json"),JSON.stringify(report,null,2)+"\n");
  return report;
 }

@@ -67,3 +67,9 @@ GitHub compared current `main` at **`66428c4145cae34e4c2bdfec6e8969174a98882f`**
 Post only the material source qualification outcome and the binary backup blocker to Issue #274. The Guardian Desk subsystem is still **NOT HOSTED / NOT OPERATIONAL**; no real support tickets, response times, or verified resolution counts are measurable. Continue small-cohort suppression and avoid customer or support content in GitHub.
 
 **No founder manual browser testing is requested.** All possible inspection in this phase was connector read-only or source-only; the pending action is a verifiable backup capability/authorization, not another front-end test.
+
+### Updated production baseline after further accepted releases (2026-11-22)
+
+Production `main` advanced further to **`2cef0da1c244de4a84d8c8e33753660a7ec96655`**, most recently a founder-authorized merge of **PR #249** (source-only production assurance and security CI). At the direct connected compare of that main SHA against Guardian Desk pre-update head `5df7f0380503b51295e9f99f74c73c04026da6b4`, GitHub reported **70 behind / 42 ahead**, **16 strictly added files** (15 Guardian Desk documentation/code/test files under `docs/guardian-desk` plus one new workflow), **zero modified or deleted accepted-main files**, and `mergeable=true`. The earlier 53-behind/15-added comparison above is preserved as a prior timestamped observation, not the current release baseline.
+
+This document update itself creates another docs-only head, so a final check must compare the then-current `main` with that actual exact head and verify both CI jobs pass against the resulting pull-request merge ref. No automatic branch reset, forced rebase, merge, release or site deployment is justified by a clean diff alone.

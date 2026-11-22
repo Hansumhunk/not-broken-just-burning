@@ -18,7 +18,7 @@ Guardian Desk will eventually provide approved policy answers, limited authentic
 
 ## Prototype actually built and tested, separately delivered
 
-Loopback-only Python standard-library HTTP server and SQLite. Deterministic, versioned approved-source FAQ; safety-sensitive question routing; synthetic `TEST:` tickets, classification and exact duplicate detection; constrained state machine, minimal audit rows and aggregate local reporting. No member or payment integrations, mail, uploads, analytics or generative API. **26 unit + HTTP tests passed locally, zero failures, ResourceWarnings treated as errors.** Real account/hosted acceptances are NOT claimed. Existing production release gates remain protected.
+Loopback-only Python standard-library HTTP server and SQLite. Deterministic, versioned approved-source FAQ; safety-sensitive question routing; synthetic `TEST:` tickets, classification and exact duplicate detection; constrained state machine, minimal audit rows and aggregate local reporting. No member or payment integrations, mail, uploads, analytics or generative API. **29 unit + HTTP tests passed locally, zero failures, ResourceWarnings treated as errors.** Real account/hosted acceptances are NOT claimed. Existing production release gates remain protected.
 
 ## Ordered integration gates
 

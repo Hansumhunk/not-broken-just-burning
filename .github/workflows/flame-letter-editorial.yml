@@ -41,6 +41,8 @@ jobs:
         run: python -m unittest discover -s flame-letter-engine -p 'test_*.py' -v
       - name: Stage four review-only candidate editions
         run: node scripts/flame_letter_editorial.mjs --weeks=4 --out=flame-letter-staging
+      - name: Confirm structural/editorial draft parity and write approval report
+        run: python flame-letter-engine/review_staged.py . flame-letter-staging
       - name: Archive editorial REVIEW artifacts, never send
         uses: actions/upload-artifact@v4
         with:

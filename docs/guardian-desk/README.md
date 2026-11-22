@@ -33,3 +33,19 @@ Loopback-only Python standard-library HTTP server and SQLite. Deterministic, ver
 This is an **engineering review branch only**. No production deploy, live billing mutation, account edit, mailing, spending, or new support backend has been authorized or executed.
 
 Tracking issue: #275. Related issues: #205, #214, #160, #274; PR #244.
+
+
+## GD-002-A Phase II continuation (latest)
+
+Existing development branch and draft PR #276 now additionally stage:
+
+- `PROPOSED_TICKET_SCHEMA.sql` — **unapplied** revision with safe delete/redaction gate, RLS, customer-column allowlist, private audit, keyed-dedupe unique index, limited-rate atomic service-only RPC.
+- `guardian-support-core.mjs` — validated, deterministic sensitive-input and departmental-routing helpers.
+- `edge/guardian-support-intake/index.ts` — **unhosted** QA-gated bearer-user verification candidate with verified-owner persistence, fail-closed error handling and no live billing actions.
+- `tests/security.test.mjs` — source-only reproducibility checks (requires Node 22+ with `--experimental-strip-types`).
+- `PHASE_II_SECURITY_REVIEW.md` — preservation vs deletion/retention proposal; not an enacted policy.
+- `PHASE_II_QA_APPROVAL.md` — single consolidated governance, isolated Commerce QA and human-operations approval request.
+
+The founder's original Python/SQLite proof remains separate from this staged source. New local Node source/security suite: **59 PASS, 0 FAIL** in an isolated development environment; **no hosted QA execution, independent GitHub CI, database writes or public releases** have occurred. Recovered status for old member-feedback composer and established public contact/billing processes is unchanged.
+
+Keep the existing Issue #275 and Executive Command Issue #274 as tracking systems. Full accounting in the draft PR and GD01–GD30 register.

@@ -7,6 +7,8 @@ on:
       - 'flame-letter-engine/**'
       - 'scripts/flame_letter_editorial.mjs'
       - 'scripts/test_flame_letter_editorial.mjs'
+      - 'scripts/flame_letter_send_guard.mjs'
+      - 'scripts/test_flame_letter_send_guard.mjs'
       - '.github/workflows/flame-letter-editorial.yml'
   workflow_dispatch:
   schedule:
@@ -31,7 +33,7 @@ jobs:
         with:
           node-version: '22'
       - name: Test offline generator and hard release gates
-        run: node --test scripts/test_flame_letter_editorial.mjs
+        run: node --test scripts/test_flame_letter_editorial.mjs scripts/test_flame_letter_send_guard.mjs
       - name: Stage four review-only candidate editions
         run: node scripts/flame_letter_editorial.mjs --weeks=4 --out=.flame-letter-staging
       - name: Archive editorial REVIEW artifacts, never send

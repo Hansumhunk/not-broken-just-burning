@@ -50,7 +50,7 @@ CREATE TABLE public.guardian_support_tickets (
   -- A reviewed scrub/purge workflow must run before account deletion.
   CONSTRAINT guardian_support_orphan_redacted CHECK (
     owner_user_id IS NOT NULL OR
-    (summary = '[REDACTED]' AND
+    (status = 'CLOSED' AND summary = '[REDACTED]' AND
      dedupe_fingerprint = repeat('0',64) AND
      feature_slug IS NULL AND last_verified_action IS NULL AND
      next_action IS NULL AND assigned_team IS NULL AND

@@ -26,8 +26,13 @@ test('pinned Stripe SDK authenticates raw-body signed sandbox fixture; tampering
  await assert.rejects(stripe.webhooks.constructEventAsync(body,header(body,undefined,'other_fixture_secret'),secret));
  await assert.rejects(stripe.webhooks.constructEventAsync(body,header(body,Math.floor(Date.now()/1000)-3600),secret));
  await assert.rejects(stripe.webhooks.constructEventAsync(body,'',secret));
- assert.ok(handler.indexOf('constructEventAsync(rawBody, signature, webhookSecret)') < handler.indexOf('if (!event.livemode)'));
- assert.ok(handler.indexOf('if (!event.livemode)') < handler.indexOf('claimReceipt(receipts, event)'));
+ const bodyRead = handler.indexOf('const rawBody = await req.text()');
+ const signed = handler.indexOf('stripe.webhooks.constructEventAsync(rawBody, signature, webhookSecret)');
+ const rejectSandboxOnLive = handler.indexOf('if (environment.live && !event.livemode)');
+ const rejectLiveOnSandbox = handler.indexOf('if (!environment.live && event.livemode)');
+ const claim = handler.indexOf('claimReceipt(receipts, event, Date.now(), environment.live)');
+ assert.ok(bodyRead >= 0 && signed > bodyRead && rejectSandboxOnLive > signed && rejectLiveOnSandbox > rejectSandboxOnLive && claim > rejectLiveOnSandbox,
+   'raw-body signature and both account-mode checks must precede receipt claims');
 });
 
 test('failed renewal expires exactly at paid-through boundary, then paid invoice restores access',async()=>{
@@ -43,7 +48,7 @@ test('failed renewal expires exactly at paid-through boundary, then paid invoice
  assert.equal(paymentBoundary(paid,old,bounds,end+1).validUntil,bounds.validUntil);
 });
 
-test('current time-bucket candidate has a demonstrated cross-boundary duplicate-session window',async()=>{
+test('historical unreserved time-bucket model permits a duplicate-session window',async()=>{
  const {checkoutConflict,sessionIdempotencyKey}=await import(checkoutModule);
  const empty={data:[],has_more:false};
  // Both callers read before either has created a provider session.
@@ -51,12 +56,12 @@ test('current time-bucket candidate has a demonstrated cross-boundary duplicate-
    assert.equal(checkoutConflict(empty,empty),null);
    return sessionIdempotencyKey('cus_fixture',t);
  }));
- assert.notEqual(a,b,'two provider keys can create two sessions; release blocker');
+ assert.notEqual(a,b,'unreserved legacy keys could create two sessions; this counterexample is historical');
  assert.equal(sessionIdempotencyKey('cus_fixture',1),sessionIdempotencyKey('cus_fixture',1799999));
 });
 
 test('reference atomic-attempt model denies simultaneous and cross-window contenders and preserves uncertain outcomes',async()=>{
- // Reference model only: production needs a database unique constraint / CAS.
+ // Reference model only: deployed database reservation/CAS is independently tested, not validated here.
  // No implementation or migration is deployed by this test.
  let held=null;let sends=0;
  function claim(offer, token) { if(held)return {kind:'blocked',attempt:held.token};held={offer,token,phase:'creating'};return {kind:'claimed',attempt:token}; }

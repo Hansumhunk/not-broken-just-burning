@@ -1,5 +1,7 @@
 # Project Ignition III / Directive 002 — Eternal Flame Engine
 
+**Phase I historical foundation:** Subsequent original archive recovery, exact T01–T20 reconciliation, durable ledger, deduplicated editorial inventory and 56-test acceptance are documented in [flame-letter-engine/PHASE_2_HANDOFF.md](flame-letter-engine/PHASE_2_HANDOFF.md). That newer handoff supersedes Phase I's inaccessible-private-archive and CI-pending notes.
+
 Status: **DRAFT DEVELOPMENT ONLY**. This is a stacked engineering change based on draft PR #230.
 No subscriber import, no Brevo API credentials, no send adapter, no live form release, no DNS, no merge/deployment, and no monetary spend.
 

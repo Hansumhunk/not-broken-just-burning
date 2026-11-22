@@ -1264,3 +1264,17 @@ test('Directive 007: member continuity links to published free Seven Days withou
   assert.doesNotMatch(publicMarks, /localStorage|sessionStorage|fetch\(|sendBeacon\(|\.capture\(/);
   assert.match(memberPlatform, /nbjb[.]member[.]v2/);
 });
+
+test('Directive 008: Join offers the published public Seven Days directly without requiring signup', () => {
+  const join = read('join.html');
+  const course = read('first-seven-days.html');
+  const marks = read('js/first-seven-days.js');
+  assert.match(join, /href="first-seven-days[.]html">Read the free First Seven Days/);
+  assert.match(join, /no account needed/);
+  assert.match(join, /href="member-auth[.]html" data-growth-cta="join_signup"/);
+  assert.match(join, /href="index[.]html#start-here">Try Free Guidance Without Signing Up/);
+  assert.match(join, /href="member-auth[.]html">Sign in/);
+  assert.match(course, /No account or payment required/);
+  assert.doesNotMatch(course, /src="js\/main[.]js"/);
+  assert.doesNotMatch(marks, /localStorage|sessionStorage|fetch\(|sendBeacon\(|\.capture\(/);
+});

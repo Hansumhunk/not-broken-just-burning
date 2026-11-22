@@ -19,9 +19,9 @@ def fixture(classification='public_educational_original', rights='original_verif
 def actor(role='vault_steward', user='steward', acct='test-account', verified=True):
     return Actor(user,role,acct,verified)
 
-def grant(purpose='ingest', kind=None, user='steward', account='test-account', dept=None):
+def grant(purpose='ingest', kind=None, user='steward', account='test-account', dept=None, destination=None):
     return Approval('synthetic-approved-'+purpose, 'synthetic-source-1', account, user,purpose,True,
-                    'synthetic-proof-1',NOW+timedelta(days=2),derivative_kind=kind,department=dept)
+                    'synthetic-proof-1',NOW+timedelta(days=2),derivative_kind=kind,department=dept,destination=destination)
 
 class PolicyCases(unittest.TestCase):
     def setUp(self): self.src=fixture(); self.actor=actor()
@@ -121,5 +121,23 @@ class PolicyCases(unittest.TestCase):
         self.deny(g=dataclasses.replace(grant(),expires_at=NOW-timedelta(days=1)))
     def test_44_approval_without_founder(self):
         self.deny(g=dataclasses.replace(grant(),approved_by_founder=False))
+
+    def test_45_missing_approval_denied(self):
+        with self.assertRaises(AccessDenied):authorize(self.actor,self.src,None,'ingest',now=NOW)
+    def test_46_external_export_destination_denied(self):
+        self.deny(purpose='controlled_export',g=grant('controlled_export',destination='https://example.org'),destination='https://example.org')
+    def test_47_export_destination_mismatch_denied(self):
+        self.deny(purpose='controlled_export',g=grant('controlled_export',destination='approved_local_outbox'),destination='review_only_local_bundle')
+    def test_48_scoped_local_export_permission_only(self):
+        self.check(purpose='controlled_export',g=grant('controlled_export',destination='review_only_local_bundle'),destination='review_only_local_bundle')
+    def test_49_license_derivative_format_excluded(self):
+        s=dataclasses.replace(fixture('third_party_licensed','license_verified'),license_purposes=frozenset({'derivative'}))
+        self.deny(src=s,purpose='derivative',g=grant('derivative','lesson'),derivative_kind='lesson')
+    def test_50_license_derivative_format_permitted(self):
+        s=dataclasses.replace(fixture('third_party_licensed','license_verified'),license_purposes=frozenset({'derivative'}),license_derivative_kinds=frozenset({'lesson'}))
+        self.check(src=s,purpose='derivative',g=grant('derivative','lesson'),derivative_kind='lesson')
+    def test_51_invalid_path_type_denied(self):
+        with tempfile.TemporaryDirectory() as x:
+            with self.assertRaises(AccessDenied):secure_read_candidate(Path(x),None)
 
 if __name__=='__main__': unittest.main()

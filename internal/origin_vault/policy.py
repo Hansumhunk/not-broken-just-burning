@@ -49,6 +49,7 @@ class Source:
     sha256_hex: str
     version: int = 1
     license_purposes: frozenset[str] = frozenset()
+    license_derivative_kinds: frozenset[str] = frozenset()
     attribution_required: bool = False
     attribution_ref: str = ""
     revoked: bool = False
@@ -65,6 +66,7 @@ class Approval:
     expires_at: datetime
     derivative_kind: str | None = None
     department: str | None = None
+    destination: str | None = None
     revoked: bool = False
 
 @dataclass(frozen=True)
@@ -97,7 +99,7 @@ def _valid_sha256(v: str) -> bool:
 
 def authorize(actor: Actor, source: Source, approval: Approval, purpose: str,
               *, derivative_kind: str | None = None, department: str | None = None,
-              now: datetime | None = None) -> None:
+              destination: str | None = None, now: datetime | None = None) -> None:
     """Fail-closed decision; does NOT establish real-world rights/identity or execute any action.
 
     Each operation needs a separate grant bound to source, actor, account, purpose.
@@ -105,6 +107,8 @@ def authorize(actor: Actor, source: Source, approval: Approval, purpose: str,
     """
     if purpose not in PURPOSES:
         _fail("purpose not supported")
+    if not isinstance(actor, Actor) or not isinstance(source, Source) or not isinstance(approval, Approval):
+        _fail("actor, source or approval missing")
     if not actor.identity_verified or not actor.actor_id or not actor.account_id:
         _fail("identity unverified")
     if actor.role not in ROLE_PURPOSES or purpose not in ROLE_PURPOSES[actor.role]:
@@ -135,8 +139,15 @@ def authorize(actor: Actor, source: Source, approval: Approval, purpose: str,
     if purpose == "derivative":
         if derivative_kind not in KINDS or approval.derivative_kind != derivative_kind:
             _fail("derivative format not authorized")
+        if source.classification == "third_party_licensed" and derivative_kind not in source.license_derivative_kinds:
+            _fail("license excludes derivative kind")
     elif derivative_kind is not None:
         _fail("unexpected derivative format")
+    if purpose == "controlled_export":
+        if destination not in {"review_only_local_bundle", "approved_local_outbox"} or approval.destination != destination:
+            _fail("export destination unapproved")
+    elif destination is not None:
+        _fail("unexpected export destination")
     if purpose.endswith("handoff"):
         expected = {"education_handoff":"educational_platform",
                     "newsletter_handoff":"eternal_flame",

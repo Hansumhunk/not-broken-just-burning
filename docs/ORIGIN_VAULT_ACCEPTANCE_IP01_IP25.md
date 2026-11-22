@@ -1,6 +1,6 @@
 # Origin Vault IP01–IP25 — phase separation acceptance record
 
-Date: 2026-11-22. Source: Issue #269 Phase 1 baseline and Directive 003-A comment. **The original IP01–IP25 case specifications and original 10 Python test bytes were not available for exact replay.** Never invent original case definitions. Original statuses are preserved exactly. New, separate local tests are `test_01` through `test_44` in `tests/test_origin_vault_phase2.py`.
+Date: 2026-11-22. Source: Issue #269 Phase 1 baseline and Directive 003-A comment. **The original IP01–IP25 case specifications and original 10 Python test bytes were not available for exact replay.** Never invent original case definitions. Original statuses are preserved exactly. New, separate local tests are `test_01` through `test_51` in `tests/test_origin_vault_phase2.py`.
 
 | Case | Original local status | 003-B status | Acceptance evidence / limitation |
 |---|---|---|---|
@@ -34,7 +34,7 @@ Date: 2026-11-22. Source: Issue #269 Phase 1 baseline and Directive 003-A commen
 
 ## Independent Phase 2 test suite (not substitutes for original IP cases)
 
-**Environment:** Python standard library `unittest`, Linux `/mnt/data`, no network, database, Supabase writes, Git remote, cloud identity or private input. Fixture is a hard-coded fake source. Execute `python -m unittest discover -s tests -p 'test_origin_vault_phase2.py' -v`. Actual results during local build: **44/44 PASS** after correcting two test-fixture mistakes during the first run. These are implementation-unit tests, not cloud security acceptance.
+**Environment:** Python standard library `unittest`, Linux `/mnt/data`, no network, database, Supabase writes, Git remote, cloud identity or private input. Fixture is a hard-coded fake source. Execute `python -m unittest discover -s tests -p 'test_origin_vault_phase2.py' -v`. Actual results during local build: **51/51 PASS** after correcting two test-fixture mistakes during the first run. These are implementation-unit tests, not cloud security acceptance.
 
 | Phase 2 test IDs | Expected behavior | Actual observation |
 |---|---|---|
@@ -45,6 +45,7 @@ Date: 2026-11-22. Source: Issue #269 Phase 1 baseline and Directive 003-A commen
 | test_31–32 | Altered/reordered local audit chain detected | PASS |
 | test_33–39 | Symlink, traversal, absolute, Git tree and oversize source refused; safe synthetic read allowed | PASS |
 | test_40–44 | Hash does not imply rights, missing permission evidence, invalid hash and founder approval failures rejected | PASS |
+| test_45–51 | Missing approval, external/mismatched export destination, licensed derivative scope and invalid path type denied; scoped local export allowed | PASS |
 
 ## Not established
 

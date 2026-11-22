@@ -13,7 +13,7 @@ At repository root, with Python 3.11+ on Linux:
 python -m unittest discover -s tests -p 'test_origin_vault_phase2.py' -v
 ```
 
-Test evidence: 44/44 passed locally on 2026-11-22, using synthetic identifiers/bytes. The pre-existing ten Phase 1 prototype tests were **not** recovered or re-executed. No public source or founder-private material has been imported.
+Test evidence: 51/51 passed locally on 2026-11-22, using synthetic identifiers/bytes. The pre-existing ten Phase 1 prototype tests were **not** recovered or re-executed. No public source or founder-private material has been imported.
 
 ## What the code enforces
 

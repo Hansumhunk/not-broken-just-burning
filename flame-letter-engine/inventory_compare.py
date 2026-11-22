@@ -15,7 +15,7 @@ STOPWORDS = {"a","an","and","are","as","at","be","can","do","for","from","how",
 
 def tokens(text):
     words = [w.lower() for w in re.findall(r"[a-zA-Z]{3,}",str(text))]
-    normalized = {w[:-3] if w.endswith("ies") else w.rstrip("s")
+    normalized = {w[:-3]+"y" if w.endswith("ies") else w.rstrip("s")
                   for w in words if w not in STOPWORDS}
     return normalized
 

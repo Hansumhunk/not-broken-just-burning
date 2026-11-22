@@ -54,3 +54,28 @@ BEGIN SELECT RAISE(ABORT,'append-only audit'); END;
 CREATE TRIGGER IF NOT EXISTS audit_cannot_delete BEFORE DELETE ON audit_log
 BEGIN SELECT RAISE(ABORT,'append-only audit'); END;
 CREATE INDEX IF NOT EXISTS editions_window_idx ON editions(state, window_start);
+
+
+-- Operational stop applies to SIMULATED claims only; live dispatch does not exist.
+-- Default preserves Phase II offline tests. PrivateOperations initializes halted=1.
+CREATE TABLE IF NOT EXISTS runtime_control (
+  singleton INTEGER PRIMARY KEY CHECK(singleton=1),
+  halted INTEGER NOT NULL CHECK(halted IN (0,1)),
+  changed_at TEXT,
+  reason_ref TEXT
+);
+INSERT OR IGNORE INTO runtime_control(singleton,halted,reason_ref)
+VALUES (1,0,'offline_phase2_compatibility');
+CREATE TABLE IF NOT EXISTS operations_audit (
+  seq INTEGER PRIMARY KEY AUTOINCREMENT,
+  event TEXT NOT NULL,
+  actor_ref TEXT NOT NULL,
+  at_utc TEXT NOT NULL,
+  evidence_ref TEXT NOT NULL
+);
+CREATE TRIGGER IF NOT EXISTS operations_audit_no_update
+BEFORE UPDATE ON operations_audit
+BEGIN SELECT RAISE(ABORT,'append-only operations audit'); END;
+CREATE TRIGGER IF NOT EXISTS operations_audit_no_delete
+BEFORE DELETE ON operations_audit
+BEGIN SELECT RAISE(ABORT,'append-only operations audit'); END;

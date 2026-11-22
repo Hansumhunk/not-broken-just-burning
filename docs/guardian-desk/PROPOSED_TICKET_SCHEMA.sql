@@ -42,7 +42,16 @@ CREATE TABLE public.guardian_support_tickets (
   legal_hold_reference text,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
-  closed_at timestamptz
+  closed_at timestamptz,
+  -- Fail closed: unlinking an Auth user cannot leave an orphaned case
+  -- containing an identifiable summary or reusable fingerprint.
+  -- A reviewed scrub/purge workflow must run before account deletion.
+  CONSTRAINT guardian_support_orphan_redacted CHECK (
+    owner_user_id IS NOT NULL OR
+    (summary = '[REDACTED]' AND
+     dedupe_fingerprint = repeat('0',64) AND
+     legal_hold_reference IS NULL)
+  )
 );
 CREATE INDEX guardian_support_tickets_owner_created_idx
   ON public.guardian_support_tickets(owner_user_id,created_at DESC);

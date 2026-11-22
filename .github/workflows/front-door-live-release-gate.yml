@@ -1,0 +1,32 @@
+name: Front Door live publication gate
+on:
+  push:
+    branches:
+      - staging/front-door-optimization
+    paths:
+      - 'index.html'
+      - 'join.html'
+      - 'css/visitor-journey.css'
+      - 'tests/front_door_live_release_gate.py'
+      - '.github/workflows/front-door-live-release-gate.yml'
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'index.html'
+      - 'join.html'
+      - 'css/visitor-journey.css'
+      - 'tests/front_door_live_release_gate.py'
+      - '.github/workflows/front-door-live-release-gate.yml'
+permissions:
+  contents: read
+concurrency:
+  group: front-door-public-gate-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  live-seven-days:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check publicly deployed First Seven Days (HTTP GET only)
+        run: python tests/front_door_live_release_gate.py

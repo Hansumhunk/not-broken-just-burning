@@ -31,7 +31,7 @@ from .policy import AccessDenied
 MAGIC = b'OV-ENC4\x00'
 MAX_SNAPSHOT = 32_000_000  # Bound synthetic memory use; not a real capacity promise.
 TABLES = ('sources', 'source_versions', 'approvals', 'concepts', 'derivative_versions',
-          'local_exports', 'audit')
+          'local_exports', 'audit', 'vault_config')
 
 
 def _aeskey(key: bytes) -> bytes:
@@ -145,7 +145,8 @@ def unseal_sqlite_snapshot(target: Path, key: bytes, reference: str) -> bytes:
 
 
 def restore_sealed_snapshot(target: Path, destination: Path, key: bytes, reference: str, *,
-                            identity_key: bytes, owner_key: bytes, backup_key: bytes) -> DurableVault:
+                            identity_key: bytes, owner_key: bytes, backup_key: bytes,
+                            content_key: bytes | None = None) -> DurableVault:
     """Restore *only into a new isolated plaintext synthetic test directory*."""
     destination = Path(destination)
     if destination.exists():
@@ -169,7 +170,7 @@ def restore_sealed_snapshot(target: Path, destination: Path, key: bytes, referen
         except (sqlite3.DatabaseError, ValueError) as exc:
             raise AccessDenied('invalid encrypted snapshot') from exc
     return DurableVault(destination, identity_key=identity_key, owner_key=owner_key,
-                        backup_key=backup_key, create=False)
+                        backup_key=backup_key, create=False, content_key=content_key)
 
 
 def rotate_sealed_snapshot(source: Path, destination: Path, old_key: bytes,

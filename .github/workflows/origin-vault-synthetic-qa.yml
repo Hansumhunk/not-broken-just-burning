@@ -9,6 +9,7 @@ on:
       - 'tests/test_origin_vault_phase2.py'
       - 'tests/test_origin_vault_phase3.py'
       - 'tests/test_origin_vault_phase4.py'
+      - 'tests/test_origin_vault_phase5.py'
       - 'docs/ORIGIN_VAULT_*.md'
       - 'docs/origin_vault_schema_PROPOSAL.sql'
       - '.github/workflows/origin-vault-synthetic-qa.yml'
@@ -37,13 +38,15 @@ jobs:
         run: python -m pip install --disable-pip-version-check --no-input 'cryptography==46.0.4'
       - name: Syntax validation - policy, SQLite, synthetic fixtures
         run: |
-          python -m py_compile internal/origin_vault/policy.py internal/origin_vault/durable.py internal/origin_vault/phase4_security.py tests/test_origin_vault_phase2.py tests/test_origin_vault_phase3.py tests/test_origin_vault_phase4.py
+          python -m py_compile internal/origin_vault/policy.py internal/origin_vault/durable.py internal/origin_vault/phase4_security.py internal/origin_vault/phase5_security.py internal/origin_vault/phase5_identity.py tests/test_origin_vault_phase2.py tests/test_origin_vault_phase3.py tests/test_origin_vault_phase4.py tests/test_origin_vault_phase5.py
       - name: Phase II reference engine acceptance - 51 synthetic tests
         run: python -m unittest discover -s tests -p 'test_origin_vault_phase2.py' -v
       - name: Phase III local durability and identity QA - 67 synthetic tests
         run: python -m unittest discover -s tests -p 'test_origin_vault_phase3.py' -v
       - name: Phase IV synthetic encryption, signed checkpoint and key-separation QA - 31 tests
         run: python -m unittest discover -s tests -p 'test_origin_vault_phase4.py' -v
+      - name: Phase V encrypted BLOB, simulated external latest checkpoint and identity QA - 27 tests
+        run: python -m unittest discover -s tests -p 'test_origin_vault_phase5.py' -v
       - name: Report strict boundary
         run: |
-          echo 'Origin Vault: 51 Phase II + 67 Phase III + 31 Phase IV synthetic-only tests; test secrets generated in-memory and never uploaded. No original Phase I replay, production security, external identity, source rights proof, active storage encryption, actual identity provider, independently anchored audit custody, offsite recovery, hosted database, remote distribution or independent audit anchor is validated here.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Origin Vault: 51 Phase II + 67 Phase III + 31 Phase IV + 27 Phase V synthetic-only tests; test secrets generated in-memory and never uploaded. No original Phase I replay, production security, external identity, source rights proof, full SQLite database encryption (payload-only synthetic AEAD), actual identity provider, independently anchored audit custody, offsite recovery, hosted database, remote distribution or independent audit anchor is validated here.' >> "$GITHUB_STEP_SUMMARY"

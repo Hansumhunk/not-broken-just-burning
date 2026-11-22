@@ -138,12 +138,18 @@ class DurableVault:
     """Non-production store; in-memory key verifier; SQLite bytes never enter Git/CI artifacts."""
 
     def __init__(self, root: Path, *, identity_key: bytes, owner_key: bytes, backup_key: bytes,
-                 create: bool = True):
+                 create: bool = True, content_key: bytes | None = None):
+        # Opt-in Phase V synthetic application-level AEAD, NOT SQLCipher or full DB encryption.
+        self.content_key = content_key
+        if content_key is not None and (not isinstance(content_key, bytes) or len(content_key) != 32):
+            raise AccessDenied("content protection requires an independent 32-byte key")
         self.identity_key = _key(identity_key)
         self.owner_key = _key(owner_key)
         self.backup_key = _key(backup_key)
         if len({self.identity_key, self.owner_key, self.backup_key}) != 3:
             raise AccessDenied('identity, approval and backup signing keys must be independent')
+        if content_key is not None and content_key in {self.identity_key, self.owner_key, self.backup_key}:
+            raise AccessDenied("content key may not reuse identity, owner or backup keys")
         self.root = _safe_root(Path(root), create=create)
         self.path = self.root / DB_NAME
         if not create and not self.path.exists():
@@ -155,14 +161,20 @@ class DurableVault:
         self.db.execute("PRAGMA journal_mode=WAL")
         self.db.execute("PRAGMA synchronous=FULL")
         self.db.execute("PRAGMA busy_timeout=5000")
-        if create:
-            self._initialize()
-        elif not self.db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='sources'").fetchone():
-            raise AccessDenied("unknown or empty database")
-        # No automatic migrations. Verification on open is important for restored state.
-        if not self.verify_integrity():
-            raise AccessDenied("vault integrity failure")
-        self._recover_incomplete_exports()
+        try:
+            if create:
+                self._initialize()
+            elif not self.db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='sources'").fetchone():
+                raise AccessDenied("unknown or empty database")
+            # Protected mode is explicitly marked on disk, refuses downgrades and wrong keys.
+            self._check_storage_mode()
+            # No automatic migrations. Verification on open is important for restored state.
+            if not self.verify_integrity():
+                raise AccessDenied("vault integrity failure")
+            self._recover_incomplete_exports()
+        except BaseException:
+            self.db.close()  # fail closed without retaining active SQLite handles
+            raise
 
     def close(self) -> None:
         self.db.close()
@@ -175,6 +187,10 @@ class DurableVault:
 
     def _initialize(self) -> None:
         self.db.executescript("""
+        CREATE TABLE IF NOT EXISTS vault_config (
+           singleton INTEGER PRIMARY KEY CHECK (singleton=1),
+           content_mode TEXT NOT NULL CHECK (content_mode IN ('legacy_plaintext','encrypted_payload_v1')),
+           key_check TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS sources (
            source_id TEXT PRIMARY KEY, account_id TEXT NOT NULL, owner_id TEXT NOT NULL,
            classification TEXT NOT NULL, rights TEXT NOT NULL, evidence_ref TEXT NOT NULL,
@@ -217,6 +233,56 @@ class DurableVault:
         CREATE TRIGGER IF NOT EXISTS protect_derivative_update BEFORE UPDATE ON derivative_versions BEGIN SELECT RAISE(ABORT,'immutable derivative version'); END;
         CREATE TRIGGER IF NOT EXISTS protect_derivative_delete BEFORE DELETE ON derivative_versions BEGIN SELECT RAISE(ABORT,'immutable derivative version'); END;
         """)
+
+    def _check_storage_mode(self) -> None:
+        """Refuse silent downgrade/upgrade; never auto-migrate old plaintext bytes."""
+        config_exists = self.db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='vault_config'").fetchone()
+        existing = self.db.execute("SELECT content_mode,key_check FROM vault_config WHERE singleton=1").fetchone() if config_exists else None
+        requested = 'encrypted_payload_v1' if self.content_key is not None else 'legacy_plaintext'
+        if existing is None:
+            if self.content_key is not None and (
+                self.db.execute("SELECT 1 FROM source_versions LIMIT 1").fetchone() or
+                self.db.execute("SELECT 1 FROM derivative_versions LIMIT 1").fetchone()
+            ):
+                raise AccessDenied('cannot re-label historical plaintext source as encrypted')
+            if not config_exists:
+                if self.content_key is not None:
+                    raise AccessDenied('protected mode requires new schema, no silent migration')
+                return  # legacy snapshot from before Phase V remains readable in legacy mode
+            check = hmac.new(self.content_key, b'origin-vault-v5-content-key-check', hashlib.sha256).hexdigest() if self.content_key else ''
+            self.db.execute('INSERT INTO vault_config VALUES(1,?,?)',(requested,check))
+            return
+        if existing['content_mode'] != requested:
+            raise AccessDenied('content mode downgrade or silent plaintext-to-encrypted migration forbidden')
+        if self.content_key is not None and not hmac.compare_digest(
+            existing['key_check'],hmac.new(self.content_key,b'origin-vault-v5-content-key-check',hashlib.sha256).hexdigest()
+        ):
+            raise AccessDenied('wrong active content key')
+
+    def _encode_blob(self, plaintext: bytes, *, kind: str, record_id: str, version: int, sha256: str) -> bytes:
+        if self.content_key is None:
+            return plaintext
+        from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+        aad=canonical({'v':1,'kind':kind,'id':record_id,'version':version,'sha256':sha256})
+        nonce=os.urandom(12)
+        return b'OV-A5\x00'+nonce+AESGCM(self.content_key).encrypt(nonce,plaintext,aad)
+
+    def _decode_blob(self, stored: bytes, *, kind: str, record_id: str, version: int, sha256: str) -> bytes:
+        if self.content_key is None:
+            return bytes(stored)
+        from cryptography.exceptions import InvalidTag
+        from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+        blob=bytes(stored)
+        if not blob.startswith(b'OV-A5\x00') or len(blob)<6+12+16:
+            raise AccessDenied('plaintext, truncated or non-protected active payload')
+        aad=canonical({'v':1,'kind':kind,'id':record_id,'version':version,'sha256':sha256})
+        try:
+            raw=AESGCM(self.content_key).decrypt(blob[6:18],blob[18:],aad)
+        except InvalidTag as exc:
+            raise AccessDenied('active payload failed authenticated decryption') from exc
+        if digest(raw)!=sha256:
+            raise AccessDenied('active payload original digest mismatch')
+        return raw
 
     @contextmanager
     def _tx(self):
@@ -340,7 +406,7 @@ class DurableVault:
                        (source_id,account_id,owner_id,classification,rights,evidence_ref,int(rights_verified),
                         json.dumps(sorted(license_purposes)),json.dumps(sorted(license_kinds)),attribution_ref,
                         int(attribution_required),None,self._time()))
-            db.execute("INSERT INTO source_versions VALUES(?,?,?,?,?,?)",(source_id,1,account_id,h,data,self._time()))
+            db.execute("INSERT INTO source_versions VALUES(?,?,?,?,?,?)",(source_id,1,account_id,h,self._encode_blob(data,kind="source",record_id=source_id,version=1,sha256=h),self._time()))
             self._audit(db,owner_id,"source_ingested",source_id,{"version":1,"sha256":h})
             if interrupt: raise RuntimeError("simulated interruption before transaction commit")
 
@@ -360,7 +426,7 @@ class DurableVault:
             self._check_and_consume(db,session,approval_id,candidate,s["owner_id"],"ingest")
             if db.execute("SELECT 1 FROM source_versions WHERE account_id=? AND sha256=?",(s["account_id"],h)).fetchone():
                 raise AccessDenied("duplicate original bytes within account")
-            db.execute("INSERT INTO source_versions VALUES(?,?,?,?,?,?)",(source_id,v,s["account_id"],h,data,self._time()))
+            db.execute("INSERT INTO source_versions VALUES(?,?,?,?,?,?)",(source_id,v,s["account_id"],h,self._encode_blob(data,kind="source",record_id=source_id,version=v,sha256=h),self._time()))
             self._audit(db,s["owner_id"],"source_versioned",source_id,{"version":v,"sha256":h})
             if interrupt: raise RuntimeError("simulated interrupted version registration")
             return v
@@ -369,10 +435,10 @@ class DurableVault:
         with self._tx() as db:
             s,v,src=self._source(db,source_id,version)
             claims=self._check_and_consume(db,session,approval_id,src,s["owner_id"],"preview")
-            if digest(v["data"])!=v["sha256"]:
+            if digest(self._decode_blob(v["data"],kind="source",record_id=source_id,version=version,sha256=v["sha256"]))!=v["sha256"]:
                 raise AccessDenied("original integrity mismatch")
             self._audit(db,claims["sub"],"source_preview",source_id,{"version":version,"sha256":v["sha256"]})
-            return bytes(v["data"])
+            return self._decode_blob(v["data"],kind="source",record_id=source_id,version=version,sha256=v["sha256"])
 
     def make_concept(self, session: str, approval_id: str, source_id: str, version: int, concept_id: str) -> None:
         if not concept_id: raise AccessDenied("empty concept ID")
@@ -404,7 +470,8 @@ class DurableVault:
                 if existing["kind"]!=kind or existing["concept_id"]!=concept_id:
                     raise AccessDenied("derivative revision cannot change lineage or kind")
             db.execute("INSERT INTO derivative_versions VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
-                       (derivative_id,next_version,concept_id,src.source_id,src.version,kind,h,data,
+                       (derivative_id,next_version,concept_id,src.source_id,src.version,kind,h,
+                        self._encode_blob(data,kind="derivative",record_id=derivative_id,version=next_version,sha256=h),
                         json.dumps(contributions),approval_id,"candidate_review_only",self._time()))
             self._audit(db,actor["sub"],"derivative_candidate",derivative_id,
                         {"version":next_version,"sha256":h,"kind":kind})
@@ -415,7 +482,7 @@ class DurableVault:
         row=db.execute("SELECT * FROM derivative_versions WHERE derivative_id=? AND version=?",(derivative_id,version)).fetchone()
         if row is None: raise AccessDenied("derivative version absent")
         s,v,src=self._source(db,row["source_id"],row["source_version"])
-        if row["sha256"] != digest(row["data"]) or row["status"] != "candidate_review_only":
+        if row["sha256"] != digest(self._decode_blob(row["data"],kind="derivative",record_id=derivative_id,version=version,sha256=row["sha256"])) or row["status"] != "candidate_review_only":
             raise AccessDenied("derivative integrity/status mismatch")
         return row,s,v,src
 
@@ -466,6 +533,8 @@ class DurableVault:
 
     def controlled_local_export(self, session: str, approval_id: str, derivative_id: str, version: int,
                                 filename: str, *, interrupt: str | None = None) -> Path:
+        if self.content_key is not None:
+            raise AccessDenied('plaintext outbox export forbidden in protected mode; reviewed encrypted export not implemented')
         if not isinstance(filename,str) or not filename.endswith('.txt') or len(filename)>80 or not filename[:-4].replace('-','').replace('_','').isalnum() or '/' in filename or '\\' in filename:
             raise AccessDenied("unsafe export filename")
         out=self.root/'outbox'
@@ -546,19 +615,21 @@ class DurableVault:
                 if r["seq"]!=i or r["previous_hash"]!=prev or digest(canonical(base))!=r["event_hash"]: return False
                 prev=r["event_hash"]
             for r in self.db.execute("SELECT source_id,version,sha256,data FROM source_versions"):
-                if digest(r["data"])!=r["sha256"] or r["version"]<1: return False
-            for r in self.db.execute("SELECT sha256,data,status FROM derivative_versions"):
-                if digest(r["data"])!=r["sha256"] or r["status"]!="candidate_review_only": return False
+                if digest(self._decode_blob(r["data"],kind="source",record_id=r["source_id"],version=r["version"],sha256=r["sha256"]))!=r["sha256"] or r["version"]<1: return False
+            for r in self.db.execute("SELECT derivative_id,version,sha256,data,status FROM derivative_versions"):
+                if digest(self._decode_blob(r["data"],kind="derivative",record_id=r["derivative_id"],version=r["version"],sha256=r["sha256"]))!=r["sha256"] or r["status"]!="candidate_review_only": return False
             for r in self.db.execute("SELECT source_id FROM sources"):
                 if not self.db.execute("SELECT 1 FROM source_versions WHERE source_id=?",(r["source_id"],)).fetchone(): return False
             for r in self.db.execute("SELECT source_id,source_version,source_sha256 FROM concepts"):
                 v=self.db.execute("SELECT sha256 FROM source_versions WHERE source_id=? AND version=?",(r["source_id"],r["source_version"])).fetchone()
                 if not v or v[0]!=r["source_sha256"]: return False
             return True
-        except (sqlite3.DatabaseError,ValueError,TypeError):
+        except (sqlite3.DatabaseError,ValueError,TypeError,AccessDenied):
             return False
 
     def backup(self, snapshot_name: str = 'synthetic-snapshot') -> tuple[Path,Path]:
+        if self.content_key is not None:
+            raise AccessDenied('legacy plaintext database backups forbidden in protected mode; use sealed in-memory snapshot')
         if not snapshot_name or not snapshot_name.replace('-','').replace('_','').isalnum():
             raise AccessDenied("unsafe backup name")
         if not self.verify_integrity(): raise AccessDenied("source vault fails integrity check")

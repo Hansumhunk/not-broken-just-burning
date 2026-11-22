@@ -20,6 +20,18 @@ export function liveConfigurationMatches({mode,key,url,expectedRef,origin,accoun
 export function productionAllowed(context) {
  return LIVE_RUNTIME_REVIEWED && liveConfigurationMatches(context);
 }
+// Sandbox waiver path: allow only an explicitly named existing production member
+// and one preapproved SKU while the public checkout is still closed.
+// Neither a browser-side flag nor a missing canary UUID can make checkout public.
+export function permittedCheckout({gate,userId,slug,canaryUserId,canarySlug}) {
+ if(!RELEASE_CANDIDATES.has(slug))return false;
+ if(gate==='enabled')return true;
+ if(gate!=='canary')return false;
+ const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+ return typeof userId==='string' && uuid.test(userId)
+   && typeof canaryUserId==='string' && uuid.test(canaryUserId)
+   && userId===canaryUserId && slug===canarySlug;
+}
 export function idOf(x){return typeof x==='string'?x:x?.id||null;}
 export function validatePrice(price,p) {
  if (!price || price.livemode!==true || !price.active || price.type!=='one_time' || price.currency!==p.currency || price.unit_amount!==p.amount || price.id!==p.stripe_price_id || idOf(price.product)!==p.stripe_product_id || price.tax_behavior!==p.tax_behavior || (!RELEASE_CANDIDATES.has(p.slug) || SKU.get(p.slug)!==p.amount)) throw Error('price_mismatch');

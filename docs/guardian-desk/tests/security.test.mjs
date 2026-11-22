@@ -170,3 +170,22 @@ test('account-deletion orphan protection requires redaction',()=>{
 test('closed ticket can get a new issue rather than stuck behind active dedupe',()=>{
  assert.match(ddl,/WHERE owner_user_id IS NOT NULL AND status <> 'CLOSED'/);
 });
+
+test('DDL has exactly one transaction, three uniquely defined RLS tables and one RPC',()=>{
+ assert.equal((ddl.match(/(?:^|\n)BEGIN;/g)||[]).length,1);
+ assert.equal((ddl.match(/(?:^|\n)COMMIT;/g)||[]).length,1);
+ for(const name of ['guardian_support_tickets','guardian_support_events','guardian_support_rate_windows']){
+  assert.equal(ddl.split('CREATE TABLE public.'+name+' (').length-1,1);
+  assert.equal(ddl.split('ALTER TABLE public.'+name+' ENABLE ROW LEVEL SECURITY;').length-1,1);
+ }
+ assert.equal(ddl.split('CREATE FUNCTION public.guardian_support_accept(').length-1,1);
+});
+test('orphaned tickets cannot retain free-text metadata or legal hold references',()=>{
+ assert.match(ddl,/feature_slug IS NULL AND last_verified_action IS NULL/);
+ assert.match(ddl,/next_action IS NULL AND assigned_team IS NULL/);
+ assert.match(ddl,/legal_hold_reference IS NULL/);
+});
+test('audit notes accept only identifiers, not free-text personal disclosures',()=>{
+ assert.match(ddl,/safe_note ~ '\^\[a-z\]\[a-z0-9_\]\{0,79\}\$'/);
+ assert.match(ddl,/authenticated_ticket_created/);
+});

@@ -149,7 +149,7 @@ export function plan({catalog,manifest,root=ROOT,asOf="2026-11-21",weeks=4}){
   generatedAt:"reproducible, evaluated from as-of input, not real-time provider data",
   asOf,proposedPlanningSlots:slots,existingApprovedUpcoming:approvedUpcoming,
   draftCount:drafts.length,missingSlots,remainingUnusedTopics:topics.length-drafts.length,
-  legacyProviderWeeklyEditions:"12 historically documented; NOT imported, not counted as approved",
+  legacyProviderWeeklyEditions:"12 confirmed in private archive; not copied into public manifest and not counted as approved",
   productionDistribution:"DISABLED",
   warnings:[
     "Proposed dates are editorial planning targets, not authorized send times.",

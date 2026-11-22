@@ -6,7 +6,7 @@
 
 - **Historical Phase I IP01–IP25:** 11 PASS (historical local report only), 6 PARTIAL, 6 BLOCKED, 2 NOT RUN. Original ten tests not recovered; no re-evaluation, no promotions.
 - **Phase II reference authorization suite:** 51/51 PASS previously in CI run #44988770626 at accepted `ca37d49a...` and repeated locally; preserved in `tests/test_origin_vault_phase2.py`.
-- **Phase III SQLite/identity/backup/integration suite:** 65/65 PASS locally on synthetic data after implementation hardening; new CI validation requires independent workflow execution on the updated PR commit.
+- **Phase III SQLite/identity/backup/integration suite:** 67/67 PASS locally on synthetic data after implementation hardening; new CI validation requires independent workflow execution on the updated PR commit.
 
 **Test evidence:** `tests/test_origin_vault_phase3.py` (exact method name below), implementation `internal/origin_vault/durable.py`; command `python -m unittest discover -s tests -p 'test_origin_vault_phase3.py' -v`. Each case below has an explicit `assert...` or caught exception; `unittest` reported `OK`. The method names summarize the expected behavior; actual means local assertions passed, not a hosted security certification.
 
@@ -78,6 +78,9 @@
 | P64 | Export failure does not automatically retry grant | Assertion passed in isolated SQLite unit run; expected readback/rejection observed | PASS (local) | `tests/test_origin_vault_phase3.py::PhaseIII.test_p64_export_failure_does_not_automatically_retry_grant` |
 | P65 | Invalid rights evidence record denied | Assertion passed in isolated SQLite unit run; expected readback/rejection observed | PASS (local) | `tests/test_origin_vault_phase3.py::PhaseIII.test_p65_invalid_rights_evidence_record_denied` |
 
+
+| P66 | Completed export is not falsely restored | Restored SQLite marks absent outbox artifact as `lost` instead of `complete` | PASS (local) | `tests/test_origin_vault_phase3.py::PhaseIII.test_p66_completed_export_is_not_falsely_restored` |
+| P67 | Modified export detected on restart | Tampered synthetic outbox file is removed and state becomes `lost` | PASS (local) | `tests/test_origin_vault_phase3.py::PhaseIII.test_p67_modified_export_detected_on_restart` |
 
 ## Negative-case coverage and limitations
 

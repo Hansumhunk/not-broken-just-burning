@@ -502,4 +502,25 @@ class PhaseIII(unittest.TestCase):
         with self.assertRaises(AccessDenied):
             self.v.register_source(self.owner,grant,source_id='s1',account_id=ACCOUNT,owner_id=OWNER,data=DATA)
 
+    def test_p66_completed_export_is_not_falsely_restored(self):
+        self.derivative()
+        g=self.permit('controlled_export',scope={'destination':'approved_local_outbox'})
+        self.v.controlled_local_export(self.owner,g,'d1',1,'draft.txt')
+        b,m=self.v.backup('snapshot')
+        restored=DurableVault.restore(b,m,self.base/'restored',identity_key=self.auth_key,
+                                     owner_key=self.owner_key,backup_key=self.backup_key)
+        try:
+            self.assertEqual(restored.db.execute('SELECT state FROM local_exports').fetchone()[0],'lost')
+            self.assertFalse((self.base/'restored'/'outbox'/'draft.txt').exists())
+        finally: restored.close()
+
+    def test_p67_modified_export_detected_on_restart(self):
+        self.derivative()
+        g=self.permit('controlled_export',scope={'destination':'approved_local_outbox'})
+        exported=self.v.controlled_local_export(self.owner,g,'d1',1,'draft.txt')
+        exported.write_bytes(b'TAMPERED SYNTHETIC EXPORT')
+        self.reopen()
+        self.assertEqual(self.v.db.execute('SELECT state FROM local_exports').fetchone()[0],'lost')
+        self.assertFalse(exported.exists())
+
 if __name__=='__main__': unittest.main()

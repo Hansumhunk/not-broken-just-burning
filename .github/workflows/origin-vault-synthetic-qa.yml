@@ -37,8 +37,8 @@ jobs:
           python -m py_compile internal/origin_vault/policy.py internal/origin_vault/durable.py tests/test_origin_vault_phase2.py tests/test_origin_vault_phase3.py
       - name: Phase II reference engine acceptance - 51 synthetic tests
         run: python -m unittest discover -s tests -p 'test_origin_vault_phase2.py' -v
-      - name: Phase III local durability and identity QA - 65 synthetic tests
+      - name: Phase III local durability and identity QA - 67 synthetic tests
         run: python -m unittest discover -s tests -p 'test_origin_vault_phase3.py' -v
       - name: Report strict boundary
         run: |
-          echo 'Origin Vault: 51 Phase II + 65 Phase III synthetic-only tests; test secrets generated in-memory and never uploaded. No original Phase I replay, production security, external identity, source rights proof, storage encryption, hosted database, remote distribution or independent audit anchor is validated here.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Origin Vault: 51 Phase II + 67 Phase III synthetic-only tests; test secrets generated in-memory and never uploaded. No original Phase I replay, production security, external identity, source rights proof, storage encryption, hosted database, remote distribution or independent audit anchor is validated here.' >> "$GITHUB_STEP_SUMMARY"

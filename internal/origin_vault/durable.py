@@ -199,7 +199,7 @@ class DurableVault:
         CREATE TABLE IF NOT EXISTS local_exports (
            export_id TEXT PRIMARY KEY, derivative_id TEXT NOT NULL, derivative_version INTEGER NOT NULL,
            approval_id TEXT NOT NULL, filename TEXT NOT NULL UNIQUE, sha256 TEXT NOT NULL,
-           state TEXT NOT NULL CHECK(state IN ('pending','complete','aborted')),
+           state TEXT NOT NULL CHECK(state IN ('pending','complete','aborted','lost')),
            created_at TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS audit (
            seq INTEGER PRIMARY KEY AUTOINCREMENT, time TEXT NOT NULL, actor TEXT NOT NULL,
@@ -498,8 +498,9 @@ class DurableVault:
 
     def _recover_incomplete_exports(self) -> None:
         rows=self.db.execute("SELECT export_id,filename FROM local_exports WHERE state='pending'").fetchall()
-        if not rows: return
         out=self.root/'outbox'
+        if not rows and not self.db.execute("SELECT 1 FROM local_exports WHERE state='complete' LIMIT 1").fetchone():
+            return
         # Restored snapshots contain SQLite bytes only, never outbox files. Pending
         # exports are aborted even when a restored outbox had not existed yet.
         if not out.exists(): out.mkdir(mode=0o700)
@@ -512,6 +513,20 @@ class DurableVault:
                 db.execute("UPDATE local_exports SET state='aborted' WHERE export_id=?",(r["export_id"],))
                 self._audit(db,"system","export_aborted",r["export_id"],{"restart_recovery":True})
             _fsync_dir(out)
+
+        # A consistent SQLite snapshot does not itself back up the ephemeral local
+        # outbox. If a restored DB says an export completed but the file is absent
+        # or altered, report it as LOST. Never silently imply it was recovered.
+        completed=self.db.execute("SELECT export_id,filename,sha256 FROM local_exports WHERE state='complete'").fetchall()
+        for r in completed:
+            path=out/r['filename']
+            if path.is_symlink(): raise AccessDenied("unsafe complete export symlink")
+            valid=path.exists() and path.is_file() and path.stat().st_size<=MAX_BYTES and digest(path.read_bytes())==r['sha256']
+            if not valid:
+                if path.exists(): path.unlink()
+                with self._tx() as db:
+                    db.execute("UPDATE local_exports SET state='lost' WHERE export_id=?",(r['export_id'],))
+                    self._audit(db,'system','export_lost',r['export_id'],{"missing_or_modified_export":True})
 
     def verify_integrity(self) -> bool:
         try:

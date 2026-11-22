@@ -229,3 +229,12 @@ Completed in response to early production traffic disproportionately landing on 
 - refreshed sitemap lastmod dates only for pages changed in this hardening pass
 
 External recrawl/index-removal timing remains controlled by the search engines. The repository can send clean signals immediately; search-result replacement still depends on each engine revisiting the affected URLs.
+
+
+## November 19, 2026 — production delivery probe
+
+PR #253 makes the read-only public delivery probe fail closed. Run `python scripts/seo_production_probe.py --self-test` for deterministic positive and negative fixtures, then `python scripts/seo_production_probe.py` for actual public delivery. A failed or unverified target exits nonzero; an offline fixture intentionally produces failure output but passes the test only when failure is detected. The probe checks response status, final canonical URL, MIME, title/description/H1, public noindex directives, sitemap uniqueness and member/account exclusions (including members.html), robots sitemap reference and the shared RGB JPEG's MIME, full decoding, exact 1200 × 630 dimensions, and static OG/Twitter image references. It does not establish search-engine indexing, field performance, or authenticated member access. Run alongside the existing static-site release gate, not in place of it. Do not modify DNS, public content, tracking settings or account access in response to a probe failure without investigation and approval. Operational tracking: #241; production QA coordination: #249. Native Google Search Console ownership was verified November 18; obtain current indexing and search reports from the founder without purchasing connector access.
+
+
+### 007-D — shared social image correction
+The historic `assets/social-share.png` is retained for defect reproduction only; do not reference it in active page metadata or structured data. Current image: `assets/social-share-v2.jpg` (RGB JPEG, 1200 × 630; full decode required). Install `Pillow==11.3.0` for `python scripts/seo_production_probe.py --self-test` and `python scripts/test_social_share.py`; browser checks additionally use `playwright==1.51.0` with a local Chromium/Chrome binary. Pre-release production probes use the existing base version; verify candidate public image and metadata with the new probe only after approved deployment, then re-scrape Facebook Sharing Debugger. Never deploy merely to complete a test.

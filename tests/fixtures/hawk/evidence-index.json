@@ -1,0 +1,42 @@
+{
+  "format": "NBJB-HAWK-EVIDENCE",
+  "version": 1,
+  "entries": [
+    {
+      "title": "FICTIONAL pickup message",
+      "category": "Communication",
+      "kind": "Message or email",
+      "status": "Original/source as received",
+      "date": "2026-05-08",
+      "received": "",
+      "origin": "Morgan's fictional message export",
+      "locator": "Practice folder A",
+      "summary": "Requested and confirmed changed pickup time.",
+      "limits": "Does not establish motive.",
+      "events": "T-0000000000000001, T-0000000000000002",
+      "alias": "",
+      "correction": "",
+      "id": "E-0000000000000001",
+      "createdAt": "2026-05-13T12:00:00.000Z",
+      "updatedAt": "2026-05-13T12:00:00.000Z"
+    },
+    {
+      "title": "FICTIONAL supply receipts",
+      "category": "Finances",
+      "kind": "Financial record",
+      "status": "Original/source as received",
+      "date": "2026-05-09",
+      "received": "",
+      "origin": "Morgan's fictional receipts",
+      "locator": "Practice folder B",
+      "summary": "Two paid supply amounts.",
+      "limits": "No reimbursement entitlement established.",
+      "events": "T-0000000000000003",
+      "alias": "",
+      "correction": "",
+      "id": "E-0000000000000002",
+      "createdAt": "2026-05-13T12:00:00.000Z",
+      "updatedAt": "2026-05-13T12:00:00.000Z"
+    }
+  ]
+}

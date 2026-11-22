@@ -25,6 +25,7 @@ on:
       - 'scripts/social_share_image.py'
       - 'scripts/test_social_share.py'
       - 'scripts/test_member_save_flow.js'
+      - 'scripts/test_first_flame_onboarding.mjs'
       - 'scripts/test_member_workshop.js'
       - 'scripts/test_member_access_guard.js'
       - 'scripts/test_member_search.js'
@@ -72,6 +73,7 @@ on:
       - 'scripts/social_share_image.py'
       - 'scripts/test_social_share.py'
       - 'scripts/test_member_save_flow.js'
+      - 'scripts/test_first_flame_onboarding.mjs'
       - 'scripts/test_member_workshop.js'
       - 'scripts/test_member_access_guard.js'
       - 'scripts/test_member_search.js'
@@ -121,6 +123,8 @@ jobs:
         run: python scripts/validate_site.py
       - name: Test save-to-My-Work sign-in and storage flow
         run: node --test scripts/test_member_save_flow.js
+      - name: Test First Flame onboarding save/failure continuity
+        run: node scripts/test_first_flame_onboarding.mjs
       - name: Verify signed-in Toolbox routing and visibility
         run: node --test scripts/test_member_workshop.js
       - name: Test signed-out member access and browser Back prevention

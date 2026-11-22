@@ -2,7 +2,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.116.0";
 import Stripe from "npm:stripe@22.6.2";
 import { verifiedStripeEvent } from "./signature.ts";
 import { providerSnapshot, verifyLiveAccount } from "./provider.ts";
-import { productionAllowed, SKU, idOf, validatePrice, verifySession, ownedDownload } from "./commerce-core.mjs";
+import { productionAllowed, permittedCheckout, SKU, idOf, validatePrice, verifySession, ownedDownload } from "./commerce-core.mjs";
 const env=(k:string)=>Deno.env.get(k)||"";
 const url=env("SUPABASE_URL"), key=env("NBJB_COMMERCE_STRIPE_LIVE_KEY"), ref=env("NBJB_COMMERCE_PRODUCTION_REF");
 const origin=env("NBJB_COMMERCE_LIVE_ORIGIN").replace(/\/$/,"");
@@ -120,7 +120,12 @@ Deno.serve(async(req:Request)=>{
    return json({url:signed.signedUrl,expiresIn:60});
  }
  if(body.action!=="checkout")return json({error:"unknown_action"},400);
- if(env("NBJB_COMMERCE_LIVE_CHECKOUT")!=="enabled")return json({error:"checkout_disabled"},503);
+ // A canary is confined to one specific production user and one approved SKU.
+ // The global public purchase UI remains off during this phase; webhook, status
+ // and downloads remain available for already legitimate orders during rollback.
+ if(!permittedCheckout({gate:env("NBJB_COMMERCE_LIVE_CHECKOUT"),userId:user.id,slug,
+      canaryUserId:env("NBJB_COMMERCE_LIVE_CANARY_USER_ID"),
+      canarySlug:env("NBJB_COMMERCE_LIVE_CANARY_SKU")}))return json({error:"checkout_disabled"},503);
  await verifyLiveAccount(stripe,env("NBJB_COMMERCE_LIVE_STRIPE_ACCOUNT"));
  const p=must(await admin.from("commerce_products").select("*").eq("slug",slug).eq("active",true).maybeSingle());
  if(!p||body.termsVersion!==p.terms_version||body.acceptTerms!==true)return json({error:"not_available_or_terms_required"},409);

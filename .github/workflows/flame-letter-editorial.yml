@@ -34,6 +34,11 @@ jobs:
           node-version: '22'
       - name: Test offline generator and hard release gates
         run: node --test scripts/test_flame_letter_editorial.mjs scripts/test_flame_letter_send_guard.mjs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test isolated durable ledger and provider read-only adapter
+        run: python -m unittest discover -s flame-letter-engine -p 'test_*.py' -v
       - name: Stage four review-only candidate editions
         run: node scripts/flame_letter_editorial.mjs --weeks=4 --out=flame-letter-staging
       - name: Archive editorial REVIEW artifacts, never send

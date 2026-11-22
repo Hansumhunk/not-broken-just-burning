@@ -26,6 +26,7 @@ on:
       - 'scripts/test_social_share.py'
       - 'scripts/test_member_save_flow.js'
       - 'scripts/test_first_flame_onboarding.mjs'
+      - 'tests/first_flame_member_browser_test.py'
       - 'scripts/test_member_workshop.js'
       - 'scripts/test_member_access_guard.js'
       - 'scripts/test_member_search.js'
@@ -74,6 +75,7 @@ on:
       - 'scripts/test_social_share.py'
       - 'scripts/test_member_save_flow.js'
       - 'scripts/test_first_flame_onboarding.mjs'
+      - 'tests/first_flame_member_browser_test.py'
       - 'scripts/test_member_workshop.js'
       - 'scripts/test_member_access_guard.js'
       - 'scripts/test_member_search.js'
@@ -168,6 +170,16 @@ jobs:
         run: python -m pip install Pillow==11.3.0 playwright==1.51.0
       - name: Verify image integrity, static metadata and browser decode
         run: python scripts/test_social_share.py --browser
+      - name: First Flame Chromium synthetic member-journey acceptance
+        run: python tests/first_flame_member_browser_test.py
+      - name: Retain synthetic First Flame browser QA screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: first-flame-synthetic-browser
+          path: test-results/first-flame/
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Verify SEO and production-probe fixtures on the exact candidate
         run: |
           python scripts/validate_site.py

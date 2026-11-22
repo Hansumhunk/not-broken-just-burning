@@ -39,7 +39,7 @@ jobs:
             -e POSTGRES_PASSWORD=synthetic-only-local -e POSTGRES_DB=guardian_fixture \
             postgres:17.12
           for attempt in $(seq 1 35); do
-            if docker exec nbjb-guardian-postgres-fixture pg_isready -U postgres -d guardian_fixture; then
+            if docker exec nbjb-guardian-postgres-fixture psql -X -q -U postgres -d guardian_fixture -c 'SELECT 1' >/dev/null 2>&1; then
               exit 0
             fi
             sleep 1

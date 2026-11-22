@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "note": "Do not import or fabricate private Brevo campaign IDs. The 12 pre-existing editions remain in owner-controlled provider/archive inventory and are not approved by this file.",
+  "publicationPolicy": {
+    "enabled": false,
+    "founderApproved": false,
+    "weeklyAudienceAuthorized": false,
+    "approvedDispatchEnabled": false
+  },
+  "approved": [],
+  "published": [],
+  "suppressedIds": []
+}

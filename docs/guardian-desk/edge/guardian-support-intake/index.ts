@@ -26,6 +26,39 @@ export function gateEnvironment(get: (key: string) => string | undefined) {
        (get('NBJB_GUARDIAN_HMAC_SECRET') || '').length >= 32);
 }
 
+const MAX_BODY_BYTES = 4000;
+
+// Trust neither Content-Length nor the browser to enforce a body-size cap.
+// Read only up to the actual UTF-8 byte limit so a chunked request cannot
+// consume unlimited memory before JSON validation. Never retain raw bytes.
+async function readLimitedBody(req: Request): Promise<string | null> {
+  if (!req.body) return null;
+  const reader = req.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > MAX_BODY_BYTES) {
+        await reader.cancel().catch(() => {});
+        return null;
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const bytes = new Uint8Array(size);
+  let position = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, position);
+    position += chunk.byteLength;
+  }
+  return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+}
+
 async function keyedFingerprint(secret: string, canonical: string) {
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey('raw', encoder.encode(secret),
@@ -64,12 +97,15 @@ export async function handle(req: Request, get: (key: string) => string | undefi
   } catch (_) {
     return json({ code: 'AUTH_UNAVAILABLE', message: 'Unable to verify the session. No ticket was created.' }, 503, cors);
   }
+  if (!/^application\/json(?:\s*;|$)/i.test(req.headers.get('content-type') || ''))
+    return json({ code: 'UNSUPPORTED_MEDIA_TYPE' }, 415, cors);
   let body: unknown;
   try {
-    if (Number(req.headers.get('content-length') || 0) > 4000)
+    const claimedLength = Number(req.headers.get('content-length') || '0');
+    if (!Number.isFinite(claimedLength) || claimedLength > MAX_BODY_BYTES)
       return json({ code: 'INVALID_BODY' }, 400, cors);
-    const raw = await req.text();
-    if (raw.length > 4000) return json({ code: 'INVALID_BODY' }, 400, cors);
+    const raw = await readLimitedBody(req);
+    if (raw === null) return json({ code: 'INVALID_BODY' }, 400, cors);
     body = JSON.parse(raw);
   } catch (_) { return json({ code: 'INVALID_JSON' }, 400, cors); }
   const input = validateSubmission(body);

@@ -23,8 +23,8 @@ const CREDENTIALS = [
   /\b(?:\d[ -]*?){13,19}\b/
 ];
 const DANGER = [
-  /\b(?:i(?:'m| am) (?:going to |about to )?(?:kill myself|end my life)|suicid(?:al|e)|overdose tonight|hurt myself tonight)\b/i,
-  /\b(?:i(?:'m| am) (?:going to |about to )?(?:kill|hurt) someone|immediate danger|life.threatening emergency)\b/i
+  /\b(?:i\s+(?:(?:am|['’]m)\s+)?(?:going to|about to|want to|plan to|might|will)\s+(?:kill myself|end my life|take my own life|hurt myself)|suicid(?:al|e)|overdos(?:e|ing)|cannot keep myself safe|can't keep myself safe)\b/i,
+  /\b(?:i\s+(?:(?:am|['’]m)\s+)?(?:going to|about to|plan to|want to)\s+(?:kill|hurt) someone|immediate danger|life.threatening emergency|someone is threatening to kill me)\b/i
 ];
 export function containsSecret(input) {
   return CREDENTIALS.some(re => re.test(input));

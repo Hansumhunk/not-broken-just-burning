@@ -185,7 +185,7 @@
     };
   }
 
-  function recordToolEntry(tool, payload = {}) {
+  function recordToolEntry(tool, payload = {}, options = {}) {
     const data = load();
     const now = Date.now();
     const meta = normalizeMeta(payload.meta || {});
@@ -205,6 +205,10 @@
     data.activity.entries = [entry, ...(data.activity.entries || [])].slice(0, MAX_ACTIVITY_ENTRIES);
     data.journey.lastTool = entry.tool;
     data.journey.lastVisited = now;
+    // First Flame: keep the explicit Start Here reflection and optional
+    // next Dashboard action in one verified device-local write.
+    const firstAction = tool === 'Start Here' ? String(options?.nextAction || '').trim().slice(0, 500) : '';
+    if (firstAction) data.journey.nextAction = firstAction;
     const result = save(data);
     return { ...result, entry };
   }

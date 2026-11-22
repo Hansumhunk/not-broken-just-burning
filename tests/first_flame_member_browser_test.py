@@ -58,6 +58,10 @@ AUTH_FIXTURE = r"""
       return () => {};
     },
     client: { from: mkQuery },
+    signUp: async () => ({data: {user: {id: 'synthetic-unverified'},session: null}, error: null}),
+    signIn: async () => ({error: {message: 'Invalid login credentials'}}),
+    sendMagicLink: async () => ({error: null}),
+    sendRecovery: async () => ({error: null}),
     signOut: async () => {
       sessionStorage.removeItem('qa-fixture-user');
       return { error: null };
@@ -123,7 +127,18 @@ def check_guest(browser, origin):
         assert page.locator("#magic-link-form").count() == 1
         assert page.locator("#recovery-form").count() == 1
         assert page.locator("main").is_visible()
-        print("PASS guest restricted redirect + offline sign-up field/entry check")
+        page.locator("#sign-up-email").fill("fixture@example.invalid")
+        page.locator("#sign-up-password").fill("synthetic-password-12")
+        page.locator("#sign-up-form button[type=submit]").click()
+        status = page.locator("#auth-status")
+        assert "if one was sent" in status.inner_text().lower()
+        assert "account created" not in status.inner_text().lower()
+        page.locator("#sign-in-email").fill("fixture@example.invalid")
+        page.locator("#sign-in-password").fill("wrong-synthetic-password")
+        page.locator("#sign-in-form button[type=submit]").click()
+        assert "invalid login credentials" in status.inner_text().lower()
+        assert page.locator("#signed-out-state").is_visible()
+        print("PASS guest redirect, form validation, neutral unverified response and failed-login UI; NO provider calls")
     finally:
         context.close()
 
@@ -140,7 +155,8 @@ def check_onboarding(browser, origin, mobile=False):
         page.locator('[data-onboarding-value][value="Honor"]').check()
         # QUOTA DENIAL MUST NOT DISCARD INPUT, SUPPRESS THE ERROR OR REDIRECT.
         page.evaluate("window.__qaBlockStorage = true")
-        page.locator("#complete-onboarding").click()
+        page.locator("#complete-onboarding").focus()
+        page.keyboard.press("Enter")  # keyboard-operable error path
         page.locator("#onboarding-save-status").wait_for(state="visible")
         assert "could not save" in page.locator("#onboarding-save-status").inner_text().lower()
         assert page.url.endswith("/member-onboarding.html"), page.url

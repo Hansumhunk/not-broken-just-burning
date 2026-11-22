@@ -126,6 +126,7 @@ on:
       - '.github/workflows/flame-spirit-welcome.yml'
       - 'scripts/flame_spirit_welcome.mjs'
       - 'scripts/test_flame_spirit_welcome.mjs'
+      - 'docs/guardian-desk/**'
       - 'FLAME_SPIRITS.md'
 
 permissions:

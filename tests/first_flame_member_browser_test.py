@@ -24,6 +24,7 @@ AUTH_FIXTURE = r"""
   const realSet = Storage.prototype.setItem;
   Storage.prototype.setItem = function(key, value) {
     if (window.__qaBlockStorage) throw new Error('Synthetic quota limit');
+    if (key.startsWith('nbjb.member.v2.')) window.__qaMemberWrites = (window.__qaMemberWrites || 0) + 1;
     return realSet.call(this, key, value);
   };
   const user = () => {
@@ -177,8 +178,24 @@ def check_onboarding(browser, origin, mobile=False):
         page.locator("#start-here-facts").fill("A meeting is scheduled.")
         page.locator("#start-here-feelings").fill("I feel uncertain.")
         page.locator("#start-here-control").fill("Prepare one question.")
+        # Reject a reflection write: neither My Work nor the Dashboard action
+        # may change, and no false success message may appear.
+        page.evaluate("window.__qaBlockStorage = true")
+        page.locator("#start-here-form button[type=submit]").click()
+        assert "could not save" in page.locator("#start-here-status").inner_text().lower()
+        assert page.evaluate("""() => {
+          const d = JSON.parse(localStorage.getItem('nbjb.member.v2.fixture-alpha'));
+          return d.journey.nextAction === 'Write one calm question' && d.activity.entries.length === 0;
+        }""")
+        page.evaluate("window.__qaBlockStorage = false")
+        writes_before = page.evaluate("window.__qaMemberWrites || 0")
         page.locator("#start-here-form button[type=submit]").click()
         assert "saved to my work" in page.locator("#start-here-status").inner_text().lower()
+        assert page.evaluate("window.__qaMemberWrites || 0") - writes_before == 1, "Start Here action and reflection must save in one write"
+        saved_after = page.evaluate("""() => JSON.parse(localStorage.getItem('nbjb.member.v2.fixture-alpha'))""")
+        assert len(saved_after["activity"]["entries"]) == 1
+        assert saved_after["activity"]["entries"][0]["data"]["facts"] == "A meeting is scheduled."
+        assert saved_after["journey"]["nextAction"] == "Prepare one question."
         ready(page, origin, "members.html")
         assert "Fire Reclamation" in page.locator('[data-dashboard-focus-name]').inner_text()
         assert "Prepare one question." in page.locator('[data-dashboard-action-state]').inner_text()

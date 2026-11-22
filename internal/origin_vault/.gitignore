@@ -1,0 +1,16 @@
+# Defense in depth only. Never stage actual Vault data in this public repository.
+*.sqlite
+*.sqlite3
+*.db
+*.db-*
+*.key
+*.pem
+*.p12
+*.secret
+*.env
+*.env.*
+*.bak
+*.backup
+*.zip
+__pycache__/
+.pytest_cache/

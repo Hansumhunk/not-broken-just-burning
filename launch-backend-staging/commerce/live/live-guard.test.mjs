@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {LIVE_RUNTIME_REVIEWED, PRODUCTION_REF, LIVE_ORIGIN, VERIFIED_LIVE_ACCOUNT, liveConfigurationMatches, productionAllowed, validatePrice, verifySession, ownedDownload} from "./commerce-core.mjs";
+import {LIVE_RUNTIME_REVIEWED, PRODUCTION_REF, LIVE_ORIGIN, VERIFIED_LIVE_ACCOUNT, liveConfigurationMatches, productionAllowed, permittedCheckout, validatePrice, verifySession, ownedDownload} from "./commerce-core.mjs";
 
 const good = {
  mode:"production",key:"sk_live_PLACEHOLDER_NOT_A_REAL_KEY",
@@ -58,4 +58,19 @@ test("a paid order needs its own exact SKU entitlement",()=>{
  assert.equal(ownedDownload(order,e,"other",order.slug),false);
  assert.equal(ownedDownload(order,e,user,"forge-workbook"),false);
  assert.equal(ownedDownload({...order,status:"refunded"},e,user,order.slug),false);
+});
+
+test("live canary never opens purchases to any other user or SKU",()=>{
+ const buyer="11111111-1111-4111-8111-111111111111";
+ const other="22222222-2222-4222-8222-222222222222";
+ const a={gate:"canary",userId:buyer,slug:"boundary-builder-workbook",canaryUserId:buyer,canarySlug:"boundary-builder-workbook"};
+ assert.equal(permittedCheckout(a),true);
+ for(const changes of [{userId:other},{canaryUserId:other},{canaryUserId:""},
+  {slug:"forge-workbook"},{canarySlug:"forge-workbook"},
+  {gate:"disabled"},{gate:"test"},{gate:"sandbox"}]){
+  assert.equal(permittedCheckout({...a,...changes}),false,JSON.stringify(changes));
+ }
+ assert.equal(permittedCheckout({...a,gate:"enabled"}),true);
+ assert.equal(permittedCheckout({...a,gate:"enabled",slug:"30-days-through-the-fire"}),false);
+ assert.equal(permittedCheckout({...a,gate:"canary",canaryUserId:"not-a-uuid"}),false);
 });

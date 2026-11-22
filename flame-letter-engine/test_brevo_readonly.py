@@ -19,11 +19,18 @@ class ReadOnlyTests(unittest.TestCase):
             if path=="/v3/account":
                 return {"companyName":"Synthetic NBJB", "plan":[{"type":"free"}],
                         "email":"private@test.invalid","secret":"secret", "relay":{"enabled":True}}
-            if path=="/v3/emailCampaigns?limit=50&offset=0":
+            if path=="/v3/emailCampaigns?limit=50&offset=0&excludeHtmlContent=true":
                 return {"count":31,"campaigns":[
                     {"id":6,"name":"Weekly synthetic","subject":"Boundaries in daily life",
                      "status":"draft","htmlContent":"PRIVATE BODY",
                      "recipients":{"lists":[4]},"replyTo":"founder@test.invalid"}]}
+            if path=="/v3/emailCampaigns?limit=50&offset=0&status=scheduled&excludeHtmlContent=true":
+                return {"campaigns":[{"id":7,"status":"scheduled","htmlContent":"SENSITIVE",
+                                      "subject":"Queued draft","recipients":{"lists":[4]}}]}
+            if path=="/v3/senders":
+                return {"senders":[{"id":3,"name":"NBJB","email":"private@test.invalid",
+                                    "active":True,"verified":True,
+                                    "ips":["127.0.0.1"]}]}
             if path=="/v3/emailCampaigns/6?statistics=globalStats&excludeHtmlContent=true":
                 return {"id":6,"name":"Weekly synthetic","subject":"Boundaries in daily life",
                         "status":"draft","statistics":{"globalStats":{
@@ -96,6 +103,19 @@ class ReadOnlyTests(unittest.TestCase):
     def test_retrieved_provider_data_cannot_authorize_dispatch(self):
         with self.assertRaisesRegex(ProviderHold,"cannot authorize dispatch"):
             self.adapter.build_dispatch_snapshot(campaign=self.adapter.campaign(6))
+
+    def test_sender_metadata_read_is_redacted(self):
+        result=self.adapter.senders()
+        self.assertEqual(result["senders"],[{"id":3,"active":True,"verified":True}])
+        self.assertFalse(result["domain_authentication_verified"])
+        self.assertNotIn("private@test.invalid",repr(result))
+
+    def test_scheduled_campaign_metadata_does_not_pretend_to_see_all_outbound_queues(self):
+        result=self.adapter.scheduled_campaigns()
+        self.assertEqual(result["campaigns"][0]["id"],7)
+        self.assertFalse(result["provider_wide_queue_zero_verified"])
+        self.assertNotIn("SENSITIVE",repr(result))
+        self.assertNotIn("recipients",repr(result))
 
     def test_missing_marketing_blocklist_field_fails_closed(self):
         adapter=BrevoReadOnly(lambda route:{"id":2,"email":"not-required"})

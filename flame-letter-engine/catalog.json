@@ -81,6 +81,46 @@
       "question": "What part of my conclusion do I know, and what part am I predicting?",
       "tool": "Divide one troubling thought into four lines: Emotion, Known fact, Interpretation, Unknown. Keep each line brief and add one action you can take without pretending the unknown is settled.",
       "action": "Make the next decision from the known facts, while keeping your interpretation open to revision."
+    },
+    {
+      "id": "healthy-validation",
+      "title": "Ask for Perspective Without Handing Over Your Judgment",
+      "theme": "connection",
+      "source": "story-healthy-validation.html",
+      "idea": "When life becomes uncertain, asking for another perspective can help you check your assumptions. Trouble begins when one person's agreement becomes the only proof that your feelings or decisions are valid. Useful support expands the questions you can consider; it does not replace your judgment with somebody else's permission.",
+      "question": "When I ask for feedback, am I seeking information I can evaluate or approval that another person must grant?",
+      "tool": "Ask two trusted people the same narrow question without sharing an accusation as a conclusion. Write where their observations agree, where they differ, and what independently observable facts you can check.",
+      "action": "Use one useful outside perspective to improve your decision, then make the decision yourself."
+    },
+    {
+      "id": "reciprocity-early",
+      "title": "Notice the Imbalance Before You Are Exhausted",
+      "theme": "reciprocity",
+      "source": "story-reciprocity-before-exhaustion.html",
+      "idea": "Relationships do not need perfectly equal effort every day. Illness, grief, and work can shift the load for a season. But if your needs only become visible after you reach exhaustion, the relationship may lack a reliable way to discuss mutual care. Healthy reciprocity means asking clear questions earlier, without turning kindness into a scoreboard.",
+      "question": "What have I needed but delayed asking for because I was waiting until I could no longer carry the load?",
+      "tool": "Write down one recurring responsibility, what support would actually help, and a specific respectful request. Notice the response across time rather than judging the whole connection from one conversation.",
+      "action": "Make one reasonable request before resentment becomes the only way your need gets expressed."
+    },
+    {
+      "id": "carrying-everyone",
+      "title": "Helping Is an Action, Not Your Entire Identity",
+      "theme": "over-responsibility",
+      "source": "story-carrying-everyone.html",
+      "idea": "Being dependable can become costly when every relationship quietly expects you to fix, absorb, or organize other people's problems. The aim is not to become uncaring. It is to separate help you freely choose from rescue work driven by fear that saying no will make you unworthy or disposable.",
+      "question": "Which responsibility am I carrying because I freely agreed to it, and which one am I carrying because stopping feels unsafe?",
+      "tool": "Make two columns: commitments I own and problems I can support without owning. Move one task to the second column, then decide what kind of limited support is realistic.",
+      "action": "Offer one specific form of help with a clear limit instead of automatically taking ownership of the whole problem."
+    },
+    {
+      "id": "documentation-window",
+      "title": "Give the Evidence Binder an Office Hour",
+      "theme": "documentation",
+      "source": "story-documentation-memory.html",
+      "idea": "Keeping records can protect clarity when memories, deadlines, and difficult conversations pile up. But continually reopening every document can turn useful organization into round-the-clock attention to the same conflict. A defined documentation routine can preserve what matters without letting the folder occupy every quiet moment.",
+      "question": "Is this review helping me make a current decision, or am I reopening the same material because uncertainty feels uncomfortable?",
+      "tool": "Create a twenty-minute documentation window: record date, source, what happened, what remains unknown, and a next required action. Close the record when the window ends unless a genuine deadline requires more.",
+      "action": "Put one necessary record in the right folder, then return to a part of the day unrelated to the dispute."
     }
   ]
 }

@@ -21,6 +21,7 @@ _PROJECTION = {
     "account": ("companyName", "plan", "relay"),
     "campaign": ("id", "name", "subject", "status", "type", "createdAt", "scheduledAt"),
     "list": ("id", "name", "totalSubscribers", "totalBlacklisted", "uniqueSubscribers"),
+    "sender": ("id", "active", "verified"),
 }
 _LIMIT = 50
 
@@ -78,13 +79,33 @@ class BrevoReadOnly:
     def campaigns(self, *, offset=0):
         if type(offset) is not int or offset < 0 or offset > 100000:
             raise ProviderHold("invalid campaign page offset")
-        raw = self._get(f"/v3/emailCampaigns?limit={_LIMIT}&offset={offset}")
+        raw = self._get(f"/v3/emailCampaigns?limit={_LIMIT}&offset={offset}&excludeHtmlContent=true")
         if not isinstance(raw,dict) or not isinstance(raw.get("campaigns"),list):
             raise ProviderHold("unexpected campaign list")
         entries = [_safe_campaign(x) for x in raw["campaigns"]]
         return {"verified_scope":"read_only_campaign_metadata",
                 "count":raw.get("count") if type(raw.get("count")) is int else None,
                 "offset":offset,"campaigns":entries}
+
+    def scheduled_campaigns(self, *, offset=0):
+        """Read scheduled campaign metadata, NOT a global provider send queue."""
+        if type(offset) is not int or offset < 0 or offset > 100000:
+            raise ProviderHold("invalid campaign page offset")
+        raw=self._get(f"/v3/emailCampaigns?limit={_LIMIT}&offset={offset}&status=scheduled&excludeHtmlContent=true")
+        if not isinstance(raw,dict) or not isinstance(raw.get("campaigns"),list):
+            raise ProviderHold("unexpected scheduled campaign response")
+        return {"verified_scope":"scheduled_campaign_metadata_only",
+                "campaigns":[_safe_campaign(x) for x in raw["campaigns"]],
+                "provider_wide_queue_zero_verified":False}
+
+    def senders(self):
+        """Sender identity redacted: account-level active states only."""
+        raw=self._get("/v3/senders")
+        if not isinstance(raw,dict) or not isinstance(raw.get("senders"),list):
+            raise ProviderHold("unexpected sender response")
+        return {"verified_scope":"sender_metadata_only",
+                "senders":[_projection(x,_PROJECTION["sender"]) for x in raw["senders"]],
+                "domain_authentication_verified":False}
 
     def campaign(self, campaign_id):
         key=_numeric(campaign_id,"campaign id")

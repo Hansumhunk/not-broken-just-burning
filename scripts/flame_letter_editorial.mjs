@@ -55,7 +55,7 @@ export function inspectInventory(catalog,manifest,root=ROOT){
    ids.add(t.id);
    assert(SOURCE.test(t.source||""),"Unapproved source path: "+t.source);
    for(const field of ["title","theme","idea","question","tool","action"]){
-     assert(typeof t[field]==="string"&&t[field].trim().length>=18&&t[field].length<=1200,
+     assert(typeof t[field]==="string"&&t[field].trim().length>=(field==="theme"?3:18)&&t[field].length<=1200,
        "Missing or out-of-range editorial "+field+" for "+t.id);
      assert(!/(\[\[|\{\{)/.test(t[field]),"Unresolved marker in topic "+t.id);
    }

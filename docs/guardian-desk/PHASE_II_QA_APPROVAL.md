@@ -2,7 +2,19 @@
 
 **Status:** source-only implementation complete enough for a controlled review. **No database write, Auth identity creation, function deployment, customer-facing collection or public release is authorized yet.** The next authorization should be one consolidated decision covering governance, isolated QA and real human escalation.
 
-## A — Data governance (approval needed)
+## GD-002-B founder disposition (2026-11-22) — supersedes outstanding approval wording below
+
+**A — APPROVED AS QA-ONLY DESIGN PRINCIPLES.** Data minimization, privacy disclosure, erasure and legal-hold approach accepted for planning and synthetic QA. Suggested retention review intervals NOT enacted, real customer collection and public privacy terms NOT authorized.
+
+**B — CONDITIONAL QA SCHEMA-ONLY AUTHORITY, CURRENTLY BLOCKED.** Commerce QA `fgpkejlmpfkxgpktgdzm` read-only preflight completed. Connected Supabase organization is Free-tier; no recoverable backup or restoration check was independently verified. No schema trial is permitted under the founder's explicit condition until backup/isolation/no-cost requirements are established. No existing functions, commerce tables, users or Auth identities modified.
+
+**C — HUMAN OVERSIGHT APPROVED AS DESIGN ONLY.** No staffing, customer support SLA or actual case assignment permitted.
+
+**D — SOURCE RELEASE CANDIDATE ONLY.** Existing PR #276 remains draft and unmerged, requires exact-head founder approval before merging; no production activation. See `GD002B_CONTROLLED_QA_PREFLIGHT_AND_MERGE_DECISION.md` for current evidence and release decision.
+
+**The remainder of this file is retained verbatim as historical GD-002-A pre-approval scope, not as the current approval state.** No manual browser tests requested.
+
+## A — Data governance (historical GD-002-A proposal)
 
 Approve/revise the draft in `PHASE_II_SECURITY_REVIEW.md`: minimum text fields, what NOT to enter, AI disclosure, policy-owner review, actual retention/deletion rights, treatment of Auth deletion, legitimate legal holds with independent review, private audit access, and proposed 180-day resolved-case *review* / 90-day open-case review / 48-hour rate counter purge. These figures are only suggested review cadences, not enacted law or a retention guarantee. Approve the precise live privacy-notice update before public ticket collection. Test the `guardian_support_orphan_redacted` constraint and reviewed account-removal workflow before hosted acceptance.
 

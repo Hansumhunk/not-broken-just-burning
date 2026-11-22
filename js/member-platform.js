@@ -489,19 +489,37 @@
   if (onboardingAction) onboardingAction.value = state.journey.nextAction || '';
   onboardingValues.forEach((box) => { box.checked = state.journey.values.includes(box.value); });
 
+  const onboardingSaveStatus = document.querySelector('#onboarding-save-status');
   document.querySelector('#complete-onboarding')?.addEventListener('click', () => {
     const values = onboardingValues.filter((box) => box.checked).map((box) => box.value);
+    const chosenFocus = onboardingFocus?.value || '';
+    const focus = service.stages.includes(chosenFocus) ? chosenFocus : '';
+    const current = service.load();
+    const progress = { ...current.journey.progress };
+    if (focus && progress[focus] === 'not-started') progress[focus] = 'in-progress';
+
+    // Commit the optional setup and its initial Path state in one device-local
+    // write. Never advance as if it succeeded when browser storage is blocked.
     const result = service.update({
       profile: { displayName: onboardingName?.value.trim() || '' },
       journey: {
-        focus: onboardingFocus?.value || '',
+        focus,
         nextAction: onboardingAction?.value.trim() || '',
         values,
+        progress,
         onboardingComplete: true
       }
     });
-    if (result.data.journey.focus && result.data.journey.progress[result.data.journey.focus] === 'not-started') {
-      service.setStageProgress(result.data.journey.focus, 'in-progress');
+    if (!result.ok) {
+      if (onboardingSaveStatus) {
+        onboardingSaveStatus.hidden = false;
+        onboardingSaveStatus.textContent = 'We could not save your choices on this device. Nothing was uploaded. Check browser storage and try again, or skip setup to begin the free lesson.';
+      }
+      return;
+    }
+    if (onboardingSaveStatus) {
+      onboardingSaveStatus.hidden = true;
+      onboardingSaveStatus.textContent = '';
     }
     window.location.href = 'member-start-here.html';
   });

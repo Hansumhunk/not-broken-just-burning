@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "note": "Do not import or fabricate private Brevo campaign IDs. The 12 pre-existing editions remain in owner-controlled provider/archive inventory and are not approved by this file.",
+  "note": "Original owner-only 31-campaign archive was recovered and inspected on 2026-11-22; 6 initial topic ideas were held for strong thematic overlap with the existing 12 weekly and 6 welcome messages. No original files or provider campaign objects were changed. Exact original 31 templates are DRAFT_NOT_AUTHORIZED/HOLD_PRODUCT in archive; these local editorial drafts remain non-sendable.",
   "publicationPolicy": {
     "enabled": false,
     "founderApproved": false,
@@ -9,6 +9,13 @@
   },
   "approved": [],
   "published": [],
-  "suppressedIds": [],
+  "suppressedIds": [
+    "one-stone",
+    "shame-action",
+    "timeline-first",
+    "strength-restraint",
+    "fatherhood-steadiness",
+    "clarity-not-certainty"
+  ],
   "drafts": []
 }

@@ -102,5 +102,32 @@ class SEO(unittest.TestCase):
             self.assertIn(dest, page.links)
         self.assertNotIn("flame-letter.html", page.links)
         self.assertNotIn("store.html", page.links)
+    def test_published_guide_contextual_paths_and_sitemap(self):
+        """Existing educational hubs must reach released guides, never draft pages."""
+        expected = {
+            "mens-personal-development.html": (
+                "guide-dad-days-without-kids.html",
+                "guide-rebuilding-friendships-after-divorce.html",
+            ),
+            "mens-mental-health.html": ("guide-working-through-divorce.html",),
+        }
+        urls = {
+            node.text for node in ET.parse(ROOT / "sitemap.xml").findall(
+                ".//{http://www.sitemaps.org/schemas/sitemap/0.9}loc"
+            )
+        }
+        for source, destinations in expected.items():
+            page = read(source)
+            for dest in destinations:
+                with self.subTest(source=source, destination=dest):
+                    self.assertEqual(page.links.count(dest), 1)
+                    self.assertIn(ORIGIN + "/" + dest, urls)
+                    target = read(dest)
+                    self.assertEqual(target.canonical, ORIGIN + "/" + dest)
+                    html = (ROOT / dest).read_text(encoding="utf-8")
+                    self.assertNotRegex(
+                        html, r'<meta[^>]+name=["\']robots["\'][^>]+noindex'
+                    )
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

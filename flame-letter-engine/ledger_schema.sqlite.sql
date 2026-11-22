@@ -79,3 +79,24 @@ BEGIN SELECT RAISE(ABORT,'append-only operations audit'); END;
 CREATE TRIGGER IF NOT EXISTS operations_audit_no_delete
 BEFORE DELETE ON operations_audit
 BEGIN SELECT RAISE(ABORT,'append-only operations audit'); END;
+
+
+-- Deliberately separate CONTENT approval from campaign WINDOW/AUDIENCE authority.
+-- Records in this offline schema are synthetic; they do not grant production sends.
+CREATE TABLE IF NOT EXISTS dispatch_authorizations (
+  edition_id TEXT PRIMARY KEY REFERENCES editions(id),
+  content_sha256 TEXT NOT NULL,
+  provider_campaign_ref TEXT NOT NULL,
+  audience_ref TEXT NOT NULL,
+  window_start TEXT NOT NULL,
+  window_end TEXT NOT NULL,
+  approval_ref TEXT NOT NULL,
+  approver_ref TEXT NOT NULL,
+  approved_at TEXT NOT NULL
+);
+CREATE TRIGGER IF NOT EXISTS dispatch_approvals_immutable_update
+BEFORE UPDATE ON dispatch_authorizations
+BEGIN SELECT RAISE(ABORT,'immutable dispatch approval'); END;
+CREATE TRIGGER IF NOT EXISTS dispatch_approvals_immutable_delete
+BEFORE DELETE ON dispatch_authorizations
+BEGIN SELECT RAISE(ABORT,'immutable dispatch approval'); END;

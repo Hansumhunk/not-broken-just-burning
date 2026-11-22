@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'internal'))
 from origin_vault.policy import *
 
 NOW = datetime(2026,11,22,12,tzinfo=timezone.utc)
+# Keep fixture approvals valid for future CI runs; expiration rejection is tested explicitly.
 SYN = b'This is a synthetic educational source. No real biography or private material.'
 DIGEST = hashlib.sha256(SYN).hexdigest()
 
@@ -21,7 +22,7 @@ def actor(role='vault_steward', user='steward', acct='test-account', verified=Tr
 
 def grant(purpose='ingest', kind=None, user='steward', account='test-account', dept=None, destination=None):
     return Approval('synthetic-approved-'+purpose, 'synthetic-source-1', account, user,purpose,True,
-                    'synthetic-proof-1',NOW+timedelta(days=2),derivative_kind=kind,department=dept,destination=destination)
+                    'synthetic-proof-1',NOW+timedelta(days=3650),derivative_kind=kind,department=dept,destination=destination)
 
 class PolicyCases(unittest.TestCase):
     def setUp(self): self.src=fixture(); self.actor=actor()

@@ -67,13 +67,32 @@ export function safePublicTicketResult(result) {
   return { ticket_id: result.ticket_id, duplicate: result.duplicate, status: result.status,
     message: result.duplicate ? 'An earlier request with the same details is already saved. No second ticket was created.' : 'Your request was saved. It has not yet been assigned to a human. No response time is promised.' };
 }
+// Executive Command consumes a single, exhaustive, mutually exclusive
+// category dimension. Small cohorts need complementary suppression: publishing
+// a grand total and every other category reveals the hidden category.
 export function suppressedExecutiveAggregate(input, minGroup = 5) {
-  const n = Number(input?.total || 0);
+  const threshold = Number.isSafeInteger(minGroup) ? Math.max(5, minGroup) : 5;
+  const n = input?.total;
   if (!Number.isSafeInteger(n) || n < 0) return null;
-  const groups = Object.fromEntries(Object.entries(input.groups || {}).map(([k,v]) => [k,
-    Number.isInteger(v) && v >= minGroup ? v : null]));
-  return { total: n >= minGroup ? n : null, groups,
-    suppressed: n < minGroup || Object.values(groups).some(v => v === null),
-    source: 'guardian_support_tickets', coverage: input.coverage || 'unknown',
-    as_of: input.as_of || null };
+  const rawGroups = input?.groups ?? {};
+  if (!rawGroups || typeof rawGroups !== 'object' || Array.isArray(rawGroups)) return null;
+  const entries = Object.entries(rawGroups);
+  if (entries.some(([k, v]) => !k || !Number.isSafeInteger(v) || v < 0)) return null;
+  // Without complete, non-overlapping groups, the denominator is ungrounded.
+  if (entries.length && entries.reduce((sum, [, v]) => sum + v, 0) !== n) return null;
+  const groups = Object.fromEntries(entries.map(([k, v]) =>
+    [k, v >= threshold ? v : null]));
+  const suppressedKeys = entries.filter(([, v]) => v < threshold);
+  if (suppressedKeys.length && n >= threshold) {
+    // Hide an additional sizeable group, otherwise one small value is
+    // reconstructible by subtracting the published groups from the total.
+    const candidates = entries.filter(([, v]) => v >= threshold)
+      .sort((a, b) => b[1] - a[1]);
+    if (candidates.length) groups[candidates[0][0]] = null;
+  }
+  const suppressed = n < threshold || Object.values(groups).some(v => v === null);
+  return { total: n >= threshold ? n : null, groups, suppressed,
+    source: 'guardian_support_tickets',
+    coverage: typeof input?.coverage === 'string' ? input.coverage : 'unknown',
+    as_of: typeof input?.as_of === 'string' ? input.as_of : null };
 }

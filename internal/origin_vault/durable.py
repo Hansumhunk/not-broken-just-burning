@@ -84,8 +84,13 @@ def verify_token(token: str, kind: str, key: bytes, now: int | None = None) -> d
 def _safe_root(path: Path, *, create: bool) -> Path:
     if not isinstance(path, Path):
         path = Path(path)
-    if not path.is_absolute() or path.is_symlink() or (path.exists() and not path.is_dir()):
+    if not path.is_absolute() or (path.exists() and not path.is_dir()):
         raise AccessDenied("invalid private root")
+    # Reject *all* symlinked ancestors before creating the directory. The
+    # earlier implementation checked only path.is_symlink() and could create
+    # the Vault beneath a symlinked parent to an unintended location.
+    if any(part.is_symlink() for part in (path, *path.parents)):
+        raise AccessDenied("symlinked private root ancestor")
     if _inside_git_tree(path.resolve()):
         raise AccessDenied("private vault cannot live within a Git tree")
     # Reject all symlinks below the resolved existing parent, preventing aliasing to Git trees.
@@ -137,6 +142,8 @@ class DurableVault:
         self.identity_key = _key(identity_key)
         self.owner_key = _key(owner_key)
         self.backup_key = _key(backup_key)
+        if len({self.identity_key, self.owner_key, self.backup_key}) != 3:
+            raise AccessDenied('identity, approval and backup signing keys must be independent')
         self.root = _safe_root(Path(root), create=create)
         self.path = self.root / DB_NAME
         if not create and not self.path.exists():

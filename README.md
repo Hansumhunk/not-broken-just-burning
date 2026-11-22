@@ -2,9 +2,11 @@
 
 Official website and digital platform for the **Not Broken Just Burning** movement.
 
-## Current learning offer — November 18, 2026
+## Current learning offer — verified November 22, 2026
 
 **Flamewalker+ currently includes 44 published, protected guided written lessons across six tracks** and their guided workbooks, at $14.99/month or $149/year. Video lessons remain paused; books and separately sold products remain distinct. See [the current release and acceptance checklist](FLAMEWALKER_PLUS_RELEASE_CHECKLIST.md). Private lesson bodies are delivered by authenticated Supabase authorization, not stored in the public site repository.
+
+**Membership operating status:** Founder-authorized **live Flamewalker+ recurring checkout was reopened on November 19, 2026**, following controlled production acceptance. The monthly and annual recurring amounts above were rechecked against active Stripe LIVE prices on November 22. Checkout enabled does **not** establish a new independent external customer purchase, complete cross-account access QA, or that every lesson has passed individual editorial proofing. See [membership release acceptance](FLAMEWALKER_PLUS_RELEASE_CHECKLIST.md) and [commerce integrity follow-up #214](https://github.com/Hansumhunk/not-broken-just-burning/issues/214).
 
 ## Current version
 
@@ -45,7 +47,7 @@ The public site intentionally remains lightweight:
 - GitHub Actions validation
 - PostHog cookieless aggregate web analytics
 
-Flamewalker Free accounts now use Supabase authentication and limited member entitlements. Reflection content remains browser/device-local by default, and paid checkout and newsletter signup are not yet launched. Basic public-site traffic uses privacy-conscious cookieless analytics.
+Flamewalker Free accounts use Supabase authentication and account-scoped entitlements. Reflection content remains browser/device-local by default unless a user explicitly uses a supported saving feature. **Live recurring Flamewalker+ checkout is enabled** following the November 19 reopening; the Flame Letter newsletter/provider rollout remains separately gated by consent and acceptance testing. Basic public-site traffic uses privacy-conscious cookieless analytics.
 
 ## Public architecture
 
@@ -142,13 +144,13 @@ Turns a vague sense that something is wrong into behavior, impact, boundary, and
 
 Breaks an overwhelming mountain into one realistic next action and what can intentionally wait.
 
-**Privacy design:** Current reflection entries remain in the visitor's browser session and are not submitted to an NBJB server.
+**Privacy design:** Ordinary unsaved public-tool reflections are browser/device-local by default. Authenticated My Work or worksheet save actions are separate user-initiated features; do not assume every reflection automatically syncs between devices.
 
-## Flamewalker Free production status (October 2026)
+## Flamewalker Free — October 2026 launch history and November 22 operating status
 
-Free account sign-in, member onboarding, Dashboard, My Path, Toolbox, My Work, Progress, Library, and the Start Here lesson were released in October. PR #82 completed member navigation polish and Coming Soon status labeling; PRs #83 and #84 improved search-engine signals for public discovery pages.
+Free account sign-in, member onboarding, Dashboard, My Path, Toolbox, My Work, Progress, Library, and the Start Here lesson **were released in October 2026**. PR #82 completed member navigation polish and Coming Soon labeling; PRs #83 and #84 improved public discovery signals. Flamewalker Free remains an accessible free account offering. Founder-reported November 16 Free-account browser acceptance covered four basic flows; independent coverage for all external account, device, and edge cases remains separate. See [membership acceptance](FLAMEWALKER_PLUS_RELEASE_CHECKLIST.md) and [Free-member QA #115](https://github.com/Hansumhunk/not-broken-just-burning/issues/115).
 
-**Backend recovery:** On October 29, 2026, the Supabase project was found inactive. A restore request was accepted, but account availability still requires verification. See `RELEASE_AUDIT_2026-10-29.md` for the exact operational checks. Paid billing, cloud synchronization of private reflections, community posting, and protected paid delivery remain unreleased.
+**Historical recovery milestone:** Supabase was found inactive on October 29, 2026; see `RELEASE_AUDIT_2026-10-29.md` for that dated recovery record. It is **not the current operating-status statement**. By November 22, production lesson metadata was available for read-only verification (44 published lessons), and protected paid delivery plus authorized live recurring checkout had been reopened. Do not represent unsupported automatic cross-device reflection sync or community posting as launched. Remaining independent membership, entitlement, reader and cancellation acceptance is tracked in the linked release checklist and [commerce QA #214](https://github.com/Hansumhunk/not-broken-just-burning/issues/214).
 
 ## Masculine Restoration production track
 
@@ -198,7 +200,7 @@ Current engagement includes:
 
 Emailing NBJB once does **not** count as consent to receive marketing or newsletter messages.
 
-Newsletter signup is intentionally deferred until after V1.0. A future release can add a real subscriber provider, explicit consent, unsubscribe controls, retention/deletion rules, and an updated privacy notice without delaying the initial public launch.
+The **initial V1.0 newsletter deferral is historical**. The Flame Letter provider system has ongoing controlled acceptance work; production subscriber acquisition and marketing sends must not be represented as verified until consent, suppression, unsubscribe and provider release gates are satisfied. See [Flame Letter provider acceptance #1](https://github.com/Hansumhunk/not-broken-just-burning/issues/1).
 
 ## Privacy-conscious analytics
 
@@ -272,7 +274,7 @@ These are operational controls, not missing public-page features.
 - monitor Google Search Console indexing/crawl reports after verification and sitemap submission
 - real newsletter/subscriber infrastructure with consent and unsubscribe controls
 - expanded Stories From the Fire
-- future Library / books / guides / courses when deliberately released
+- expand the existing member Library; release standalone books, guides and courses only when individually approved
 - future events, community, or service offerings only when they actually exist
 
 ## Publishing guardrails

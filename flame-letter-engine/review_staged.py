@@ -55,7 +55,7 @@ def inspect(root, staging):
                 errs.append("public educational source not present")
             else:
                 page=source.read_text(encoding="utf-8")
-                if re.search(r'<meta[^>]+name=["\\']robots["\\'][^>]+noindex',page,re.I):
+                if re.search(r"""<meta[^>]+name=["']robots["'][^>]+noindex""",page,re.I):
                     errs.append("noindex source cannot be cited")
                 if "<main" not in page or "<title" not in page:
                     errs.append("public source structure incomplete")

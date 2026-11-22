@@ -20,16 +20,16 @@
  const {products}=await api.call('catalog');
  let n=0;
  for(const b of buttons){
-  const p=products.find(p=>p.slug===b.dataset.commerceBuy);
-  if(p&&p.terms_version===terms){
-   b.disabled=false;
-   b.textContent=api.mode==='sandbox'?'Test one-time checkout':window.NBJBAuth?.user?'Buy securely':'Sign in to buy';
-   if(api.mode==='live'&&p.currency==='usd'&&Number.isSafeInteger(p.amount)){
-    const card=b.closest('article.member-card');
-    const eyebrow=card?.querySelector('.eyebrow');
-    if(eyebrow)eyebrow.textContent='Available now · One-time purchase';
-    const listingPrice=card?.querySelector('p > strong');
-    if(listingPrice)listingPrice.textContent='
+  const p=products.find(candidate=>candidate.slug===b.dataset.commerceBuy);
+  if(!p||p.terms_version!==terms)continue;
+  b.disabled=false;
+  b.textContent=api.mode==='sandbox'?'Test one-time checkout':window.NBJBAuth?.user?'Buy securely':'Sign in to buy';
+  if(api.mode==='live'){
+   const eyebrow=b.closest('article.member-card')?.querySelector('.eyebrow');
+   if(eyebrow)eyebrow.textContent='Available now · One-time purchase';
+  }
+  n++;
+ }
  consent.hidden=n===0;
  message(n?(api.mode==='sandbox'?'SANDBOX ONLY — no real money. Available test products are marked below.':'Secure one-time payment through Stripe. Applicable tax, if any, appears at checkout.'):'No products are currently available for purchase.');
  }catch{message('Checkout not available. Nothing has been charged.');}

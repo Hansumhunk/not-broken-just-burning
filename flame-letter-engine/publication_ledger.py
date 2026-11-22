@@ -160,6 +160,8 @@ class Ledger:
         require(release_enabled is False, "PRODUCTION RELEASE HOLD: no live dispatch implemented")
         require(isinstance(snapshot, dict), "missing Brevo provider snapshot")
         with self._tx() as db:
+            stop = db.execute("SELECT halted FROM runtime_control WHERE singleton=1").fetchone()
+            require(stop is not None and stop["halted"] == 0, "emergency stop engaged; no queue claims")
             row = self._get(db, edition_id)
             require(row["state"] == "queued", "edition not claimable / duplicate claim")
             require(dt(row["window_start"]) <= dt(now) <= dt(row["window_end"]), "outside dispatch window")

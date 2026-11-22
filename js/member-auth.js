@@ -20,6 +20,7 @@
   }
   function nextDestination(fallback='members.html'){
     const next = new URLSearchParams(location.search).get('next') || '';
+    if (next === 'commerce-live-canary.html') return next; // Restricted server-side canary, not an open redirect.
     if (/^(?:members|member-[a-z0-9-]+)\.html(?:[?#].*)?$/i.test(next)) return next;
     // Only explicit public-tool anchors may resume after sign-in.
     const toolReturns = new Set([

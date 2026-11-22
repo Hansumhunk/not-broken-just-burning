@@ -5,15 +5,17 @@ Date: 2026-11-22. Development-only. **NO production dispatch or merge authorizat
 
 Issue #1 records a private campaign/template archive with **31** distinct entries and 62 HTML/plain files: 6 welcome (D0/2/4/7/10/14), 12 weekly, 4 Free onboarding, 4 Plus onboarding, 5 product. Historical Brevo template identifiers #6–36 were reported in issue comment 7046942504; this phase did not reauthenticate them. The separate one-recipient marketing test campaign #1 is not one of those historical template identifiers.
 
-The private archive content, original twelve weekly subjects, and exact original twenty-case matrix are **not accessible** in current connected source search. No fresh campaign duplicate/uniqueness pass can be claimed. The new local-only inventory_compare.py accepts a privately supplied 31-row metadata inventory, verifies the 6/12/4/4/5 breakdown, flags possible subject overlap and fails closed when any historical entry is missing. No private subjects, subscriber records or archive bytes were copied to public Git.
+The two original owner-only ZIP archives were RECOVERED through connected Drive and inspected locally on Nov 22. Both outer ZIPs and both nested archives passed integrity checks. The original 31-row release inventory, twelve weekly plain-text bodies, six welcome bodies, 20-case lifecycle matrix and original provider/import registers were reopened. The nested source ZIP SHA-256 matched its own archive audit (d975cfa652116ec4ca3e353028bd27f4e8f496c427a0252d9fdabe37f990f8c2); 31 HTML/plain pairs and 62 native unsubscribe markers were checked. The old import queue is a pre-provider baseline (all 31 NOT_IMPORTED), not proof of current Brevo status; later Nov 20 founder provider evidence takes precedence within its scope. No private subjects, contact addresses, ZIP contents, or identifiers were copied into public Git. The inventory_compare.py tool now permits local future comparison without export.
 
-Four generated review drafts and their sources:
-- boundaries-hurt — story-boundaries.html. Boundary grief versus validity. **REVIEW; historical weekly overlap unknown.**
-- one-stone — story-one-stone.html. Urgency triage and a twenty-minute next action. **REVIEW; potential welcome/first-seven-days thematic overlap.**
-- shame-action — story-shame.html. Behavior-specific accountability versus shame. **REVIEW; compare with existing Guardian/shame teaching.**
-- survival-off-switch — story-survival-skill-off-switch.html. Deliberate start/stop rules for heightened vigilance. **REVIEW; meaningful distinct practical angle, but weekly archive comparison unavailable.**
+Private source comparison identified significant collisions: one-stone repeats welcome message 03's One Stone mountain exercise; shame-action duplicates weekly edition 09's accountability/identity and repair lesson. The remaining initial catalog ideas on timeline/clarity, restraint and fatherhood also substantially revisit earlier weekly or welcome themes. These six topic IDs are now HELD in the disabled manifest, not deleted from history.
 
-Status: 4 review-ready draft pairs, **0 certified original against the private archive**, **0 editorially approved**, **0 scheduled**, 4 further topics still available. Nov 25 / Dec 2 / Dec 9 / Dec 16 are EDITORIAL PLANNING dates only.
+Replenishment candidates after deduplication:
+- boundaries-hurt — story-boundaries.html: boundary grief following an appropriate limit, distinct from weekly 03's boundary-versus-control mechanics.
+- survival-off-switch — story-survival-skill-off-switch.html: explicit start/stop condition for protective habits, distinct implementation focus from weekly 12's keep/adapt/release integration review.
+- healthy-validation — story-healthy-validation.html: obtain perspective without outsourcing judgment, distinct from weekly 10's brotherhood theme.
+- reciprocity-early — story-reciprocity-before-exhaustion.html: express a concrete unmet need early without using a relationship scoreboard, distinct from weekly 04's trust-consistency teaching.
+
+Four source-backed, review-only candidates are expected in the updated artifact; they remain **NOT EDITORIALLY APPROVED**. Two other distinct topics remain available for later review: over-responsibility and bounded documentation. No actual Brevo campaign approval or scheduling. Nov 25 / Dec 2 / Dec 9 / Dec 16 are EDITORIAL PLANNING dates only.
 
 ## Durable local ledger implemented
 
@@ -47,7 +49,7 @@ https://help.brevo.com/hc/en-us/articles/40158285046930-About-API-key-permission
 
 ## Original T01–T20 historical disposition map
 
-Exact private test-case definitions remain inaccessible. Below is a conservative checkpoint from issue #1 comment 7055834268, not an authoritative reinterpretation of the original matrix.
+The exact original T01–T20 case definitions were recovered from the owner-only provider integration archive. That CSV is a pre-test baseline (all provider cases initially NOT_RUN). The following case-level disposition incorporates later dated Nov 20 founder screenshots and issue #1 acceptance notes without promoting a partial positive-path observation to a full original-case pass.
 
 | Case | Disposition | Scope |
 | --- | --- | --- |
@@ -56,32 +58,32 @@ Exact private test-case definitions remain inaccessible. Below is a conservative
 | T03 | HISTORICAL/PARTIAL | Mailing address privately reconciled; final footer/privacy integration pending |
 | T04 | NOT RUN | Refusal/negative consent test |
 | T05 | PARTIAL | Positive CAPTCHA view; enforcement not verified |
-| T06 | POSITIVE PASS | Founder-controlled DOI signup |
-| T07 | POSITIVE PASS | Founder DOI confirmation |
+| T06 | PARTIAL/POSITIVE PATH | Pre-confirmation list held zero; full marketing exclusion case not fully reproduced |
+| T07 | PARTIAL/POSITIVE PATH | DOI confirmed once; exact recorded consent version and timestamp acceptance not fully inspected |
 | T08 | PARTIAL | One list contact after duplicate attempt; second DOI message generated |
 | T09 | NOT RUN/HELD | Welcome automation inactive |
-| T10 | PARTIAL GROUP EVIDENCE | Actual unsubscribe lifecycle, exact case mapping unavailable |
-| T11 | PARTIAL GROUP EVIDENCE | Same limitation; individual pass not claimed |
-| T12 | PARTIAL GROUP EVIDENCE | Same limitation; individual pass not claimed |
-| T13 | PARTIAL GROUP EVIDENCE | Same limitation; individual pass not claimed |
-| T14 | PARTIAL GROUP EVIDENCE | Same limitation; individual pass not claimed |
-| T15 | PARTIAL GROUP EVIDENCE | Marketing blocklist/transactional separation shown, exact case mapping unavailable |
+| T10 | PARTIAL | Marketing campaign unsubscribe propagated to blocklist; stopping an active automation before its next send NOT RUN |
+| T11 | NOT RUN | Unsubscribe from active automation preventing the next broadcast |
+| T12 | NOT RUN | Hard bounce safe simulation / provider confirmation |
+| T13 | NOT RUN | Soft bounce safe simulation / provider confirmation |
+| T14 | NOT RUN | Complaint safe simulation / provider confirmation |
+| T15 | PARTIAL | Marketing suppression/blocklist observed; deletion and lawful suppression retention NOT RUN |
 | T16 | PARTIAL | Gmail delivery/authentication; Outlook not tested |
-| T17 | PARTIAL | Two workflows inactive; no global queue proof |
-| T18 | PARTIAL | Workflow logs empty in selected historic filters only |
-| T19 | PARTIAL | Zero active workflow contacts shown; attempted-send suppression not proven |
+| T17 | PARTIAL | Founder-only test list used, but production recipient-exclusion check not independently established |
+| T18 | PARTIAL | Both workflows inactive and filtered logs empty; global pending queue zero NOT VERIFIED |
+| T19 | NOT RUN | Hosted form shutdown and direct-link enrollment rejection not tested |
 | T20 | WITHHELD | Distinct production authorization required |
 
 Evidence: issue #1 comments 7054910860 (DOI), 7055412063 (single marketing report), 7055433265 (marketing/transactional permission difference), 7055807880 (six marketing event rows), 7055725248 and 7055732869 (automation isolation), 7055834268 (consolidation). New Python and Node tests are never counted as provider T01–T20 passes.
 
 ## Validation
 
-Phase II GitHub Actions run #44987837572 passed: **39/39 Python tests and 17/17 Node tests**, four HTML/plain-text review candidates generated and review artifact uploaded. This was a non-production development branch run; no Brevo mutations or live send occurred.
+Initial Phase II GitHub Actions run #44987837572 passed: **39/39 Python tests and 17/17 Node tests**. A further run after editorial deduplication #44988112890 succeeded with four review-only edition drafts. The tests are code-level only; no Brevo mutation or live send occurred.
 
 ## Integration order and founder decisions
 
 PR #268 remains DRAFT stacked onto draft PR #230. PR #230 currently diverges from production main and overlaps index.html, join.html, privacy.html and resources.html. Main also carries a newer sitemap baseline. PR #254 First Seven Days is draft/nonmergeable at latest readback; PR #250 Front Door Optimization remains separately draft. Do not undo accepted SEO, Search Dominion's reported 101-URL sitemap, analytics, membership, privacy or commerce improvements.
 
-A safe eventual release requires: (1) separately approved customer-experience baseline resolution, (2) conflict-safe exact-head PR #230 integration and static/browser CI, (3) PR #268 updated on its accepted parent and all ledger tests green, (4) authenticated provider and original matrix reconciliation plus approved address/consent/footer/retention, approved weekly inventory, real queue/suppression acceptance, and private server-only durable storage/dispatch adapter, (5) founder approvals separately for PUBLIC SIGNUP, WELCOME AUTOMATION, WEEKLY AUDIENCE/SCHEDULE, and PRODUCT MARKETING once commerce QA is accepted.
+A safe eventual release requires: (1) separately approved customer-experience baseline resolution, (2) conflict-safe exact-head PR #230 integration and static/browser CI, (3) PR #268 updated on its accepted parent and all ledger tests green, (4) authenticated current provider queue/permissions acceptance plus approved address/consent/footer/retention and four separately approved weekly editions, real queue/suppression acceptance, and private server-only durable storage/dispatch adapter, (5) founder approvals separately for PUBLIC SIGNUP, WELCOME AUTOMATION, WEEKLY AUDIENCE/SCHEDULE, and PRODUCT MARKETING once commerce QA is accepted.
 
 Current founder intervention: **none required for this development checkpoint**. Do not send, schedule, resubscribe, import, activate production workflows, change DNS/billing/entitlements/databases, spend, or merge.

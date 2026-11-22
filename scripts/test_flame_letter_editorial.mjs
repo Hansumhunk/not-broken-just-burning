@@ -56,6 +56,15 @@ test("approved entry consumes its slot and topic, never re-enters a duplicate",(
  assert.ok(drafts.every(d=>d.topicId!==previous.topicId&&d.proposedDate!=="2026-11-25"));
  assert.equal(report.existingApprovedUpcoming,1);
 });
+test("staged draft ledger prevents regeneration of an unapproved candidate",()=>{
+ const m=clone(manifest);
+ const prior=buildDraft(catalog.topics[0],"2026-11-25");
+ m.drafts.push({topicId:prior.topicId,proposedDate:prior.proposedDate,status:"draft",contentSha256:prior.contentSha256});
+ const {drafts}=plan({catalog,manifest:m,root:ROOT,asOf:"2026-11-21",weeks:4});
+ assert.equal(drafts.length,3);
+ assert.ok(drafts.every(x=>x.topicId!==prior.topicId&&x.proposedDate!==prior.proposedDate));
+});
+
 test("unsafe attempts to enable distribution are explicitly rejected",()=>{
  for(const key of Object.keys(manifest.publicationPolicy)){
    const m=clone(manifest);m.publicationPolicy[key]=true;
@@ -98,7 +107,10 @@ test("CLI output remains offline, local, review-only and writes metadata alongsi
    assert.equal(files.filter(x=>x.endsWith(".html")).length,4);
    assert.equal(files.filter(x=>x.endsWith(".txt")).length,4);
    assert.equal(files.filter(x=>x.startsWith("draft-")&&x.endsWith(".json")).length,4);
-   assert.equal(files.length,13);
+   assert.equal(files.length,14);
+   const proposed=JSON.parse(fs.readFileSync(path.join(out,"proposed-manifest.json"),"utf8"));
+   assert.equal(proposed.drafts.length,4);
+   assert.equal(proposed.publicationPolicy.enabled,false);
    assert.deepEqual(JSON.parse(fs.readFileSync(path.join(out,"editorial-report.json"))).productionDistribution,"DISABLED");
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });

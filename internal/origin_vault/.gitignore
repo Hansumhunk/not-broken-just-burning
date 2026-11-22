@@ -1,16 +1,23 @@
-# Defense in depth only. Never stage actual Vault data in this public repository.
+# Public repository: NEVER commit local vault datasets, outputs, secrets or fixtures containing real material
 *.sqlite
 *.sqlite3
+*.sqlite3-*
 *.db
 *.db-*
+*.wal
+*.shm
+*.manifest.json
+*.bak
+*.zip
+*.tar
+*.tar.gz
 *.key
 *.pem
-*.p12
-*.secret
-*.env
-*.env.*
-*.bak
-*.backup
-*.zip
+.env*
 __pycache__/
-.pytest_cache/
+.private/
+private-data/
+backups/
+outbox/
+*.source
+*.journal

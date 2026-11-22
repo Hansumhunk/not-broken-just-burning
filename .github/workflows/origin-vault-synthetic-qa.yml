@@ -1,6 +1,5 @@
-# Public-repo-safe Origin Vault synthetic unit checks ONLY.
-# Never configure provider keys, read private Drive archives, upload CI artifacts,
-# or create a hosted vault from this workflow.
+# Public-repository-safe Origin Vault unit checks ONLY. No signing keys or vault data.
+# Never read Drive, private assets, databases, backup artifacts, or deploy a hosted Vault.
 name: Origin Vault synthetic policy QA
 
 on:
@@ -8,6 +7,7 @@ on:
     paths:
       - 'internal/origin_vault/**'
       - 'tests/test_origin_vault_phase2.py'
+      - 'tests/test_origin_vault_phase3.py'
       - 'docs/ORIGIN_VAULT_*.md'
       - 'docs/origin_vault_schema_PROPOSAL.sql'
       - '.github/workflows/origin-vault-synthetic-qa.yml'
@@ -19,11 +19,12 @@ jobs:
   synthetic-only:
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 7
     env:
       PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONHASHSEED: '0'
     steps:
-      - name: Checkout synthetic code only (no persisted credentials)
+      - name: Checkout synthetic source with no persisted credentials
         uses: actions/checkout@v4
         with:
           persist-credentials: false
@@ -31,10 +32,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-      - name: Validate standalone reference engine and unit test syntax
-        run: python -m py_compile internal/origin_vault/policy.py tests/test_origin_vault_phase2.py
-      - name: Verify full non-networked synthetic security suite
-        run: python -m unittest discover -s tests -p 'test_origin_vault_phase2.py' -v
-      - name: Record bounded acceptance scope
+      - name: Syntax validation - policy, SQLite, synthetic fixtures
         run: |
-          echo 'Origin Vault Phase 2 synthetic policy tests only. This run does not validate original Phase 1 prototype, real founder identity, hosted storage, cross-account Supabase permissions, secure backup, publication or rights ownership.' >> "$GITHUB_STEP_SUMMARY"
+          python -m py_compile internal/origin_vault/policy.py internal/origin_vault/durable.py tests/test_origin_vault_phase2.py tests/test_origin_vault_phase3.py
+      - name: Phase II reference engine acceptance - 51 synthetic tests
+        run: python -m unittest discover -s tests -p 'test_origin_vault_phase2.py' -v
+      - name: Phase III local durability and identity QA - 65 synthetic tests
+        run: python -m unittest discover -s tests -p 'test_origin_vault_phase3.py' -v
+      - name: Report strict boundary
+        run: |
+          echo 'Origin Vault: 51 Phase II + 65 Phase III synthetic-only tests; test secrets generated in-memory and never uploaded. No original Phase I replay, production security, external identity, source rights proof, storage encryption, hosted database, remote distribution or independent audit anchor is validated here.' >> "$GITHUB_STEP_SUMMARY"

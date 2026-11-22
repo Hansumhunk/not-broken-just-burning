@@ -12,7 +12,7 @@ test("the canary is a noindex page with explicit click and optional existing acc
  assert.match(js,/auth\?\.refresh\(\)/);
  assert.match(js,/if\(!consent\.checked\)/);
  assert.match(js,/window\.NBJBCommerceLive\?\.enabled!==true/);
- assert.match(js,/return .*?|const slug='boundary-builder-workbook'/);
+ assert.match(js,/const slug='boundary-builder-workbook'/);
  assert.match(js,/window\.NBJBConfig\?\.supabaseUrl===prod/);
  assert.ok(!/sk_live_|rk_live_|SUPABASE_SERVICE_ROLE_KEY|whsec_/.test(html+js),"No payment or service-role secrets in browser files");
 });

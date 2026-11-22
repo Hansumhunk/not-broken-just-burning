@@ -183,3 +183,77 @@ Every row distinguishes isolated browser results from actual provider authentica
 4. **Front Door:** #250 may only link to the actual verified public destination, then requires independent exact-head QA and founder deployment approval.
 5. **First Flame #270:** Not part of either other release approval; independently accept real signup/lesson/return/error path and authorize precise head.
 6. **No additional infrastructure, consent, Stripe, entitlement, account writes, marketing activation, DNS or paid spend permitted by this directive.**
+
+## M. Phase III 004-D — actual independent engineering, member data and test classifications
+
+**2026-11-22 read-only production** (Supabase `plhbvtbvtxfzulsaxuim`): 4 Auth users, 4 confirmed, 4 profiles, 4 member_path_state, 4 member_continue_state, **0 member_path_progress, 0 learning_progress**; **0 `profiles.onboarding_completed=true`**, **0 non-null server `member_continue_state.next_honest_action`**, 3 Auth accounts with `last_sign_in_at` in previous 7 days, 0 created in that time. Existing `NBJB Commerce QA` has 2 confirmed Auth users and 2 profiles but is dedicated commerce QA, not approved registration testing; 0 separate Supabase development branches in either project. The read-only `pg_policies` inspection confirmed own-row/admin member policies and explicit premium manuscript browser deny. No JWT-scoped adversarial account attempts have been made. Security Advisor warnings remain under #160.
+
+**One-transaction Start Here repair** (isolated #270): Original `js/member-start-here.js` saved the reflection with `service.recordToolEntry` and then attempted an independent `service.update` for the optional Dashboard Next Honest Action without checking the second write. Phase III now passes the optional action into `service.recordToolEntry`, which applies it to the same local member record and performs **one verified storage save**. `member-start-here.js` also suppresses unintended rapid duplicate identical submits within 1800ms without recording duplicates; a genuinely edited new reflection is still eligible. Browser QA fixture injects storage quota denial, proves neither reflection nor action changes, retries successfully with exactly one write, then double-clicks and proves a single retained activity entry. This is browser-fixture evidence; not real-provider Auth acceptance.
+
+**Authoritative controlled-provider packet**: `FIRST_FLAME_PROVIDER_ACCEPTANCE_004D.md` defines production vs Commerce QA selection, A/B founder-controlled identities, maximum eight transactional Auth emails, zero incremental spend, cleanup and sessions, redaction, 14-step provider acceptance, 7-day measurement semantics, PR sequencing and the precise separate founder approval request. No real account, outbound Auth mail, consent, Stripe or Supabase settings changes were made.
+
+### Phase III MA01–MA30 evidence tiers — retain Phase II expected/observed and actions above
+
+These describe the **newest evidence available** and do NOT silently promote a case to provider PASS. "Partial" remains an umbrella result; each fixture is limited to mocked identities.
+
+| Case | Phase III evidence category | Overall | Remaining real gate |
+|---|---|---|---|
+| MA01 | Source-only | PARTIAL | Real first visit through public Join |
+| MA02 | BLOCKED | BLOCKED | Approved A new account |
+| MA03 | Browser Fixture Verified | PARTIAL | Real duplicate signup response |
+| MA04 | BLOCKED | BLOCKED | A/B verification email |
+| MA05 | BLOCKED | BLOCKED | Reused/expired provider link |
+| MA06 | Browser Fixture Verified | PARTIAL | Real verified-user onboarding |
+| MA07 | Browser Fixture Verified | PARTIAL | Real guest/auth protection |
+| MA08 | Browser Fixture Verified | PARTIAL | Real return login |
+| MA09 | Browser Fixture Verified | PARTIAL | Provider recovery/error behavior |
+| MA10 | Browser Fixture Verified | PARTIAL | Actual sign-out/session expiry |
+| MA11 | Browser Fixture Verified | PARTIAL | Real A/B member journey |
+| MA12 | Browser Fixture Verified | PARTIAL | Real member optional skip |
+| MA13 | Browser Fixture Verified | PARTIAL | Real account privacy check |
+| MA14 | Browser Fixture Verified | PARTIAL | Real free entitlement access |
+| MA15 | Browser Fixture Verified — **atomic lesson + action save** | PARTIAL | Approved A with valid Auth |
+| MA16 | Browser Fixture Verified — one write and refresh | PARTIAL | Same-device real session/return |
+| MA17 | NOT RUN | NOT RUN | Intentional repeat-practice lifecycle beyond rapid duplicate guard |
+| MA18 | NOT RUN | NOT RUN | Paid protected reading continuity |
+| MA19 | Browser Fixture Verified | PARTIAL | Real authenticated Dashboard |
+| MA20 | Browser Fixture Verified | PARTIAL | Real two-JWT owner isolation |
+| MA21 | Staged Chromium CI #254 | PARTIAL | Founder content release and real live URL |
+| MA22 | Existing source and editorial review | PARTIAL | Live first-lesson and seven-day acceptance |
+| MA23 | RLS policy review; historical founder denial | PARTIAL | Real free/B authenticated access denial |
+| MA24 | Source-only | PARTIAL | Provider-level no marketing enrollment |
+| MA25 | Browser network-block fixture / analytics runbook | PARTIAL | Production telemetry privacy proof |
+| MA26 | BLOCKED | BLOCKED | Defined and genuinely elapsed D7 cohort |
+| MA27 | Browser Fixture Verified — mobile emulator | PARTIAL | Physical mobile device |
+| MA28 | Browser Fixture Verified — keyboard Enter negative path | PARTIAL | Full keyboard and assisted screen-reader test |
+| MA29 | Browser Fixture Verified — storage deny/retry, one-write, double-click | PARTIAL | Real offline/storage/accessibility acceptance |
+| MA30 | GitHub branch-only evidence | PASS | Exact-head founder release decision before any merge |
+
+**Real Provider Verified in Phase III = none.** Historical founder reports in #205 are preserved as historical, not treated as today's new authorization.
+
+### F01–F16 coordinated status — do not duplicate Open the Gates
+
+The source of record is the 2026-11-21 **reconstructed** sixteen-case matrix at [issue #205](https://github.com/Hansumhunk/not-broken-just-burning/issues/205#issuecomment-7068072390); the historical original standalone matrix was not recovered. Current Phase III mapping:
+
+| F-case | Current evidence tier | Operational result |
+|---|---|---|
+| F01 | Source-only public homepage | PARTIAL |
+| F02 | Source-only Join | PARTIAL |
+| F03 | Browser Fixture Verified signup fields/neutral no-session messaging | PARTIAL |
+| F04 | Provider account/duplicate | BLOCKED |
+| F05 | Historical confirmed accounts and redirect source | PARTIAL |
+| F06 | Provider link replay/expiry | BLOCKED |
+| F07 | Browser Fixture Verified onboarding save/skip/fail | PARTIAL |
+| F08 | Browser Fixture Verified free lesson/action | PARTIAL |
+| F09 | **Failed production source path**; #267 separately fixes in unmerged draft | FAIL (production) |
+| F10 | Historical founder free/guest + RLS source review | PARTIAL |
+| F11 | Server entitlement source/historical production | PARTIAL |
+| F12 | Browser Fixture Verified return + server-refresh code | PARTIAL |
+| F13 | Provider recovery/magic link | BLOCKED |
+| F14 | Browser Fixture Verified logout/guest redirect/account switch | PARTIAL |
+| F15 | Browser Fixture Verified desktop/mobile/keyboard error; not physical AT | PARTIAL |
+| F16 | Signup source separated from marketing workflows | PARTIAL |
+
+**Release interactions:** #267 edits `js/member-dashboard.js` + `scripts/test_member_access_guard.js`; #270's production changes are disjoint from those two. #254 edits isolated lesson page/assets/test and **sitemap**; #250 edits `index.html`, `join.html`, `css/visitor-journey.css` and is logically dependent on #254 deployment and public route acceptance. #249 overlaps #270 on `.github/workflows/validate-site.yml`; if combined later, reconcile workflow coverage instead of overwriting tests. #255 is already merged. After each proposed merge, the other branch heads/CI become historical and require main resynchronization and new exact-head validation. **No merge/deploy authorized.**
+
+**Authorization boundary:** Only founder's separate, named A/B Auth identity/inbox, environment, transactional-mail scope and data cleanup decision enables provider registration. Until that decision, all P01–P14 are BLOCKED by design; do not forge test accounts or send mail. The precise request and stop conditions are in `FIRST_FLAME_PROVIDER_ACCEPTANCE_004D.md`.

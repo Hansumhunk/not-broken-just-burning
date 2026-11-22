@@ -110,6 +110,8 @@ class SEO(unittest.TestCase):
                 "guide-rebuilding-friendships-after-divorce.html",
             ),
             "mens-mental-health.html": ("guide-working-through-divorce.html",),
+            "path-masculine-restoration-steadiness.html": ("guide-working-through-divorce.html",),
+            "path-circle-of-the-flame.html": ("guide-rebuilding-friendships-after-divorce.html",),
         }
         urls = {
             node.text for node in ET.parse(ROOT / "sitemap.xml").findall(

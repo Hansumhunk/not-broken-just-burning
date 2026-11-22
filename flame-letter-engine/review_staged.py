@@ -45,7 +45,7 @@ def inspect(root, staging):
             continue
         body=text_path.read_text(encoding="utf-8")
         html=html_path.read_text(encoding="utf-8")
-        actual=hashlib.sha256((body+"\n"+html).encode()).hexdigest()
+        actual=hashlib.sha256((body+html).encode()).hexdigest()
         if actual!=m.get("contentSha256"):
             errs.append("immutable content hash mismatch")
         if topic:

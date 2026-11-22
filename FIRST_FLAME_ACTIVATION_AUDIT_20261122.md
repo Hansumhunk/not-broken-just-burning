@@ -128,3 +128,58 @@ These are **handler-level tests, not browser end-to-end acceptance**. The corres
 **Founder controlled:** production deploy, live entitlement changes, external campaigns, billing, privacy-policy changes, new infrastructure.
 
 **Recommended next priority:** Finish Open the Gates provider/browser acceptance and ship a separately approved verified free-first pathway before adding complex AI personalization. A successful first lesson and a truthful Continue Learning state matter more than another unchecked feature.
+
+## L. Phase II browser acceptance and release reconciliation — 2026-11-22
+
+**Classification discipline:** Chromium steps below were executed against a local HTTP static-site preview using two deliberately synthetic identity objects and a local-only stub of Supabase entitlement responses. All external browser requests were blocked. **This is browser-level UI acceptance, not real Supabase Auth account creation, provider email delivery, security/RLS adversarial proof, or a genuine 7-day retention cohort.** Manual phone and assistive-technology acceptance remain separate.
+
+**Code/CI:** PR #270 now also includes `tests/first_flame_member_browser_test.py`, a targeted neutral signup message in `js/member-auth.js`, and a browser acceptance step in the existing static-site workflow. Synthetic Chromium checks executed with actual existing HTML, browser LocalStorage, JS, desktop and mobile viewport; non-PII screenshot artifact in GitHub Actions. No new production account, payment, marketing activity, provider request, or production deployment.
+
+**First Seven Days conflict resolution:** PR #254's staged accepted content preserved byte-for-byte at its six original non-sitemap blob SHAs. The conflict was caused by three later public Search Dominion guide entries in `main:sitemap.xml`. The branch now has a two-parent merge commit `7f314e7046eada07bc78086ca1a99a3dfb44b5b1` with main `ac8d5da6bb214d4ea7be9d9109cf5f2c6cbcf932` as second parent, a merged main-preserving sitemap and exactly one First Seven Days URL. GitHub reports 0 commits behind main, mergeable true, seven changed files. Exact-head [static CI #44988758512](https://github.com/Hansumhunk/not-broken-just-burning/actions/runs/44988758512) and [staged Chromium CI #44988758483](https://github.com/Hansumhunk/not-broken-just-burning/actions/runs/44988758483) completed successfully. **Still draft, unmerged, not live.** PR #250 remains separate and cannot introduce a direct link to the staged page before actual live verification.
+
+**Open the Gates F01–F16 recovery:** Existing [issue #205 checkpoint](https://github.com/Hansumhunk/not-broken-just-burning/issues/205#issuecomment-7068072390) explicitly reconstructs the sixteen cases and cautions the original historical F01–F16 artifact was not recovered. Relevant statuses there: F01–03 partial; F04 blocked; F05 partial; F06 blocked; F07–08 partial; **F09 source-confirmed failure** (Dashboard shortcuts to public Path pages) has isolated [draft PR #267](https://github.com/Hansumhunk/not-broken-just-burning/pull/267), not merged; F10–12 partial; F13 blocked; F14–16 partial. This Phase II browser fixture adds evidence for F03, F07, F08, F09's *independent* Dashboard continuation area, F12, F14, F15, but **does not clear real-provider or #267 founder approval gates**. Coordinate PR #267 with the Open the Gates owner, do not copy its fix into #270.
+
+### MA01–MA30 Phase II requirement-by-requirement execution
+
+Every row distinguishes isolated browser results from actual provider authentication. "PARTIAL" deliberately remains the overall status when only the simulated test passed.
+
+| ID | Environment | Expected | Observed | Result | Evidence | Required next action |
+|---|---|---|---|---|---|---|
+| MA01 | Public HTML/main source | Visitors find free registration | Join and free CTA source present; no live browser click | PARTIAL | `index.html`, `join.html`, F01 | Fresh signed-out production click acceptance |
+| MA02 | Real Supabase | New signup creates legitimate free member | No new account created | BLOCKED | F04, #205 | Explicit authorization for controlled new test identity and mail |
+| MA03 | Browser fixture | Invalid and duplicate signup handled safely | Required fields asserted; provider duplicate behavior not contacted | PARTIAL | Chromium guest form + neutral no-session response | Approved real duplicate/idempotency scenario |
+| MA04 | Real email provider | Confirmation arrives, redirect works | No actual verification email generated | BLOCKED | F05/F06 | Approve controlled transactional verification |
+| MA05 | Real email provider | Expired/reused link recovers safely | Not exercised | BLOCKED | F06 | Approved provider expiry tests |
+| MA06 | Local Chromium + fixture | New verified user reaches onboarding | Synthetic signed-in account can access onboarding | PARTIAL | `first_flame_member_browser_test.py` | Authenticated real new-account journey |
+| MA07 | Local Chromium guest | Guest denied protected route | Guest redirected to account screen | PARTIAL | Chromium protected redirect | Real production route/gate acceptance |
+| MA08 | Local Chromium + fixture | Returning login works | Synthetic session restored following sign-out; live password login untested | PARTIAL | Chromium sign-out/return | Real existing-account login |
+| MA09 | Local Chromium + fixture | Errors/recovery understandable | Synthetic failed login displays error; recovery form is present | PARTIAL | Browser guest test | Real recovery email/retry acceptance |
+| MA10 | Local Chromium + fixture | Sessions/expiration handled | Synthetic sign-out, subsequent guest redirect, same-device return verified | PARTIAL | Browser sign-out/re-entry | Actual Supabase expiry, Back and token invalidation |
+| MA11 | Desktop + mobile Chromium fixture | Focus/values/action saved accurately | Verified local state across navigation and reload | PARTIAL | Chromium onboarding sequence | Real authenticated browser on approved account |
+| MA12 | Desktop Chromium fixture | Setup optional | Skip reaches free Start Here with no local setup written | PARTIAL | Chromium skip scenario | Real authenticated skip verification |
+| MA13 | Source + local browser | Preference can be changed without disclosing sensitive content | Only educational focus stored in scoped local data, no external browser network | PARTIAL | Browser isolated local-state assertion | Privacy manual audit and real environment |
+| MA14 | Desktop/mobile Chromium fixture | Start Here accessible without paid purchase | Free fixture reaches the actual free lesson; no checkout | PARTIAL | Browser loaded `member-start-here.html` | Real free-entitlement end-to-end |
+| MA15 | Desktop/mobile Chromium fixture | Deliberate first lesson action works | Synthetic facts/feelings/control submitted and saved, dashboard action updated | PARTIAL | Browser form/response | Real new-account case |
+| MA16 | Desktop/mobile Chromium fixture | Saved progress truthful and restored | Device-scoped progress and action survive refresh; no cross-device claim | PARTIAL | Browser reload + local record inspection | Verify real device and determine sync roadmap |
+| MA17 | Isolated source | Repeat completion safe | Not exercised as separate idempotency case | NOT RUN | N/A | Repeat-save and deliberate-practice state test |
+| MA18 | Paid continuity | Bookmarks resume correct protected section | Not exercised in this free-member fixture | NOT RUN | `js/learning-continuity.js` source only | Existing paid QA identity, approved protected reader test |
+| MA19 | Desktop/mobile Chromium fixture | Dashboard returns appropriate next action | Focus and Next Honest Action displayed after reload/return | PARTIAL | Browser Dashboard selectors | Real account return visit acceptance |
+| MA20 | Local two-identity fixture | Data from A is not shown to B | A retained under own local key; B view blank, no A text | PARTIAL | Browser fixture `fixture-alpha`/`fixture-beta` | Provider-backed two-account RLS proof |
+| MA21 | PR #254 staged Chromium | Seven-day path substantive and navigable | Existing accepted browser suite + merged branch CI passed, not published | PARTIAL | PR #254 exact-head actions | Founder separate deploy, then live route |
+| MA22 | Source + staged content | Free experience has genuine depth | Existing free lesson and staged seven-day library present | PARTIAL | `member-start-here.html`, #254 | Verified public/member journey and editorial acceptance |
+| MA23 | Supabase policy review | Free cannot read premium data | Browser-role premium table denied, entitlement reader inspected; new direct role attempt not run | PARTIAL | RLS inspection and historical F10 | Approved two-account server-side entitlement test |
+| MA24 | Source + isolated browser | Auth signup does not enroll marketing | Auth form has no newsletter consent; external network blocked in fixture | PARTIAL | Auth source, PR #230 separate | Provider/consent acceptance owned by Flame Letter |
+| MA25 | Local synthetic network guard | No private reflection data leaks to analytics | Browser fixture blocks all external calls, not proof of live configuration | PARTIAL | Browser route guard; analytics runbook | Owner review of real cookieless ingestion privacy |
+| MA26 | PostHog/Supabase metrics | D7 cohort tracked without incompatible IDs | Linked cohort not established | BLOCKED | Measurement runbook | Approved privacy-safe metric design and repeat visits |
+| MA27 | Chromium mobile emulation | Mobile controls fit and function | Focus/setup/lesson/dashboard and 390 px overflow check passed | PARTIAL | Mobile CI result | Physical Android/iOS manual check |
+| MA28 | Chromium + source | Keyboard and screen reader access | Keyboard Enter activates failure path, role=alert visible; manual AT not run | PARTIAL | Browser keyboard test | Keyboard-wide + screen-reader acceptance |
+| MA29 | Chromium + fixture | Failed saves report error without navigation and recover | Synthetic quota failure announced, state retained; retry saved and navigated | PARTIAL | Browser failure/retry + Node test | Test real storage denial, offline and stale assets |
+| MA30 | GitHub and live-system change control | No unauthorized production release or messaging | Branch-only files and comments; no merge/deploy/payment/email sends initiated | PASS | PR #270/#254 current draft state | Founder exact-head authorization only after outstanding gates |
+
+### Founder-controlled gates and release dependency order
+1. **Current independent work:** Finalize #270 exact-head CI/browser preview, coordinate Open the Gates #267, keep private user data absent from test fixtures.
+2. **Actual provider acceptance:** Requires founder approval of an approved controlled identity/email path (or a founder-supervised Work Cloud Browser session against an existing account). No automatic new live customer accounts or mail.
+3. **First Seven Days:** #254 is technically mergeable and staged CI-green but not deploy-authorized. Founder must review exact head and separately authorize release. After live deployment, verify real availability/SEO/resources.
+4. **Front Door:** #250 may only link to the actual verified public destination, then requires independent exact-head QA and founder deployment approval.
+5. **First Flame #270:** Not part of either other release approval; independently accept real signup/lesson/return/error path and authorize precise head.
+6. **No additional infrastructure, consent, Stripe, entitlement, account writes, marketing activation, DNS or paid spend permitted by this directive.**

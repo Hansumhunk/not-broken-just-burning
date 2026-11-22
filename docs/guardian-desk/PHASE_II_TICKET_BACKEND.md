@@ -77,3 +77,24 @@ Passing a static SQL safety check is **not** equivalent to passing real RLS/acco
 - Keep production release and all privileged customer actions behind separate exact-commit approvals.
 
 No real personal information, private reflections, Stripe customer data, or marketing consent was collected during preparation of this proposal.
+
+
+## GD-002-A continuation — source implementation and hardening (2026-11-22)
+
+**The earlier section above describes the previous draft before this continuation.** Current authoritative proposed SQL is `PROPOSED_TICKET_SCHEMA.sql`; new source is `guardian-support-core.mjs`, `edge/guardian-support-intake/index.ts`, and `tests/security.test.mjs`. All remain **unapplied / unhosted**.
+
+### Changed controls
+- Removed automatic account→ticket→audit cascading loss. Ticket owner becomes NULL only after approved redaction; a CHECK forbids orphaned unsanitized content. Ticket→audit FK RESTRICT blocks silent event deletion. Both deletion/hold policy and actual workflow are still unapproved.
+- Added HMAC-based active-owner duplicate uniqueness, server-only atomically enforced 5-per-hour intake gate, and database transaction joining rate decision, ticket insert, and minimal audit event.
+- Added constrained topic-to-team *suggestion*, keeping actual assignment empty until verified staff action; unverified report text never generates P0/P1 claims.
+- Proposed Edge handler independently verifies user JWT against existing Supabase Auth, derives owner server-side, rejects client ownership/priority fields, denies secrets, uses QA kill switch and exact project ref, emits a ticket ID only when the RPC provides a valid persisted ID.
+- No browser write grants; no Auth users created; no live Stripe read or write integration; no new public Help page.
+
+### Evidence and test scope
+- Executed new **59/59 locally passing Node tests** from the isolated source package using `node --experimental-strip-types --test tests/*.test.mjs` (input/identity/safety, mocked Edge transport, SQL structural lint). The GitHub branch also stages `tests/security.test.mjs` as a reproducible source regression suite; **no GitHub Actions or hosted acceptance is claimed**.
+- These tests mock Supabase Auth and PostgREST and lint SQL text; do **not** establish actual JWT enforcement, RLS, transactional behavior, deployed Edge function accessibility, 2-account separation, backup recovery or legal retention adequacy.
+- Read-only Commerce QA direct project check: `ACTIVE_HEALTHY`, PostgreSQL 17.12, existing populated commerce QA. No hosted write performed. A verified $0 **incremental resource cost** assumption is not available until metering and backup preflight.
+- Full risk and proposed disclosures: `PHASE_II_SECURITY_REVIEW.md`; **single** exact founder decision: `PHASE_II_QA_APPROVAL.md`.
+
+### Important rollout limitation
+The new Edge handler imports a shared pure helper module outside its function directory. That dependency must be bundled/validated for the intended supported runtime, not assumed to deploy directly. The future function must retain `verify_jwt=true`; no service-role key or HMAC secret is permitted in GitHub or browser code. The exact retention and customer rights workflow, staffing ownership, and isolated QA permission remain approval-blocked.

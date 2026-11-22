@@ -35,11 +35,11 @@ jobs:
       - name: Test offline generator and hard release gates
         run: node --test scripts/test_flame_letter_editorial.mjs scripts/test_flame_letter_send_guard.mjs
       - name: Stage four review-only candidate editions
-        run: node scripts/flame_letter_editorial.mjs --weeks=4 --out=.flame-letter-staging
+        run: node scripts/flame_letter_editorial.mjs --weeks=4 --out=flame-letter-staging
       - name: Archive editorial REVIEW artifacts, never send
         uses: actions/upload-artifact@v4
         with:
           name: flame-letter-editorial-review-${{ github.run_id }}
-          path: .flame-letter-staging/
+          path: flame-letter-staging/
           retention-days: 14
           if-no-files-found: error

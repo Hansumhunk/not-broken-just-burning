@@ -57,7 +57,11 @@ AUTH_FIXTURE = r"""
       callback({ user: user(), session: user() ? { user: user() } : null });
       return () => {};
     },
-    client: { from: mkQuery }
+    client: { from: mkQuery },
+    signOut: async () => {
+      sessionStorage.removeItem('qa-fixture-user');
+      return { error: null };
+    }
   };
 })();
 """
@@ -171,6 +175,19 @@ def check_onboarding(browser, origin, mobile=False):
         else:
             page.screenshot(path=str(OUT / "synthetic-return-dashboard.png"), full_page=True)
         print("PASS", mode, "synthetic authenticated browser onboarding, storage error, free lesson, explicit save, dashboard return/refresh")
+
+        # Actual sign-out button and same-browser return, but provider responses
+        # are synthetic and do not establish real Supabase token revocation.
+        page.locator(".member-nav-more summary").click()
+        page.locator(".member-sign-out").click()
+        page.wait_for_url("**/member-auth.html")
+        page.goto(origin + "/members.html", wait_until="domcontentloaded")
+        page.wait_for_url("**/member-auth.html?next=members.html")
+        identity(page, origin, "fixture-alpha")
+        ready(page, origin, "members.html")
+        assert "Prepare one question." in page.locator('[data-dashboard-action-state]').inner_text()
+        print("PASS", mode, "synthetic sign-out, guest redirect, returning-device restoration")
+
         # Same-browser account switch: no prior user's private local data visible.
         page.evaluate("sessionStorage.setItem('qa-fixture-user','fixture-beta')")
         page.reload(wait_until="domcontentloaded")

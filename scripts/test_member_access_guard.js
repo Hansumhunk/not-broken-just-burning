@@ -1246,3 +1246,21 @@ test('dashboard Path focus shortcut stays in the authenticated Path practice', (
   assert.doesNotMatch(mapping, /:\s*['"]path-[^'"]+\.html/, 'Member shortcut must not silently exit to public overview');
   assert.match(stagePage, /id="nbjb-member-access-gate"/);
 });
+
+
+test('Directive 007: member continuity links to published free Seven Days without implying account sync', () => {
+  const dashboard = read('members.html');
+  const publicCourse = read('first-seven-days.html');
+  const publicMarks = read('js/first-seven-days.js');
+  const guestFrontDoor = read('index.html');
+  const memberPlatform = read('js/member-service.js');
+  assert.match(dashboard, /href="first-seven-days[.]html">Explore the free First Seven Days/);
+  assert.match(dashboard, /href="first-seven-days[.]html">Open the free First Seven Days/);
+  assert.match(dashboard, /Its optional day marks last only for that page visit/);
+  assert.match(dashboard, /not saved to your Hub or synchronized between devices/);
+  assert.match(dashboard, /Next Honest Action and explicitly saved My Work remain device-local/);
+  assert.match(publicCourse, /<link rel="canonical" href="https:\/\/notbrokenjustburning[.]com\/first-seven-days[.]html">/);
+  assert.match(guestFrontDoor, /href="first-seven-days[.]html"/);
+  assert.doesNotMatch(publicMarks, /localStorage|sessionStorage|fetch\(|sendBeacon\(|\.capture\(/);
+  assert.match(memberPlatform, /nbjb[.]member[.]v2/);
+});

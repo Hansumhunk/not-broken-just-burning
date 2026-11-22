@@ -257,3 +257,82 @@ The source of record is the 2026-11-21 **reconstructed** sixteen-case matrix at 
 **Release interactions:** #267 edits `js/member-dashboard.js` + `scripts/test_member_access_guard.js`; #270's production changes are disjoint from those two. #254 edits isolated lesson page/assets/test and **sitemap**; #250 edits `index.html`, `join.html`, `css/visitor-journey.css` and is logically dependent on #254 deployment and public route acceptance. #249 overlaps #270 on `.github/workflows/validate-site.yml`; if combined later, reconcile workflow coverage instead of overwriting tests. #255 is already merged. After each proposed merge, the other branch heads/CI become historical and require main resynchronization and new exact-head validation. **No merge/deploy authorized.**
 
 **Authorization boundary:** Only founder's separate, named A/B Auth identity/inbox, environment, transactional-mail scope and data cleanup decision enables provider registration. Until that decision, all P01–P14 are BLOCKED by design; do not forge test accounts or send mail. The precise request and stop conditions are in `FIRST_FLAME_PROVIDER_ACCEPTANCE_004D.md`.
+
+---
+
+## N. Directive 007 — production R1–R5 acceptance reconciliation (2026-11-22)
+
+**Supersedes stale *current-status* statements in sections written before the five releases; preserves all old matrices and historical evidence verbatim.** This is a new provenance/date-specific checkpoint, not a second acceptance program.
+
+**Verified accepted production main:** `2cef0da1c244de4a84d8c8e33753660a7ec96655` (R5 #249). R1 #267 routing merge `a76c3bf8dd0daeb3df852dab5c5e7c6bcc0a5c3f`; R2 #270 onboarding/atomic device save `84d15c144eb94889cbd2c8e0981e6ee5e34ec9a8`; R3 #254 free public Seven Days `e33885ca7758c2aeb2307993cd66f6a779f6346e`; R4 #250 free visitor Front Door `66428c4145cae34e4c2bdfec6e8969174a98882f`; R5 #249 source-only assurance `2cef0da1c244de4a84d8c8e33753660a7ec96655`. GitHub metadata confirmed all five CLOSED/MERGED. R5 post-merge CI and GitHub Pages were successful per the [Executive Registry #274](https://github.com/Hansumhunk/not-broken-just-burning/issues/274#issuecomment-7084333919); this does NOT imply customer/provider security acceptance.
+
+**Accepted single-account actual customer journey, not synthetic:** Issue #205 Account A founder-observed live Supabase registration and verification email; free entitlement/provisioning; optional onboarding/Path; free Start Here and explicitly saved My Work + Next Honest Action; Dashboard refresh; logout/protected-route denial; same-device returning sign-in. This was a controlled internal QA identity, *not* external acquired demand. Preserve these completed successes; never demand another Account A manual retest.
+
+**Independent source / CI / HTTP:** #267 maps six Dashboard focus shortcuts to protected member Path stages in production (prior F09 source FAIL **RESOLVED at code level**). #270 delivers one local write for saved Start Here reflection + Next Honest Action; blocked storage/failure and rapid duplicate fixture tests run in release CI. #254 Seven Days public HTML/CSS/JS and self-canonical sitemap published; #250 direct public free guest link, Join page, desktop/mobile/keyboard CI and live outbound HTTP 200 verified [Front Door gate](https://github.com/Hansumhunk/not-broken-just-burning/actions/runs/45058278371). #249 source-only auth/webhook/Postgres fixtures, not two real JWTs or verified charge/refund, are accepted as security engineering.
+
+**Current Supabase read-only aggregate checkpoint** (2026-11-22): 5 confirmed Auth accounts, including a known internal QA account; 1 newly created Auth in previous 7 days; 3 active free entitlements and 2 active paid entitlement rows; 0 server `profiles.onboarding_completed=true`, 0 server `member_continue_state.next_honest_action`, 0 server learning/path-progress entries. Account/user cohorts and free-to-paid external customers cannot be deduced from these mixed grains. PostHog event catalog includes `$pageview` but no observed NBJB-specific completed-first-action or verified-member-return event names. Auth `last_sign_in_at` does not reconstruct D7 visits. Browser local work does not automatically update those server tables. Never infer lack of local educational activity from server zeros.
+
+### MA01–MA30 reconciled against current evidence
+
+PASS is **explicitly scoped** to the labeled evidence, not a blanket multi-account/provider acceptance. PARTIAL means some source/fixture or Account A subscope accepted; DEFERRED means unexecuted by founder decision.
+
+| Case | Current class | Verified evidence / still missing |
+|---|---|---|
+| MA01 | PASS—public route | R4 homepage + Join + free Seven Days published; outbound GET/Chromium, not human comprehension |
+| MA02 | PASS—Account A | Genuine founder-controlled production registration and verified free member |
+| MA03 | PARTIAL | Synthetic invalid/duplicate behavior; actual second registration/duplicate provider probe waived |
+| MA04 | PASS—Account A | Genuine one transactional confirmation email/link and account verification |
+| MA05 | DEFERRED | Provider expired/reused verification link not tested |
+| MA06 | PASS—Account A | Genuine verified member onboarded and reached free lesson |
+| MA07 | PASS—single-account | Founder observed guest/protected-route denial after sign-out; not adversarial two-user JWT |
+| MA08 | PASS—Account A | Founder observed returning password login |
+| MA09 | PARTIAL | Error/recovery UI fixtures; actual recovery provider email/link deferred |
+| MA10 | PARTIAL | Actual logout & return A verified; provider session expiry/race not verified |
+| MA11 | PASS—Account A | Chosen Path and Next Honest Action survived same-device refresh |
+| MA12 | PARTIAL | Optional skip fixture/source; founder skip scenario not repeated |
+| MA13 | PARTIAL | Device-scoped preferences/source privacy; distinct-account isolation deferred |
+| MA14 | PASS—Account A | Actual Free tier opened substantive Start Here without purchase |
+| MA15 | PASS—Account A + CI | Deliberately saved free reflection and Dashboard action; atomic failure branch validated in fixture, not in real A |
+| MA16 | PASS—same device | Saved My Work/action persisted across refresh, sign-out and returning login; no cross-device sync |
+| MA17 | PARTIAL | Rapid double-submit browser regression passes; separate deliberate repeat-practice lifecycle not established |
+| MA18 | DEFERRED | Paid-reading bookmark continuity not independently rerun as this program |
+| MA19 | PASS—Account A | Dashboard actual tier/focus/work/action rendered; R1 route fixed at source+CI |
+| MA20 | DEFERRED | Two genuine ordinary-member JWT row isolation challenge not performed; owner RLS inspected only |
+| MA21 | PASS—public course | R3 seven substantive day lessons, valid canonical+index, live HTTP and browser candidate |
+| MA22 | PARTIAL | Curriculum published, editorial/staged QA; real multi-day behavioral continuity cannot be inferred |
+| MA23 | PARTIAL | Guest direct manuscript SQL grant/policy deny + historical founder checks; real ordinary Free JWT reader denial deferred |
+| MA24 | PARTIAL | Signup and newsletter consent isolated in code; negative provider marketing-enrollment audit not run |
+| MA25 | PARTIAL | No upload claimed; local mock network checks, PostHog taxonomy incomplete; production leakage audit deferred |
+| MA26 | DEFERRED | No complete comparable external D7 activated cohort; don't calculate retention |
+| MA27 | PARTIAL | Desktop/mobile Chromium accepted; founder physical mobile verification waived |
+| MA28 | PARTIAL | Automated keyboard/landmark tests accepted; manual screen-reader audit waived |
+| MA29 | PARTIAL | Actual offline/storage failure/recovery covered by released synthetic CI; no real provider failure injection |
+| MA30 | PASS—release controls | R1–R5 merged after exact-head approval and validation, provider Pages deployment; security gaps separately open |
+
+### F01–F16 Open the Gates source matrix — 007 reconciliation
+
+Original reconstruction retained at [issue #205](https://github.com/Hansumhunk/not-broken-just-burning/issues/205#issuecomment-7068072390). Never promote the whole matrix to real-provider PASS.
+
+| F | Current class | Rationale |
+|---|---|---|
+| F01 | PASS—public UI | Public homepage and free entry deployed with outbound HTTP 200 |
+| F02 | PASS—public UI | Join benefit/guest/optional signup links released, HTTP 200 |
+| F03 | PARTIAL | Source/form fixture; provider duplicate/invalid state not exercised |
+| F04 | PARTIAL | Real Account A created; duplicate identity prevention not provider-tested |
+| F05 | PASS—A | Founder-owned verification mail/confirmed account |
+| F06 | DEFERRED | Expiry/replay provider link behavior |
+| F07 | PASS—A | Genuine optional onboarding focus/save and free lesson |
+| F08 | PASS—A | Actual first lesson, saved tool work and Next Honest Action |
+| F09 | PASS—released source/CI | All six Dashboard focus shortcuts corrected by merged R1; not a fresh human six-route test |
+| F10 | PARTIAL | Member RLS policies and guest restrictions; two distinct ordinary JWTs deferred |
+| F11 | PARTIAL | Backend paid entitlement reference and historical founder premium/free; fresh Free JWT denial deferred |
+| F12 | PASS—A | Founder observed returning sign-in and same-device work |
+| F13 | DEFERRED | Provider password recovery/magic link |
+| F14 | PASS—A | Founder observed signout protected-page denial and restored A state |
+| F15 | PARTIAL | Automated responsive/keyboard accepted; human AT excluded by waiver |
+| F16 | PARTIAL | Code consent segregation; actual list isolation not audited in this release |
+
+### Next bounded improvement, not a historical blocker
+**Observed:** Public First Seven Days is fully released but `members.html` has **no direct link** to `first-seven-days.html`, despite the public course describing the member Hub as a continuation destination. **Customer consequence:** A signed-in member may need to navigate back through the visitor homepage to rediscover free seven-day lessons. **Source-only 007 correction staged on a separate draft branch:** add a small public link to first-run Dashboard and the free member learning card, explicitly disclosing that temporary public day marks do **not** synchronize into the Hub or private My Work; do not create storage/tracking/auth systems. Add targeted test inside existing member-access regression suite. **Production remains unchanged pending its own exact-head founder release approval.**
+
+**Hard boundaries retained:** no new QA B, emails, premium payment tests, marketing, production tracking, DDL, Auth config or customer changes. Real A/B JWT, Free JWT manuscript denial, recovery provider behavior, physical AT and D7 are **DEFERRED, not PASS**. #249 and security issue #160 own unrelated security improvements. Production and new draft source must never be conflated.

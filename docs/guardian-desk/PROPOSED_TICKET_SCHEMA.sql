@@ -146,6 +146,26 @@ BEGIN
  END IF;
  IF p_topic = 'general_feedback' THEN v_priority := 'P3'; END IF;
 
+ -- Serialize intake by owner for the duration of this transaction. This
+ -- protects first-submit vs identical retry races and avoids charging rate
+ -- allowance for a duplicate. The partial unique index remains a second guard.
+ -- PG17 catalog hash collision only causes extra serialization, not ownership
+ -- sharing; each subsequent query still filters by exact owner UUID.
+ PERFORM pg_catalog.pg_advisory_xact_lock(
+   pg_catalog.hashtextextended(p_owner_user_id::text, 0)
+ );
+ SELECT id,status INTO v_ticket_id,v_status
+ FROM public.guardian_support_tickets
+ WHERE owner_user_id = p_owner_user_id
+   AND dedupe_fingerprint = p_dedupe_fingerprint
+   AND status <> 'CLOSED'
+ ORDER BY created_at ASC LIMIT 1;
+ IF v_ticket_id IS NOT NULL THEN
+   RETURN jsonb_build_object('ticket_id',v_ticket_id,
+                             'duplicate',true,'status',v_status);
+ END IF;
+
+ -- Only genuinely new tickets consume one of five per-user slots per hour.
  -- Atomic per-verified-user limit of five accepted requests per database hour.
  INSERT INTO public.guardian_support_rate_windows AS r
    (owner_user_id,window_started_at,accepted_count)

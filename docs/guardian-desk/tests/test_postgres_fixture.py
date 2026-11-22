@@ -59,7 +59,7 @@ def user_count(owner):
     return int(one(
         "BEGIN; SET LOCAL ROLE authenticated;"
         f"SELECT set_config('request.jwt.claim.sub','{owner}',true);"
-        "SELECT count(*) FROM public.guardian_support_tickets; COMMIT;"
+        "SELECT count(id) FROM public.guardian_support_tickets; COMMIT;"
     ))
 
 
@@ -106,7 +106,7 @@ VALUES ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),
             AND tablename LIKE 'guardian_support_%' AND rowsecurity;
           """) == "3")
     check("authenticated has own-ticket SELECT but no table writes",
-          one("""SELECT has_table_privilege('authenticated','public.guardian_support_tickets','SELECT')
+          one("""SELECT has_column_privilege('authenticated','public.guardian_support_tickets','id','SELECT')
             AND NOT has_table_privilege('authenticated','public.guardian_support_tickets','INSERT')
             AND NOT has_table_privilege('authenticated','public.guardian_support_tickets','UPDATE')
             AND NOT has_table_privilege('authenticated','public.guardian_support_tickets','DELETE');""") == "t")

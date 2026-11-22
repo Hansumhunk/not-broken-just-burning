@@ -144,6 +144,8 @@ class Ledger:
         dt(now)
         require(dt(window_start) < dt(window_end), "invalid dispatch window")
         with self._tx() as db:
+            stop = db.execute("SELECT halted FROM runtime_control WHERE singleton=1").fetchone()
+            require(stop is not None and stop["halted"] == 0, "emergency stop engaged; no queue staging")
             row = self._get(db, edition_id)
             require(row["state"] == "approved", "approval required")
             require(bool(row["approval_ref"]), "missing approval evidence")

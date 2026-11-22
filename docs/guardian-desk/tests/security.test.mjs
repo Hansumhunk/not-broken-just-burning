@@ -58,7 +58,7 @@ test('billing queue is revenue forge',()=>assert.equal(classifyTicket(validateSu
 test('safety language routed',()=>assert.equal(isImmediateDanger('I am going to kill myself'),true));
 test('safety page says no ticket',()=>assert.match(emergencyResponse().message,/No support ticket/));
 test('no ticket ID invented for wrong database payload',()=>assert.equal(safePublicTicketResult({success:true}),null));
-test('public aggregates suppress tiny cohorts',()=>assert.equal(suppressedExecutiveAggregate({total:2,groups:{billing:1}}).groups.billing,null));
+test('public aggregates suppress tiny cohorts',()=>assert.equal(suppressedExecutiveAggregate({total:2,groups:{billing:1,technical:1}}).groups.billing,null));
 test('environment fails closed without QA flag',()=>assert.equal(gateEnvironment(k=>k==='NBJB_GUARDIAN_QA_ENABLED'?'false':get(k)),false));
 test('environment fails closed on production host',()=>assert.equal(gateEnvironment(k=>k==='SUPABASE_URL'?'https://wrong.supabase.co':get(k)),false));
 test('anonymous request rejected',async()=>assert.equal((await handle(req(valid,{authorization:''}),get)).status,401));

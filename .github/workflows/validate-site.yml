@@ -159,6 +159,8 @@ jobs:
         run: node --test scripts/test_member_workshop.js
       - name: Test signed-out member access and browser Back prevention
         run: node --test scripts/test_member_access_guard.js
+      - name: Test public Frontier Engine tools, SEO pages and privacy
+        run: node --test scripts/test_frontier_engine.mjs
       - name: Test public Before You Hit Send acquisition tool and privacy boundaries
         run: node --test scripts/test_before_you_send.mjs
       - name: Test member Find & Resume alongside More

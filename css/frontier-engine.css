@@ -1,0 +1,13 @@
+/* Frontier Engine public candidate styles: scoped, mobile-first, no account dependence. */
+.fe-hero{padding-bottom:1rem}.fe-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(250px,.8fr);gap:clamp(1rem,3vw,2rem);align-items:start;padding-bottom:2.5rem}
+.fe-card,.fe-aside,.fe-example{border:1px solid rgba(210,171,100,.3);border-radius:14px;background:rgba(13,12,15,.8);padding:clamp(1.1rem,3vw,1.8rem)}
+.fe-card h2,.fe-aside h2{margin-top:0}.fe-card fieldset{border:0;border-top:1px solid rgba(210,171,100,.24);padding:1.1rem 0;margin:1.15rem 0 0;min-width:0}.fe-card legend{font-weight:700;padding-top:.7rem}
+.fe-choice{display:flex;gap:.7rem;align-items:center;border:1px solid rgba(210,171,100,.26);border-radius:10px;padding:.9rem;margin:.65rem 0;cursor:pointer;line-height:1.4;background:rgba(255,255,255,.03)}
+.fe-choice:focus-within{outline:2px solid #e6b96b;outline-offset:2px}.fe-choice:has(input:checked){background:rgba(210,171,100,.12);border-color:#e6b96b}.fe-choice input{accent-color:#e6b96b;min-height:18px;min-width:18px;margin:0}
+.fe-card .button,.fe-share .button{min-height:44px;margin:.3rem .5rem .3rem 0}.fe-result{border-top:1px solid rgba(210,171,100,.35);padding-top:1.25rem;margin-top:1.5rem}.fe-result[hidden]{display:none}.fe-result h3:focus{outline:2px solid #e6b96b;outline-offset:4px}
+.fe-result label{display:block;font-weight:650;margin:.7rem 0}.fe-result textarea{display:block;box-sizing:border-box;width:100%;max-width:100%;padding:1rem;background:#141317;color:#f6eee5;border:1px solid rgba(210,171,100,.48);border-radius:9px;font:inherit;line-height:1.6;resize:vertical}
+.fe-status,.fe-share [role=status]{min-height:1.5rem}.fe-aside ul{padding-left:1.4rem;line-height:1.8}.fe-note,.fe-scope{font-size:.95rem;line-height:1.7}.fe-reading,.fe-article{max-width:860px;line-height:1.8}.fe-reading{padding-bottom:2rem}
+.fe-article h2{margin-top:2.3rem}.fe-article p{max-width:75ch}.fe-example{margin:1.3rem 0}.fe-example h3{margin-top:0}.fe-share,.fe-join{padding-top:2rem;padding-bottom:2rem}.fe-continuation{margin-top:2rem}
+.fe-article a:not(.button),.fe-reading a,.fe-aside a,.fe-join a{text-decoration:underline;text-underline-offset:3px}
+@media(max-width:800px){.fe-grid{grid-template-columns:1fr}.fe-choice{padding:1rem}.fe-result .button{width:100%}.fe-article{padding-left:clamp(1rem,4vw,2rem);padding-right:clamp(1rem,4vw,2rem)}}
+@media(prefers-reduced-motion:reduce){.fe-choice{transition:none}}

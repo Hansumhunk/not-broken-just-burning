@@ -11,7 +11,7 @@ const product={slug:"from-chaos-to-clarity",active:true,amount:1799,member_amoun
   tax_code:"txcd_10302000",tax_behavior:"exclusive",terms_version:"wb001-v1",
   asset_version:"v1.0",asset_key:WB001_ASSET_KEY,download_name:"NBJB-WB-001_v1.0_customer.zip",currency:"usd"};
 const now=Date.parse("2026-11-22T20:00:00Z");
-function fixture({guest=false,providerActive=true,assetReady=true,abuse=true}={}){
+function fixture({guest=false,providerActive=true,assetReady=true,abuse=true,failFirstEmail=false}={}){
  const calls={prices:[],checkouts:[],emails:[],binds:[],downloads:[],events:[],abuseChecks:0};
  let current=guest?null:member;
  let row=null,outbox=null,entitlement=null;
@@ -55,7 +55,7 @@ function fixture({guest=false,providerActive=true,assetReady=true,abuse=true}={}
  };
  const delivery={
   assertPrivateAsset:async()=>{if(!assetReady)throw Error("asset_not_ready");},
-  sendGuestReceipt:async x=>calls.emails.push(x),
+  sendGuestReceipt:async x=>{if(failFirstEmail&&calls.emails.length===0){calls.emails.push({failed:true});throw Error("mail_provider_down");}calls.emails.push(x);},
   signDownload:async (order,seconds)=>{calls.downloads.push([order,seconds]);return {url:"https://example.supabase.co/storage/v1/object/sign/private",expiresIn:seconds};}
  };
  const svc=createWB001Service({store,provider,delivery,verifyAbuse:async()=>{calls.abuseChecks++;return abuse;},claimSecret:"s".repeat(64),clock:()=>now});
@@ -104,4 +104,29 @@ test("duplicate signed events issue no duplicate receipt, refund revokes access 
  const claim=await signGuestClaim(f.row(),"s".repeat(64));
  await f.store.reconcile({event:"evt_refund",state:"refunded",refunded:1799});
  await assert.rejects(f.svc.downloadGuest({orderId:uuid,claim}),/not_owned/);
+});
+
+test("lost guest purchase link can be reissued without account; old nonce is replaced only after email acceptance",async()=>{
+ const f=fixture({guest:true});
+ await f.svc.checkout({guestEmail:"guest@example.org",acceptedTerms:true,termsVersion:"wb001-v1",abuseProof:"synthetic"});
+ await f.svc.reconcileVerifiedSession("cs_live_fixture","evt_1");
+ const first=await signGuestClaim(f.row(),"s".repeat(64));
+ assert.equal((await f.svc.downloadGuest({orderId:uuid,claim:first})).expiresIn,60);
+ const recovery=await f.svc.recoverGuest({guestEmail:"guest@example.org",abuseProof:"synthetic"});
+ assert.match(recovery.message,/eligible order/);
+ assert.equal(f.calls.emails.length,2);
+ assert.equal(f.row().claim_nonce,"44444444-4444-4444-8444-444444444444");
+ await assert.rejects(f.svc.downloadGuest({orderId:uuid,claim:first}),/not_owned/);
+ const second=await signGuestClaim(f.row(),"s".repeat(64));
+ assert.equal((await f.svc.downloadGuest({orderId:uuid,claim:second})).expiresIn,60);
+});
+test("email transport failure leaves paid order queued for retry with no phantom entitlement",async()=>{
+ const f=fixture({guest:true,failFirstEmail:true});
+ await f.svc.checkout({guestEmail:"guest@example.org",acceptedTerms:true,termsVersion:"wb001-v1",abuseProof:"synthetic"});
+ await assert.rejects(f.svc.reconcileVerifiedSession("cs_live_fixture","evt_1"),/mail_provider_down/);
+ assert.equal(f.row().status,"paid");
+ assert.equal(f.row().receipt_sent_at,null);
+ await f.svc.reconcileVerifiedSession("cs_live_fixture","evt_1");
+ assert.ok(f.row().receipt_sent_at);
+ assert.equal(f.calls.emails.length,2);
 });

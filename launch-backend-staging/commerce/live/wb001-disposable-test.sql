@@ -58,7 +58,20 @@ begin
  perform public.commerce_direct_mark_receipt(guest_order.id);
  if (select receipt_sent_at is null or claim_expires_at <= now() from public.commerce_direct_orders where id=guest_order.id)
  then raise exception 'WB001_GUEST_RECEIPT_NOT_TRACKED';end if;
- perform public.commerce_direct_reconcile(guest_order.id,'evt_refund_1','cs_live_guest','pi_live_guest',
+ -- Claim rotation happens only after the new email is accepted, never when requested.
+ update public.commerce_direct_outbox set sent_at=now()-interval '20 minutes' where order_id=guest_order.id;
+ if public.commerce_direct_request_recovery('guest@example.org')<>guest_order.id then
+  raise exception 'WB001_RECOVERY_NOT_QUEUED';end if;
+ if (select status<>'pending' from public.commerce_direct_outbox where order_id=guest_order.id)
+ then raise exception 'WB001_RECOVERY_OUTBOX_NOT_PENDING';end if;
+ if (select pending_nonce=claim_nonce from public.commerce_direct_outbox x
+     join public.commerce_direct_orders o on o.id=x.order_id where o.id=guest_order.id)
+ then raise exception 'WB001_RECOVERY_ROTATED_TOO_EARLY';end if;
+ perform public.commerce_direct_mark_receipt(guest_order.id);
+ if (select pending_nonce<>claim_nonce from public.commerce_direct_outbox x
+     join public.commerce_direct_orders o on o.id=x.order_id where o.id=guest_order.id)
+ then raise exception 'WB001_RECOVERY_CLAIM_NOT_ROTATED';end if;
+  perform public.commerce_direct_reconcile(guest_order.id,'evt_refund_1','cs_live_guest','pi_live_guest',
   'refunded',1799,1799,'guest@example.org');
  if (select status from public.commerce_direct_orders where id=guest_order.id)<>'refunded'
  then raise exception 'WB001_REFUND_IGNORED';end if;

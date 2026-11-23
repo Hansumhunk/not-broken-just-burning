@@ -91,11 +91,22 @@ export function createWB001Service({store,provider,delivery,verifyAbuse,claimSec
      ||order.review_required||order.refunded_amount>0||outbox?.status!=="pending")
       return {sent:false};
    // Generating a claim never grants entitlement. Authorization still checks paid state on every download.
-   const signature=await signGuestClaim({...order,claim_nonce:order.claim_nonce},claimSecret);
-   const link=guestReceiptLink(origin,{...order,claim_nonce:order.claim_nonce},signature);
+   if(!outbox.pending_nonce)throw Error("receipt_nonce_missing");
+   const pendingOrder={...order,claim_nonce:outbox.pending_nonce};
+   const signature=await signGuestClaim(pendingOrder,claimSecret);
+   const link=guestReceiptLink(origin,pendingOrder,signature);
    await delivery.sendGuestReceipt({to:order.guest_email,orderId:order.id,url:link,product:WB001_SLUG});
    await store.markReceipt(order.id);
    return {sent:true};
+  },
+  async recoverGuest({guestEmail,abuseProof}={}) {
+   // Always return the same outward response whether or not the buyer exists.
+   if(!validGuestEmail(guestEmail))return {message:"If this address has an eligible order, a link will be sent."};
+   if(!await verifyAbuse(abuseProof))throw Error("abuse_proof_required");
+   const normalized=guestEmail.trim().toLowerCase();
+   const id=await store.requestRecovery(normalized);
+   if(id)await this.deliverGuest(id);
+   return {message:"If this address has an eligible order, a link will be sent."};
   },
   async downloadMember({user,orderId}={}) {
    if(!UUID.test(user?.id||"")||!UUID.test(orderId||""))throw Error("identity_required");

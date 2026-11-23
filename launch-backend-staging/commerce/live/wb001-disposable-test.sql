@@ -12,7 +12,7 @@ insert into public.membership_entitlements(user_id,tier,status,source,provider,p
  values('11111111-1111-4111-8111-111111111111','paid_member','active','stripe_subscription',
  'stripe','cus_qa','sub_qa',now()-interval '1 day',now()+interval '1 day');
 do $verify$
-declare member_order public.commerce_direct_orders; guest_order public.commerce_direct_orders;
+declare member_order public.commerce_direct_orders; guest_order public.commerce_direct_orders; free_order public.commerce_direct_orders; wrong_email_order public.commerce_direct_orders;
         retry public.commerce_direct_orders; count_before integer; count_after integer;
 begin
  select * into member_order from public.commerce_direct_reserve('from-chaos-to-clarity',
@@ -23,7 +23,12 @@ begin
  select * into retry from public.commerce_direct_reserve('from-chaos-to-clarity',
   '11111111-1111-4111-8111-111111111111',null,'wb001-v1');
  if retry.id<>member_order.id then raise exception 'WB001_RESERVATION_NOT_IDEMPOTENT';end if;
- select * into guest_order from public.commerce_direct_reserve('from-chaos-to-clarity',
+ -- A registered FREE buyer never receives the paid-member amount.
+ select * into free_order from public.commerce_direct_reserve('from-chaos-to-clarity',
+  '22222222-2222-4222-8222-222222222222',null,'wb001-v1');
+ if free_order.amount<>1799 or free_order.price_tier<>'retail' or free_order.buyer_kind<>'member'
+ then raise exception 'WB001_FREE_ACCOUNT_DISCOUNT_LEAK';end if;
+  select * into guest_order from public.commerce_direct_reserve('from-chaos-to-clarity',
   null,'guest@example.org','wb001-v1');
  if guest_order.buyer_kind<>'guest' or guest_order.price_tier<>'retail'
   or guest_order.amount<>1799 or guest_order.user_id is not null then
@@ -42,7 +47,15 @@ begin
  exception when others then
   if sqlerrm='WB001_NULL_TERMS_ACCEPTED' then raise; end if;
  end;
- perform public.commerce_direct_reconcile(member_order.id,'evt_member_1','cs_live_member','pi_live_member',
+ -- A checkout email changed in Stripe is held; never email the original or unverified address.
+ select * into wrong_email_order from public.commerce_direct_reserve('from-chaos-to-clarity',
+  null,'another@example.org','wb001-v1');
+ perform public.commerce_direct_reconcile(wrong_email_order.id,'evt_wrong_email','cs_live_mismatch','pi_live_mismatch',
+  'paid',1799,0,'stranger@example.org');
+ if not (select review_required from public.commerce_direct_orders where id=wrong_email_order.id)
+  or exists(select 1 from public.commerce_direct_outbox where order_id=wrong_email_order.id)
+ then raise exception 'WB001_EMAIL_MISMATCH_DELIVERY';end if;
+  perform public.commerce_direct_reconcile(member_order.id,'evt_member_1','cs_live_member','pi_live_member',
   'paid',999,0,null);
  if (select status from public.product_entitlements where user_id=member_order.user_id
   and product_slug='from-chaos-to-clarity')<>'active' then raise exception 'WB001_MEMBER_ENTITLEMENT_MISSING';end if;

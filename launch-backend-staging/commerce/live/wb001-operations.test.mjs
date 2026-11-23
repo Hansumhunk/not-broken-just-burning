@@ -27,13 +27,14 @@ function fixture({guest=false,providerActive=true,assetReady=true,abuse=true}={}
      receipt_sent_at:null,refunded_amount:0,review_required:false};return row;},
   bindSession:async(id,session)=>{row.stripe_session_id=session;calls.binds.push([id,session]);},
   order:async()=>row, outbox:async()=>outbox,
-  markReceipt:async()=>{row.receipt_sent_at=new Date(now).toISOString();row.claim_expires_at="2026-12-02T20:00:00Z";outbox.status="sent";},
+  markReceipt:async()=>{row.receipt_sent_at=new Date(now).toISOString();row.claim_expires_at="2026-12-02T20:00:00Z";row.claim_nonce=outbox.pending_nonce;outbox.status="sent";},
   memberEntitlement:async()=>entitlement,
+  requestRecovery:async email=>{if(row?.guest_email!==email||row.status!=="paid"||outbox?.status!=="sent")return null;outbox.status="pending";outbox.pending_nonce="44444444-4444-4444-8444-444444444444";return row.id;},
   reconcile:async(evt)=>{
    if(calls.events.find(e=>e.event===evt.event))return;
    calls.events.push(evt);
    if(row.status==="refunded"||row.status==="disputed")return;
-   if(evt.state==="paid"){row.status="paid";if(row.buyer_kind==="guest"&&evt.email===row.guest_email)outbox={status:"pending"};else if(row.buyer_kind==="member")entitlement={status:"active",source:"stripe_commerce",provider_entitlement_ref:uuid};}
+   if(evt.state==="paid"){row.status="paid";if(row.buyer_kind==="guest"&&evt.email===row.guest_email)outbox={status:"pending",pending_nonce:nonce};else if(row.buyer_kind==="member")entitlement={status:"active",source:"stripe_commerce",provider_entitlement_ref:uuid};}
    if(evt.state==="refunded"||evt.state==="disputed"){row.status=evt.state;row.refunded_amount=evt.refunded;if(entitlement)entitlement.status="revoked";if(outbox)outbox.status="hold";}
   }
  };

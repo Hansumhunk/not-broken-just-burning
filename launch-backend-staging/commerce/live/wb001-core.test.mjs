@@ -78,7 +78,7 @@ test("owned member and guest downloads require proper principal, paid order and 
   assert.equal(authorizeDirectDownload({...order,status:"paid"},{userId:"someone_else"}),false);
   assert.equal(authorizeDirectDownload({...order,status:"refunded"},{userId:user.id}),false);
   const guest={...order,status:"paid",buyer_kind:"guest",user_id:null,
-    guest_claim_nonce:"sample",receipt_sent_at:"2026-11-22T19:50:00Z",claim_expires_at:"2026-11-23T20:00:00Z"};
+    claim_nonce:"sample",receipt_sent_at:"2026-11-22T19:50:00Z",claim_expires_at:"2026-11-23T20:00:00Z"};
   assert.equal(!!authorizeDirectDownload(guest,{claimNonce:"sample",now}),true);
   assert.equal(authorizeDirectDownload(guest,{claimNonce:"bad",now}),false);
   assert.equal(authorizeDirectDownload({...guest,receipt_sent_at:null},{claimNonce:"sample",now}),false);

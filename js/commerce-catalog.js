@@ -29,7 +29,7 @@
     "slug": "from-chaos-to-clarity",
     "title": "From Chaos to Clarity — The Flamewalker Workbook",
     "price": "$17.99",
-    "memberPriceProposal": "$9.99",
+    "memberPrice": "$9.99",
     "memberSavingsProposal": "44.5%",
     "format": "44-page digital PDF + 44-page print-friendly PDF in customer ZIP",
     "short": "Separate what happened from what you fear, reclaim agency, and choose one realistic next action.",
@@ -37,7 +37,7 @@
     "wave": "Founder-approved editorial candidate · awaiting secure commerce integration",
     "status": "coming_soon",
     "priceApproved": true,
-    "memberPriceApproved": false,
+    "memberPriceApproved": true,
     "deliveryReady": false
   },
   {

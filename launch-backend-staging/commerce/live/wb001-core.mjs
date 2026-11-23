@@ -92,7 +92,7 @@ export function authorizeDirectDownload(order,{userId=null,claimNonce=null,now=D
     return false;
   if(order.buyer_kind === "member") return !!(userId && order.user_id === userId);
   if(order.buyer_kind === "guest") return !!(claimNonce && typeof claimNonce==="string"
-    && order.guest_claim_nonce === claimNonce && Number.isFinite(Date.parse(order.claim_expires_at))
+    && order.claim_nonce === claimNonce && Number.isFinite(Date.parse(order.claim_expires_at))
     && Date.parse(order.claim_expires_at) > now && order.receipt_sent_at);
   return false;
 }

@@ -4,7 +4,7 @@ import {signGuestClaim} from "./wb001-guest-claim.mjs";
 import {WB001_ASSET_KEY} from "./wb001-core.mjs";
 const user={id:"11111111-1111-4111-8111-111111111111",email:"reader@example.org"};
 const uuid="22222222-2222-4222-8222-222222222222",nonce="33333333-3333-4333-8333-333333333333";
-const member={tier:"paid",status:"active",source:"stripe_subscription",provider:"stripe",
+const member={tier:"paid_member",status:"active",source:"stripe_subscription",provider:"stripe",
  provider_subscription_ref:"sub_qa",valid_from:"2026-11-01T00:00:00Z",valid_until:"2026-12-02T00:00:00Z"};
 const product={slug:"from-chaos-to-clarity",active:true,amount:1799,member_amount:999,
   stripe_price_id:"price_retail",member_stripe_price_id:"price_member",stripe_product_id:"prod_wb001",

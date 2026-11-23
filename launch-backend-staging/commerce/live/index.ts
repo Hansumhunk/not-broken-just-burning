@@ -3,6 +3,7 @@ import Stripe from "npm:stripe@22.6.2";
 import { verifiedStripeEvent } from "./signature.ts";
 import { providerSnapshot, verifyLiveAccount } from "./provider.ts";
 import { productionAllowed, SKU, idOf, validatePrice, verifySession, ownedDownload } from "./commerce-core.mjs";
+import { handleWB001Action,handleWB001VerifiedWebhook } from "./wb001-edge.ts";
 const env=(k:string)=>Deno.env.get(k)||"";
 const url=env("SUPABASE_URL"), key=env("NBJB_COMMERCE_STRIPE_LIVE_KEY"), ref=env("NBJB_COMMERCE_PRODUCTION_REF");
 const origin=env("NBJB_COMMERCE_LIVE_ORIGIN").replace(/\/$/,"");
@@ -14,6 +15,7 @@ const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const safePath=(p:string)=>/^[a-z0-9-]+\/[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+\.(pdf|zip)$/.test(p) && !p.includes("..");
 const headers={"Access-Control-Allow-Origin":origin,"Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info","Access-Control-Allow-Methods":"POST, OPTIONS","Cache-Control":"no-store","Vary":"Origin"};
 const json=(body:unknown,status=200)=>Response.json(body,{status,headers});
+const wb001Ports=()=>({admin,stripe,origin,env,verifyLiveAccount:()=>verifyLiveAccount(stripe!,env("NBJB_COMMERCE_LIVE_STRIPE_ACCOUNT"))});
 function must(result:{data:any,error:unknown}):any{if(result.error)throw Error("database_or_storage_error");return result.data;}
 function trustedCheckoutUrl(s:string){const u=new URL(s);return u.protocol==="https:" && u.hostname==="checkout.stripe.com";}
 async function verifiedUser(req:Request) {
@@ -62,11 +64,18 @@ async function webhook(req:Request) {
  try{
  await verifyLiveAccount(stripe!,env("NBJB_COMMERCE_LIVE_STRIPE_ACCOUNT"));
  const obj:any=event.data.object;
- if(["checkout.session.completed","checkout.session.async_payment_succeeded","checkout.session.async_payment_failed","checkout.session.expired"].includes(event.type))await reconcile(obj.id,event.id,event.type);
+ if(["checkout.session.completed","checkout.session.async_payment_succeeded","checkout.session.async_payment_failed","checkout.session.expired"].includes(event.type)){
+   if(obj.metadata?.nbjb_commerce==="wb001-v1-live")await handleWB001VerifiedWebhook(obj.id,event.id,wb001Ports());
+   else await reconcile(obj.id,event.id,event.type);
+ }
  else if(["charge.refunded","charge.dispute.created","charge.dispute.updated","charge.dispute.closed","refund.created","refund.updated","refund.failed"].includes(event.type)){
    let pi=idOf(obj.payment_intent);
    if(!pi&&obj.charge){const charge=await stripe!.charges.retrieve(idOf(obj.charge)!);pi=idOf(charge.payment_intent);}
-   if(pi){const intent=await stripe!.paymentIntents.retrieve(pi);if(intent.metadata?.nbjb_commerce==="v1-live"){
+   if(pi){const intent=await stripe!.paymentIntents.retrieve(pi);if(intent.metadata?.nbjb_commerce==="wb001-v1-live"){
+       const sessions=await stripe!.checkout.sessions.list({payment_intent:pi,limit:2});
+       if(sessions.has_more||sessions.data.length!==1)throw Error("session_lookup_ambiguous");
+       await handleWB001VerifiedWebhook(sessions.data[0].id,event.id,wb001Ports());
+     }else if(intent.metadata?.nbjb_commerce==="v1-live"){
      const sessions=await stripe!.checkout.sessions.list({payment_intent:pi,limit:2});
      if(sessions.has_more||sessions.data.length!==1)throw Error("session_lookup_ambiguous");
      await reconcile(sessions.data[0].id,event.id,event.type);
@@ -88,6 +97,12 @@ Deno.serve(async(req:Request)=>{
  if(body.action==="catalog"){
    const products=must(await admin.from("commerce_products").select("slug,amount,currency,terms_version,tax_behavior").eq("active",true));
    return json({products:products.filter((p:any)=>SKU.get(p.slug)===p.amount)});
+ }
+ if(typeof body.action==="string"&&body.action.startsWith("wb001_")){
+   const user=await verifiedUser(req);
+   const result=await handleWB001Action(body,user,wb001Ports());
+   if(result.error)return json({error:result.error},result.status||503);
+   return json(result.data);
  }
  const user=await verifiedUser(req);if(!user)return json({error:"unauthorized"},401);
  if(body.action==="status"){

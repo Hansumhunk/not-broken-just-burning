@@ -87,7 +87,7 @@ begin
  if p_user is not null then
   if exists(select 1 from public.product_entitlements where user_id=p_user and product_slug=p_slug and status='active') then raise exception 'already_owned'; end if;
   select exists(select 1 from public.membership_entitlements m where m.user_id=p_user
-    and m.tier='paid' and m.status='active' and m.source='stripe_subscription' and m.provider='stripe'
+    and m.tier='paid_member' and m.status='active' and m.source='stripe_subscription' and m.provider='stripe'
     and m.provider_subscription_ref like 'sub_%'
     and m.valid_from<=now() and m.valid_until>now()) into eligible;
  end if;

@@ -104,8 +104,12 @@ export function createWB001Service({store,provider,delivery,verifyAbuse,claimSec
    if(!validGuestEmail(guestEmail))return {message:"If this address has an eligible order, a link will be sent."};
    if(!await verifyAbuse(abuseProof))throw Error("abuse_proof_required");
    const normalized=guestEmail.trim().toLowerCase();
-   const id=await store.requestRecovery(normalized);
-   if(id)await this.deliverGuest(id);
+   // Do not reveal account existence through response timing, status, or provider errors.
+   // A failed email stays in the durable pending outbox for authorized retry.
+   try{
+     const id=await store.requestRecovery(normalized);
+     if(id)await this.deliverGuest(id);
+   }catch { /* best-effort queue retry; response is deliberately generic */ }
    return {message:"If this address has an eligible order, a link will be sent."};
   },
   async downloadMember({user,orderId}={}) {

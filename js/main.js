@@ -132,7 +132,7 @@ if (analyticsHostnames.has(window.location.hostname) && !privacySignalEnabled &&
         }
         if (['$pathname','$prev_pageview_pathname'].includes(key) && (typeof value !== 'string' || !/^\/[a-z0-9_.-]*$/i.test(value))) delete event.properties[key];
         if (key === 'plan' && (event.event !== 'nbjb_membership_checkout_requested' || !['monthly','annual'].includes(value))) delete event.properties[key];
-        if (key === 'placement' && (event.event !== 'nbjb_free_membership_cta_clicked' || !['home_hero','home_lessons','join_signup'].includes(value))) delete event.properties[key];
+        if (key === 'placement' && (event.event !== 'nbjb_free_membership_cta_clicked' || !['home_hero','home_lessons','join_signup','before_send'].includes(value))) delete event.properties[key];
       }
       event.properties.$process_person_profile = false;
       return event;
@@ -155,7 +155,7 @@ if (analyticsHostnames.has(window.location.hostname) && !privacySignalEnabled &&
   document.addEventListener('click', (event) => {
     const link = event.target?.closest?.('a[data-growth-cta]');
     const placement = link?.getAttribute('data-growth-cta');
-    if (!['home_hero', 'home_lessons', 'join_signup'].includes(placement)) return;
+    if (!['home_hero', 'home_lessons', 'join_signup', 'before_send'].includes(placement)) return;
     window.posthog?.capture?.('nbjb_free_membership_cta_clicked', { placement });
   });
 }

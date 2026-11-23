@@ -32,11 +32,12 @@ export function makeWB001Ports({admin,stripe,origin,env,verifyLiveAccount}:PortO
     }
   },
   async order(id:string){return must(await admin.from("commerce_direct_orders").select("*").eq("id",id).maybeSingle());},
-  async outbox(id:string){return must(await admin.from("commerce_direct_outbox").select("status,attempts").eq("order_id",id).maybeSingle());},
+  async outbox(id:string){return must(await admin.from("commerce_direct_outbox").select("status,attempts,pending_nonce").eq("order_id",id).maybeSingle());},
   async reconcile(p:any){must(await admin.rpc("commerce_direct_reconcile",{
     p_order:p.order,p_event:p.event,p_session:p.session,p_intent:p.intent,
     p_state:p.state,p_total:p.total,p_refunded:p.refunded,p_email:p.email}));},
   async markReceipt(id:string){must(await admin.rpc("commerce_direct_mark_receipt",{p_order:id}));},
+  async requestRecovery(email:string){return must(await admin.rpc("commerce_direct_request_recovery",{p_email:email}));},
   async memberEntitlement(userId:string,slug:string){return must(await admin.from("product_entitlements")
     .select("status,source,provider_entitlement_ref").eq("user_id",userId).eq("product_slug",slug).maybeSingle());}
  };
@@ -149,6 +150,7 @@ export async function handleWB001Action(body:any,user:any,options:PortOptions){
    case "wb001_member_checkout":return {data:await svc.checkout({
     user,acceptedTerms:body.acceptTerms===true,termsVersion:body.termsVersion})};
    case "wb001_guest_download":return {data:await svc.downloadGuest({orderId:body.order,claim:body.claim})};
+   case "wb001_guest_recover":return {data:await svc.recoverGuest({guestEmail:body.guestEmail,abuseProof:body.turnstileToken})};
    case "wb001_member_download":return {data:await svc.downloadMember({user,orderId:body.order})};
    default:return {error:"unknown_action",status:400};
   }

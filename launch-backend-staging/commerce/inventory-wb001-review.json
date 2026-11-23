@@ -1,0 +1,40 @@
+{
+  "sku": "NBJB-WB-001",
+  "slug": "from-chaos-to-clarity",
+  "title": "From Chaos to Clarity — The Flamewalker Workbook",
+  "author": "Rickey Partin Jr.",
+  "series": "The Flamewalker Foundations",
+  "format": "one-time customer ZIP containing 44-page reading PDF and 44-page print-friendly PDF",
+  "retail_price_cents": 1799,
+  "retail_approved_by_founder": true,
+  "proposed_member_price_cents": 999,
+  "member_price_exact_amount_confirmed": true,
+  "member_discount_percent_approx": 44.5,
+  "currency": "usd",
+  "member_eligibility": "server-verified active paid Flamewalker+ entitlement only; never trust client input",
+  "guest_checkout_requirement": true,
+  "free_account_purchase_requirement": false,
+  "customer_archive_filename": "NBJB-WB-001_Customer_Download_Bundle.zip",
+  "proposed_private_asset_key": "from-chaos-to-clarity/v1.0/NBJB-WB-001_v1.0_customer.zip",
+  "customer_archive_sha256": "e5194f3fbe0e863fd467c9f0e130c6e5ba70754677a2e1828bc5c5fbb9357f87",
+  "public_sample_filename": "NBJB-WB-001_Free_Sample.pdf",
+  "cover_filename": "NBJB-WB-001_Store_Cover.png",
+  "launch_status": "STAGED ONLY — NOT FOR SALE",
+  "checks": {
+    "customer_asset_uploaded": false,
+    "guest_checkout_implemented": false,
+    "member_discount_server_verified": false,
+    "product_stripe_prices_created": false,
+    "checkout_sandbox_accepted": false,
+    "live_paid_canary_accepted": false,
+    "production_activation_approved": false
+  },
+  "constraints": [
+    "Do not alter recurring membership prices or webhooks",
+    "Do not unlock production commerce",
+    "Do not publicly commit paid PDF or ZIP",
+    "Commerce QA issue #214 must be resolved and real sandbox signed-event tests must independently pass; closed audit #249 is not provider acceptance",
+    "Exact $9.99 member offer awaits final founder confirmation"
+  ],
+  "member_discount_approved_by_founder": true
+}

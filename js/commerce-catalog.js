@@ -26,6 +26,21 @@
     "deliveryReady": false
   },
   {
+    "slug": "from-chaos-to-clarity",
+    "title": "From Chaos to Clarity — The Flamewalker Workbook",
+    "price": "$17.99",
+    "memberPrice": "$9.99",
+    "memberSavingsProposal": "44.5%",
+    "format": "44-page digital PDF + 44-page print-friendly PDF in customer ZIP",
+    "short": "Separate what happened from what you fear, reclaim agency, and choose one realistic next action.",
+    "scope": "Six original teaching modules, worked examples, structured worksheets, the Six Sacred Questions, One Stone planning and a seven-day implementation plan. US Letter; not digitally fillable.",
+    "wave": "Founder-approved editorial candidate · awaiting secure commerce integration",
+    "status": "coming_soon",
+    "priceApproved": true,
+    "memberPriceApproved": true,
+    "deliveryReady": false
+  },
+  {
     "slug": "30-days-through-the-fire",
     "title": "30 Days Through the Fire",
     "price": "$24.99",

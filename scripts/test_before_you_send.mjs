@@ -30,6 +30,10 @@ test('no private text intake, browser persistence or outbound transfer from tool
 });
 
 test('visitor gets free optional continuation and safe public share link', () => {
+  assert.match(page, /href="join\.html" data-growth-cta="before_send"/);
+  const growth=read('js/main.js');
+  assert.match(growth, /'home_hero','home_lessons','join_signup','before_send'/);
+  assert.match(growth, /'home_hero', 'home_lessons', 'join_signup', 'before_send'/);
   assert.match(page, /href="join\.html"/);
   assert.match(page, /href="first-seven-days\.html"/);
   assert.match(page, /href="support\.html"/);

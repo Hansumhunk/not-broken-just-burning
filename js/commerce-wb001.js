@@ -19,8 +19,15 @@
  const box=document.getElementById("wb001-turnstile");
  const setStatus=t=>{message.textContent=t;};
  form.hidden=false;
- const turnstileReady=typeof window.turnstile?.render==="function";
- if(turnstileReady)window.turnstile.render(box,{sitekey:gate.turnstileSiteKey,action:"wb001_purchase"});
+ // Load anti-abuse challenge only after the separately approved release gate opens.
+ const challenge=document.createElement("script");
+ challenge.src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+ challenge.async=true;challenge.defer=true;
+ challenge.addEventListener("load",()=>{
+   if(window.turnstile?.render)window.turnstile.render(box,{sitekey:gate.turnstileSiteKey,action:"wb001_purchase"});
+ });
+ challenge.addEventListener("error",()=>setStatus("Verification is unavailable; checkout remains closed."));
+ document.head.appendChild(challenge);
  async function guestCheckout(payload) {
   const res=await fetch(url+"/functions/v1/commerce-live",{
    method:"POST",headers:{"Content-Type":"application/json",apikey:window.NBJBConfig.supabasePublishableKey},

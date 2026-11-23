@@ -57,6 +57,7 @@ create table public.commerce_direct_receipts (
 create table public.commerce_direct_outbox (
  order_id uuid primary key references public.commerce_direct_orders(id),
  status text not null default 'pending' check(status in ('pending','sent','hold')),
+ pending_nonce uuid not null default gen_random_uuid(),
  attempts integer not null default 0 check(attempts>=0),
  last_attempt_at timestamptz,
  sent_at timestamptz,
@@ -158,16 +159,36 @@ begin
  select * into o from public.commerce_direct_orders where id=p_order for update;
  if not found or o.buyer_kind<>'guest' or o.status<>'paid' or o.review_required or o.refunded_amount>0 then
   raise exception 'receipt_not_permitted';end if;
- update public.commerce_direct_orders set receipt_sent_at=now(),claim_expires_at=now()+interval '30 days',updated_at=now()
- where id=p_order;
+ update public.commerce_direct_orders set receipt_sent_at=now(),claim_expires_at=now()+interval '30 days',
+  claim_nonce=(select pending_nonce from public.commerce_direct_outbox where order_id=p_order and status='pending'),
+  updated_at=now() where id=p_order;
  update public.commerce_direct_outbox set status='sent',sent_at=now(),attempts=attempts+1,last_attempt_at=now()
  where order_id=p_order and status='pending';
  if not found then raise exception 'outbox_not_pending';end if;
 end $q$;
+-- Recovery changes the claim ONLY AFTER successful email; old link survives a failed send.
+-- Guest caller passes only a verified anti-abuse email; return a generic response to prevent enumeration.
+create function public.commerce_direct_request_recovery(p_email text)
+returns boolean language plpgsql security invoker set search_path='' as $q$
+declare o public.commerce_direct_orders; q public.commerce_direct_outbox;
+begin
+ if p_email is null or length(p_email)>254 or p_email<>lower(trim(p_email)) then return false; end if;
+ select * into o from public.commerce_direct_orders
+ where buyer_kind='guest' and guest_email=p_email and slug='from-chaos-to-clarity'
+ and status='paid' and review_required=false and refunded_amount=0 and receipt_sent_at is not null
+ order by paid_at desc limit 1 for update;
+ if not found then return false;end if;
+ select * into q from public.commerce_direct_outbox where order_id=o.id for update;
+ if not found or q.status<>'sent' or q.sent_at>now()-interval '15 minutes' then return false; end if;
+ update public.commerce_direct_outbox set
+  status='pending',pending_nonce=gen_random_uuid(),last_attempt_at=now()
+ where order_id=o.id;
+ return true;
+end $q$;
 revoke execute on function public.commerce_direct_reserve(text,uuid,text,text),
  public.commerce_direct_reconcile(uuid,text,text,text,text,integer,integer,text),
- public.commerce_direct_mark_receipt(uuid) from public,anon,authenticated;
+ public.commerce_direct_mark_receipt(uuid),public.commerce_direct_request_recovery(text) from public,anon,authenticated;
 grant execute on function public.commerce_direct_reserve(text,uuid,text,text),
  public.commerce_direct_reconcile(uuid,text,text,text,text,integer,integer,text),
- public.commerce_direct_mark_receipt(uuid) to service_role;
+ public.commerce_direct_mark_receipt(uuid),public.commerce_direct_request_recovery(text) to service_role;
 commit;

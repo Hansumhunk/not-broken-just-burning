@@ -9,7 +9,7 @@ export const WB001_DOWNLOAD_SECONDS = 60;
 export const WB001_STATUSES = new Set(["pending","paid","expired","failed","refunded","disputed"]);
 
 export function paidMemberEligible(row, now = Date.now()) {
-  return !!(row && row.tier === "paid" && row.status === "active"
+  return !!(row && row.tier === "paid_member" && row.status === "active"
     && row.source === "stripe_subscription" && row.provider === "stripe"
     && typeof row.provider_subscription_ref === "string" && row.provider_subscription_ref.startsWith("sub_")
     && Number.isFinite(Date.parse(row.valid_from))

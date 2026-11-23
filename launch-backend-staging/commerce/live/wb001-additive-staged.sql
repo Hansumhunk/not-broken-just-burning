@@ -169,21 +169,21 @@ end $q$;
 -- Recovery changes the claim ONLY AFTER successful email; old link survives a failed send.
 -- Guest caller passes only a verified anti-abuse email; return a generic response to prevent enumeration.
 create function public.commerce_direct_request_recovery(p_email text)
-returns boolean language plpgsql security invoker set search_path='' as $q$
+returns uuid language plpgsql security invoker set search_path='' as $q$
 declare o public.commerce_direct_orders; q public.commerce_direct_outbox;
 begin
- if p_email is null or length(p_email)>254 or p_email<>lower(trim(p_email)) then return false; end if;
+ if p_email is null or length(p_email)>254 or p_email<>lower(trim(p_email)) then return null; end if;
  select * into o from public.commerce_direct_orders
  where buyer_kind='guest' and guest_email=p_email and slug='from-chaos-to-clarity'
  and status='paid' and review_required=false and refunded_amount=0 and receipt_sent_at is not null
  order by paid_at desc limit 1 for update;
- if not found then return false;end if;
+ if not found then return null;end if;
  select * into q from public.commerce_direct_outbox where order_id=o.id for update;
- if not found or q.status<>'sent' or q.sent_at>now()-interval '15 minutes' then return false; end if;
+ if not found or q.status<>'sent' or q.sent_at>now()-interval '15 minutes' then return null; end if;
  update public.commerce_direct_outbox set
   status='pending',pending_nonce=gen_random_uuid(),last_attempt_at=now()
  where order_id=o.id;
- return true;
+ return o.id;
 end $q$;
 revoke execute on function public.commerce_direct_reserve(text,uuid,text,text),
  public.commerce_direct_reconcile(uuid,text,text,text,text,integer,integer,text),

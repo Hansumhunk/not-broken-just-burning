@@ -33,7 +33,7 @@
     "Do not alter recurring membership prices or webhooks",
     "Do not unlock production commerce",
     "Do not publicly commit paid PDF or ZIP",
-    "Existing Commerce QA issue #214 and provider acceptance #249 must pass before expansion",
+    "Commerce QA issue #214 must be resolved and real sandbox signed-event tests must independently pass; closed audit #249 is not provider acceptance",
     "Exact $9.99 member offer awaits final founder confirmation"
   ]
 }

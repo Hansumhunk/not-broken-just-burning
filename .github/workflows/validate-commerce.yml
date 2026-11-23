@@ -116,7 +116,7 @@ jobs:
           node-version: '22'
       - name: Check live account isolation, exact SKU payment shape, and refund access gates
         run: |
-          node --test launch-backend-staging/commerce/live/live-guard.test.mjs scripts/test_commerce_four_product_release.mjs
+          node --test launch-backend-staging/commerce/live/live-guard.test.mjs scripts/test_commerce_four_product_release.mjs launch-backend-staging/commerce/live/wb001-core.test.mjs launch-backend-staging/commerce/live/wb001-guest-claim.test.mjs launch-backend-staging/commerce/live/wb001-operations.test.mjs
           node --check launch-backend-staging/commerce/live/commerce-core.mjs
           node --check js/commerce-client.js
           node --check js/commerce-store.js
@@ -130,7 +130,7 @@ jobs:
         with:
           deno-version: v2.x
       - name: Typecheck independently locked LIVE handler and providers
-        run: deno check launch-backend-staging/commerce/live/index.ts launch-backend-staging/commerce/live/provider.ts launch-backend-staging/commerce/live/signature.ts
+        run: deno check launch-backend-staging/commerce/live/index.ts launch-backend-staging/commerce/live/provider.ts launch-backend-staging/commerce/live/signature.ts launch-backend-staging/commerce/live/wb001-edge.ts
 
   commerce-production-schema-dryrun:
     runs-on: ubuntu-latest
@@ -162,7 +162,11 @@ jobs:
           psql $db -f launch-backend-staging/commerce/test-migration.sql
           psql $db -f launch-backend-staging/commerce/test-operations.sql
           psql $db -f launch-backend-staging/commerce/test-phase-four.sql
-          if psql $db -f launch-backend-staging/commerce/live/production-schema-staged.sql >/tmp/duplicate-apply.log 2>&1; then
+          if psql $db -f launch-backend-staging/commerce/live/wb001-additive-staged.sql
+          psql $db -f launch-backend-staging/commerce/live/wb001-disposable-test.sql
+          test "$(psql $db -qAt -c "select count(*) from public.commerce_products where slug='from-chaos-to-clarity' and active=false")" -eq 1
+          grep -Fq 'WB001_PUBLIC_RELEASE = false' launch-backend-staging/commerce/live/wb001-core.mjs
+          psql $db -f launch-backend-staging/commerce/live/production-schema-staged.sql >/tmp/duplicate-apply.log 2>&1; then
             echo 'FAIL: migration unexpectedly applied twice' >&2; exit 1
           fi
           grep -q 'COMMERCE_ALREADY_INSTALLED' /tmp/duplicate-apply.log

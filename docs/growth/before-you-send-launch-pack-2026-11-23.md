@@ -15,7 +15,7 @@ https://notbrokenjustburning.com/before-you-send.html
 - [ ] Existing static-site and SEO CI checks PASS, no broken references or member-auth regression.
 - [ ] Founder mobile and desktop review: four results, keyboard-only navigation, visible focus, copy success/fallback, no horizontal scrolling.
 - [ ] Real public link and social OG preview tested **after** authorized site deployment. Do not publish a pre-release broken link.
-- [ ] Privacy: no message text typed, user choices not persisted, no new event tracking; existing public pageview collection follows site privacy settings. No personalized selections in shared URL.
+- [ ] Privacy: no message text typed or persisted; reuses the existing anonymous `nbjb_free_membership_cta_clicked` event with the fixed `before_send` placement on the optional free-join link, subject to existing privacy controls. Existing public pageview collection follows site privacy settings. No personalized selections in shared URLs or event properties.
 - [ ] Legal and safety wording reviewed by founder, including parenting urgency, legal restrictions, danger, and no-contact obligations.
 - [ ] Separate exact-head founder approval for merge/deploy. No unapproved production change.
 

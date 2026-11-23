@@ -4,7 +4,7 @@ import {WB001_PUBLIC_RELEASE,WB001_ASSET_KEY,WB001_RETAIL_CENTS,WB001_MEMBER_CEN
   paidMemberEligible,determineOffer,verifyConfiguredProduct,verifyStripePrice,verifyPaidProvider,
   nextOrderState,authorizeDirectDownload,validGuestEmail} from "./wb001-core.mjs";
 const now=Date.parse("2026-11-22T20:00:00Z");
-const paid={tier:"paid",status:"active",source:"stripe_subscription",provider:"stripe",
+const paid={tier:"paid_member",status:"active",source:"stripe_subscription",provider:"stripe",
   provider_subscription_ref:"sub_fixture",valid_from:"2026-11-01T00:00:00Z",valid_until:"2026-12-02T00:00:00Z",cancel_at_period_end:true};
 const user={id:"22222222-2222-4222-8222-222222222222"};
 const product={slug:"from-chaos-to-clarity",active:true,currency:"usd",amount:1799,member_amount:999,

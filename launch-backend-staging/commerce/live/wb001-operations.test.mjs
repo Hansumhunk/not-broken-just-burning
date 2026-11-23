@@ -1,7 +1,7 @@
 import test from "node:test";import assert from "node:assert/strict";
 import {createWB001Service} from "./wb001-operations.mjs";
 import {signGuestClaim} from "./wb001-guest-claim.mjs";
-import {WB001_ASSET_KEY} from "./wb001-core.mjs";
+import {WB001_ASSET_KEY,paidMemberEligible} from "./wb001-core.mjs";
 const user={id:"11111111-1111-4111-8111-111111111111",email:"reader@example.org"};
 const uuid="22222222-2222-4222-8222-222222222222",nonce="33333333-3333-4333-8333-333333333333";
 const member={tier:"paid_member",status:"active",source:"stripe_subscription",provider:"stripe",
@@ -18,7 +18,7 @@ function fixture({guest=false,providerActive=true,assetReady=true,abuse=true}={}
  const store={
   membership:async()=>current,product:async()=>product,
   reserve:async({userId,guestEmail})=>{
-   const offer=userId && current && providerActive? "member":"retail";
+   const offer=userId && paidMemberEligible(current,now) && providerActive? "member":"retail";
    row={id:uuid,slug:product.slug,buyer_kind:userId?"member":"guest",price_tier:offer,user_id:userId,
      guest_email:guestEmail,amount:offer==="member"?999:1799,
      stripe_price_id:offer==="member"?"price_member":"price_retail",

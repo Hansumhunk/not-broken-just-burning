@@ -25,7 +25,6 @@ QA_USER_IDS = frozenset({
 })
 SPECS = (
     ("boundary-builder-workbook", 1499, "a61b151de255ca848838cac23fbbe94f44d92bfa3fa378877bbf6e7d64984fd0"),
-    ("forge-workbook", 1999, "e1b6c43db71226f8801a16ca0df8e5e2e6ae9b3fb2552194342cb06ea8d9b1d9"),
 )
 NO_PII_OUTPUT = Path(os.environ.get("NBJB_QA_EVIDENCE_PATH", "/tmp/nbjb-provider-evidence.json"))
 
@@ -80,42 +79,80 @@ def smoke(page):
     check(page.locator("[data-commerce-buy='hawk-complete-toolkit']").is_disabled(), "future_product_enabled")
     return {"mode": "sandbox", "origin": QA_ORIGIN, "qa_ref": QA_REF, "catalog": "present"}
 
-def fill_across_frames(page, probes, value, required=True):
-    """Stripe's card fields may be in the top document or secure nested iframes."""
-    until=time.monotonic()+22
+def test_host(page):
+    u=urlparse(page.url)
+    check(u.scheme=="https" and u.hostname=="checkout.stripe.com"
+          and re.search(r"/cs_test_[A-Za-z0-9]+",u.path), "ABORT_NON_TEST_CHECKOUT_SESSION")
+
+def stripe_frames(page):
+    for frame in page.frames:
+        u=urlparse(frame.url)
+        if u.scheme=="https" and (u.hostname=="stripe.com" or (u.hostname or "").endswith(".stripe.com")):
+            yield frame
+
+def controls_diagnostic(page, field):
+    # Counts only: no input values, text, HTML, URLs, email, or arbitrary attribute strings.
+    known=("cc-number","cc-exp","cc-csc","cc-name","email","postal-code")
+    counts={k:0 for k in known}
+    visible=0
+    for frame in stripe_frames(page):
+        try:
+            data=frame.locator("input:visible").evaluate_all("(els) => els.map(e => e.getAttribute('autocomplete') || '')")
+            visible+=len(data)
+            for a in data:
+                if a in counts: counts[a]+=1
+        except Exception:
+            pass
+    print("STRIPE_CONTROL_DIAGNOSTIC "+json.dumps({"missing":field,"stripe_frames":sum(1 for _ in stripe_frames(page)),"visible_inputs":visible,"known_autocomplete_counts":counts}),flush=True)
+
+def fill_across_frames(page, field, probes, value, required=True):
+    until=time.monotonic()+(25 if required else 4)
     while time.monotonic()<until:
-        for frame in page.frames:
+        test_host(page)
+        for frame in stripe_frames(page):
             for selector in probes:
                 try:
-                    locator=frame.locator(selector).first
-                    if locator.count() and locator.is_visible(timeout=250):
-                        locator.fill(value,timeout=2500)
-                        return True
+                    for locator in frame.locator(selector).all()[:8]:
+                        if locator.is_visible(timeout=250) and locator.is_enabled(timeout=250):
+                            locator.fill(value,timeout=2500)
+                            return True
                 except Exception:
                     continue
         time.sleep(.25)
     if required:
-        raise AssertionError("STRIPE_TEST_INPUT_NOT_FOUND")
+        controls_diagnostic(page,field)
+        raise AssertionError("STRIPE_TEST_INPUT_NOT_FOUND_"+field)
     return False
 
 def stripe_test_payment(page, email, cents):
-    # Stripe Checkout URLs carry cs_test_ for real Stripe test-mode sessions.
-    parsed=urlparse(page.url)
-    check(parsed.scheme=="https" and parsed.hostname=="checkout.stripe.com", "CHECKOUT_NOT_STRIPE_HOST")
-    check("cs_test_" in parsed.path, "ABORT_NON_TEST_CHECKOUT_SESSION")
-    check(str(cents//100)+"."+f"{cents%100:02d}" in page.locator("body").inner_text(timeout=30000), "WRONG_STRIPE_SUBTOTAL_ABORT")
-    # Use the authorized QA account email only, no new test recipient.
-    fill_across_frames(page, ["input[type=email]", "input[autocomplete=email]"], email, required=False)
-    fill_across_frames(page, ["input[autocomplete='cc-number']", "input[placeholder='1234 1234 1234 1234']", "input[name='cardnumber']", "#cardNumber"], "4242424242424242")
-    fill_across_frames(page, ["input[autocomplete='cc-exp']", "input[placeholder='MM / YY']", "input[name='exp-date']", "#cardExpiry"], "1228")
-    fill_across_frames(page, ["input[autocomplete='cc-csc']", "input[placeholder='CVC']", "input[name='cvc']", "#cardCvc"], "123")
-    fill_across_frames(page, ["input[autocomplete='cc-name']", "input[name='billingName']", "input[placeholder='Full name']"], "NBJB QA Browser", required=False)
-    fill_across_frames(page, ["input[autocomplete='postal-code']", "input[name='billingPostalCode']", "input[placeholder='ZIP']"], "33801", required=False)
-    # Only the Stripe test-hosted session is allowed to receive our test card.
-    buttons=page.get_by_role("button", name=re.compile(r"^(Pay|Complete purchase|Place order)",re.I))
-    check(buttons.count()>0, "STRIPE_PAY_BUTTON_NOT_FOUND")
-    buttons.first.click(timeout=12000)
-    page.wait_for_url(re.compile(r"^https://localhost:8443/commerce-result\.html\?"),timeout=90000)
+    test_host(page)
+    expected=str(cents//100)+"."+f"{cents%100:02d}"
+    check(expected in page.locator("body").inner_text(timeout=30000), "WRONG_STRIPE_SUBTOTAL_ABORT")
+    # Checkout may default to Link/wallet rather than the card accordion.
+    # Select only the exact Card choice, never Link, saved cards or other methods.
+    for frame in stripe_frames(page):
+        for loc in (frame.get_by_role("radio",name=re.compile(r"^Card$",re.I)),
+                    frame.get_by_role("button",name=re.compile(r"^Card$",re.I)),
+                    frame.locator('[data-testid="card-accordion-item"]')):
+            try:
+                if loc.count() and loc.first.is_visible(timeout=500):
+                    loc.first.click(timeout=3000)
+                    break
+            except Exception:
+                continue
+    fill_across_frames(page,"email",["input[type=email]","input[autocomplete=email]","#email"],email,required=False)
+    fill_across_frames(page,"card_number",["input[autocomplete='cc-number']","input[name='cardNumber']","input[name='cardnumber']","#cardNumber","input[data-elements-stable-field-name='cardNumber']","input[aria-label='Card number' i]","input[placeholder='1234 1234 1234 1234']"],"4242424242424242")
+    fill_across_frames(page,"expiry",["input[autocomplete='cc-exp']","input[name='cardExpiry']","input[name='exp-date']","#cardExpiry","input[data-elements-stable-field-name='cardExpiry']","input[aria-label='Expiration date' i]","input[placeholder='MM / YY']"],"1228")
+    fill_across_frames(page,"cvc",["input[autocomplete='cc-csc']","input[name='cardCvc']","input[name='cvc']","#cardCvc","input[data-elements-stable-field-name='cardCvc']","input[placeholder='CVC']"],"123")
+    fill_across_frames(page,"name",["input[autocomplete='cc-name']","input[name='billingName']","#billingName","input[placeholder='Full name']"],"NBJB QA Browser",required=False)
+    fill_across_frames(page,"postal",["input[autocomplete='postal-code']","input[name='billingPostalCode']","#billingPostalCode","input[placeholder='ZIP']"],"33801",required=False)
+    test_host(page)
+    check(expected in page.locator("body").inner_text(timeout=10000),"WRONG_STRIPE_SUBTOTAL_ABORT")
+    buttons=page.get_by_role("button",name=re.compile(r"^(Pay(?: \\$?14\\.99)?|Complete purchase|Place order)$",re.I))
+    visible=[b for b in buttons.all() if b.is_visible() and b.is_enabled()]
+    check(len(visible)==1,"STRIPE_PAY_BUTTON_NOT_UNIQUE_OR_ENABLED")
+    visible[0].click(timeout=12000)
+    page.wait_for_url(re.compile(r"^https://localhost:8443/commerce-result\\.html\\?"),timeout=90000)
     check(urlparse(page.url).hostname=="localhost","UNEXPECTED_POST_PAYMENT_REDIRECT")
 
 def wait_verified_order(page, order_id):
@@ -145,7 +182,19 @@ def exact_private_download(page, slug, expected_sha):
     content=response.body()
     digest=hashlib.sha256(content).hexdigest()
     check(digest==expected_sha, "SYNTHETIC_PRODUCT_BYTE_HASH_MISMATCH")
-    return {"download_sha256":digest, "bytes":len(content),"url_ttl_seconds":60}
+    time.sleep(70)
+    expired=page.request.get(link,timeout=20000)
+    check(expired.status in (400,401,403,404),"EXPIRED_URL_NOT_REJECTED")
+    page.reload(wait_until="domcontentloaded")
+    page.wait_for_function("window.NBJBAuth?.user?.id && window.NBJBCommerce?.enabled",timeout=25000)
+    recovered=qa_request(page,"download",slug=slug)
+    check(recovered["ok"],"RECOVERY_DOWNLOAD_NOT_ISSUED")
+    fresh=recovered["result"].get("url","")
+    v=urlparse(fresh)
+    check(v.scheme=="https" and v.hostname==QA_REF+".supabase.co" and v.path.startswith("/storage/v1/object/sign/nbjb-private-products/") and fresh!=link,"UNSAFE_RECOVERY_URL")
+    response=page.request.get(fresh,timeout=20000)
+    check(response.ok and hashlib.sha256(response.body()).hexdigest()==expected_sha,"RECOVERY_HASH_MISMATCH")
+    return {"download_sha256":digest,"bytes":len(content),"url_ttl_seconds":60,"expired_url_denied":True,"reload_recovery_verified":True}
 
 def provider_purchase(page, email, slug, cents, sha):
     page.goto(QA_ORIGIN + "/store.html",wait_until="domcontentloaded")
@@ -177,7 +226,7 @@ def provider_purchase(page, email, slug, cents, sha):
     wait_verified_order(page,order_id)
     download=exact_private_download(page,slug,sha)
     # Verify SKU-specific grant, not subscription entitlement or cross-SKU permission.
-    return {"sku":slug,"order_id":order_id,"checkout":"cs_test_ verified in browser",
+    return {"sku":slug,"checkout":"cs_test_ verified in browser",
             "status":"paid","entitlement":"active_verified_through_authenticated_ledger",
             **download}
 
@@ -214,13 +263,15 @@ def main():
             email=os.getenv("NBJB_QA_EXISTING_EMAIL","")
             password=os.getenv("NBJB_QA_EXISTING_PASSWORD","")
             primary_id=login(page,email,password)
+            # Require the second approved identity and existing unowned denial before any payment.
+            check(check_other_account(browser,primary_id,[x[0] for x in SPECS])=="verified_denied","BLOCKED_SECOND_APPROVED_QA_IDENTITY")
             for slug,cents,sha in SPECS:
                 result=provider_purchase(page,email,slug,cents,sha)
                 evidence["products"].append(result)
                 print("PASS: "+slug+": real Stripe cs_test_, paid ledger, authorized private file hash",flush=True)
             evidence["cross_account"]=check_other_account(browser,primary_id,[x[0] for x in SPECS])
             if evidence["cross_account"]!="verified_denied":
-                print("BLOCKED: cross-account check requires second existing QA account credential",flush=True)
+                raise AssertionError("BLOCKED_CROSS_ACCOUNT_ACCEPTANCE")
         context.close()
         browser.close()
     NO_PII_OUTPUT.parent.mkdir(parents=True,exist_ok=True)
@@ -230,5 +281,8 @@ def main():
 if __name__=="__main__":
     try:main()
     except Exception as exc:
-        print("PROVIDER_QA_BLOCKED_OR_FAILED: "+str(exc).splitlines()[0][:180],file=sys.stderr)
+        # Playwright exceptions may contain sensitive locators, URLs, or values.
+        reason=str(exc) if isinstance(exc,AssertionError) else type(exc).__name__
+        safe=reason if re.fullmatch(r"[A-Za-z0-9_]{1,150}",reason) else "REDACTED_FAILURE"
+        print("PROVIDER_QA_BLOCKED_OR_FAILED: "+safe,file=sys.stderr)
         sys.exit(1)

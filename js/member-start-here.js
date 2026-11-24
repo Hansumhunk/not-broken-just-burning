@@ -26,6 +26,8 @@
     setStatus('Fields cleared. Nothing was deleted from previously saved My Work.');
   }
 
+  let recentSavedSignature = '';
+  let recentSavedAt = 0;
   form?.addEventListener('submit', (event) => {
     event.preventDefault();
 
@@ -35,6 +37,11 @@
 
     if (!factText && !feelingText && !controlText) {
       setStatus('Write something in at least one field, or skip the exercise entirely. Both are allowed.', true);
+      return;
+    }
+    const signature = JSON.stringify([factText, feelingText, controlText]);
+    if (signature === recentSavedSignature && Date.now() - recentSavedAt < 1800) {
+      setStatus('This reflection was already saved on this device. No duplicate was added.');
       return;
     }
 
@@ -49,17 +56,15 @@
         feelings: feelingText,
         control: controlText
       }
-    });
+    }, { nextAction: controlText });
 
     if (!result.ok) {
       setStatus('This browser could not save the reflection. Nothing was uploaded.', true);
       return;
     }
 
-    if (controlText) {
-      service.update({ journey: { nextAction: controlText } });
-    }
-
+    recentSavedSignature = signature;
+    recentSavedAt = Date.now();
     setStatus('Saved to My Work on this device. Your account did not upload the reflection body.');
   });
 

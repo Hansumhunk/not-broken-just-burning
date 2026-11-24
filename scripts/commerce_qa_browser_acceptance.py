@@ -148,11 +148,11 @@ def stripe_test_payment(page, email, cents):
     fill_across_frames(page,"postal",["input[autocomplete='postal-code']","input[name='billingPostalCode']","#billingPostalCode","input[placeholder='ZIP']"],"33801",required=False)
     test_host(page)
     check(expected in page.locator("body").inner_text(timeout=10000),"WRONG_STRIPE_SUBTOTAL_ABORT")
-    buttons=page.get_by_role("button",name=re.compile(r"^(Pay(?: \\$?14\\.99)?|Complete purchase|Place order)$",re.I))
+    buttons=page.get_by_role("button",name=re.compile(r"^(Pay(?: \$?14\.99)?|Complete purchase|Place order)$",re.I))
     visible=[b for b in buttons.all() if b.is_visible() and b.is_enabled()]
     check(len(visible)==1,"STRIPE_PAY_BUTTON_NOT_UNIQUE_OR_ENABLED")
     visible[0].click(timeout=12000)
-    page.wait_for_url(re.compile(r"^https://localhost:8443/commerce-result\\.html\\?"),timeout=90000)
+    page.wait_for_url(re.compile(r"^https://localhost:8443/commerce-result\.html\?"),timeout=90000)
     check(urlparse(page.url).hostname=="localhost","UNEXPECTED_POST_PAYMENT_REDIRECT")
 
 def wait_verified_order(page, order_id):

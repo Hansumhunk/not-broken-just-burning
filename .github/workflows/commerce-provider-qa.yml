@@ -67,12 +67,10 @@ jobs:
       - name: Record genuine-provider status separately from browser smoke
         run: echo 'Browser preview acceptance is NOT Stripe provider payment acceptance.' >> "$GITHUB_STEP_SUMMARY"
   qa-genuine-provider-checkout:
-    # Founder Directive 004-E: sandbox card UI automation explicitly paused.
-    # Do NOT access the temporary QA identity secrets on PR pushes or charge test cards.
-    # Preserve this job as archived harness code, not a release acceptance claim.
-    # Re-enable only in a separately reviewed, explicitly authorized QA change.
-    needs: qa-local-preview-chromium
-    if: false
+    # Founder 004-C-1: single controlled Boundary-only sandbox run on this specific synchronization.
+    # No future push or re-run may access the QA-only secrets via this gate.
+    needs: [qa-local-preview-chromium, qa-hosted-security-probe]
+    if: github.event.action == 'synchronize' && github.event.pull_request.number == 265 && github.event.before == '4fe0016ea5ad4548a4560334cf76013079c41fc4' && github.run_attempt == 1 && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
@@ -85,7 +83,7 @@ jobs:
       - name: Securely verify existing QA identity secret availability
         shell: bash
         run: |
-          if [ -z "$NBJB_QA_EXISTING_EMAIL" ] || [ -z "$NBJB_QA_EXISTING_PASSWORD" ]; then
+          if [ -z "$NBJB_QA_EXISTING_EMAIL" ] || [ -z "$NBJB_QA_EXISTING_PASSWORD" ] || [ -z "$NBJB_QA_SECONDARY_EMAIL" ] || [ -z "$NBJB_QA_SECONDARY_PASSWORD" ]; then
             echo 'BLOCKED: Existing approved QA identity credentials are not available to this GitHub Actions runner. No checkout or payment was attempted.' | tee -a "$GITHUB_STEP_SUMMARY"
             exit 78
           fi

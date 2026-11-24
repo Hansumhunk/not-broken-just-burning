@@ -70,7 +70,7 @@ jobs:
     # Founder 004-C-1: single controlled Boundary-only sandbox run on this specific synchronization.
     # No future push or re-run may access the QA-only secrets via this gate.
     needs: [qa-local-preview-chromium, qa-hosted-security-probe]
-    if: github.event.action == 'synchronize' && github.event.pull_request.number == 265 && github.event.before == '4fe0016ea5ad4548a4560334cf76013079c41fc4' && github.run_attempt == 1 && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event.action == 'synchronize' && github.event.pull_request.number == 265 && github.event.before == 'cedf198b5031d854e45ed7de973a6389cbb81626' && github.run_attempt == 1 && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:

@@ -1,3 +1,44 @@
+# 🔥 Boundary Builder v1.4 — controlling release-readiness reconciliation (2026-11-24 ET)
+<!-- 2026-11-24 CONTROLLING STATUS / SUPERSEDES THE HISTORICAL 2026-11-20 SNAPSHOT BELOW -->
+
+> **PREPARATION ONLY / NO-GO FOR LIVE.** This is a factual, read-only release review and staged change plan, not approval to deploy, merge, create a live payment, upload a production ZIP, revise live Stripe settings, switch the backend runtime lock, or serve a public checkout. The earlier 2026-11-20 packet remains below as **historical context only** wherever it describes Boundary Builder v1.3 or missing infrastructure. This section controls those conflicts.
+
+## Founder decision & explicit risk disposition
+- Founder elected to **defer the actual sandbox purchase test** and proceed directly to preparing the release decision package. Do not request repetitive local QA sign-in. Do not call the unexecuted purchase flow successful.
+- A $14.99 standalone charge, signed Stripe webhook, canonical ownership, buyer-only download, expiry/recovery, cross-account denial and refund/dispute/replay have **not** been proven end to end for the commercial v1.4 file. A later real-money canary could provide first payment evidence **only after its own exact account/identity/SKU/charge/rollback authorization and controls**, with the public store closed. No such canary is authorized by the deferral.
+- **No public LIVE activation** until the remaining gates are resolved and separately approved. A testing waiver cannot waive safe fulfillment, honest consumer disclosure, security, tax duties, or other launch requirements.
+
+## Current source-of-truth — verified 2026-11-24
+| Control | Latest observed position | Release implication |
+| --- | --- | --- |
+| Commercial asset | Boundary Builder **v1.4**, customer ZIP exactly 739,982 bytes; SHA-256 `c3031e9de5d66ba0d4185efceff67321a669b472fd264728ff911b06c372c123`; two PDFs: **43-page reading** + **42-page print**. Existing personal-use license and free-account-required disclosure approved. | **Only this corrected 004-C package** is eligible. Original v1.3 Boundary hashes are historical and must not be uploaded for the v1.4 release. |
+| QA Supabase `fgpkejlmpfkxgpktgdzm` | Private `nbjb-private-products` object `boundary-builder-workbook/v1.4/NBJB-BB-001_v1.4_customer.zip` exists; QA product mapped to v1.4, **$14.99**, `terms_version=draft-v1`; one historical QA order, **0 product entitlements**. Founder-returned downloaded bytes/hash independently matched in #214. | Asset integrity, QA mapping and storefront presentation accepted; **no successful paid QA fulfillment**. |
+| Draft storefront | Draft PR #265 `store.html` now says **Boundary Builder v1.4**, correct 43/42 pages, $14.99; Forge v1.3 separate. Local Chromium preview **PASSED** run #45441331235. | Keep customer buy buttons and LIVE release disabled until separately approved deployment/activation. |
+| Production Supabase `plhbvtbvtxfzulsaxuim` | `commerce_products` **exists**; Boundary row `active=false`, `asset_version=v1.3`, old v1.3 key, `terms_version=NULL`; private bucket `public=false` with **0 product files**; **0 standalone orders**, **0 product entitlements**. | Earlier instructions claiming the tables/bucket/worker do not exist are outdated. No write or unsafe blind migration; reconcile actual current schema and preserve existing recurring-membership state. |
+| Production worker | `commerce-live` Edge Function **deployed v1**, **compile-time `LIVE_RUNTIME_REVIEWED=false`**. Other LIVE membership functions remain active. | Remain **fail-closed**. Do not remove lock or deploy new function as part of this review. |
+| Stripe LIVE | Existing merchant `acct_1UIHnYGyOSBYVfGl`; one-time price **USD 14.99**, **inactive**, metadata version **1.3** and inactive prelaunch, tax behavior `exclusive`. Stripe Tax registration API returned **0 registrations**. | Version metadata/catalog reconciliation, tax classification, registration/nexus/collection decision and any provider changes require distinct review/authorization. Zero Stripe registrations is **not** evidence that there are no legal tax obligations. |
+| Terms and refunds | Published `terms.html` and `refunds.html` address Flamewalker+ subscriptions. Draft standalone `commerce-policy-live-review.html` covers personal-use, free account without paid membership, edition-specific ZIP, short-lived links, **proposed** 14-day first-purchase refund and failure-to-deliver support. | Final standalone customer-facing purchase/refund, geography, retention/privacy and support terms **not yet effective**; do not publish as approved. |
+| Source integration | PR #265 remains **DRAFT/unmerged**; reviewed head at this checkpoint: `42feca4cf836c953ddb1a7a5541d76edc2ea9618`. Git compare shows **125 commits on main not on branch and 45 branch-only**. PR #249 is **closed**, not a current independent approval for this revised head. | Fresh integration/conflict and exact-head security review required before considering merge or deploy. Protect First Flame member auth, front door/SEO, recurring membership and unrelated products. |
+
+### Required preparation sequence — no production mutation authorized here
+1. **Reconcile the existing integration draft against fresh main**, focusing on `js/member-auth.js`, First Flame browser checks, home/navigation, subscription code and file overlap. Do not overwrite independently merged changes, disable failing controls or merge PR #265. Review existing CI failures and no-op route guarantees.
+2. **Produce a specific LIVE Boundary v1.4 immutable asset plan**: private upload with independent readback/hash, product version/path/name reconciliation, and explicit rollback/kill-switch that keeps valid customer entitlements and webhook receipts intact. Never reuse v1.3 or synthetic QA files.
+3. **Finalize standalone customer terms for qualified review** using the existing `commerce-policy-live-review.html`; confirm 14-day refund implementation and rights, failed delivery/recovery, buyer access, no paid subscription requirement, seller identity, actual geographic scope, privacy/erasure and support response. Published membership terms stay unchanged.
+4. **Get an authoritative product-specific tax determination** (ebook/workbook/printable ZIP classification, Stripe `txcd_10302000`, registration/nexus obligations and destinations). Florida's general Sales and Use Tax guidance: https://floridarevenue.com/taxes/taxesfees/Pages/sales_tax.aspx ; Florida DOR registration: https://floridarevenue.com/taxes/eservices/Pages/registration.aspx ; Stripe Tax registration guidance: https://docs.stripe.com/tax/registrations . Zero registrations is a check result, not a ruling; do not silently set universal tax exemption.
+5. **Require a fresh security and commerce review** of signed events, strict `livemode`, price identity, idempotency, public/anonymous/file restrictions, 60-second links, paid-to-refunded transition, error/recovery path and isolation from active Flamewalker+ payments. Mark actual paid E2E as **DEFERRED**, not `PASSED`; never change manifest approval booleans to fabricate a pass.
+6. **Assemble one exact-head founder approval package** with changes/diff, QA/pass/fail register, tax/terms dispositions, current live state, checkout-disabled deployment plan, operational incident owner and rollback. New production writes, PR merges, LIVE canary and public purchase switch each need their own clear approval; don't infer them from this preparation decision.
+
+### Current disposition
+**GO:** Existing v1.4 product and QA asset integrity; draft storefront copy and Chromium presentation.
+
+**DEFERRED:** Actual Stripe sandbox purchase-to-entitlement-to-private-download and refund/dispute/replay.
+
+**NO-GO:** Production deployment/activation, live charges or public sales. Separate reviewed release package and authorization required.
+
+---
+
+## Historical 2026-11-20 packet (superseded where inconsistent with the controlling 2026-11-24 reconciliation)
+
 # Revenue Forge — controlled stage-to-canary release packet
 
 **Directive:** Project Ignition II, 004-E — founder instruction of 2026-11-20 ET.

@@ -66,11 +66,41 @@ jobs:
         run: python scripts/commerce_qa_browser_acceptance.py --mode smoke
       - name: Record genuine-provider status separately from browser smoke
         run: echo 'Browser preview acceptance is NOT Stripe provider payment acceptance.' >> "$GITHUB_STEP_SUMMARY"
+  qa-credential-presence-only:
+    # Single synchronization only; no checkout, no payment and no secret values in runner.
+    if: github.event.action == 'synchronize' && github.event.pull_request.number == 265 && github.event.before == 'aa997e49c1e4a326098a390ba79cbbe8ca41f8a1' && github.run_attempt == 1 && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    permissions: {}
+    steps:
+      - name: Report approved QA credential presence only
+        env:
+          NBJB_QA_EXISTING_EMAIL_PRESENT: ${{ secrets.NBJB_QA_EXISTING_EMAIL != '' }}
+          NBJB_QA_EXISTING_PASSWORD_PRESENT: ${{ secrets.NBJB_QA_EXISTING_PASSWORD != '' }}
+          NBJB_QA_SECONDARY_EMAIL_PRESENT: ${{ secrets.NBJB_QA_SECONDARY_EMAIL != '' }}
+          NBJB_QA_SECONDARY_PASSWORD_PRESENT: ${{ secrets.NBJB_QA_SECONDARY_PASSWORD != '' }}
+        shell: bash
+        run: |
+          set +x
+          missing=0
+          for name in NBJB_QA_EXISTING_EMAIL NBJB_QA_EXISTING_PASSWORD NBJB_QA_SECONDARY_EMAIL NBJB_QA_SECONDARY_PASSWORD; do
+            flag="${name}_PRESENT"
+            if [[ "${!flag}" == "true" ]]; then
+              echo "$name: PRESENT"
+            else
+              echo "$name: MISSING"
+              missing=1
+            fi
+          done
+          if [[ "$missing" == 1 ]]; then
+            echo 'Credential availability incomplete; no authentication or payment attempted.'
+            exit 78
+          fi
+          echo 'All four inputs present; identity validity and isolation not yet tested.'
   qa-genuine-provider-checkout:
-    # Founder 004-C-1: single controlled Boundary-only sandbox run on this specific synchronization.
-    # No future push or re-run may access the QA-only secrets via this gate.
+    # 004-C-2: provider job remains disarmed pending credential-only diagnosis.
     needs: [qa-local-preview-chromium, qa-hosted-security-probe]
-    if: github.event.action == 'synchronize' && github.event.pull_request.number == 265 && github.event.before == 'cedf198b5031d854e45ed7de973a6389cbb81626' && github.run_attempt == 1 && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository
+    if: false
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:

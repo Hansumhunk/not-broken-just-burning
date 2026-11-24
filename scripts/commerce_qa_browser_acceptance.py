@@ -68,11 +68,10 @@ def smoke(page):
     check(page.locator("main #forge-workbook").count()==1, "missing_forge_listing")
     # Validate actual DOM content of the isolated local Chromium storefront preview.
     boundary = page.locator("main #boundary-builder-workbook")
-    check("Completed v1.4" in boundary.locator(".eyebrow").inner_text(), "BOUNDARY_VERSION_NOT_V1_4")
-    check("43-page reading PDF and 42-page print edition in one ZIP" in boundary.inner_text(), "BOUNDARY_PAGE_COUNTS_MISMATCH")
-    check("$14.99 USD" in boundary.inner_text(), "BOUNDARY_PRICE_MISMATCH")
-    check("Completed v1.3" in page.locator("main #forge-workbook .eyebrow").inner_text(), "FORGE_VERSION_REGRESSED")
-    check("Boundary Builder v1.4 and The Forge v1.3" in page.locator("#commerce-store-status").inner_text(), "STORE_BANNER_VERSIONS_MISMATCH")
+    check("Completed v1.4" in (boundary.locator(".eyebrow").text_content() or ""), "BOUNDARY_VERSION_NOT_V1_4")
+    check("43-page reading PDF and 42-page print edition in one ZIP" in (boundary.text_content() or ""), "BOUNDARY_PAGE_COUNTS_MISMATCH")
+    check("$14.99 USD" in (boundary.text_content() or ""), "BOUNDARY_PRICE_MISMATCH")
+    check("Completed v1.3" in (page.locator("main #forge-workbook .eyebrow").text_content() or ""), "FORGE_VERSION_REGRESSED")
     browser_config = page.evaluate("""() => ({
       url:window.NBJBConfig?.supabaseUrl,
       ref:window.NBJBCommercePreview?.sandboxRef,

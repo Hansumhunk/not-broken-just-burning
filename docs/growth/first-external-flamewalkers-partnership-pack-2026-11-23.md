@@ -3,6 +3,24 @@
 **Related:** GitHub issue #220 (first-ten acquisition), #274 (executive operating registry), #115/#205 (member acceptance).
 **Budget:** $0 new spend. **Restrictions:** no outreach without founder approval; no list imports, cross-posting without permission, billing/security mutations, public client identifiers, sponsored claims, or production website changes.
 
+## Founder outreach approval control — 2026-11-24
+
+**All five fully individualized message bodies remain unchanged in this document below. This is one centralized review interface, not a request to rewrite or re-send them. Zero external messages sent.**
+
+| Decision | Recipient/channel | Subject/offer | Proposed first follow-up | Current gate |
+| --- | --- | --- | --- | --- |
+| P1 · Healthy Start HHP, TEAM Dad | Organizational program inbox **fatherhood@healthystarthhp.org** (official [TEAM Dad page](https://healthystarthhp.org/fatherhood-initiatives/)) | **Optional free educational resource for Polk-area fathers — Not Broken Just Burning**; public [First Seven Days](https://notbrokenjustburning.com/first-seven-days.html) | 10 business days after a founder-authorized send, only once | **HOLD — explicit founder recipient/wording/send approval required** |
+| P2 · Heartland for Children | **Reginald Colston**, rcolston@heartlandforchildren.org (official [Fatherhood Engagement](https://www.heartlandforchildren.org/fatherhood)) | **Staff-review request: free, self-paced resource for fathers rebuilding stability**; public First Seven Days | 10 business days after an approved message | **HOLD** |
+| P3 · All Pro Dad | [Official contributor channel](https://allprodad.com/about/) or editorial contact route [contact](https://allprodad.com/contact/) (no invented personal recipient) | **Five Small Practices That Help Dads Stay Reliable During Family Change**; ORIGINAL unpublished article pitch, not a marketing email blast | 14 business days after an accepted submission; respect editorial terms | **HOLD** |
+| P4 · Father First Florida | Official [contact form](https://fatherfirstfl.com/contact/) under accurate independent-project category, **not nonprofit** | **Educational resource collaboration inquiry**; public First Seven Days | 10 business days after approved inquiry | **HOLD** |
+| P5 · Fathers Incorporated | Organizational inbox **info@fathersincorporated.com**, verified [official organization page](https://fathersincorporated.com/about-us/) | **Potential educational contribution for dads rebuilding after major life changes**; free First Seven Days + possible original article | 10 business days after approved inquiry | **HOLD** |
+
+**Approval syntax:** Founder may individually authorize `P1 APPROVE`, `P2 APPROVE`, etc., or specify `REVISE`/`HOLD` for each. **Approval is not implied by executing other NBJB directives.** After approval, independently inspect sender account, duplicates and whether the source page is publicly accessible. Only then draft/send through the authorized channel; no automated or unapproved outreach.
+
+**Historical dedup checkpoint (not falsely complete):** Search in connected Google Drive for "Brotherhood Network", "partnership prospect", "26 prospects" and "29 prospects" did **not** establish either historical 26-/29-prospect register; results matched unrelated generic files. A narrow search of the connected founder Gmail Sent folder for the five specific partner contact domains/emails returned **zero matching sent messages**, but **does not cover the NBJB-branded mailbox, native forms, all historical inboxes, or messages to unknown recipients**. Treat historical dedup as **PARTIAL**, not proved. Re-check available original prospect registers or contact history before any send.
+
+**Conservative scheduling:** Prepare one accurate inquiry per organization, respect any reply/refusal, and do not create unapproved automated reminder tasks. Keep client/participant data out of the pipeline. The default public resource is live First Seven Days, which needs no account or card. No claim of formal partnership, endorsement or client referrals.
+
 ## Grounded operating premise
 - At Nov 23 ~5:11 p.m. ET, Supabase had 5 profiles: 3 active Free entitlements, 2 active paid entitlements. The sole profile created in the preceding 7 days was the controlled Nov 22 founder QA signup; it is **not an external acquisition**. This pack does not claim new customers.
 - Current main site provides **free, public** [The First Seven Days](https://notbrokenjustburning.com/first-seven-days.html), [free join page](https://notbrokenjustburning.com/join.html), and [account creation](https://notbrokenjustburning.com/member-auth.html). The first seven lessons require neither payment nor account.

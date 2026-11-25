@@ -4,6 +4,21 @@
 
 ## Current operational acceptance — November 25, 2026 (supersedes historical facts below)
 
+### Revenue Forge — first standalone paid-to-delivery priority (2026-11-25 ET, latest source-only reconciliation)
+
+**First SKU only:** Boundary Builder NBJB-BB-001 v1.4 / 004-C, immutable existing private ZIP `boundary-builder-workbook/v1.4/NBJB-BB-001_v1.4_customer.zip`, one-time USD **$14.99**. R01 approved customer-file hash and R02 actual production private downloaded-byte SHA-256 remain **PASS**; DO NOT manufacture, reupload, overwrite or rehash merely to reopen these gates. This acceptance is asset-only, not purchase fulfillment.
+
+**Checkout diagnostic corrected, provider payment NOT YET PASSED:** current original QA Checkout creator in `launch-backend-staging/commerce/index.ts` now sets both `automatic_tax:{enabled:true}` and `billing_address_collection:"required"`, retaining card-only payment, account/price isolation, reservation idempotency and distinct QA origin. Its Playwright form helper now explicitly recognizes accessible State/Region/Province combobox and California option instead of relying only on `select[autocomplete=address-level1]`; the existing regression test asserts required billing collection. Independently read QA Supabase `commerce` Edge Function version **12**: its four deployed source files match the current draft source byte-for-byte. A configured function/version or enabled Pay button is **not** a successful Stripe payment. Fresh provider readback before the changes: three commerce-tagged Boundary sessions expired/unpaid, no PaymentIntent, QA three expired orders / zero paid, no product entitlements. No new successful paid session or full signed-event/delivery proof is recorded in this checkpoint.
+
+**Ordered remaining acceptance:**
+1. One controlled genuine `cs_test_` Boundary Checkout on the existing QA project/sandbox and approved synthetic account; prove complete US address and authentic provider `paid` state; never repeatedly retry without new diagnostic evidence.
+2. Independently reconcile actual Stripe signed webhook receipt to exactly one paid canonical order, SKU-specific entitlement, authenticated owner Library download and actual customer-file SHA-256. Distinguish QA synthetic asset integrity from already-accepted production v1.4 ZIP integrity.
+3. Genuine alternate signed-in non-owner/anonymous access denial, wrong SKU, expired/reissued 60-second URL, reload/recovery, duplicate/replayed signed events, concurrent checkout, refund/partial refund/dispute and entitlement revocation; preserve membership rights.
+4. Founder/qualified merchant identification, consumer-facing effective standalone terms and first-edition refund policy, applicable digital tax classification, seller registrations/nexus and any purchase territory controls. Current proposed terms remain DRAFT and the live price/product remain INACTIVE.
+5. Prepare exact current-head merge/review packet, migrations/rollback and controlled live canary proposal. **No branch merge, live worker switch, public checkout, real-money charge, refund, product activation, marketing availability claim or production release without separate exact-change founder approval.**
+
+**Next reusable integration:** The Forge v1.3, existing independent approved asset/manifests, `$19.99` proposed existing price, separate SKU entitlement and terms. Integrate only after Boundary paid-to-delivery acceptance using the SAME worker, webhook, order/receipt ledger and private storage policies. No new checkout implementation, no new catalog manufacturing. Other SKUs retain individual gates. Coordinate First Ten/Steady Flame for future *post-activation* promotion only; preserve Brotherhood Network outreach HOLD. Additional spend **$0.00**.
+
 ### Founder Supabase readback ZIP 004-C — actual downloaded-byte acceptance
 
 **ACCEPTED — full remote readback SHA-256: PASS (November 25, 2026).** The founder downloaded the actual existing ZIP from the production Supabase private bucket and supplied it back as `NBJB-BB-001_v1.4_supabase_readback.zip.zip`. The double `.zip` suffix is only the local filename of the readback; the remote object key is unchanged. Independent direct byte hashing in the container of this attached **downloaded** object produced:

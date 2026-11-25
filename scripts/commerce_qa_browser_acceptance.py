@@ -24,7 +24,7 @@ QA_USER_IDS = frozenset({
     "4a34b3f8-4c46-4e07-adf7-c5aae719a23f",
 })
 SPECS = (
-    ("boundary-builder-workbook", 1499, "a61b151de255ca848838cac23fbbe94f44d92bfa3fa378877bbf6e7d64984fd0"),
+    ("boundary-builder-workbook", 1499, "c3031e9de5d66ba0d4185efceff67321a669b472fd264728ff911b06c372c123"),
 )
 NO_PII_OUTPUT = Path(os.environ.get("NBJB_QA_EVIDENCE_PATH", "/tmp/nbjb-provider-evidence.json"))
 
@@ -187,7 +187,7 @@ def exact_private_download(page, slug, expected_sha):
     check(response.ok, "PRIVATE_FILE_FETCH_FAILED")
     content=response.body()
     digest=hashlib.sha256(content).hexdigest()
-    check(digest==expected_sha, "SYNTHETIC_PRODUCT_BYTE_HASH_MISMATCH")
+    check(digest==expected_sha, "APPROVED_CUSTOMER_ARCHIVE_HASH_MISMATCH")
     time.sleep(70)
     expired=page.request.get(link,timeout=20000)
     check(expired.status in (400,401,403,404),"EXPIRED_URL_NOT_REJECTED")

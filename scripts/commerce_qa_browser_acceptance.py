@@ -150,7 +150,7 @@ def fill_synthetic_billing_address(page):
                 pass
     fields["line1"]=fill_across_frames(page,"billing_line1",[
         "input[autocomplete='address-line1']","input[name*='addressLine1' i]",
-        "input[placeholder*='address' i]","input[aria-label*='Address line 1' i]"
+        "input[placeholder*='Street address' i]","input[placeholder*='Address line 1' i]","input[aria-label*='Address line 1' i]"
     ],"123 Test Avenue",required=False)
     fields["city"]=fill_across_frames(page,"billing_city",[
         "input[autocomplete='address-level2']","input[name*='city' i]",

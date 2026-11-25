@@ -179,7 +179,15 @@ def stripe_test_payment(page, email, cents):
         print("STRIPE_PAY_CONTROL_DIAGNOSTIC "+json.dumps(counts),flush=True)
         controls_diagnostic(page,"pay_button")
         raise AssertionError("STRIPE_PAY_BUTTON_NOT_UNIQUE_OR_ENABLED")
-    page.wait_for_url(re.compile(r"^https://localhost:8443/commerce-result\.html\?"),timeout=90000)
+    try:
+        page.wait_for_url(re.compile(r"^https://localhost:8443/commerce-result\.html\?"),timeout=90000)
+    except BrowserTimeout:
+        # A redirect timeout is not evidence of a failed or successful payment.
+        # Only coarse destination class; never log URLs, session IDs, field values or page text.
+        host=urlparse(page.url).hostname
+        destination="stripe_checkout" if host=="checkout.stripe.com" else "qa_localhost" if host=="localhost" else "other"
+        print("QA_POST_SUBMISSION_DESTINATION "+destination,flush=True)
+        raise AssertionError("POST_PAYMENT_REDIRECT_TIMEOUT_RECONCILE_PROVIDER")
     check(urlparse(page.url).hostname=="localhost","UNEXPECTED_POST_PAYMENT_REDIRECT")
 
 def wait_verified_order(page, order_id):

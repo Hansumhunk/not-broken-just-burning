@@ -23,3 +23,12 @@ test('QA Checkout must demand a full billing address when using automatic Stripe
   assert.match(source,/stripe\.checkout\.sessions\.create\(\{[^]*?automatic_tax:\{enabled:true\},billing_address_collection:"required",customer_creation:"always"/);
   assert.match(source,/payment_method_types:\["card"\]/);
 });
+
+test('sandbox Stripe hosted billing City and State are fail-closed before Pay',()=>{
+  const source=readFileSync(new URL('./commerce_qa_browser_acceptance.py',import.meta.url),'utf8');
+  assert.match(source,/input\[name='locality'\]/);
+  assert.match(source,/select\[name='administrativeArea'\]/);
+  assert.match(source,/STRIPE_BILLING_FIELDS_INCOMPLETE_NO_PAYMENT_CLICK/);
+  assert.match(source,/STRIPE_BILLING_CITY_STATE_DOM_VERIFICATION_FAILED_NO_PAYMENT_CLICK/);
+  assert.match(source,/SANDBOX_BILLING_CITY_STATE_HOSTED_DOM_VERIFIED/);
+});

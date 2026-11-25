@@ -1,4 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import {sandboxAllowed,SKU,LIVE_CHECKOUT_ENABLED,validatePrice,verifySession,ownedDownload} from '../launch-backend-staging/commerce/commerce-core.mjs';
 const slug='forge-workbook',user='user-a',order='order-a';
 const o={id:order,user_id:user,slug,amount:1999,currency:'usd',stripe_price_id:'price_test',stripe_product_id:'prod_test',tax_behavior:'exclusive',stripe_session_id:'cs_test',status:'paid'};
@@ -16,3 +17,9 @@ test('unpaid stays pending; expired is terminal candidate',()=>{assert.equal(ver
 test('tampered checkout/session/order/line/intent/charge fails closed',()=>{for(const change of [{livemode:true},{mode:'subscription'},{client_reference_id:'other'},{currency:'eur'},{amount_subtotal:1},{id:'other'},{metadata:{nbjb_commerce:'v1',order_id:'other',slug}}])assert.throws(()=>verifySession({...s,...change},items,o,pi,charge));for(const change of [{quantity:2},{price:{id:'other'}},{amount_subtotal:1}])assert.throws(()=>verifySession(s,{has_more:false,data:[{...items.data[0],...change}]},o,pi,charge));for(const change of [{status:'processing'},{amount_received:1},{id:'other'},{livemode:true}])assert.throws(()=>verifySession(s,items,o,{...pi,...change},charge));for(const change of [{paid:false},{payment_intent:'other'},{amount_refunded:-1},{amount_refunded:2140}])assert.throws(()=>verifySession(s,items,o,pi,{...charge,...change}));});
 test('full refund and dispute block access candidate; partial refund stays paid pending review',()=>{assert.equal(verifySession(s,items,o,pi,{...charge,amount_refunded:2139}).state,'refunded');assert.equal(verifySession(s,items,o,pi,{...charge,disputed:true}).state,'disputed');assert.equal(verifySession(s,items,o,pi,{...charge,amount_refunded:100}).state,'paid');});
 test('download independently checks ownership, order and product; not membership',()=>{assert.equal(ownedDownload(o,ent,user,slug),true);assert.equal(ownedDownload(o,ent,'other',slug),false);assert.equal(ownedDownload(o,ent,user,'other'),false);for(const change of [{status:'revoked'},{source:'manual'},{provider_entitlement_ref:'other'},{valid_until:'2000-01-01'}])assert.equal(ownedDownload(o,{...ent,...change},user,slug),false);assert.equal(ownedDownload({...o,status:'refunded'},ent,user,slug),false);});
+
+test('QA Checkout must demand a full billing address when using automatic Stripe Tax',()=>{
+  const source=readFileSync(new URL('../launch-backend-staging/commerce/index.ts',import.meta.url),'utf8');
+  assert.match(source,/stripe\.checkout\.sessions\.create\(\{[^]*?automatic_tax:\{enabled:true\},billing_address_collection:"required",customer_creation:"always"/);
+  assert.match(source,/payment_method_types:\["card"\]/);
+});

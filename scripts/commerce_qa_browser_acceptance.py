@@ -133,7 +133,16 @@ def fill_across_frames(page, field, probes, value, required=True):
 def stripe_test_payment(page, email, cents):
     test_host(page)
     expected=str(cents//100)+"."+f"{cents%100:02d}"
-    check(expected in page.locator("body").inner_text(timeout=30000), "WRONG_STRIPE_SUBTOTAL_ABORT")
+    # Actual non-paying Checkout probe confirmed that Stripe's form is ready
+    # after its async amount hydration; inner_text() by itself does NOT wait.
+    # Never attempt to fill or press Pay against a partly-rendered Checkout.
+    try:
+        page.wait_for_function("amount => document.body && document.body.innerText.includes(amount)",arg=expected,timeout=30000)
+    except BrowserTimeout:
+        raise AssertionError("STRIPE_PRICE_RENDER_TIMEOUT_NO_PAYMENT_CLICK")
+    test_host(page)
+    check(expected in page.locator("body").inner_text(timeout=5000), "WRONG_STRIPE_SUBTOTAL_ABORT")
+    print("SANDBOX_CHECKOUT_AMOUNT_RENDERED_CARD_FORM_STAGE",flush=True)
     # Checkout may default to Link/wallet rather than the card accordion.
     # Select only the exact Card choice, never Link, saved cards or other methods.
     for frame in stripe_frames(page):
@@ -172,7 +181,9 @@ def stripe_test_payment(page, email, cents):
         if len(visible)==1 and len(enabled)==1:
             test_host(page)
             check(expected in page.locator("body").inner_text(timeout=10000),"WRONG_STRIPE_SUBTOTAL_ABORT")
+            print("SANDBOX_EXACT_ONE_ENABLED_PAY_BUTTON_VERIFIED",flush=True)
             enabled[0].click(timeout=12000)
+            print("SANDBOX_TEST_PAY_CLICK_RETURNED_RECONCILE_PROVIDER_NOT_A_PASS",flush=True)
             break
         time.sleep(.5)
     else:

@@ -53,10 +53,11 @@
   const again = document.getElementById('bys-again');
   const share = document.getElementById('bys-share');
   const shareStatus = document.getElementById('bys-share-status');
-  if (!form || !result || !heading || !wording) return;
+  const run = form?.querySelector('[data-tool-run]');
+  const fallback = document.getElementById('bys-fallback');
+  if (!form || !result || !heading || !wording || !why || !step || !caution || !status || !run || !fallback) return;
 
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
+  run.addEventListener('click', () => {
     const selected = form.querySelector('input[name="purpose"]:checked');
     const response = guidanceFor(selected?.value);
     if (!response) {
@@ -96,7 +97,7 @@
   });
 
   again?.addEventListener('click', () => {
-    form.reset();
+    form.querySelectorAll('input[type=radio]').forEach(input => { input.checked = false; });
     wording.value = '';
     heading.textContent = '';
     result.hidden = true;
@@ -108,4 +109,8 @@
     // Never share user choice or page query parameters; only a constant canonical URL.
     copyValue('https://notbrokenjustburning.com/before-you-send.html', null, shareStatus, 'Public tool link copied. No private selections included.');
   });
+  // Enable only after all handlers are registered; controls have no form owner.
+  form.querySelectorAll('fieldset').forEach(group => { group.disabled = false; });
+  run.disabled = false;
+  fallback.hidden = true;
 })();

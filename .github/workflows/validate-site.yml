@@ -217,6 +217,11 @@ jobs:
         run: python scripts/test_social_share.py --browser
       - name: First Flame Chromium synthetic member-journey acceptance
         run: python tests/first_flame_member_browser_test.py
+      - name: Frontier Engine isolated privacy failure-path Chromium acceptance
+        run: python tests/frontier_privacy_browser_test.py
+      - name: Flame Post dedicated no-send routing acceptance
+        if: github.event_name == 'pull_request' && github.head_ref == 'ops/flame-post-email-routing'
+        run: python tests/flame_post_routing_browser_test.py
       - name: Retain synthetic First Flame browser QA screenshot
         if: always()
         uses: actions/upload-artifact@v4

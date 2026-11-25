@@ -584,7 +584,8 @@ test('live Terms and Refund pages describe currently available paid membership w
     assert.ok(page.includes('44 currently published written lessons'),name);
     assert.ok(!page.includes('paid subscriptions are not yet available for purchase'),name);
     assert.ok(!page.includes('Applies to paid memberships when offered'),name);
-    assert.ok(page.includes('notbrokenjustburning@gmail.com'),name);
+    assert.ok(page.includes('mailto:billing@notbrokenjustburning.com'),name);
+    assert.ok(!page.includes('notbrokenjustburning@gmail.com'),name+' legacy public inbox');
     assert.ok(page.includes('14'),name);
     assert.ok(page.includes('30'),name);
   }
@@ -888,7 +889,7 @@ test('feedback prepares a private-by-default email without transmitting until me
   assert.equal(wrap.hidden,false);
   assert.equal(mailto,'','copy must not launch email');
   listeners['form:submit']({preventDefault(){}});
-  assert.ok(mailto.startsWith('mailto:notbrokenjustburning@gmail.com?subject='));
+  assert.ok(mailto.startsWith('mailto:support@notbrokenjustburning.com?subject='));
   assert.ok(mailto.includes('body='));
   assert.match(status.textContent,/NBJB has not received it yet/);
 });

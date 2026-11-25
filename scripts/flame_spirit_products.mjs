@@ -120,7 +120,7 @@ async function fetchPublic(url, timeout = 7500) {
       return { ok:false, status:"not allowlisted" };
     }
     const res = await fetch(url, {
-      headers: { "user-agent": "NotBrokenJustBurning-FlameSpirits/1.0 (notbrokenjustburning@gmail.com)" },
+      headers: { "user-agent": "NotBrokenJustBurning-FlameSpirits/1.0 (contact@notbrokenjustburning.com)" },
       signal: AbortSignal.timeout(timeout)
     });
     if (!res.ok) return { ok:false, status:"HTTP " + res.status };

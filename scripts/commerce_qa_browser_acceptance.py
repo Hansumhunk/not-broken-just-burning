@@ -169,6 +169,46 @@ def fill_synthetic_billing_address(page):
         fields["state"]=fill_across_frames(page,"billing_state",[
           "input[autocomplete='address-level1']","input[name*='state' i]","input[aria-label='State' i]"
         ],"CA",required=False)
+    # Stripe occasionally renders State/Region as a custom accessible picker,
+    # not a native address-level1 input/select. Select the explicit CA option
+    # rather than treating a visible/enabled Pay button as proof of address validity.
+    if not fields["state"]:
+        state_name=re.compile(r"(state|province|region)",re.I)
+        for frame in stripe_frames(page):
+            if fields["state"]:break
+            candidates=[
+                frame.get_by_role("combobox",name=state_name),
+                frame.get_by_role("button",name=state_name),
+                frame.locator("select[name*='state' i]"),
+                frame.locator("select[name*='region' i]"),
+            ]
+            for group in candidates:
+                if fields["state"]:break
+                try:
+                    for control in group.all()[:5]:
+                        if not control.is_visible(timeout=250) or not control.is_enabled(timeout=250):
+                            continue
+                        tag=control.evaluate("el=>el.tagName.toLowerCase()")
+                        if tag=="select":
+                            try:control.select_option(value="CA",timeout=2000)
+                            except Exception:control.select_option(label="California",timeout=2000)
+                            fields["state"]=True
+                            break
+                        if tag=="input":
+                            control.fill("California",timeout=2000)
+                        else:
+                            control.click(timeout=2000)
+                        for option in (
+                            frame.get_by_role("option",name=re.compile(r"^California$",re.I)),
+                            frame.get_by_text(re.compile(r"^California$",re.I),exact=True)
+                        ):
+                            if option.count() and option.first.is_visible(timeout=400):
+                                option.first.click(timeout=2000)
+                                fields["state"]=True
+                                break
+                        if fields["state"]:break
+                except Exception:
+                    continue
     fields["postal"]=fill_across_frames(page,"billing_postal",[
         "input[autocomplete='postal-code']","input[name*='postal' i]",
         "input[placeholder*='ZIP' i]","input[aria-label*='Postal code' i]"

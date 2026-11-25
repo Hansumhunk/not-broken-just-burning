@@ -99,9 +99,9 @@ jobs:
           fi
           echo 'All four inputs present; identity validity and isolation not yet tested.'
   qa-genuine-provider-checkout:
-    # 002-D: one controlled retry after pay-control readiness fix; reuse the pending order through existing reservation logic; no automatic reruns.
+    # 002: one controlled TEST-MODE Checkout after distinct nonpaying browser evidence proved exact amount/card fields/one enabled Pay; do not arm on any future sync.
     needs: [qa-local-preview-chromium, qa-hosted-security-probe]
-    if: github.event.action == 'synchronize' && github.event.pull_request.number == 265 && github.event.before == '7bdc4cb82050b361176ef11851a8db8db3b4045c' && github.run_attempt == 1 && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event.action == 'synchronize' && github.event.pull_request.number == 265 && github.event.before == '67733729f935068144b6c9f8f3cd076db35d61df' && github.run_attempt == 1 && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:

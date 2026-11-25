@@ -161,7 +161,7 @@ def release_checks(browser,tool,width,signal):
   # on sampled surfaces rather than misreport an unmeasured background.
   sample=page.evaluate("""({group,result,output,prefix})=>{
    const C=s=>{const a=s.match(/[\\d.]+/g).map(Number);return [a[0],a[1],a[2],a[3]??1]};
-   const over=(f,b)=>{const a=f[3]+b[3]*(1-f[3]);return [0,1,2].map(i=>(f[i]*f[3]+b[i]*b[3]*(1-f[3]))/a).concat(a)};
+   const over=(f,b)=>{const a=f[3]+b[3]*(1-f[3]);if(a===0)return [0,0,0,0];return [0,1,2].map(i=>(f[i]*f[3]+b[i]*b[3]*(1-f[3]))/a).concat(a)};
    const L=c=>[.2126,.7152,.0722].reduce((sum,w,i)=>{const v=c[i]/255;return sum+w*(v<=.04045?v/12.92:((v+.055)/1.055)**2.4)},0);
    const background=el=>{let c=[0,0,0,0];for(let e=el;e;e=e.parentElement){const s=getComputedStyle(e);if(s.backgroundImage!=='none'&&c[3]<.999)throw Error('unmeasured gradient on '+e.tagName);c=over(c,C(s.backgroundColor));if(c[3]>.999)return c}throw Error('no opaque background')};
    const targets=[...document.querySelectorAll('#'+group+' label,#'+group+' label strong,#'+group+' label small,#'+group+' legend,#'+group+' button,#'+result+' h3,#'+result+' p,#'+result+' label:not(.bys-visually-hidden),#'+result+' textarea,#'+result+' button,#'+prefix+'-share,#'+prefix+'-status')].filter(e=>e.getClientRects().length&&e.textContent.trim()||e.tagName==='TEXTAREA');

@@ -9,7 +9,7 @@ const checks={
  'terms.html':['billing@notbrokenjustburning.com','contact@notbrokenjustburning.com'],
  'privacy.html':['privacy@notbrokenjustburning.com'],
  'join.html':['contact@notbrokenjustburning.com','partnerships@notbrokenjustburning.com'],
- 'commerce-policy-live-review.html':['support@notbrokenjustburning.com']
+ 'commerce-policy-live-review.html':['support@notbrokenjustburning.com','billing@notbrokenjustburning.com']
 };
 for(const [path,addresses] of Object.entries(checks)){
  test(path+' uses professional Flame Post inboxes without breaking links',()=>{

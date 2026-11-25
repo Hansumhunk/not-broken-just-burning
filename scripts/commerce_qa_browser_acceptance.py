@@ -157,7 +157,7 @@ def stripe_test_payment(page, email, cents):
     # Stripe may enable the final button asynchronously after address/card validation.
     # Accept only a narrowly allowlisted one-time checkout label, on the verified test URL.
     # Do not select saved cards, Link, subscriptions, wallets or arbitrary submit buttons.
-    allowed=re.compile(r"^(?:Pay(?:\\s+\\$?14\\.99(?:\\s+USD)?)?|Complete purchase|Place order)$",re.I)
+    allowed=re.compile(r"^(?:Pay(?:\s+\$?14\.99(?:\s+USD)?)?|Complete purchase|Place order)$",re.I)
     until=time.monotonic()+30
     counts={"visible":0,"enabled":0}
     while time.monotonic()<until:

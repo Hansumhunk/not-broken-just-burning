@@ -98,9 +98,9 @@ jobs:
           fi
           echo 'All four inputs present; identity validity and isolation not yet tested.'
   qa-genuine-provider-checkout:
-    # 004-C-2: provider job remains disarmed pending credential-only diagnosis.
+    # 002-D: one authorized sandbox attempt on the specific synchronization; no automatic reruns.
     needs: [qa-local-preview-chromium, qa-hosted-security-probe]
-    if: false
+    if: github.event.action == 'synchronize' && github.event.pull_request.number == 265 && github.event.before == '9af66ed0ee90e3fc5b7a6bbee42345847bdfc034' && github.run_attempt == 1 && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:

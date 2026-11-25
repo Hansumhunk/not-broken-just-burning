@@ -32,6 +32,24 @@ export function permittedCheckout({gate,userId,slug,canaryUserId,canarySlug}) {
    && typeof canaryUserId==='string' && uuid.test(canaryUserId)
    && userId===canaryUserId && slug===canarySlug;
 }
+// Founder-approved 004-C commercial edition, not historical Wave One v1.3.
+// This is an additional CHECKOUT-only guard; it never creates entitlement or
+// revokes a legitimate historical owner's access to a separately purchased file.
+export const BOUNDARY_APPROVED_RELEASE = Object.freeze({
+ slug:"boundary-builder-workbook",
+ asset_version:"v1.4",
+ asset_key:"boundary-builder-workbook/v1.4/NBJB-BB-001_v1.4_customer.zip",
+ download_name:"NBJB-BB-001_v1.4_customer.zip",
+ stripe_version:"1.4"
+});
+export function approvedBoundaryRelease(product,stripeProduct) {
+ if(product?.slug!==BOUNDARY_APPROVED_RELEASE.slug)return true;
+ return product.asset_version===BOUNDARY_APPROVED_RELEASE.asset_version
+   && product.asset_key===BOUNDARY_APPROVED_RELEASE.asset_key
+   && product.download_name===BOUNDARY_APPROVED_RELEASE.download_name
+   && stripeProduct?.metadata?.sku==="NBJB-BB-001"
+   && stripeProduct?.metadata?.version===BOUNDARY_APPROVED_RELEASE.stripe_version;
+}
 export function idOf(x){return typeof x==='string'?x:x?.id||null;}
 export function validatePrice(price,p) {
  if (!price || price.livemode!==true || !price.active || price.type!=='one_time' || price.currency!==p.currency || price.unit_amount!==p.amount || price.id!==p.stripe_price_id || idOf(price.product)!==p.stripe_product_id || price.tax_behavior!==p.tax_behavior || (!RELEASE_CANDIDATES.has(p.slug) || SKU.get(p.slug)!==p.amount)) throw Error('price_mismatch');

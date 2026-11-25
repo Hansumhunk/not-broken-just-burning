@@ -26,7 +26,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   qa-hosted-security-probe:
-    if: (github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == 'a8c3e034f0fcacb08ac39c4256131cd51405f69f' && github.run_attempt == 1)
+    if: (github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == '85fd17de647d844d615307c4553ea76149633aac' && github.run_attempt == 1)
     runs-on: ubuntu-24.04
     timeout-minutes: 4
     steps:
@@ -42,7 +42,7 @@ jobs:
         run: echo 'Real QA HTTPS security probes passed. These do NOT establish signed provider payment acceptance.' >> "$GITHUB_STEP_SUMMARY"
   qa-local-preview-chromium:
     # Run only on the existing controlled integration PR; never on forks or production.
-    if: (github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == 'a8c3e034f0fcacb08ac39c4256131cd51405f69f' && github.run_attempt == 1)
+    if: (github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == '85fd17de647d844d615307c4553ea76149633aac' && github.run_attempt == 1)
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -107,9 +107,9 @@ jobs:
           fi
           echo 'All four inputs present; identity validity and isolation not yet tested.'
   qa-genuine-provider-checkout:
-    # 002: a distinct one-shot TEST-MODE attempt addresses confirmed previous OPEN/UNPAID/NO_PI outcome by filling the previously skipped Stripe billing address; no more automatic reruns.
+    # One exact branch push only after non-paying DOM established State=administrativeArea, City=locality; QA v12 enforces full address, card only, Stripe automatic tax. Abort before Pay on missing any synthetic fields. No real-money call.
     needs: [qa-local-preview-chromium, qa-hosted-security-probe]
-    if: github.event.action == 'synchronize' && github.event.pull_request.number == 265 && github.event.before == '1b8c771851f6d1e88462eb0103eadfbb87ce472a' && github.run_attempt == 1 && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == '85fd17de647d844d615307c4553ea76149633aac' && github.run_attempt == 1
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:

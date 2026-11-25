@@ -6,6 +6,7 @@ on:
       - 'commerce-*.html'
       - 'js/commerce-*.js'
       - 'scripts/test_commerce*'
+      - 'scripts/commerce_stage_boundary_004c_private.py'
       - 'launch-backend-staging/commerce/**'
       - '.github/workflows/validate-commerce.yml'
 permissions:
@@ -20,6 +21,8 @@ jobs:
           node-version: '22'
       - run: node --test scripts/test_commerce_catalog.js scripts/test_commerce_security.mjs scripts/test_commerce_browser.js scripts/test_commerce_release.js scripts/test_commerce_phase_four.mjs scripts/test_commerce_stage_release.js
       - run: for f in js/commerce-*.js; do node --check "$f"; done
+      - name: Offline-only 004-C private staging security regression
+        run: python -m unittest discover -s scripts -p test_commerce_private_004c.py -v
       - name: Assert unapproved production manifest stays blocked
         run: |
           set +e

@@ -6,7 +6,9 @@ from threading import Thread
 from urllib.parse import urlsplit
 import shutil
 from itertools import product
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, expect
+import mimetypes
+import re
 
 ROOT=Path(__file__).resolve().parents[1]
 TOOLS=[
@@ -97,6 +99,107 @@ def inspect(browser,base,tool,mode,width):
    assert not urlsplit(referer).query
  ctx.close()
  print("PASS",path,mode,width, "combinations",len(list(product(*(v for _,v in keys)))) if mode=="normal" else 0)
+# FE11/FE14: route the real production hostname to exact checked-out files,
+# never to the network. Verify the live-host guard rather than localhost alone.
+def release_checks(browser,tool,width,signal):
+ path,script,group,result,output,clear,fallback,keys=tool
+ origin="https://notbrokenjustburning.com"
+ canonical=origin+"/"+path
+ url=canonical+"?utm_source=facebook&utm_medium=social&utm_campaign=synthetic"
+ ctx=browser.new_context(viewport={"width":width,"height":850},reduced_motion="reduce",is_mobile=False,has_touch=width<500)
+ ctx.grant_permissions(["clipboard-read","clipboard-write"],origin=origin)
+ if signal=="gpc":
+  ctx.add_init_script("Object.defineProperty(Navigator.prototype,'globalPrivacyControl',{get:()=>true,configurable:true})")
+ if signal=="dnt":
+  ctx.add_init_script("Object.defineProperty(Navigator.prototype,'doNotTrack',{get:()=>'1',configurable:true})")
+ if signal=="unknown-query":
+  url=canonical+"?synthetic_private=never_send"
+ page=ctx.new_page()
+ requests=[]
+ page.on("request",lambda q:requests.append((q.url,q.method,q.post_data)))
+ def route(rt):
+  u=urlsplit(rt.request.url)
+  if u.scheme!="https" or u.hostname!="notbrokenjustburning.com": return rt.abort()
+  f=(ROOT/u.path.lstrip("/")).resolve()
+  if ROOT not in f.parents or not f.is_file(): return rt.fulfill(status=404,body="not found")
+  return rt.fulfill(status=200,body=f.read_bytes(),content_type=mimetypes.guess_type(f.name)[0] or "application/octet-stream")
+ page.route("**/*",route)
+ page.goto(url,wait_until="load")
+ scope=page.locator("#"+group)
+ run=scope.locator("[data-tool-run]")
+ expect(run).to_be_enabled()
+ assert page.evaluate("typeof window.posthog === 'undefined'")
+ assert not any("posthog" in q[0] for q in requests)
+ before=len(requests)
+ prefix="bys" if group=="bys-form" else group.removesuffix("-form")
+ heading=page.locator("#"+("bys-result-heading" if prefix=="bys" else prefix+"-heading"))
+ status=page.locator("#"+prefix+"-status")
+ field=page.locator("#"+output)
+ copy=page.locator("#"+prefix+"-copy")
+ share=page.locator("#"+prefix+"-share")
+ share_status=page.locator("#"+prefix+"-share-status")
+ run.click()
+ expect(status).to_contain_text("Choose")
+ assert status.get_attribute("role")=="status"
+ for name,values in keys:
+  radio=scope.locator('input[name="'+name+'"][value="'+values[0]+'"]')
+  expect(radio).to_have_accessible_name(re.compile(r"\S"))
+  radio.focus()
+  page.keyboard.press("Space")
+  if len(values)>1:
+   page.keyboard.press("ArrowRight")
+   expect(scope.locator('input[name="'+name+'"][value="'+values[1]+'"]')).to_be_checked()
+ run.focus()
+ page.keyboard.press("Enter")
+ expect(heading).to_be_focused()
+ expect(heading).to_have_accessible_name(re.compile(r"\S"))
+ expect(field).to_have_accessible_name(re.compile(r"\S"))
+ assert field.get_attribute("readonly") is not None
+ if signal=="default":
+  # Calculate actual rendered foreground/background pairs for primary controls,
+  # result and option labels. Walk opaque/alpha ancestors; reject gradients
+  # on sampled surfaces rather than misreport an unmeasured background.
+  sample=page.evaluate("""({group,result,output,prefix})=>{
+   const C=s=>{const a=s.match(/[\\d.]+/g).map(Number);return [a[0],a[1],a[2],a[3]??1]};
+   const over=(f,b)=>{const a=f[3]+b[3]*(1-f[3]);return [0,1,2].map(i=>(f[i]*f[3]+b[i]*b[3]*(1-f[3]))/a).concat(a)};
+   const L=c=>[.2126,.7152,.0722].reduce((sum,w,i)=>{const v=c[i]/255;return sum+w*(v<=.04045?v/12.92:((v+.055)/1.055)**2.4)},0);
+   const background=el=>{let c=[0,0,0,0];for(let e=el;e;e=e.parentElement){const s=getComputedStyle(e);if(s.backgroundImage!=='none'&&c[3]<.999)throw Error('unmeasured gradient on '+e.tagName);c=over(c,C(s.backgroundColor));if(c[3]>.999)return c}throw Error('no opaque background')};
+   const targets=[...document.querySelectorAll('#'+group+' label,#'+group+' label strong,#'+group+' label small,#'+group+' legend,#'+group+' button,#'+result+' h3,#'+result+' p,#'+result+' label:not(.bys-visually-hidden),#'+result+' textarea,#'+result+' button,#'+prefix+'-share,#'+prefix+'-status')].filter(e=>e.getClientRects().length&&e.textContent.trim()||e.tagName==='TEXTAREA');
+   const contrasts=targets.map(e=>{const s=getComputedStyle(e),b=background(e);let opacity=1;for(let q=e;q;q=q.parentElement)opacity*=Number(getComputedStyle(q).opacity);let f=C(s.color);f[3]*=opacity;const a=L(over(f,b)),z=L(b);return {name:e.id||e.textContent.trim().slice(0,35),ratio:(Math.max(a,z)+.05)/(Math.min(a,z)+.05)}});
+   const hits=[...document.querySelectorAll('#'+group+' label,#'+group+' button,#'+result+' button,#'+prefix+'-share')].map(e=>{const b=e.getBoundingClientRect();return {name:e.id||e.textContent.trim().slice(0,35),w:b.width,h:b.height}});
+   return {contrasts,hits}
+  }""",{"group":group,"result":result,"output":output,"prefix":prefix})
+  assert sample["contrasts"] and all(x["ratio"]>=4.5 for x in sample["contrasts"]),sample["contrasts"]
+  assert all(x["w"]>=44 and x["h"]>=44 for x in sample["hits"]),sample["hits"]
+  print("FE11",path,width,"min contrast",round(min(x["ratio"] for x in sample["contrasts"]),2),"min target",round(min(x["w"] for x in sample["hits"]),1),round(min(x["h"] for x in sample["hits"]),1),"samples",len(sample["contrasts"]))
+  # Real browser clipboard permission, then controlled denial and manual fallback.
+  copy.click()
+  expect(status).to_contain_text("copied")
+  assert page.evaluate("navigator.clipboard.readText()")==field.input_value()
+  share.click()
+  expect(share_status).to_contain_text("copied")
+  assert page.evaluate("navigator.clipboard.readText()")==canonical
+  page.evaluate("Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw Error('synthetic denial')}}})")
+  copy.click()
+  expect(status).to_contain_text("highlighted")
+  expect(field).to_be_focused()
+  assert field.evaluate("x=>x.selectionEnd-x.selectionStart===x.value.length")
+  share.click()
+  expect(share_status).to_contain_text(canonical)
+  assert "utm_" not in share_status.inner_text()
+ # An actual CTA activation, suppressed navigation only; no telemetry from tool.
+ link=page.locator('main a[href="join.html"]').first
+ link.evaluate("x=>x.addEventListener('click',e=>e.preventDefault(),{once:true})")
+ link.click()
+ page.wait_for_timeout(100)
+ assert len(requests)==before,(path,signal,requests[before:])
+ assert page.url==url
+ assert page.evaluate("typeof window.posthog === 'undefined'")
+ assert page.evaluate("document.documentElement.scrollWidth<=innerWidth+2")
+ assert not any("posthog" in q[0] for q in requests)
+ ctx.close()
+ print("FE14",path,width,signal,"PASS no analytics SDK or event requests")
+
 def main():
  server=ThreadingHTTPServer(("127.0.0.1",0),partial(Quiet,directory=str(ROOT)))
  Thread(target=server.serve_forever,daemon=True).start()
@@ -109,6 +212,7 @@ def main():
     if not (ROOT/tool[0]).exists(): continue
     for width in (1280,390):
      for mode in ("normal","disabled","blocked","http-failure","init-failure"): inspect(browser,base,tool,mode,width)
+     for signal in ("default","gpc","dnt","unknown-query"): release_checks(browser,tool,width,signal)
    browser.close()
  finally: server.shutdown()
 if __name__=="__main__": main()

@@ -26,3 +26,12 @@
 .bys-disclaimer{margin-bottom:2rem;opacity:.86}
 @media(max-width:830px){.bys-shell{grid-template-columns:1fr}.bys-choice{padding:.9rem}.bys-actions .button{width:100%}}
 @media(prefers-reduced-motion:reduce){.bys-choice{transition:none}}
+
+/* Tool-scoped accessible color pairs and target sizes; no shared-site redesign. */
+.bys-card,.bys-side,.bys-share{background:#111116;color:#f5efe7}
+.bys-choice{min-height:44px;box-sizing:border-box}
+.bys-card .button,.bys-share .button,.bys-followup .button{min-width:44px;min-height:44px}
+.bys-card .button-primary,.bys-followup .button-primary{background:#ffad72;color:#160802}
+.bys-card .button-ghost,.bys-share .button-ghost{background:#242127;color:#f5efe7}
+.bys-card a:not(.button),.bys-side a:not(.button),.bys-share a:not(.button){color:#ffad72;text-decoration:underline}
+.bys-card button:focus-visible,.bys-share button:focus-visible,.bys-followup .button:focus-visible,.bys-card a:focus-visible{outline:2px solid #ffad72;outline-offset:3px}

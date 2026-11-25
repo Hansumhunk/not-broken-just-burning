@@ -99,9 +99,9 @@ jobs:
           fi
           echo 'All four inputs present; identity validity and isolation not yet tested.'
   qa-genuine-provider-checkout:
-    # 002: one controlled TEST-MODE Checkout after distinct nonpaying browser evidence proved exact amount/card fields/one enabled Pay; do not arm on any future sync.
+    # 002: a distinct one-shot TEST-MODE attempt addresses confirmed previous OPEN/UNPAID/NO_PI outcome by filling the previously skipped Stripe billing address; no more automatic reruns.
     needs: [qa-local-preview-chromium, qa-hosted-security-probe]
-    if: github.event.action == 'synchronize' && github.event.pull_request.number == 265 && github.event.before == '67733729f935068144b6c9f8f3cd076db35d61df' && github.run_attempt == 1 && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event.action == 'synchronize' && github.event.pull_request.number == 265 && github.event.before == '1b8c771851f6d1e88462eb0103eadfbb87ce472a' && github.run_attempt == 1 && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:

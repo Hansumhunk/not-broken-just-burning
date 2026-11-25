@@ -39,3 +39,18 @@ This supplements, and **does not amend**, the effective Flamewalker+ subscriptio
 - **Download issue:** “Please send only the page name, approximate time, your account email and the error message. Don't send passwords, full card details or personal workbook responses.”
 
 **Release hold:** This text is a **source-only operational review candidate** until the final standalone terms, signed-payment acceptance, and founder approval are recorded. The public membership policy and existing support inbox are unchanged.
+
+## Flame Post correspondence routing — source-review handoff (November 25, 2026)
+
+Route public consumer links through the existing professional addresses, forwarded to NBJB's established central inbox `notbrokenjustburning@gmail.com` (internal transport only):
+- `contact@notbrokenjustburning.com` — general consumer inquiries, website feedback
+- `support@notbrokenjustburning.com` — account login, purchased ZIP/download, technical issues, accessibility assistance
+- `billing@notbrokenjustburning.com` — membership billing, standalone charges, cancellations and refunds
+- `privacy@notbrokenjustburning.com` — personal data, account export/removal, privacy rights
+- `partnerships@notbrokenjustburning.com` — media, partnerships and speaking
+- `founder@notbrokenjustburning.com` — founder-only executive or internal routing, not routine customer dispute intake
+- `newsletter@notbrokenjustburning.com` — approved newsletter sender only; no marketing consent or sender authenticity implied by an alias
+
+**Evidence boundary:** The connected NBJB Gmail inbox received verification messages addressed to all seven aliases on Nov 25, demonstrating inbound routing. Those messages DO NOT by themselves prove that each Gmail `Send mail as` identity was successfully verified, that outbound DKIM/SPF/DMARC alignment passed, or that Brevo newsletter sending is ready. A professional inbound `mailto:` address may be shown without claiming outbound authorization. Do not send a customer reply from an unverified address, fall back to an unauthorized sender, or trigger a production email campaign based on this runbook.
+
+**Customer response safeguards:** Always verify the owner's existing account before discussing order details; do not ask for full card numbers, login passwords, private writing, court documents or medical records. No autoresponder, confirmation campaign, payment receipt, or customer notification was sent by this source-only routing change. Stripe account-wide business-profile support email is currently unset; its modification requires a separate supported provider action / scoped approval, and is NOT a prerequisite for the currently checkout-disabled product draft.

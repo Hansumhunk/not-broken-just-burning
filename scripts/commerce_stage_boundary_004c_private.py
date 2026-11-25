@@ -49,13 +49,18 @@ def verify_local(p):
  print("APPROVED_PRIVATE_004C_ZIP_LOCAL_BYTES_VERIFIED",flush=True)
  return b
 
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+ def redirect_request(self,req,fp,code,msg,headers,newurl):
+  # Never forward a privileged Storage credential to another host.
+  return None
+
 def request(url,method="GET",blob=None,key=None,headers=None):
  if not url.startswith(ORIGIN+"/storage/v1/"):raise RuntimeError("NON_PRODUCTION_STORAGE_ORIGIN_ABORT")
  h={"Cache-Control":"no-store"}
  if key:h.update({"Authorization":"Bearer "+key,"apikey":key})
  if headers:h.update(headers)
  try:
-  with urllib.request.urlopen(urllib.request.Request(url,data=blob,headers=h,method=method),timeout=45) as res:
+  with urllib.request.build_opener(NoRedirect).open(urllib.request.Request(url,data=blob,headers=h,method=method),timeout=45) as res:
    return res.status,res.read()
  except urllib.error.HTTPError as ex:
   return ex.code,ex.read(1000)

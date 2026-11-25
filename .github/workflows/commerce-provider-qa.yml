@@ -160,7 +160,7 @@ jobs:
     # One exact SHA transition only. The previous paid attempt failed in the
     # browser; this DIFFERENT probe never submits payment or creates a PaymentIntent.
     # Never rearm or run on arbitrary branch pushes.
-    if: github.event.action == 'synchronize' && github.event.pull_request.number == 265 && github.event.before == 'b0b455ceb56edc0106601ab4ebec5b8fb10a6316' && github.run_attempt == 1 && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event.action == 'synchronize' && github.event.pull_request.number == 265 && github.event.before == 'dbc7cf9a8369b273dd1ec1d7bf2ae22633238610' && github.run_attempt == 1 && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository
     needs: [qa-local-preview-chromium, qa-hosted-security-probe]
     runs-on: ubuntu-24.04
     timeout-minutes: 12

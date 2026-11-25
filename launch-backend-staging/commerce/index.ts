@@ -138,7 +138,7 @@ Deno.serve(async(req:Request)=>{
  // Stripe idempotency retention is at least 24h. Never recreate an old unknown session.
  if(!Number.isFinite(expires)||expires<Math.floor(Date.now()/1000)+1900)return json({error:"order_review"},409);
  const metadata={nbjb_commerce:"v1",order_id:o.id,slug};
- s=await stripe.checkout.sessions.create({mode:"payment",payment_method_types:["card"],line_items:[{price:o.stripe_price_id,quantity:1}],client_reference_id:o.id,metadata,payment_intent_data:{metadata},expires_at:expires,automatic_tax:{enabled:true},customer_creation:"always",success_url:origin+"/commerce-result.html?order="+o.id+"&return=success",cancel_url:origin+"/commerce-result.html?order="+o.id+"&return=cancel"}, {idempotencyKey:"nbjb-commerce-v1-"+o.id});
+ s=await stripe.checkout.sessions.create({mode:"payment",payment_method_types:["card"],line_items:[{price:o.stripe_price_id,quantity:1}],client_reference_id:o.id,metadata,payment_intent_data:{metadata},expires_at:expires,automatic_tax:{enabled:true},billing_address_collection:"required",customer_creation:"always",success_url:origin+"/commerce-result.html?order="+o.id+"&return=success",cancel_url:origin+"/commerce-result.html?order="+o.id+"&return=cancel"}, {idempotencyKey:"nbjb-commerce-v1-"+o.id});
  // Conditional bind: a webhook may have already bound this order.
  must(await admin.from("commerce_orders").update({stripe_session_id:s.id}).eq("id",o.id).eq("status","pending").is("stripe_session_id",null));
  }

@@ -152,15 +152,21 @@ def fill_synthetic_billing_address(page):
         "input[autocomplete='address-line1']","input[name*='addressLine1' i]",
         "input[placeholder*='Street address' i]","input[placeholder*='Address line 1' i]","input[aria-label*='Address line 1' i]"
     ],"123 Test Avenue",required=False)
+    # Stripe Checkout's actual hosted DOM uses name=locality and
+    # autocomplete="billing address-level2"; the old exact selector missed it.
     fields["city"]=fill_across_frames(page,"billing_city",[
-        "input[autocomplete='address-level2']","input[name*='city' i]",
-        "input[aria-label='City' i]"
+        "input[name='locality']","input[autocomplete*='address-level2']",
+        "input[name*='city' i]","input[aria-label='City' i]",
+        "input[placeholder='City']"
     ],"San Francisco",required=False)
     for frame in stripe_frames(page):
         try:
-            options=frame.locator("select[autocomplete='address-level1']").first
+            # The real Stripe State field is select[name=administrativeArea]
+            # with autocomplete="billing address-level1".
+            options=frame.locator("select[name='administrativeArea'],select[autocomplete*='address-level1']").first
             if options.count() and options.is_visible(timeout=250) and options.is_enabled(timeout=250):
-                options.select_option(value="CA",timeout=2000)
+                try:options.select_option(value="CA",timeout=2000)
+                except Exception:options.select_option(label="California",timeout=2000)
                 fields["state"]=True
                 break
         except Exception:
@@ -250,7 +256,24 @@ def stripe_test_payment(page, email, cents):
     # Previous genuine sandbox Pay click was accepted by Chromium but left
     # Checkout OPEN/UNPAID with NO PaymentIntent. An independently observed
     # country/address section was not completed by that prior harness.
-    fill_synthetic_billing_address(page)
+    addr=fill_synthetic_billing_address(page)
+    # Do not press Pay unless every approved, synthetic billing field was filled.
+    check(all(addr.values()),"STRIPE_BILLING_FIELDS_INCOMPLETE_NO_PAYMENT_CLICK")
+    # Assert the actual known hosted City / State controls, not merely a click.
+    city_found=state_found=False
+    for frame in stripe_frames(page):
+        try:
+            city=frame.locator("input[name='locality']").first
+            if city.count() and city.is_visible(timeout=250):
+                city_found |= city.input_value(timeout=500)=="San Francisco"
+            state=frame.locator("select[name='administrativeArea']").first
+            if state.count() and state.is_visible(timeout=250):
+                state_value=state.input_value(timeout=500)
+                selected_label=state.locator("option:checked").inner_text(timeout=500) if state_value else ""
+                state_found |= state_value=="CA" or selected_label.strip().lower()=="california"
+        except Exception:pass
+    check(city_found and state_found,"STRIPE_BILLING_CITY_STATE_DOM_VERIFICATION_FAILED_NO_PAYMENT_CLICK")
+    print("SANDBOX_BILLING_CITY_STATE_HOSTED_DOM_VERIFIED",flush=True)
     test_host(page)
     check(expected in page.locator("body").inner_text(timeout=10000),"WRONG_STRIPE_SUBTOTAL_ABORT")
     # Stripe may enable the final button asynchronously after address/card validation.

@@ -54,23 +54,36 @@ def address_controls_snapshot(page):
     # Only structure/labels, no element values, typed emails, card, tokens,
     # URLs, screenshot or page text. This diagnoses Stripe's state/region picker.
     controls=[]
+    descriptors=("select", "[role=combobox]", "input[autocomplete*='address-level']", "input[autocomplete='postal-code']",
+                 "input[name*='state' i]", "input[name*='region' i]", "input[aria-label*='state' i]",
+                 "input[placeholder*='state' i]", "button[aria-label*='state' i]",
+                 "button[aria-label*='region' i]", "[aria-invalid='true']")
+    seen=set()
     for frame in stripe_frames(page):
         try:
-            for item in frame.locator("select,[role=combobox]").all()[:35]:
-                if not item.is_visible(timeout=200):continue
-                data=item.evaluate("""el => ({
-                    tag:el.tagName.toLowerCase(),
-                    name:(el.getAttribute('name')||'').slice(0,60),
-                    autocomplete:(el.getAttribute('autocomplete')||'').slice(0,60),
-                    label:(el.getAttribute('aria-label')||'').slice(0,60),
-                    testid:(el.getAttribute('data-testid')||'').slice(0,60),
-                    role:(el.getAttribute('role')||'').slice(0,40),
-                    placeholder:(el.getAttribute('placeholder')||'').slice(0,60)
-                })""")
-                controls.append(data)
+            for selector in descriptors:
+                for item in frame.locator(selector).all()[:16]:
+                    try:
+                        if not item.is_visible(timeout=200):continue
+                        data=item.evaluate("""el => ({
+                            tag:el.tagName.toLowerCase(),type:(el.getAttribute('type')||'').slice(0,24),
+                            name:(el.getAttribute('name')||'').slice(0,60),
+                            autocomplete:(el.getAttribute('autocomplete')||'').slice(0,60),
+                            label:(el.getAttribute('aria-label')||'').slice(0,60),
+                            testid:(el.getAttribute('data-testid')||'').slice(0,60),
+                            role:(el.getAttribute('role')||'').slice(0,40),
+                            placeholder:(el.getAttribute('placeholder')||'').slice(0,60),
+                            invalid:el.getAttribute('aria-invalid')==='true',
+                            disabled:el.disabled===true,readonly:el.readOnly===true
+                        })""")
+                        # Structural metadata only: no input values, email, card number, DOM text or URLs.
+                        if data.get("autocomplete","").startswith("cc-"):continue
+                        key=json.dumps(data,sort_keys=True)
+                        if key not in seen:
+                            seen.add(key);controls.append(data)
+                    except Exception:continue
         except Exception:continue
-    # The display below intentionally never includes account/card/address values.
-    print("STRIPE_SYNTHETIC_ADDRESS_CONTROL_DESCRIPTORS "+json.dumps(controls[:25],sort_keys=True),flush=True)
+    print("STRIPE_SYNTHETIC_ADDRESS_CONTROL_DESCRIPTORS "+json.dumps(controls[:36],sort_keys=True),flush=True)
 
 def main():
     email=os.getenv("NBJB_QA_EXISTING_EMAIL","")

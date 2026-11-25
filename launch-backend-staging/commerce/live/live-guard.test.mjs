@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {LIVE_RUNTIME_REVIEWED, PRODUCTION_REF, LIVE_ORIGIN, VERIFIED_LIVE_ACCOUNT, liveConfigurationMatches, productionAllowed, permittedCheckout, validatePrice, verifySession, ownedDownload} from "./commerce-core.mjs";
+import {LIVE_RUNTIME_REVIEWED, PRODUCTION_REF, LIVE_ORIGIN, VERIFIED_LIVE_ACCOUNT, liveConfigurationMatches, productionAllowed, permittedCheckout, approvedBoundaryRelease, BOUNDARY_APPROVED_RELEASE, validatePrice, verifySession, ownedDownload} from "./commerce-core.mjs";
 
 const good = {
  mode:"production",key:"sk_live_PLACEHOLDER_NOT_A_REAL_KEY",
@@ -73,4 +73,23 @@ test("live canary never opens purchases to any other user or SKU",()=>{
  assert.equal(permittedCheckout({...a,gate:"enabled"}),true);
  assert.equal(permittedCheckout({...a,gate:"enabled",slug:"30-days-through-the-fire"}),false);
  assert.equal(permittedCheckout({...a,gate:"canary",canaryUserId:"not-a-uuid"}),false);
+});
+
+test("Boundary Builder checkout accepts only frozen 004-C v1.4 bytes path and matching live Stripe product version",()=>{
+ const b=BOUNDARY_APPROVED_RELEASE;
+ const p={slug:b.slug,asset_version:b.asset_version,asset_key:b.asset_key,download_name:b.download_name};
+ const provider={metadata:{sku:"NBJB-BB-001",version:"1.4"}};
+ assert.equal(approvedBoundaryRelease(p,provider),true);
+ for(const altered of [
+  {asset_version:"v1.3"},
+  {asset_key:"boundary-builder-workbook/v1.3/NBJB-BB-001_v1.3_customer.zip"},
+  {asset_key:"boundary-builder-workbook/v1.4/NBJB-BB-001_v1.4_INTERNAL.zip"},
+  {download_name:"NBJB-BB-001_v1.3_customer.zip"},
+  {asset_version:null},
+  {asset_key:null}
+ ]) assert.equal(approvedBoundaryRelease({...p,...altered},provider),false,JSON.stringify(altered));
+ assert.equal(approvedBoundaryRelease(p,{metadata:{sku:"NBJB-BB-001",version:"1.3"}}),false);
+ assert.equal(approvedBoundaryRelease(p,{metadata:{sku:"OTHER",version:"1.4"}}),false);
+ assert.equal(approvedBoundaryRelease(p,{}),false);
+ assert.equal(approvedBoundaryRelease({...p,slug:"forge-workbook"},{}),true,"Separate Forge release awaits its own accepted edition gate");
 });

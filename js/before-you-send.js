@@ -86,7 +86,7 @@
         fallbackField.select();
         messageElement.textContent = 'Select and copy the highlighted wording using your device’s Copy command.';
       } else {
-        messageElement.textContent = 'Clipboard unavailable. Use your browser’s address bar to copy this page’s URL.';
+        messageElement.textContent = 'Clipboard unavailable. Copy this public link manually: https://notbrokenjustburning.com/before-you-send.html';
       }
     }
   }

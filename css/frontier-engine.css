@@ -11,3 +11,11 @@
 .fe-article a:not(.button),.fe-reading a,.fe-aside a,.fe-join a{text-decoration:underline;text-underline-offset:3px}
 @media(max-width:800px){.fe-grid{grid-template-columns:1fr}.fe-choice{padding:1rem}.fe-result .button{width:100%}.fe-article{padding-left:clamp(1rem,4vw,2rem);padding-right:clamp(1rem,4vw,2rem)}}
 @media(prefers-reduced-motion:reduce){.fe-choice{transition:none}}
+/* Tool-scoped accessible color pairs and target sizes. */
+.fe-card,.fe-aside,.fe-share{background:#111116;color:#f5efe7}
+.fe-choice{min-height:44px;box-sizing:border-box}
+.fe-card .button,.fe-share .button,.fe-continuation .button{min-width:44px;min-height:44px}
+.fe-card .button-primary,.fe-continuation .button-primary{background:#ffad72;color:#160802}
+.fe-card .button-ghost,.fe-share .button-ghost{background:#242127;color:#f5efe7}
+.fe-card a:not(.button),.fe-aside a:not(.button),.fe-share a:not(.button){color:#ffad72;text-decoration:underline}
+.fe-card button:focus-visible,.fe-share button:focus-visible,.fe-continuation .button:focus-visible,.fe-card a:focus-visible{outline:2px solid #ffad72;outline-offset:3px}

@@ -44,7 +44,7 @@ function wire(kind,build,keys,shareUrl){
  });
  async function copy(value,fallback,message,el){
   try {if(!navigator.clipboard?.writeText)throw Error('Clipboard unavailable');await navigator.clipboard.writeText(value);el.textContent=message}
-  catch(_){if(fallback){fallback.focus();fallback.select();el.textContent='Select the highlighted text and use Copy on your device.';}else{el.textContent='Copy is unavailable. Use your address bar to copy this public page URL.';}}
+  catch(_){if(fallback){fallback.focus();fallback.select();el.textContent='Select the highlighted text and use Copy on your device.';}else{el.textContent='Copy is unavailable. Copy this public link manually: '+shareUrl+'';}}
  }
  document.getElementById('fe-'+kind+'-copy')?.addEventListener('click',()=>{if(!result.hidden&&output.value)copy(output.value,output,'Routine copied. You control where it goes.',status)});
  document.getElementById('fe-'+kind+'-clear')?.addEventListener('click',()=>{form.querySelectorAll('input[type=radio]').forEach(input=>{input.checked=false});result.hidden=true;output.value='';status.textContent='Choose a new direction.';form.querySelector('input[type=radio]')?.focus()});

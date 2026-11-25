@@ -130,6 +130,53 @@ def fill_across_frames(page, field, probes, value, required=True):
         raise AssertionError("STRIPE_TEST_INPUT_NOT_FOUND_"+field)
     return False
 
+def fill_synthetic_billing_address(page):
+    """Checkout displayed country/address inputs that the previous harness left blank.
+
+    Only preexisting Stripe test-hosted fields, approved US synthetic test address;
+    no real customer data, no shipping, no saved-card or Link integration.
+    """
+    test_host(page)
+    fields={"country":False,"line1":False,"city":False,"state":False,"postal":False}
+    for frame in stripe_frames(page):
+        for selector in ("select[autocomplete='country']","select[name*='country' i]"):
+            try:
+                element=frame.locator(selector).first
+                if element.count() and element.is_visible(timeout=300) and element.is_enabled(timeout=300):
+                    element.select_option(value="US",timeout=2000)
+                    fields["country"]=True
+                    break
+            except Exception:
+                pass
+    fields["line1"]=fill_across_frames(page,"billing_line1",[
+        "input[autocomplete='address-line1']","input[name*='addressLine1' i]",
+        "input[placeholder*='address' i]","input[aria-label*='Address line 1' i]"
+    ],"123 Test Avenue",required=False)
+    fields["city"]=fill_across_frames(page,"billing_city",[
+        "input[autocomplete='address-level2']","input[name*='city' i]",
+        "input[aria-label='City' i]"
+    ],"San Francisco",required=False)
+    for frame in stripe_frames(page):
+        try:
+            options=frame.locator("select[autocomplete='address-level1']").first
+            if options.count() and options.is_visible(timeout=250) and options.is_enabled(timeout=250):
+                options.select_option(value="CA",timeout=2000)
+                fields["state"]=True
+                break
+        except Exception:
+            pass
+    if not fields["state"]:
+        fields["state"]=fill_across_frames(page,"billing_state",[
+          "input[autocomplete='address-level1']","input[name*='state' i]","input[aria-label='State' i]"
+        ],"CA",required=False)
+    fields["postal"]=fill_across_frames(page,"billing_postal",[
+        "input[autocomplete='postal-code']","input[name*='postal' i]",
+        "input[placeholder*='ZIP' i]","input[aria-label*='Postal code' i]"
+    ],"94103",required=False)
+    test_host(page)
+    print("SANDBOX_TEST_BILLING_ADDRESS_FIELD_STATUS "+json.dumps(fields,sort_keys=True),flush=True)
+    return fields
+
 def stripe_test_payment(page, email, cents):
     test_host(page)
     expected=str(cents//100)+"."+f"{cents%100:02d}"
@@ -160,7 +207,10 @@ def stripe_test_payment(page, email, cents):
     fill_across_frames(page,"expiry",["input[autocomplete='cc-exp']","input[name='cardExpiry']","input[name='exp-date']","#cardExpiry","input[data-elements-stable-field-name='cardExpiry']","input[aria-label='Expiration date' i]","input[placeholder='MM / YY']"],"1228")
     fill_across_frames(page,"cvc",["input[autocomplete='cc-csc']","input[name='cardCvc']","input[name='cvc']","#cardCvc","input[data-elements-stable-field-name='cardCvc']","input[placeholder='CVC']"],"123")
     fill_across_frames(page,"name",["input[autocomplete='cc-name']","input[name='billingName']","#billingName","input[placeholder='Full name']"],"NBJB QA Browser",required=False)
-    fill_across_frames(page,"postal",["input[autocomplete='postal-code']","input[name='billingPostalCode']","#billingPostalCode","input[placeholder='ZIP']"],"33801",required=False)
+    # Previous genuine sandbox Pay click was accepted by Chromium but left
+    # Checkout OPEN/UNPAID with NO PaymentIntent. An independently observed
+    # country/address section was not completed by that prior harness.
+    fill_synthetic_billing_address(page)
     test_host(page)
     check(expected in page.locator("body").inner_text(timeout=10000),"WRONG_STRIPE_SUBTOTAL_ABORT")
     # Stripe may enable the final button asynchronously after address/card validation.

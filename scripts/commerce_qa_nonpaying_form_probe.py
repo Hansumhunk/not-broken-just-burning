@@ -15,7 +15,7 @@ import time
 from urllib.parse import urlparse
 from playwright.sync_api import sync_playwright, TimeoutError as BrowserTimeout
 from commerce_qa_browser_acceptance import (
-    QA_ORIGIN, login, smoke, test_host, stripe_frames, fill_across_frames, check
+    QA_ORIGIN, login, smoke, test_host, stripe_frames, fill_across_frames, fill_synthetic_billing_address, check
 )
 SLUG="boundary-builder-workbook"
 
@@ -49,6 +49,28 @@ def frames_snapshot(page):
             "address_field_presence":address,
             "allowed_pay_button_visible":pay_visible,
             "allowed_pay_button_enabled":pay_enabled}
+
+def address_controls_snapshot(page):
+    # Only structure/labels, no element values, typed emails, card, tokens,
+    # URLs, screenshot or page text. This diagnoses Stripe's state/region picker.
+    controls=[]
+    for frame in stripe_frames(page):
+        try:
+            for item in frame.locator("select,[role=combobox]").all()[:35]:
+                if not item.is_visible(timeout=200):continue
+                data=item.evaluate("""el => ({
+                    tag:el.tagName.toLowerCase(),
+                    name:(el.getAttribute('name')||'').slice(0,60),
+                    autocomplete:(el.getAttribute('autocomplete')||'').slice(0,60),
+                    label:(el.getAttribute('aria-label')||'').slice(0,60),
+                    testid:(el.getAttribute('data-testid')||'').slice(0,60),
+                    role:(el.getAttribute('role')||'').slice(0,40),
+                    placeholder:(el.getAttribute('placeholder')||'').slice(0,60)
+                })""")
+                controls.append(data)
+        except Exception:continue
+    # The display below intentionally never includes account/card/address values.
+    print("STRIPE_SYNTHETIC_ADDRESS_CONTROL_DESCRIPTORS "+json.dumps(controls[:25],sort_keys=True),flush=True)
 
 def main():
     email=os.getenv("NBJB_QA_EXISTING_EMAIL","")
@@ -106,7 +128,10 @@ def main():
                     break
             time.sleep(2)
             test_host(page)
+            fields=fill_synthetic_billing_address(page)
+            address_controls_snapshot(page)
             snap=frames_snapshot(page)
+            print("NONPAYING_ADDRESS_FILL_STATUS "+json.dumps(fields,sort_keys=True),flush=True)
             print("SANDBOX_NONPAYING_FORM_DIAGNOSTIC "+json.dumps({"input_fill_status":results,**snap},sort_keys=True),flush=True)
             print("NO_PAY_BUTTON_CLICKED_NO_PAYMENT_INTENT_NO_SETTLED_ORDER_CLAIM",flush=True)
         finally:

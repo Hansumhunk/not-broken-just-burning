@@ -18,7 +18,7 @@ Primary public domain:
 
 Official public channels:
 
-- Email: `notbrokenjustburning@gmail.com`
+- Email: `contact@notbrokenjustburning.com`
 - Facebook: `https://www.facebook.com/profile.php?id=61575787773619`
 
 ## Mission

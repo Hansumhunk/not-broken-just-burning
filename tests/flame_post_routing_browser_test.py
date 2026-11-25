@@ -56,6 +56,10 @@ def check_url(h):
     return address
 
 def scope(p):
+    if p.as_posix() in {'README.md','BRAND.md','ENGAGEMENT.md'}:
+        return 'public-guidance'
+    if p.as_posix() == 'scripts/flame_spirit_products.mjs':
+        return 'external-identity'
     if len(p.parts)==1 and (p.suffix==".html" or p.name in {"robots.txt","sitemap.xml","CNAME"}):
         return "website"
     if p.parts[0] in {"js","css","assets"} and p.suffix in TEXT_SUFFIX:
@@ -78,9 +82,9 @@ def scan():
         legacy=LEGACY in normalized
         restricted=RESTRICTED in normalized
         unknown=sorted(set(EMAIL_RE.findall(normalized))-PUBLIC)
-        if kind=="website" and (legacy or restricted or unknown):
+        if kind in {"website","public-guidance","external-identity"} and (legacy or restricted or unknown):
             errors.append(f"{p}: legacy={legacy} restricted={restricted} unapproved={len(unknown)}")
-        elif kind!="website" and (legacy or restricted or unknown):
+        elif kind not in {"website","public-guidance","external-identity"} and (legacy or restricted or unknown):
             print(f"REVIEW separate scope {kind}: {p} legacy={legacy} restricted={restricted} unapproved={len(unknown)}")
         if kind!="website" or p.suffix!=".html": continue
         a=Anchors();a.feed(text)
@@ -119,11 +123,15 @@ def browser_check(browser, origin, pages, mobile):
     try:
         identity(page,origin,"flame-post-fixture")
         for path, links in sorted(pages.items()):
+            if path=="member-auth.html":
+                page.evaluate("sessionStorage.removeItem('qa-fixture-user')")
             if path.startswith("member-") and path!="member-auth.html" or path=="members.html":
                 ready(page,origin,path)
             else:
                 response=page.goto(origin+"/"+path,wait_until="domcontentloaded")
                 assert response and response.status==200,path
+            if path=="member-auth.html":
+                page.locator("#signed-out-state").wait_for(state="visible")
             page.evaluate(CAPTURE)
             anchors=page.locator("a[href^='mailto:' i]").all()
             actual=[a.get_attribute("href") for a in anchors]
@@ -139,7 +147,10 @@ def browser_check(browser, origin, pages, mobile):
                 else:
                     # Hidden state is not interactive acceptance; separately counted.
                     hidden+=1
+                    print(f"HIDDEN {mode} {path}")
             print(f"PASS {mode} {path}: {len(anchors)} DOM links")
+            if path=="member-auth.html":
+                page.evaluate("sessionStorage.setItem('qa-fixture-user','flame-post-fixture')")
         ready(page,origin,"member-feedback.html")
         page.locator("#feedback-topic").select_option("Broken link or button")
         page.locator("#feedback-page").select_option("Dashboard")
@@ -165,6 +176,7 @@ def browser_check(browser, origin, pages, mobile):
         assert "Synthetic fixture only" in page.locator("#feedback-prepared").input_value()
         print(f"PASS {mode} feedback composer recipient/subject/body; headless protocol capture, NO message sent")
         print(f"BROWSER_COUNTS {mode} clicked={n} hidden={hidden} feedback=1")
+        assert hidden==0, "unexercised contact interaction; inspect logged path"
     finally:
         context.close()
 

@@ -51,16 +51,17 @@
         <p class="eyebrow">One choice. One clearer next step.</p>
         <h2 id="bys-tool-title">What are you trying to do?</h2>
         <p>Choose the closest situation. This tool offers general communication examples, not an instruction to contact someone when contact may be unsafe or prohibited.</p>
-        <form id="bys-form">
-          <fieldset class="bys-options">
+        <p id="bys-fallback" role="status">Interactive suggestions are unavailable until the tool loads. You can still read the checks on this page or <a href="first-seven-days.html">use the free First Seven Days</a>.</p>
+        <div id="bys-form">
+          <fieldset class="bys-options" disabled>
             <legend class="bys-visually-hidden">Choose a communication goal</legend>
             <label class="bys-choice"><input type="radio" name="purpose" value="pause" required><span><strong>I am too upset to respond well.</strong><small>I need a pause without making things worse.</small></span></label>
             <label class="bys-choice"><input type="radio" name="purpose" value="facts"><span><strong>I want to defend or explain myself.</strong><small>I need to separate facts from accusations.</small></span></label>
             <label class="bys-choice"><input type="radio" name="purpose" value="boundary"><span><strong>Someone crossed a boundary.</strong><small>I need a limit I can act on.</small></span></label>
             <label class="bys-choice"><input type="radio" name="purpose" value="parenting"><span><strong>We need to discuss child-related logistics.</strong><small>I want to keep necessary communication practical.</small></span></label>
           </fieldset>
-          <button type="submit" class="button button-primary">Find My Next Step</button>
-        </form>
+          <button type="button" class="button button-primary" data-tool-run disabled>Find My Next Step</button>
+        </div>
         <section id="bys-result" class="bys-result" aria-labelledby="bys-result-heading" hidden>
           <p class="eyebrow">Your 90-second reset</p>
           <h3 id="bys-result-heading" tabindex="-1"></h3>

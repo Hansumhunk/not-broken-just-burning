@@ -23,3 +23,8 @@ test('frontier source does not change protected site controls',()=>{
  const css=read('css/frontier-engine.css');assert.match(css,/@media\(max-width:800px\)/);assert.match(css, /prefers-reduced-motion/);
  const a=read('.github/workflows/validate-site.yml');assert.match(a,/node --test scripts\/test_frontier_engine\.mjs/);
 });
+
+test('native form submission is structurally impossible even before JS initialization',()=>{
+ for(const [p] of tools){const h=read(p);assert.doesNotMatch(h,/<form\b|type="submit"|\bform=/i);assert.equal((h.match(/<fieldset disabled>/g)||[]).length,3);assert.match(h,/data-tool-run disabled/);assert.match(h,/-fallback" role="status"/);}
+ const js=read('js/frontier-engine-tools.js');assert.match(js,/run\.addEventListener\('click'/);assert.ok(js.indexOf('run.disabled=false')>js.indexOf("run.addEventListener('click'"));
+});

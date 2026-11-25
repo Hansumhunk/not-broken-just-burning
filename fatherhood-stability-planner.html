@@ -20,22 +20,23 @@
 <main id="main-content">
 <section class="page-hero section-shell fe-hero"><p class="eyebrow">Free interactive tool · 2-minute exercise</p><h1>Fatherhood Stability <span>Planner</span></h1><p class="hero-lead">Separation can change schedules. It does not have to erase the little rituals a child can count on. Choose one dependable action within your actual responsibilities and parenting arrangements.</p></section>
 <section class="section-shell fe-grid"><div class="fe-card"><h2>Build one reliable anchor</h2><p>Choose only general options. No child's name, location, schedule or private history is requested or stored.</p>
-<form id="fe-father-form" data-fe-tool="father">
-<fieldset><legend>1. What moment needs an anchor?</legend>
+<p id="fe-father-fallback" role="status">Interactive suggestions are unavailable until the tool loads. The educational guidance below and <a href="first-seven-days.html">First Seven Days</a> remain available without an account.</p>
+<div id="fe-father-form" data-fe-tool="father">
+<fieldset disabled><legend>1. What moment needs an anchor?</legend>
 <label class="fe-choice"><input type="radio" name="moment" value="morning" required><span>Morning or getting ready</span></label>
 <label class="fe-choice"><input type="radio" name="moment" value="handoff"><span>Transitions or handoffs</span></label>
 <label class="fe-choice"><input type="radio" name="moment" value="apart"><span>When we are apart</span></label>
 <label class="fe-choice"><input type="radio" name="moment" value="bedtime"><span>Evening or bedtime</span></label></fieldset>
-<fieldset><legend>2. What does the child need most from this moment?</legend>
+<fieldset disabled><legend>2. What does the child need most from this moment?</legend>
 <label class="fe-choice"><input type="radio" name="need" value="calm" required><span>Calm reassurance</span></label>
 <label class="fe-choice"><input type="radio" name="need" value="connection"><span>Undivided connection</span></label>
 <label class="fe-choice"><input type="radio" name="need" value="predictability"><span>A predictable routine</span></label></fieldset>
-<fieldset><legend>3. What can you realistically give?</legend>
+<fieldset disabled><legend>3. What can you realistically give?</legend>
 <label class="fe-choice"><input type="radio" name="minutes" value="5" required><span>5 minutes</span></label>
 <label class="fe-choice"><input type="radio" name="minutes" value="15"><span>15 minutes</span></label>
 <label class="fe-choice"><input type="radio" name="minutes" value="30"><span>30 minutes</span></label></fieldset>
-<button class="button button-primary" type="submit">Build My Routine</button>
-</form>
+<button class="button button-primary" type="button" data-tool-run disabled>Build My Routine</button>
+</div>
 <section class="fe-result" id="fe-father-result" hidden aria-labelledby="fe-father-heading"><h3 id="fe-father-heading" tabindex="-1">Your dependable anchor</h3><p id="fe-father-summary"></p><label for="fe-father-output">A small routine you can adapt</label><textarea id="fe-father-output" readonly rows="6"></textarea><p class="fe-note">Adjust to your child's age, expressed needs, safety and real parenting arrangements. Do not promise a call or visit you cannot guarantee.</p><button type="button" class="button button-ghost" id="fe-father-copy">Copy My Routine</button><button type="button" class="button button-ghost" id="fe-father-clear">Choose Again</button></section>
 <p class="fe-status" id="fe-father-status" role="status" aria-live="polite"></p>
 <noscript><p>Without JavaScript, choose a single predictable moment, offer appropriate reassurance or attention, and keep promises small and realistic. Read the <a href="guide-fatherhood-routines-after-separation.html">full guide</a>.</p></noscript>

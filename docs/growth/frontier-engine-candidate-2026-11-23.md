@@ -67,3 +67,7 @@ Use existing verified PostHog pageview coverage to observe aggregate landings, t
 - [ ] Separate release approval for PR #282 then stacked PR
 - [ ] Live indexability/search and actual visitor measurement after deployment
 - [ ] Publishing of prepared channel packages (not scheduled or sent)
+
+
+### Ignition V — fail-closed candidate reconciliation
+Existing stack reconciled onto Candidate A with non-form radio controls, disabled-by-default fieldsets and button, accessible fallback, local-only generation. Exact browser and regression acceptance required before release; Candidate A must be independently released first. No new analytics events.

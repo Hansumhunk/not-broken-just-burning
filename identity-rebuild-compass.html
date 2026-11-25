@@ -20,21 +20,22 @@
 <main id="main-content">
 <section class="page-hero section-shell fe-hero"><p class="eyebrow">Free interactive tool · 2-minute exercise</p><h1>The Identity <span>Rebuild Compass</span></h1><p class="hero-lead">A relationship, career or role can change without erasing every part of who you are. This exercise connects one chosen value to a small, observable action.</p></section>
 <section class="section-shell fe-grid"><div class="fe-card"><h2>Choose a direction you can act on</h2><p>You do not need to explain what happened. No identifying details, private writing or account registration are required.</p>
-<form id="fe-identity-form" data-fe-tool="identity">
-<fieldset><legend>1. What value do you want to practice?</legend>
+<p id="fe-identity-fallback" role="status">Interactive suggestions are unavailable until the tool loads. The educational guidance below and <a href="first-seven-days.html">First Seven Days</a> remain available without an account.</p>
+<div id="fe-identity-form" data-fe-tool="identity">
+<fieldset disabled><legend>1. What value do you want to practice?</legend>
 <label class="fe-choice"><input type="radio" name="value" value="steadiness" required><span>Steadiness — respond, don't spiral</span></label>
 <label class="fe-choice"><input type="radio" name="value" value="integrity"><span>Integrity — keep my word</span></label>
 <label class="fe-choice"><input type="radio" name="value" value="connection"><span>Connection — show up for people</span></label>
 <label class="fe-choice"><input type="radio" name="value" value="courage"><span>Courage — face one avoided task</span></label></fieldset>
-<fieldset><legend>2. Where could you practice it first?</legend>
+<fieldset disabled><legend>2. Where could you practice it first?</legend>
 <label class="fe-choice"><input type="radio" name="area" value="self" required><span>My daily routine</span></label>
 <label class="fe-choice"><input type="radio" name="area" value="work"><span>Work and responsibilities</span></label>
 <label class="fe-choice"><input type="radio" name="area" value="relationships"><span>Healthy relationships</span></label></fieldset>
-<fieldset><legend>3. Choose a modest commitment</legend>
+<fieldset disabled><legend>3. Choose a modest commitment</legend>
 <label class="fe-choice"><input type="radio" name="minutes" value="5" required><span>5 minutes</span></label>
 <label class="fe-choice"><input type="radio" name="minutes" value="15"><span>15 minutes</span></label>
 <label class="fe-choice"><input type="radio" name="minutes" value="30"><span>30 minutes</span></label></fieldset>
-<button class="button button-primary" type="submit">Find One Direction</button></form>
+<button class="button button-primary" type="button" data-tool-run disabled>Find One Direction</button></div>
 <section id="fe-identity-result" class="fe-result" hidden aria-labelledby="fe-identity-heading"><h3 id="fe-identity-heading" tabindex="-1">Your next honest action</h3><p id="fe-identity-summary"></p><label for="fe-identity-output">Your compass note</label><textarea id="fe-identity-output" readonly rows="6"></textarea><button type="button" class="button button-ghost" id="fe-identity-copy">Copy My Note</button><button type="button" class="button button-ghost" id="fe-identity-clear">Choose Again</button></section>
 <p id="fe-identity-status" class="fe-status" role="status" aria-live="polite"></p>
 <noscript><p>Without JavaScript, write one value you want to practice, choose one life area, and act on it for five minutes. Read the <a href="guide-rebuilding-identity-after-divorce.html">identity guide</a> for examples.</p></noscript></div>

@@ -23,7 +23,12 @@ test('each of four choices produces a complete, non-diagnostic human-scale next 
 
 test('no private text intake, browser persistence or outbound transfer from tool', () => {
   assert.equal((page.match(/type="radio" name="purpose"/g) || []).length, 4);
-  assert.doesNotMatch(page, /name="email"|type="email"|<form[^>]+action=/i);
+  assert.doesNotMatch(page, /name="email"|type="email"|<form\b|type="submit"|\bform=/i);
+  assert.match(page, /<fieldset class="bys-options" disabled>/);
+  assert.match(page, /data-tool-run disabled/);
+  assert.match(page, /id="bys-fallback"/);
+  assert.match(script, /run\.addEventListener\('click'/);
+  assert.ok(script.indexOf('run.disabled = false') > script.indexOf("run.addEventListener('click'"));
   assert.doesNotMatch(script, /\blocalStorage\b|\bsessionStorage\b|\bfetch\s*\(|XMLHttpRequest|sendBeacon|posthog|URLSearchParams|document\.cookie|innerHTML/);
   assert.match(script, /heading\.textContent = response\.title/);
   assert.match(script, /wording\.value = response\.template/);

@@ -33,9 +33,9 @@ function wire(kind,build,keys,shareUrl){
  const form=document.getElementById('fe-'+kind+'-form'),result=document.getElementById('fe-'+kind+'-result'),
  output=document.getElementById('fe-'+kind+'-output'),summary=document.getElementById('fe-'+kind+'-summary'),
  status=document.getElementById('fe-'+kind+'-status'),heading=document.getElementById('fe-'+kind+'-heading');
- if(!form||!result||!output||!status||!heading)return;
- form.addEventListener('submit',e=>{
-  e.preventDefault();
+ const run=form?.querySelector('[data-tool-run]'),fallback=document.getElementById('fe-'+kind+'-fallback');
+ if(!form||!result||!output||!status||!heading||!summary||!run||!fallback)return;
+ run.addEventListener('click',()=>{
   const values=keys.map(k=>form.querySelector('input[name="'+k+'"]:checked')?.value);
   const text=build(...values);
   if(!text){status.textContent='Choose one option in every section to build your next step.';return;}
@@ -47,9 +47,11 @@ function wire(kind,build,keys,shareUrl){
   catch(_){if(fallback){fallback.focus();fallback.select();el.textContent='Select the highlighted text and use Copy on your device.';}else{el.textContent='Copy is unavailable. Use your address bar to copy this public page URL.';}}
  }
  document.getElementById('fe-'+kind+'-copy')?.addEventListener('click',()=>{if(!result.hidden&&output.value)copy(output.value,output,'Routine copied. You control where it goes.',status)});
- document.getElementById('fe-'+kind+'-clear')?.addEventListener('click',()=>{form.reset();result.hidden=true;output.value='';status.textContent='Choose a new direction.';form.querySelector('input[type=radio]')?.focus()});
+ document.getElementById('fe-'+kind+'-clear')?.addEventListener('click',()=>{form.querySelectorAll('input[type=radio]').forEach(input=>{input.checked=false});result.hidden=true;output.value='';status.textContent='Choose a new direction.';form.querySelector('input[type=radio]')?.focus()});
  const share=document.getElementById('fe-'+kind+'-share'),shareStatus=document.getElementById('fe-'+kind+'-share-status');
  share?.addEventListener('click',()=>copy(shareUrl,null,'Public tool link copied. No selections included.',shareStatus));
+ // No form owner; enable controls only after initialization succeeds.
+ form.querySelectorAll('fieldset').forEach(group=>{group.disabled=false});run.disabled=false;fallback.hidden=true;
 }
 wire('father',buildFather,['moment','need','minutes'],'https://notbrokenjustburning.com/fatherhood-stability-planner.html');
 wire('identity',buildIdentity,['value','area','minutes'],'https://notbrokenjustburning.com/identity-rebuild-compass.html');

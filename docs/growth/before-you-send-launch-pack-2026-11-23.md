@@ -63,3 +63,7 @@ Try it: https://notbrokenjustburning.com/before-you-send.html?utm_source=faceboo
 
 ## Guardrails
 No new domains, ad spend, Brevo marketing activation, API secrets, Stripe changes, member-data exports, automatic outreach, or unreviewed production merge. This is educational material, not clinical treatment, legal strategy, or a safety-plan substitute.
+
+
+### Ignition V — privacy correction / release hold
+Non-form radio groups, non-submitting button, disabled-by-default controls and visible failure fallback; enable only after handlers attach. Native GET no longer possible via tool UI. Existing source/CI tests extended; exact-head browser results required. Do not deploy until FE01–FE20 disposition and founder exact authorization.

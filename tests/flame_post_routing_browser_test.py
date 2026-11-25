@@ -8,7 +8,7 @@ import shutil
 import subprocess
 from urllib.parse import unquote, parse_qs
 from playwright.sync_api import sync_playwright
-from first_flame_member_browser_test import ROOT, local_server, setup_context, identity, ready
+from first_flame_member_browser_test import ROOT, AUTH_FIXTURE, local_server, identity, ready
 
 DOMAIN = "notbrokenjustburning.com"
 LEGACY = "notbrokenjustburning" + "@gmail.com"
@@ -115,8 +115,30 @@ event.preventDefault(); event.stopImmediatePropagation();
 window.__fpClicks.push(a.getAttribute('href'));
 }}, true); }"""
 
+def routing_context(browser, origin, mobile):
+    # Same isolated synthetic Auth fixture as existing member QA; add ONLY
+    # the catalog readiness read required to reveal the free-member billing link.
+    # All other function invocations fail and all non-loopback network is blocked.
+    needle = "client: { from: mkQuery },"
+    replacement = """client: { from: mkQuery, functions: { invoke: async (name, options) => {
+      if (name !== 'read-flamewalker-lesson' || options?.body?.action !== 'catalog') {
+        throw new Error('Unexpected function call in isolated routing QA');
+      }
+      return { data: { lessons: Array.from({length: 7}, (_, i) => ({slug: 'fixture-' + i, status: 'published'})) }, error: null };
+    } } },"""
+    assert AUTH_FIXTURE.count(needle)==1, "synthetic fixture contract changed"
+    fixture=AUTH_FIXTURE.replace(needle,replacement)
+    options=dict(viewport={"width":390,"height":844} if mobile else {"width":1280,"height":900},
+                 reduced_motion="reduce")
+    if mobile:
+        options.update(is_mobile=True,has_touch=True,device_scale_factor=2)
+    context=browser.new_context(**options)
+    context.route("**/*",lambda r: r.continue_() if r.request.url.startswith(origin+"/") else r.abort())
+    context.add_init_script(script=fixture)
+    return context, context.new_page()
+
 def browser_check(browser, origin, pages, mobile):
-    context, page=setup_context(browser,origin,mobile=mobile)
+    context, page=routing_context(browser,origin,mobile)
     page.set_default_timeout(6000)
     mode="mobile" if mobile else "desktop"
     n=0; hidden=0
@@ -132,6 +154,8 @@ def browser_check(browser, origin, pages, mobile):
                 assert response and response.status==200,path
             if path=="member-auth.html":
                 page.locator("#signed-out-state").wait_for(state="visible")
+            if path=="member-store.html":
+                page.locator("#member-billing-purchase").wait_for(state="visible")
             page.evaluate(CAPTURE)
             anchors=page.locator("a[href^='mailto:' i]").all()
             actual=[a.get_attribute("href") for a in anchors]

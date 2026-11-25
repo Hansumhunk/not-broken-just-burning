@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
+import {runInNewContext} from "node:vm";
 const read=p=>readFileSync(new URL("../"+p,import.meta.url),"utf8");
 
 test("the canary is a noindex page with explicit click and optional existing account sign in",()=>{
@@ -37,4 +38,32 @@ test("sandbox terms remain separate from specifically versioned LIVE terms",()=>
  assert.match(client,/consent\.dataset\.version='live-v1'/);
  assert.match(client,/commerce-policy-live-review\.html/);
  assert.match(client,/Review and accept the digital product terms first/);
+});
+
+test("public free-account store return accepts exact internal store.html and rejects external or altered destinations",()=>{
+ const authSource=read("js/member-auth.js");
+ const store=read("store.html");
+ assert.ok(store.includes('href="member-auth.html?next=store.html"'),"explicit sign-in path exists without opening checkout");
+ function redirect(next){
+  let subscriber;
+  const link={href:""};
+  const auth={onChange(cb){subscriber=cb;}};
+  const sandbox={
+    window:{NBJBAuth:auth},
+    document:{querySelector(selector){return selector==='[data-auth-primary-link]'?link:null;}},
+    location:{search:next?'?next='+encodeURIComponent(next):'',hash:''},
+    URLSearchParams,Set
+  };
+  runInNewContext(authSource,sandbox,{filename:"js/member-auth.js"});
+  assert.equal(typeof subscriber,"function");
+  subscriber({user:{id:"approved-qa-user"}});
+  return link.href;
+ }
+ assert.equal(redirect("store.html"),"store.html");
+ assert.equal(redirect("commerce-live-canary.html"),"commerce-live-canary.html");
+ assert.equal(redirect("https://external.example/store.html"),"members.html");
+ assert.equal(redirect("//external.example"),"members.html");
+ assert.equal(redirect("store.html?next=https://external.example"),"members.html");
+ assert.equal(redirect("store.html/../admin.html"),"members.html");
+ assert.equal(redirect(""),"members.html");
 });

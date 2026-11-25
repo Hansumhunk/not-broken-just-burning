@@ -4,6 +4,20 @@
 
 ## Current operational acceptance — November 25, 2026 (supersedes historical facts below)
 
+### Founder Supabase readback ZIP 004-C — actual downloaded-byte acceptance
+
+**ACCEPTED — full remote readback SHA-256: PASS (November 25, 2026).** The founder downloaded the actual existing ZIP from the production Supabase private bucket and supplied it back as `NBJB-BB-001_v1.4_supabase_readback.zip.zip`. The double `.zip` suffix is only the local filename of the readback; the remote object key is unchanged. Independent direct byte hashing in the container of this attached **downloaded** object produced:
+
+- Exact ZIP byte count: `739982` (matches production Storage object metadata).
+- Direct full-file SHA-256: `c3031e9de5d66ba0d4185efceff67321a669b472fd264728ff911b06c372c123` — **exactly equal to the approved 004-C release SHA-256**.
+- Python ZIP CRC/integrity: `testzip() == None` (PASS).
+- ZIP members: **exactly two**: `boundary_customer_v1.4.pdf` (806653 bytes, SHA-256 `5d08013c5c59c31c7d9373f79046f51596800b99579e091134bd12be2d84c33f`), `boundary_print_v1.4.pdf` (361242 bytes, SHA-256 `c3e5b2f39027146b06b10ce0ba9a6d5b7ab600b601ccd059f755adb02aaa6d7d`). Both individual files match the approved 004-C manifest.
+- Independent production DB object readback reconfirmed exact private key, 739982 bytes and multipart ETag `"ffe511103d12b2ca90b90654fc5556f7-1"`.
+
+**Disposition:** mark **private release artifact upload + downloaded remote full SHA-256 + archive member integrity = VERIFIED PASS**. Do not reupload/repackage or expose the paid ZIP. This does **not** grant permission for Checkout: genuine sandbox paid event, signed webhook, correct ownership, authenticated owner delivery and nonowner denial, refund/replay, effective terms, and explicit canary/public approvals remain outstanding.
+
+
+
 **Actual installed foundation, checkout OFF:**
 - Production Supabase `plhbvtbvtxfzulsaxuim` now has the isolated RLS-enabled commerce schema, private `nbjb-private-products` bucket and an existing `commerce-live` Edge Function v1, whose deployed `LIVE_RUNTIME_REVIEWED=false` hard-lock still denies Checkout. Five standalone product rows remain `active=false`, standalone orders and entitlements are zero. Membership billing and entitlements are preserved.
 - Approved Boundary Builder buyer edition `v1.4 / 004-C`: protected ZIP size `739982` bytes, local SHA-256 `c3031e9de5d66ba0d4185efceff67321a669b472fd264728ff911b06c372c123`. Owner independently placed one object at `nbjb-private-products/boundary-builder-workbook/v1.4/NBJB-BB-001_v1.4_customer.zip`; production Storage metadata reports the same 739982 bytes and multipart S3 ETag `"ffe511103d12b2ca90b90654fc5556f7-1"`. Locally computing S3 one-part multipart ETag as `md5(md5(raw_approved_zip).digest()).hexdigest()+"-1"` produces **exactly** the reported remote ETag. This is a successful remote-versus-local **ETag integrity match**, not yet independent remote full SHA-256 readback; do not label it a measured remote SHA-256.
@@ -13,7 +27,7 @@
 - Effective standalone purchase terms remain **NOT APPROVED**: the draft proposes a 14-day first-edition refund review, explicit nonrecurring $14.99 consent, two non-fillable PDFs, personal-use license, free account, secure short-lived ZIP, and support/recovery. The exact legal merchant name is not established merely by an EIN. Tax classification `txcd_10302000` is provisional, Stripe Tax registrations were zero, and US/non-Florida nexus and purchase-territory controls need final disposition. Existing Flamewalker+ terms are unchanged.
 - Actual QA provider outcome remains **NO-GO**: Stripe test Checkout card Pay was clicked but the session remained OPEN/UNPAID with **no PaymentIntent**, and QA has 0 paid orders or ownership rights. The most recent synthetic billing address probe reported country/line1/city/postal completed while state-level selection was not confirmed. A subsequent non-paying DOM diagnostic must isolate the field before any further real TEST-mode payment attempt. Successful signed payment→order→entitlement→owned download and refund/replay isolation remain NOT VERIFIED.
 
-**Separate founder approvals required later:** independent remote SHA-256 download evidence (or an accepted stronger service attestation); qualified terms/tax/merchant review; QA successful signed event/ownership/delivery; exact-head PR merge and production code release; expressly authorized real-money canary; expressly authorized public activation. No approval of one phase implies permission to charge or launch the next.
+**Separate founder approvals required later:** qualified terms/tax/merchant review; QA successful signed event/ownership/delivery; exact-head PR merge and production code release; expressly authorized real-money canary; expressly authorized public activation. No approval of one phase implies permission to charge or launch the next.
 
 ---
 
@@ -71,7 +85,7 @@ The founder requested Masculine Restoration Guide and H.A.W.K. Complete Toolkit 
 ## Evidence and tracked blockers
 
 - **Passed:** live merchant charges/payouts capability; separate sandbox/live account identities; QA two SKU configuration; QA synthetic storage; QA unsigned webhook rejection; exact v1.3 archive fingerprints; local QA preview starts and authenticated free test account works.
-- **Still unaccepted (waiver is not a pass):** genuine successful sandbox payment/fulfillment/refund; independent remote full SHA-256, authenticated HTTP owner isolation; effective terms and non-Florida tax/merchant disposition; dedicated live webhook signed acceptance; site integration and live canary; refund/replay and cross-account proofs. Production migration, private bucket, hard-locked function and inactive live catalog have now actually been installed; see November 25 section above.
+- **Still unaccepted (waiver is not a pass):** genuine successful sandbox payment/fulfillment/refund; authenticated HTTP owner isolation; effective terms and non-Florida tax/merchant disposition; dedicated live webhook signed acceptance; site integration and live canary; refund/replay and cross-account proofs. Production migration, private bucket, hard-locked function and inactive live catalog have now actually been installed; see November 25 section above.
 - **Current launch state (November 25):** production commerce foundation exists, but checkout remains hard-locked and all live standalone SKUs/prices inactive. There have been approved inactive production catalog, metadata and Storage object changes; **no real charges, no paid orders, no public checkout launch and no new recurring spend**.
 
 User-facing progress should state the difference between *live account exists and can collect* versus *standalone product checkout is released and proven*. Never call a sandbox price a live sale.

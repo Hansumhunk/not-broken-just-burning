@@ -159,6 +159,8 @@ jobs:
         run: node --test scripts/test_member_workshop.js
       - name: Test signed-out member access and browser Back prevention
         run: node --test scripts/test_member_access_guard.js
+      - name: Test public Before You Hit Send acquisition tool and privacy boundaries
+        run: node --test scripts/test_before_you_send.mjs
       - name: Test member Find & Resume alongside More
         run: node --test scripts/test_member_search.js
       - name: Test protected Flamewalker Plus editorial review
@@ -215,6 +217,8 @@ jobs:
         run: python scripts/test_social_share.py --browser
       - name: First Flame Chromium synthetic member-journey acceptance
         run: python tests/first_flame_member_browser_test.py
+      - name: Frontier Engine isolated privacy failure-path Chromium acceptance
+        run: python tests/frontier_privacy_browser_test.py
       - name: Flame Post dedicated no-send routing acceptance
         if: github.event_name == 'pull_request' && github.head_ref == 'ops/flame-post-email-routing'
         run: python tests/flame_post_routing_browser_test.py

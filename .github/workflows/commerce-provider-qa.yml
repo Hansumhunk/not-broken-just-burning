@@ -157,10 +157,10 @@ jobs:
         run: echo 'Provider acceptance browser completed; independently inspect sandbox Stripe sessions and QA order/receipt ledger before acceptance signoff.' >> "$GITHUB_STEP_SUMMARY"
 
   qa-one-shot-nonpaying-checkout-form-diagnosis:
-    # One exact SHA transition only. The previous paid attempt failed in the
+    # One exact SHA transition only. Inspect Stripe's synthetic state picker; no Pay. The previous paid attempt failed in the
     # browser; this DIFFERENT probe never submits payment or creates a PaymentIntent.
     # Never rearm or run on arbitrary branch pushes.
-    if: github.event.action == 'synchronize' && github.event.pull_request.number == 265 && github.event.before == 'dbc7cf9a8369b273dd1ec1d7bf2ae22633238610' && github.run_attempt == 1 && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event.action == 'synchronize' && github.event.pull_request.number == 265 && github.event.before == 'aeccfe74619140f1e1e25255935a6663d1f68a67' && github.run_attempt == 1 && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository
     needs: [qa-local-preview-chromium, qa-hosted-security-probe]
     runs-on: ubuntu-24.04
     timeout-minutes: 12

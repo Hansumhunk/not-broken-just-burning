@@ -24,7 +24,7 @@ def frames_snapshot(page):
     attr_counts={"cc-number":0,"cc-exp":0,"cc-csc":0,"cc-name":0,"email":0,"postal-code":0}
     address={"country_select":0,"address_line1":0,"state":0,"postal":0}
     pay_visible=pay_enabled=0
-    pay_re=re.compile(r"^(?:Pay(?:\\s+\\$?14\\.99(?:\\s+USD)?)?|Complete purchase|Place order)$",re.I)
+    pay_re=re.compile(r"^(?:Pay(?:\s+\$?14\.99(?:\s+USD)?)?|Complete purchase|Place order)$",re.I)
     for frame in stripe_frames(page):
         try:
             for name in frame.locator("input:visible").evaluate_all(
@@ -69,11 +69,16 @@ def main():
             page.locator("#commerce-terms input[type=checkbox]").check()
             page.locator('[data-commerce-buy="'+SLUG+'"]').click()
             try:
-                page.wait_for_url(re.compile(r"^https://checkout\\.stripe\\.com/"),timeout=45000)
+                page.wait_for_url(re.compile(r"^https://checkout\.stripe\.com/"),timeout=45000)
             except BrowserTimeout:
                 raise AssertionError("SANDBOX_FORM_NOT_REACHED_NO_PAYMENT_ATTEMPT")
+            print("DIAGNOSTIC_CHECKOUT_REDIRECT_REACHED",flush=True)
             test_host(page)
-            check("14.99" in page.locator("body").inner_text(timeout=20000),"WRONG_SANDBOX_AMOUNT")
+            try:
+                page.wait_for_function("document.body && document.body.innerText.includes('14.99')",timeout=30000)
+            except BrowserTimeout:
+                raise AssertionError("STRIPE_EXPECTED_AMOUNT_NOT_RENDERED")
+            check("14.99" in page.locator("body").inner_text(timeout=5000),"WRONG_SANDBOX_AMOUNT")
             print("DIAGNOSTIC_SANDBOX_STRIPE_HOST_AND_PRICE_VERIFIED",flush=True)
             for frame in stripe_frames(page):
                 for el in (frame.get_by_role("radio",name=re.compile(r"^Card$",re.I)),

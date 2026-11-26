@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {LIVE_RUNTIME_REVIEWED, PRODUCTION_REF, LIVE_ORIGIN, VERIFIED_LIVE_ACCOUNT, liveConfigurationMatches, productionAllowed, permittedCheckout, approvedBoundaryRelease, BOUNDARY_APPROVED_RELEASE, validatePrice, verifySession, ownedDownload} from "./commerce-core.mjs";
+import {LIVE_RUNTIME_REVIEWED, PRODUCTION_REF, LIVE_ORIGIN, VERIFIED_LIVE_ACCOUNT, liveConfigurationMatches, productionAllowed, permittedCheckout, approvedBoundaryRelease, BOUNDARY_APPROVED_RELEASE, approvedForgeRelease, FORGE_APPROVED_RELEASE, validatePrice, verifySession, ownedDownload} from "./commerce-core.mjs";
 
 const good = {
  mode:"production",key:"sk_live_PLACEHOLDER_NOT_A_REAL_KEY",
@@ -92,4 +92,21 @@ test("Boundary Builder checkout accepts only frozen 004-C v1.4 bytes path and ma
  assert.equal(approvedBoundaryRelease(p,{metadata:{sku:"OTHER",version:"1.4"}}),false);
  assert.equal(approvedBoundaryRelease(p,{}),false);
  assert.equal(approvedBoundaryRelease({...p,slug:"forge-workbook"},{}),true,"Separate Forge release awaits its own accepted edition gate");
+});
+
+test("The Forge stays release-locked to frozen v1.3 identity without activating sale",()=>{
+ const a=FORGE_APPROVED_RELEASE;
+ const p={slug:a.slug,asset_version:a.asset_version,asset_key:a.asset_key,download_name:a.download_name};
+ const provider={metadata:{sku:"NBJB-FG-002",version:"1.3"}};
+ assert.equal(approvedForgeRelease(p,provider),true);
+ for(const changed of [
+  {asset_version:"v1"},{asset_version:null},
+  {asset_key:"forge-workbook/v1/qa.pdf"},
+  {asset_key:"forge-workbook/v1.2/NBJB-FG-002_v1.2_customer.zip"},
+  {download_name:"NBJB-FG-002_v1.2_customer.zip"},{download_name:null}
+ ]) assert.equal(approvedForgeRelease({...p,...changed},provider),false,JSON.stringify(changed));
+ assert.equal(approvedForgeRelease(p,{metadata:{sku:"NBJB-FG-002",version:"1.2"}}),false);
+ assert.equal(approvedForgeRelease(p,{metadata:{sku:"OTHER",version:"1.3"}}),false);
+ assert.equal(approvedForgeRelease(p,{}),false);
+ assert.equal(approvedForgeRelease({...p,slug:"boundary-builder-workbook"},{}),true);
 });

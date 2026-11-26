@@ -4,6 +4,11 @@
 
 ## Current operational acceptance — November 25, 2026 (supersedes historical facts below)
 
+### Founder-assisted payment ACCEPTED; delivery-only continuation
+
+The [verified founder-assisted Stripe sandbox payment](https://github.com/Hansumhunk/not-broken-just-burning/pull/265#issuecomment-7178390755) supersedes all earlier unpaid/zero-entitlement observations below. Stripe Checkout complete/paid, PaymentIntent succeeded USD 1499, authentic completion event and matching receipt, exactly one canonical paid v1.4 order and one active customer entitlement, no manual ledger writes. No live charge. Preserve this paid order for owner delivery, exact archive SHA-256, expiry/recovery and non-owner denial using existing QA identities. The existing browser harness now supports `--mode existing-paid`; one exact push workflow at `cc2d38bae98468b2aac7fe6755a9f1a31f76058d` requests delivery-only acceptance, not another payment. Execution and refund/replay are not yet accepted. Do not refund before delivery evidence. Draft-v1 terms are not effective consumer terms; merchant/tax review and exact-head production authorization remain mandatory. No live changes.
+
+
 ### Revenue Forge 002 — isolated provider outcome and first-sale release gates (2026-11-25 ET)
 
 **Code and provider sources verified:**

@@ -13,7 +13,8 @@ HUBS = ("divorce-recovery.html", "masculine-restoration-placeholder-wound.html",
         "mens-mental-health.html", "mens-personal-development.html", "lessons.html")
 GUIDES = ("guide-dad-days-without-kids.html", "guide-working-through-divorce.html",
           "guide-rebuilding-friendships-after-divorce.html")
-PUBLIC_ROUTES = HUBS + GUIDES
+FREE_ENTRY_ROUTES = ("first-seven-days.html", "before-you-send.html")
+PUBLIC_ROUTES = HUBS + GUIDES + FREE_ENTRY_ROUTES
 TARGETS = [("http://notbrokenjustburning.com/", ORIGIN + "/", "html"),
            ("https://www.notbrokenjustburning.com/", ORIGIN + "/", "html")]
 TARGETS += [(ORIGIN + "/" + path, ORIGIN + "/" + path, kind) for path, kind in
@@ -180,6 +181,13 @@ class ProbeTests(unittest.TestCase):
 
     def test_missing_heading(self):
         self.assertTrue(self.check(self.good.replace("<h1>Test</h1>", "")))
+
+    def test_published_free_entry_routes_are_checked(self):
+        """Keep new public free entrances in delivery checks, not member-only routes."""
+        checked = {url for url, _, kind in TARGETS if kind == "html"}
+        for page in FREE_ENTRY_ROUTES:
+            with self.subTest(route=page):
+                self.assertIn(ORIGIN + "/" + page, checked)
 
     def test_sitemap_private_duplicate(self):
         base = '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'

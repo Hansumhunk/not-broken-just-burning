@@ -106,10 +106,9 @@ jobs:
             exit 78
           fi
           echo 'All four inputs present; identity validity and isolation not yet tested.'
-  qa-genuine-provider-checkout:
-    # One exact branch push only after non-paying DOM established State=administrativeArea, City=locality; QA v12 enforces full address, card only, Stripe automatic tax. Abort before Pay on missing any synthetic fields. No real-money call.
-    needs: [qa-local-preview-chromium, qa-hosted-security-probe]
-    if: github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == '85fd17de647d844d615307c4553ea76149633aac' && github.run_attempt == 1
+  qa-existing-paid-delivery:
+    # One exact branch push: reuse founder-paid order, no checkout or payment.
+    if: github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == '4a60d334490388cb85e0a7594b77e0c0cf298c5a' && github.run_attempt == 1
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
@@ -150,19 +149,19 @@ jobs:
             sleep 1
           done
           curl -fsS --cacert "$RUNNER_TEMP/qa-cert.pem" https://localhost:8443/store.html >/dev/null
-      - name: Genuine Stripe cs_test payments, signed event reconciliation, SKU delivery and second-account isolation
-        run: python scripts/commerce_qa_browser_acceptance.py --mode provider
-      - name: Upload sanitized evidence ONLY after genuine provider success
+      - name: Existing paid Boundary owner delivery, exact hash, expiry, recovery and non-owner denial
+        run: python scripts/commerce_qa_browser_acceptance.py --mode existing-paid
+      - name: Upload sanitized evidence ONLY after delivery success
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: commerce-genuine-provider-qa
+          name: commerce-existing-paid-delivery-qa
           path: /tmp/nbjb-provider-evidence.json
           retention-days: 7
           if-no-files-found: error
-      - name: Indicate provider browser payment result
+      - name: Indicate existing paid delivery result
         if: success()
-        run: echo 'Provider acceptance browser completed; independently inspect sandbox Stripe sessions and QA order/receipt ledger before acceptance signoff.' >> "$GITHUB_STEP_SUMMARY"
+        run: echo 'Existing paid delivery browser completed; no new checkout or payment.' >> "$GITHUB_STEP_SUMMARY"
 
   qa-one-shot-nonpaying-checkout-form-diagnosis:
     # One exact SHA transition only. Inspect Stripe's synthetic state picker; no Pay. The previous paid attempt failed in the

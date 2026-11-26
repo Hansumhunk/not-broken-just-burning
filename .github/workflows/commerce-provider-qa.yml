@@ -26,7 +26,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   qa-hosted-security-probe:
-    if: (github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == '09d9487cfef572d1b58e5897f72f6ae143f57afd' && github.run_attempt == 1)
+    if: (github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == '4b0779a0f13024815c8f85aa0a506e53eb72a947' && github.run_attempt == 1)
     runs-on: ubuntu-24.04
     timeout-minutes: 4
     steps:
@@ -42,7 +42,7 @@ jobs:
         run: echo 'Real QA HTTPS security probes passed. These do NOT establish signed provider payment acceptance.' >> "$GITHUB_STEP_SUMMARY"
   qa-local-preview-chromium:
     # Run only on the existing controlled integration PR; never on forks or production.
-    if: (github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == '09d9487cfef572d1b58e5897f72f6ae143f57afd' && github.run_attempt == 1)
+    if: (github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == '4b0779a0f13024815c8f85aa0a506e53eb72a947' && github.run_attempt == 1)
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -269,3 +269,53 @@ jobs:
       - name: Distinguish delivery acceptance from full refund/replay
         if: always()
         run: echo 'This acceptance tests an existing genuine sandbox paid order only. No new purchase, refund, or signed replay event was created by this workflow.' >> "$GITHUB_STEP_SUMMARY"
+
+  qa-postrefund-owner-access-denial:
+    # One previous successful real paid sandbox order was FULLY refunded by
+    # genuine Stripe test API. Verify both original buyer and other account
+    # can no longer mint paid private file URLs. Never charge or refund here.
+    if: github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == '4b0779a0f13024815c8f85aa0a506e53eb72a947' && github.run_attempt == 1
+    needs: [qa-local-preview-chromium, qa-hosted-security-probe]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    env:
+      NBJB_QA_EXISTING_EMAIL: ${{ secrets.NBJB_QA_EXISTING_EMAIL }}
+      NBJB_QA_EXISTING_PASSWORD: ${{ secrets.NBJB_QA_EXISTING_PASSWORD }}
+      NBJB_QA_SECONDARY_EMAIL: ${{ secrets.NBJB_QA_SECONDARY_EMAIL }}
+      NBJB_QA_SECONDARY_PASSWORD: ${{ secrets.NBJB_QA_SECONDARY_PASSWORD }}
+      NBJB_QA_PUBLISHABLE_KEY: sb_publishable_Ayqf6-ZoFGIDscFq6RWfcw_eQ5p_etR
+    steps:
+      - name: Existing two approved QA identities only
+        run: |
+          if [ -z "$NBJB_QA_EXISTING_EMAIL" ] || [ -z "$NBJB_QA_EXISTING_PASSWORD" ] || [ -z "$NBJB_QA_SECONDARY_EMAIL" ] || [ -z "$NBJB_QA_SECONDARY_PASSWORD" ]; then
+            echo 'BLOCKED_EXISTING_QA_CREDENTIALS' >> "$GITHUB_STEP_SUMMARY"
+            exit 78
+          fi
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Read-only post-refund test syntax
+        run: python -m py_compile scripts/commerce_qa_postrefund_denial.py scripts/commerce_qa_browser_acceptance.py
+      - name: Existing pinned Chromium runner
+        run: |
+          python -m pip install playwright==1.51.0
+          python -m playwright install --with-deps chromium
+      - name: Launch existing QA HTTPS preview, not production
+        run: |
+          set -euo pipefail
+          python launch-backend-staging/commerce/build-qa-preview.py --out "$RUNNER_TEMP/nbjb-commerce-preview" --project-ref fgpkejlmpfkxgpktgdzm
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1" -keyout "$RUNNER_TEMP/qa-key.pem" -out "$RUNNER_TEMP/qa-cert.pem" >/dev/null 2>&1
+          nohup python launch-backend-staging/commerce/serve-qa-preview.py --dir "$RUNNER_TEMP/nbjb-commerce-preview" --cert "$RUNNER_TEMP/qa-cert.pem" --key "$RUNNER_TEMP/qa-key.pem" --port 8443 > "$RUNNER_TEMP/commerce-qa-server.log" 2>&1 &
+          for i in {1..25}; do
+            if curl -fsS --cacert "$RUNNER_TEMP/qa-cert.pem" https://localhost:8443/store.html > /dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS --cacert "$RUNNER_TEMP/qa-cert.pem" https://localhost:8443/store.html >/dev/null
+      - name: Confirm genuinely refunded test buyer and other identity cannot download
+        run: python scripts/commerce_qa_postrefund_denial.py
+      - name: Keep provider acceptance partition explicit
+        if: always()
+        run: echo 'Postrefund negative owner/nonowner QA only. No charges/refunds/replays and no production changes.' >> "$GITHUB_STEP_SUMMARY"

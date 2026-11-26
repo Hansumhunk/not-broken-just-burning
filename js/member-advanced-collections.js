@@ -35,6 +35,7 @@
  }
  async function open(row,panel){
   const token=++sequence;active=row.slug;panel.replaceChildren();status("Checking lesson access…");
+  const url=new URL(location.href);url.searchParams.set("collection","mythic-resilience");url.searchParams.set("lesson",row.slug);history.replaceState(null,"",url);
   try{
    const data=await request({action:"reader",slug:row.slug,edition:"RC2"});
    if(!current()||token!==sequence)return;
@@ -67,6 +68,7 @@
      paragraph(li,row.minutes+" · "+row.objective+(row.available?"":" · Requires active Plus access"));list.append(li);
     }nav.append(list);
    }root.append(panel);root.hidden=false;
+   const params=new URLSearchParams(location.search);const deep=params.get("collection")==="mythic-resilience"&&data.lessons.find(x=>x.slug===params.get("lesson")&&x.available);if(deep)await open(deep,panel);
   }catch(_){if(current()&&token===sequence)clear();}
  }
  auth.onChange?.(({user})=>{if(user?.id!==id)clear();});

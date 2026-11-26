@@ -91,6 +91,10 @@ export default {
       return reply({ error: "content_unavailable" }, 503);
     }
     if (!lesson) return reply({ error: "lesson_not_available" }, 404);
+    // The reviewer exception is for unpublished Fortress review, never a free published download.
+    if (slug === fortressSlug && lesson.status === "published" && !entitled) {
+      return reply({ error: "paid_membership_required" }, 403);
+    }
 
     // Keep the nominated reviewer exception for existing manuscripts. A new
     // workbook requires current paid access to a published lesson, OR the

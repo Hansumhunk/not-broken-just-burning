@@ -151,7 +151,7 @@ Deno.serve(async(req:Request)=>{
  // Redirect an individually approved canary to its restricted result/verification page;
  // normal publicly enabled purchases continue to use the standard result page.
  const resultPage=env("NBJB_COMMERCE_LIVE_CHECKOUT")==="canary"?"commerce-live-canary.html":"commerce-result.html";
- s=await stripe.checkout.sessions.create({mode:"payment",payment_method_types:["card"],line_items:[{price:o.stripe_price_id,quantity:1}],client_reference_id:o.id,metadata,payment_intent_data:{metadata},expires_at:expires,automatic_tax:{enabled:true},customer_creation:"always",success_url:origin+"/"+resultPage+"?order="+o.id+"&return=success",cancel_url:origin+"/"+resultPage+"?order="+o.id+"&return=cancel"}, {idempotencyKey:"nbjb-commerce-live-v1-"+o.id});
+ s=await stripe.checkout.sessions.create({mode:"payment",payment_method_types:["card"],line_items:[{price:o.stripe_price_id,quantity:1}],client_reference_id:o.id,metadata,payment_intent_data:{metadata},expires_at:expires,automatic_tax:{enabled:true},billing_address_collection:"required",customer_creation:"always",success_url:origin+"/"+resultPage+"?order="+o.id+"&return=success",cancel_url:origin+"/"+resultPage+"?order="+o.id+"&return=cancel"}, {idempotencyKey:"nbjb-commerce-live-v1-"+o.id});
  // Conditional bind: a webhook may have already bound this order.
  must(await admin.from("commerce_orders").update({stripe_session_id:s.id}).eq("id",o.id).eq("status","pending").is("stripe_session_id",null));
  }

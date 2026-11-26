@@ -1,0 +1,2 @@
+// Local navigation only. No analytics on purchase status URLs.
+(() => {const b=document.querySelector('.nav-toggle'),n=document.querySelector('#site-nav');if(!b||!n)return;b.addEventListener('click',()=>{const open=b.getAttribute('aria-expanded')!=='true';b.setAttribute('aria-expanded',String(open));n.classList.toggle('is-open',open);n.classList.toggle('open',open);});})();

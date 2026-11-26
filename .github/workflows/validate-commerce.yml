@@ -1,0 +1,190 @@
+name: Validate draft commerce catalog
+on:
+  pull_request:
+    paths:
+      - 'store.html'
+      - 'commerce-*.html'
+      - 'js/commerce-*.js'
+      - 'scripts/test_commerce*'
+      - 'scripts/commerce_stage_boundary_004c_private.py'
+      - 'launch-backend-staging/commerce/**'
+      - '.github/workflows/validate-commerce.yml'
+  push:
+    branches:
+      - 'commerce/revenue-forge-main-integration-20261120'
+    paths:
+      - '.github/workflows/validate-commerce.yml'
+      - 'launch-backend-staging/commerce/live/**'
+permissions:
+  contents: read
+jobs:
+  commerce-catalog:
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == 'a5855c8cf064004fe03b994174e99d5b31c79662' && github.run_attempt == 1)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/test_commerce_catalog.js scripts/test_commerce_security.mjs scripts/test_commerce_browser.js scripts/test_commerce_release.js scripts/test_commerce_phase_four.mjs scripts/test_commerce_stage_release.js scripts/test_commerce_flame_post_routing.mjs
+      - run: for f in js/commerce-*.js; do node --check "$f"; done
+      - name: Offline-only 004-C private staging security regression
+        run: python -m unittest discover -s scripts -p test_commerce_private_004c.py -v
+      - name: Assert unapproved production manifest stays blocked
+        run: |
+          set +e
+          node scripts/check_commerce_release.js launch-backend-staging/commerce/release-review.json
+          result=$?
+          set -e
+          test "$result" -eq 2
+      - name: Assert separate checkout-disabled staging review is not silently authorized
+        run: |
+          set +e
+          node scripts/check_commerce_stage_release.js launch-backend-staging/commerce/stage-review.json
+          result=$?
+          set -e
+          test "$result" -eq 2
+  commerce-database:
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == 'a5855c8cf064004fe03b994174e99d5b31c79662' && github.run_attempt == 1)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: fixture-only
+          POSTGRES_DB: commerce_fixture
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply staged SQL and exercise ledger in disposable Postgres
+        env:
+          PGPASSWORD: fixture-only
+        run: |
+          psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/test-fixture.sql
+          psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/qa-entitlement-baseline.sql
+          psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/migration.sql
+          psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/test-migration.sql
+          psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/operations.sql
+          psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/test-operations.sql
+          psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/phase-four.sql
+          psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/test-phase-four.sql
+          psql -h localhost -U postgres -d commerce_fixture -v ON_ERROR_STOP=1 -f launch-backend-staging/commerce/financial-command-report.sql
+          reserve="set role service_role; select (public.commerce_reserve('22222222-2222-4222-8222-222222222222','forge-workbook','draft-v1')).id;"
+          psql -h localhost -U postgres -d commerce_fixture -qAt -v ON_ERROR_STOP=1 -c "$reserve" > /tmp/order-1 & p1=$!
+          psql -h localhost -U postgres -d commerce_fixture -qAt -v ON_ERROR_STOP=1 -c "$reserve" > /tmp/order-2 & p2=$!
+          wait "$p1"; wait "$p2"
+          test -s /tmp/order-1; diff /tmp/order-1 /tmp/order-2
+  commerce-edge-typecheck:
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == 'a5855c8cf064004fe03b994174e99d5b31c79662' && github.run_attempt == 1)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno check launch-backend-staging/commerce/index.ts launch-backend-staging/commerce/admin-cli.ts
+      - run: deno test launch-backend-staging/commerce/signature_test.ts launch-backend-staging/commerce/provider_test.ts
+  commerce-qa-fixtures:
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == 'a5855c8cf064004fe03b994174e99d5b31c79662' && github.run_attempt == 1)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate harmless private upload fixtures and isolated local preview
+        env:
+          NBJB_QA_PUBLISHABLE_KEY: sb_publishable_fixture_not_a_real_key
+        run: |
+          python launch-backend-staging/commerce/test-customer-archive.py
+          python launch-backend-staging/commerce/make-fixtures.py --out /tmp/nbjb-commerce-fixtures
+          python launch-backend-staging/commerce/build-qa-preview.py --out /tmp/nbjb-commerce-preview --project-ref abcdefghijklmnopqrst
+          test "$(find /tmp/nbjb-commerce-fixtures -name '*.pdf' | wc -l)" -eq 3
+          grep -q 'abcdefghijklmnopqrst.supabase.co' /tmp/nbjb-commerce-preview/js/nbjb-config.js
+          ! grep -q 'plhbvtbvtxfzulsaxuim' /tmp/nbjb-commerce-preview/js/nbjb-config.js
+          ! grep -q 'create-live-checkout-session' /tmp/nbjb-commerce-preview/js/member-billing.js
+          test ! -d /tmp/nbjb-commerce-preview/launch-backend-staging
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj '/CN=localhost' -addext 'subjectAltName=DNS:localhost' -keyout /tmp/qa.key -out /tmp/qa.crt >/dev/null 2>&1
+          python launch-backend-staging/commerce/serve-qa-preview.py --dir /tmp/nbjb-commerce-preview --cert /tmp/qa.crt --key /tmp/qa.key >/tmp/qa-preview.log 2>&1 & preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+          curl --fail --silent --show-error --retry 5 --retry-connrefused --cacert /tmp/qa.crt https://localhost:8443/store.html > /tmp/qa-store.html
+          grep -q 'NBJB · Digital Store Preview' /tmp/qa-store.html
+          curl --fail --silent --show-error --cacert /tmp/qa.crt https://localhost:8443/member-library.html > /tmp/qa-library.html
+          grep -q 'nbjb-owned-products' /tmp/qa-library.html
+          curl --fail --silent --show-error --cacert /tmp/qa.crt https://localhost:8443/commerce-result.html > /tmp/qa-result.html
+          grep -q 'commerce-result-status' /tmp/qa-result.html
+          if command -v pdfinfo >/dev/null; then find /tmp/nbjb-commerce-fixtures -name '*.pdf' -exec pdfinfo {} \; ; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nbjb-commerce-synthetic-pdfs
+          path: /tmp/nbjb-commerce-fixtures
+          retention-days: 7
+          if-no-files-found: error
+
+  commerce-live-isolation:
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == 'a5855c8cf064004fe03b994174e99d5b31c79662' && github.run_attempt == 1)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check live account isolation, exact SKU payment shape, and refund access gates
+        run: |
+          node --test launch-backend-staging/commerce/live/live-guard.test.mjs scripts/test_commerce_four_product_release.mjs scripts/test_commerce_live_canary.mjs
+          node --check launch-backend-staging/commerce/live/commerce-core.mjs
+          node --check js/commerce-client.js
+          node --check js/commerce-store.js
+          node --check js/commerce-release.js
+          grep -Fq 'LIVE_RUNTIME_REVIEWED = false' launch-backend-staging/commerce/live/commerce-core.mjs
+          grep -Fq 'enabled:false' js/commerce-release.js
+          if grep -Eq '(NBJB_COMMERCE_STRIPE_TEST_KEY|NBJB_COMMERCE_SANDBOX_REF|verifySandboxAccount|nbjb_commerce:"v1")' launch-backend-staging/commerce/live/index.ts; then
+            echo 'Sandbox wiring leaked into the live handler' >&2; exit 1
+          fi
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Typecheck independently locked LIVE handler and providers
+        run: deno check launch-backend-staging/commerce/live/index.ts launch-backend-staging/commerce/live/provider.ts launch-backend-staging/commerce/live/signature.ts
+
+  commerce-production-schema-dryrun:
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == 'a5855c8cf064004fe03b994174e99d5b31c79662' && github.run_attempt == 1)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: fixture-only
+          POSTGRES_DB: commerce_production_dryrun
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply the production candidate ONLY in disposable Postgres
+        env:
+          PGPASSWORD: fixture-only
+        run: |
+          set -e
+          db="-h localhost -U postgres -d commerce_production_dryrun -v ON_ERROR_STOP=1"
+          psql $db -f launch-backend-staging/commerce/test-fixture.sql
+          psql $db -f launch-backend-staging/commerce/qa-entitlement-baseline.sql
+          psql $db -f launch-backend-staging/commerce/live/production-schema-staged.sql
+          psql $db -qAt -c "select (select count(*)=5 from commerce_products) and (select count(*)=0 from commerce_products where active) and (select public=false from storage.buckets where id='nbjb-private-products') and to_regclass('public.membership_entitlements') is not null;" | grep -Fx t
+          psql $db -f launch-backend-staging/commerce/test-migration.sql
+          psql $db -f launch-backend-staging/commerce/test-operations.sql
+          psql $db -f launch-backend-staging/commerce/test-phase-four.sql
+          if psql $db -f launch-backend-staging/commerce/live/production-schema-staged.sql >/tmp/duplicate-apply.log 2>&1; then
+            echo 'FAIL: migration unexpectedly applied twice' >&2; exit 1
+          fi
+          grep -q 'COMMERCE_ALREADY_INSTALLED' /tmp/duplicate-apply.log

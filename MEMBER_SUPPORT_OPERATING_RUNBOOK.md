@@ -18,3 +18,39 @@ Optional separate email, with no effect on ability to cancel or receive refund. 
 - Feedback: “Thank you for the optional feedback. It is not required for cancellation or refund review.”
 
 Human acceptance of real cases remains deferred; no actual payments or subscriptions changed by development.
+
+## Standalone digital workbook support — release candidate only (004-C)
+
+This supplements, and **does not amend**, the effective Flamewalker+ subscription cancellation/refund rules above. Boundary Builder v1.4 / Edition 004-C at **$14.99 USD** is a separate one-time purchase, initially requiring only a **free** Flamewalker account; the buyer does not need paid Flamewalker+. No buyer outreach or financial action is authorized merely by this draft.
+
+1. **Payment not complete:** A canceled or expired Stripe Checkout session is not proof of a charge. Check the LIVE (not SANDBOX) Stripe account, exact Checkout Session/PaymentIntent state, existing commerce order and signed-webhook receipt. If unpaid, do not claim ownership or initiate a refund; explain that payment has not been confirmed. Do not reflexively send a customer back to Pay if the state is ambiguous.
+2. **Charged but missing workbook:** Verify matching LIVE settled PaymentIntent/charge, exact order ID, amount/currency, matching NBJB account ID, and the correct v1.4 edition entitlement. Do not treat a screenshot or client redirect as proof. If the signed provider event has not reconciled, use the existing protected reconciliation queue and authorized technical escalation; do not grant ownership manually from an unverified email. Once legitimate ownership is confirmed, issue a fresh short-lived secure link to the private purchased ZIP, not a public or unprotected attachment.
+3. **Login or recovery:** Help the verified owner recover their existing free Flamewalker account through normal account recovery; do not ask for passwords, one-time codes, private workbook content, custody details or card numbers. Account email alone is not proof of ownership.
+4. **Duplicate charge:** Look for distinct LIVE PaymentIntents/charges and compare order/event ledgers. A double webhook of the same charge is not a second payment. Escalate true duplicate charges to the authorized human refund reviewer; never issue two refunds for one charge.
+5. **First-edition refund request:** The **proposed, not-yet-effective** standalone policy is a full refund on a first purchase of the individual edition requested within 14 calendar days, without private narrative or nondownload proof. Effective consumer rights and provider protections always override this voluntary proposal. Human approves refunds; after an actual approved full refund, independently confirm processor refund, correct product-only entitlement treatment, buyer notification and ledger. Do not revoke unrelated workbooks or Flamewalker+ membership.
+6. **Download trouble:** Confirm the correct edition and ZIP size, advise standard ZIP/PDF reader instructions and retry a short-lived link if authorized. For interrupted links, use ownership-authenticated reissuance. If an accessibility format issue is reported, offer support or a lawful remedy; do not promise an unverified accessible edition.
+7. **Private record keeping:** Keep only minimal verified order references, payment state, support category, decision, and outcome in existing protected operational records. No customer details or reflection answers in public GitHub comments, analytics events or campaign lists.
+
+### Proposed reply language (do not send automatically)
+
+- **Payment pending:** “Thanks for checking. We are verifying the payment status before granting access or requesting another payment. Please do not purchase the same workbook again while we review it.”
+- **Paid, access missing:** “We will reconcile your purchase with the payment processor and restore the correct edition's secure download if ownership is verified, or explain the appropriate remedy. You don't need to share your card number or workbook answers.”
+- **Refund request:** “We received your request and will check the transaction against the applicable standalone digital-product terms and consumer rights. This is not yet confirmation that a refund was issued.”
+- **Download issue:** “Please send only the page name, approximate time, your account email and the error message. Don't send passwords, full card details or personal workbook responses.”
+
+**Release hold:** This text is a **source-only operational review candidate** until the final standalone terms, signed-payment acceptance, and founder approval are recorded. The public membership policy and existing support inbox are unchanged.
+
+## Flame Post correspondence routing — source-review handoff (November 25, 2026)
+
+Route public consumer links through the existing professional addresses, forwarded to NBJB's established central inbox `notbrokenjustburning@gmail.com` (internal transport only):
+- `contact@notbrokenjustburning.com` — general consumer inquiries, website feedback
+- `support@notbrokenjustburning.com` — account login, purchased ZIP/download, technical issues, accessibility assistance
+- `billing@notbrokenjustburning.com` — membership billing, standalone charges, cancellations and refunds
+- `privacy@notbrokenjustburning.com` — personal data, account export/removal, privacy rights
+- `partnerships@notbrokenjustburning.com` — media, partnerships and speaking
+- `founder@notbrokenjustburning.com` — founder-only executive or internal routing, not routine customer dispute intake
+- `newsletter@notbrokenjustburning.com` — approved newsletter sender only; no marketing consent or sender authenticity implied by an alias
+
+**Evidence boundary:** The connected NBJB Gmail inbox received verification messages addressed to all seven aliases on Nov 25, demonstrating inbound routing. Those messages DO NOT by themselves prove that each Gmail `Send mail as` identity was successfully verified, that outbound DKIM/SPF/DMARC alignment passed, or that Brevo newsletter sending is ready. A professional inbound `mailto:` address may be shown without claiming outbound authorization. Do not send a customer reply from an unverified address, fall back to an unauthorized sender, or trigger a production email campaign based on this runbook.
+
+**Customer response safeguards:** Always verify the owner's existing account before discussing order details; do not ask for full card numbers, login passwords, private writing, court documents or medical records. No autoresponder, confirmation campaign, payment receipt, or customer notification was sent by this source-only routing change. Stripe account-wide business-profile support email is currently unset; its modification requires a separate supported provider action / scoped approval, and is NOT a prerequisite for the currently checkout-disabled product draft.

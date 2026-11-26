@@ -99,7 +99,8 @@ test('Shipped email signup distinguishes immediate session from verification-req
  assert.match(client,/emailRedirectTo:\s*location\.origin\s*\+\s*'\/member-auth\.html\?next=member-onboarding\.html'/);
  assert.match(auth,/if\s*\(data\.session\)/);
  assert.match(auth,/nextDestination\('member-onboarding\.html'\)/);
- assert.match(auth,/Check your email to verify it/);
+ assert.match(auth,/Check your email for a verification link, if one was sent/);
+ assert.doesNotMatch(auth,/else setStatus\('Account created/);
  assert.match(auth,/auth\.signIn\(/);
 });
 test('Live checkout excludes designated sandbox identity and prevents duplicate paid purchase',()=>{

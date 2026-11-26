@@ -65,7 +65,7 @@
     if (!result) return;
     // Opens the member's own email composer. This page does not transmit a
     // message, read their account, upload notes, or claim delivery.
-    const address = 'notbrokenjustburning@gmail.com';
+    const address = 'support@notbrokenjustburning.com';
     const mailto = 'mailto:' + address + '?subject=' +
       encodeURIComponent(result.subject) + '&body=' + encodeURIComponent(result.report);
     status.textContent = 'Your email app should open. Review the message and press Send there. NBJB has not received it yet.';
@@ -78,7 +78,7 @@
     try {
       if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
       await navigator.clipboard.writeText(result.report);
-      status.textContent = 'Copied. Paste into an email to notbrokenjustburning@gmail.com and press Send yourself.';
+      status.textContent = 'Copied. Paste into an email to support@notbrokenjustburning.com and press Send yourself.';
     } catch (_) {
       prepared.focus();
       prepared.select();

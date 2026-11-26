@@ -3,7 +3,7 @@ const headers = {"Cache-Control":"private, no-store, max-age=0","Pragma":"no-cac
 const reply=(data,status=200)=>Response.json(data,{status,headers});
 const free=new Set([1,3,6,11]);
 const slugPattern=/^mythic-resilience-l(0[1-9]|1[0-4])$/;
-const number=s=>Number(slugPattern.exec(s||"")?.[1]||0);
+const number=s=>typeof s==="string"?Number(slugPattern.exec(s)?.[1]||0):0;
 const moduleFor=n=>n<=4?1:n<=8?2:n<=11?3:4;
 export const tierFor=n=>free.has(n)?"free":"plus";
 export function paid(m,now=Date.now()){
@@ -19,7 +19,9 @@ function asset(row,kind){
  const a=row.content.advancedCollection.assets?.[kind];
  // All identifiers originate in a private server-side row, never in request data.
  if(!a||typeof a.key!=="string"||a.key.length>300||!/^[-a-zA-Z0-9_/]+[.](?:pdf|json)$/.test(a.key)||a.key.includes("//")||!Number.isSafeInteger(a.bytes)||a.bytes<1||a.bytes>2000000||!/^[a-f0-9]{64}$/.test(a.sha256||""))return null;
- if(kind==="reader"?!a.key.endsWith(".json"):!a.key.endsWith(".pdf"))return null;
+ // Reject cross-lesson, combined-workbook and wrong-kind pointers even if a row is misconfigured.
+ const leaf=kind+(kind==="reader"?".json":".pdf");
+ if(a.key.split("/").slice(-2).join("/")!==row.slug+"/"+leaf)return null;
  return a;
 }
 async function verified(bytes,a){

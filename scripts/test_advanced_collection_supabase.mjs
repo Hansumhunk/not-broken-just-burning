@@ -65,6 +65,13 @@ for(let n=1;n<=14;n++){
 assert.equal((await get("expired",2)).status,403);assert.equal((await get("revoked",2)).status,403);
 assert.equal((await get("plus",2,"worksheet","RC1")).status,400);
 assert.equal((await call("free",{action:"worksheet",slug:rows[1].slug,edition:"RC2",userId:users.plus.id})).status,400);
+const original=rows[0].content;
+const crossed=structuredClone(original);crossed.advancedCollection.assets.worksheet=rows[1].content.advancedCollection.assets.worksheet;
+await ok(await api("/rest/v1/flamewalker_premium_lessons?slug=eq."+rows[0].slug,{method:"PATCH",body:{content:crossed}}),"misconfigure scoped pointer in disposable fixture");
+assert.equal((await get("free",1)).status,503);
+await ok(await api("/rest/v1/flamewalker_premium_lessons?slug=eq."+rows[0].slug,{method:"PATCH",body:{content:original}}),"restore scoped pointer");
+assert.equal((await call("free",{action:"worksheet",slug:[rows[0].slug],edition:"RC2"})).status,400);
+console.log("PASS cross-lesson misconfiguration denial and strict slug type");
 const key=rows[1].content.advancedCollection.assets.worksheet.key;
 await ok(await api("/storage/v1/object/"+bucket+"/"+key,{method:"POST",body:Buffer.alloc(files.get(key).length),headers:{"Content-Type":"application/pdf","x-upsert":"true"}}),"tamper synthetic object");
 assert.equal((await get("plus",2)).status,503);

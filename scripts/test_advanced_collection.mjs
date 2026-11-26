@@ -32,6 +32,8 @@ test("real loopback HTTP with signed synthetic sessions and private asset bytes"
  rows[0].status="editorial_review";assert.equal((await get("plus",1)).status,404);assert.equal((await (await call("plus",{action:"catalog"})).json()).lessons.length,13);rows[0].status="published";
  assert.equal((await get("plus",2,"worksheet","RC1")).status,400);
  assert.equal((await call("plus",{action:"worksheet",slug:rows[0].slug,edition:"RC2",key:"other"})).status,400);
+ const assets=rows[0].content.advancedCollection.assets,original=assets.worksheet;assets.worksheet=rows[1].content.advancedCollection.assets.worksheet;assert.equal((await get("free",1)).status,503);assets.worksheet=original;
+ assert.equal((await call("free",{action:"worksheet",slug:[rows[0].slug],edition:"RC2"})).status,400);
  const a=rows[1].content.advancedCollection.assets.worksheet,b=files.get(a.key);files.set(a.key,Buffer.alloc(b.length));assert.equal((await get("plus",2)).status,503);files.set(a.key,b);
  hook=()=>members.set("plus",{...paid,status:"revoked"});assert.equal((await get("plus",2)).status,403);hook=null;members.set("plus",paid);
  enabled=false;assert.equal((await get("plus",2)).status,404);

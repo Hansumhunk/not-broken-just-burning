@@ -12,6 +12,6 @@ export default {fetch:withSupabase({auth:"user"},async(req,ctx)=>{
   member:id=>checked(admin.from("membership_entitlements").select("tier,status,valid_from,valid_until,provider").eq("user_id",id).maybeSingle()),
   catalog:()=>checked(admin.from("flamewalker_premium_lessons").select(fields).eq("track_slug","mythic-resilience").eq("status","published")),
   row:slug=>checked(admin.from("flamewalker_premium_lessons").select(fields).eq("track_slug","mythic-resilience").eq("slug",slug).maybeSingle()),
-  read:async key=>{const {data,error}=await admin.storage.from(bucket!).download(key);if(error||!data)throw new Error("private_asset_failed");return new Uint8Array(await data.arrayBuffer());}
+  read:async key=>{const privateBucket=await checked(admin.storage.getBucket(bucket!));if(privateBucket?.public!==false)throw new Error("private_bucket_required");const {data,error}=await admin.storage.from(bucket!).download(key);if(error||!data)throw new Error("private_asset_failed");return new Uint8Array(await data.arrayBuffer());}
  });
 })};

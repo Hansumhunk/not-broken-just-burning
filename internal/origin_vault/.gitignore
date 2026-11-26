@@ -1,0 +1,23 @@
+# Public repository: NEVER commit local vault datasets, outputs, secrets or fixtures containing real material
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+*.wal
+*.shm
+*.manifest.json
+*.bak
+*.zip
+*.tar
+*.tar.gz
+*.key
+*.pem
+.env*
+__pycache__/
+.private/
+private-data/
+backups/
+outbox/
+*.source
+*.journal

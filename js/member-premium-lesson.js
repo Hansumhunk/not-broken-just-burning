@@ -5,6 +5,8 @@
   const querySlug = new URLSearchParams(location.search).get('lesson') || 'father-wound';
   const slug = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(querySlug) && querySlug.length <= 100 ? querySlug : 'father-wound';
   const userId = auth?.user?.id || '';
+  const fortressSlug = 'when-protection-becomes-a-prison';
+  const fortressEdition = 'Fortress Project v1.1 (Directive 002)';
   const progressKey = userId ? 'nbjb.plus.lesson-progress.v1.' + userId : null;
   const positionKey = userId ? 'nbjb.plus.reading-position.v1.' + userId + '.' + slug : null;
   // The scenario-page layout changed, so map older device-only numeric bookmarks once.
@@ -163,7 +165,26 @@
   }
   function appendText(container, tag, text, extraClass = '') {
     const p = document.createElement(tag);
-    p.textContent = text;
+    // Only the authorized Fortress reference paragraphs receive external links.
+    // The visible URL remains the approved source text; no third-party request
+    // occurs until the learner explicitly follows a link.
+    const reference = slug === fortressSlug && tag === 'p'
+      ? /^(\[\d{1,2}\][\s\S]*?)(https:\/\/\S+)$/.exec(text) : null;
+    let href = null;
+    if (reference) {
+      try {
+        const u = new URL(reference[2]);
+        if (u.protocol === 'https:' && !u.username && !u.password && !u.port &&
+          (u.hostname === 'doi.org' || u.hostname === 'pubmed.ncbi.nlm.nih.gov') &&
+          !u.search && !u.hash) href = u.href;
+      } catch (_) { /* Keep the complete source as plain text. */ }
+    }
+    if (href) {
+      const a = document.createElement('a');
+      a.href = href; a.textContent = reference[2]; a.target = '_blank';
+      a.rel = 'noopener noreferrer'; a.referrerPolicy = 'no-referrer';
+      p.append(document.createTextNode(reference[1]), a);
+    } else p.textContent = text;
     if (extraClass) p.classList.add(extraClass);
     container.appendChild(p);
   }
@@ -237,7 +258,7 @@
       if (!block || typeof block.text !== 'string' || !block.text.trim()) continue;
       const text = block.text.trim();
       const kind = block.type === 'heading' ? 'heading' : 'paragraph';
-      if (kind === 'heading' && major.test(text)) {
+      if (kind === 'heading' && (major.test(text) || (slug === fortressSlug && /^RESEARCH NOTES AND REFERENCES$/i.test(text)))) {
         flush();
         name = prettyHeading(text);
         parentName = name;
@@ -895,6 +916,114 @@
       select.append(option);
     });
   }
+  // The companion is built exclusively from the server-authorized lesson.
+  // No workbook content, private file URL or personal answers are bundled here.
+  function installFortressCompanion(data, workbookAvailable) {
+    if (slug !== fortressSlug || data?.slug !== fortressSlug ||
+        data?.content?.sourceEdition !== fortressEdition ||
+        data?.content?.workbook?.slug !== 'fortress-audit' ||
+        !Array.isArray(data.content.workbook.blocks) || !el('premium-exercise')) return;
+    const panel = document.createElement('section');
+    panel.className = 'premium-final-reflection';
+    panel.id = 'premium-fortress-companion';
+    panel.setAttribute('aria-labelledby', 'premium-fortress-companion-title');
+    const title = document.createElement('h2');
+    title.id = 'premium-fortress-companion-title';
+    title.textContent = data.content.workbook.title || 'Companion workbook';
+    panel.append(title);
+    appendText(panel, 'p', 'Optional practice. Use a fictional example, write privately, skip questions or maintain a necessary restriction. Nothing is required for completion.');
+    const status = document.createElement('p');
+    status.setAttribute('role','status');
+    status.setAttribute('aria-live','polite');
+    let active = true;
+    let url = null;
+    let button = null;
+    const cleanup = () => {
+      if (url) { URL.revokeObjectURL(url); url = null; }
+    };
+    const deactivate = () => {
+      active = false; cleanup();
+      panel.hidden = true;
+      if (button) button.disabled = true;
+    };
+    window.addEventListener('pagehide', deactivate);
+    // Existing member-bootstrap verifies/redirects on restored pages; don't
+    // re-enable a stale candidate panel or a pending download on restoration.
+    auth.onChange?.(({user}) => { if (!user || user.id !== userId) deactivate(); });
+    if (workbookAvailable === true) {
+      button = document.createElement('button');
+      button.type = 'button'; button.className = 'button button-ghost';
+      button.textContent = 'Download blank workbook (PDF)';
+      panel.append(button, status);
+      button.addEventListener('click', async () => {
+        if (!active || button.disabled || auth.user?.id !== userId) return;
+        button.disabled = true; status.textContent = 'Checking current workbook access…';
+        try {
+          // Only the slug/action leaves the browser. No responses, notes, or
+          // storage key. Server rechecks status, entitlement and file hash.
+          const {data: bytes, error} = await auth.client.functions.invoke('read-flamewalker-lesson',
+            { body: { slug, action: 'workbook' } });
+          if (!active || auth.user?.id !== userId) return;
+          if (error || !(bytes instanceof Blob) || bytes.size !== 182857) throw Error('unavailable');
+          cleanup();
+          url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+          const link = document.createElement('a');
+          link.href = url; link.download = 'The-Fortress-Audit.pdf';
+          link.hidden = true; panel.append(link);
+          link.click(); link.remove();
+          status.textContent = 'Download requested. Keep your completed copy somewhere you control.';
+          const issued = url;
+          window.setTimeout(() => { if (url === issued) cleanup(); }, 15000);
+        } catch (_) {
+          if (active) status.textContent = 'Workbook download unavailable. Use the optional text version below, or try again later.';
+        } finally {
+          if (active && auth.user?.id === userId) button.disabled = false;
+        }
+      });
+    }
+    const textVersion = document.createElement('details');
+    const summary = document.createElement('summary');
+    summary.textContent = 'Read the accessible workbook text';
+    textVersion.append(summary);
+    for (const block of data.content.workbook.blocks.slice(0, 300)) {
+      if (!block || typeof block.text !== 'string' || !block.text.trim()) continue;
+      appendText(textVersion, block.type === 'heading' ? 'h3' : 'p', block.text);
+    }
+    panel.append(textVersion);
+    const knowledge = document.createElement('details');
+    const knowledgeSummary = document.createElement('summary');
+    knowledgeSummary.textContent = 'Optional understanding checks (unscored)';
+    knowledge.append(knowledgeSummary);
+    const checks = Array.isArray(data.content.comprehension) ? data.content.comprehension.slice(0, 8) : [];
+    for (const check of checks) {
+      if (!check || typeof check.question !== 'string' || typeof check.answer !== 'string') continue;
+      const item = document.createElement('details');
+      const question = document.createElement('summary');
+      question.textContent = check.question;
+      item.append(question);
+      appendText(item, 'p', check.answer);
+      knowledge.append(item);
+    }
+    if (checks.length) panel.append(knowledge);
+    const related = document.createElement('details');
+    const relatedSummary = document.createElement('summary');
+    relatedSummary.textContent = 'Related lessons · optional';
+    related.append(relatedSummary);
+    const list = document.createElement('ul');
+    for (const [id, label] of [
+      ['boundaries-without-cruelty','Boundaries Without Cruelty'],
+      ['grieving-future-never-happened','Grieving the Future That Never Happened'],
+      ['what-comes-after-survival-adaptations','What Comes After: Survival Adaptations'],
+      ['brotherhood-without-dependency','Brotherhood Without Dependency'],
+      ['the-integrated-man-thirty-day-map','The Integrated Man']
+    ]) {
+      const li = document.createElement('li'), a = document.createElement('a');
+      a.href = 'member-premium-lesson.html?lesson=' + encodeURIComponent(id);
+      a.textContent = label; li.append(a); list.append(li);
+    }
+    related.append(list); panel.append(related);
+    el('premium-exercise').before(panel);
+  }
   function renderLesson(data) {
     lesson = data;
     const reviewPanel = el('premium-editorial-review');
@@ -1342,7 +1471,13 @@
             : 'This lesson is still in review, or access could not be confirmed. Please try again later.');
         return;
       }
+      if (slug === fortressSlug && (data.lesson.slug !== slug ||
+          data.lesson.content?.sourceEdition !== fortressEdition)) {
+        noticeState('Lesson not available yet', 'The approved lesson edition could not be confirmed.');
+        return;
+      }
       renderLesson(data.lesson);
+      installFortressCompanion(data.lesson, data.workbookAvailable === true);
       // Only request the editorial/published catalog once server access to
       // this protected lesson has been confirmed for the current account.
       await loadCatalog();

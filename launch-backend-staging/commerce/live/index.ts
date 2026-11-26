@@ -2,7 +2,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.116.0";
 import Stripe from "npm:stripe@22.6.2";
 import { verifiedStripeEvent } from "./signature.ts";
 import { providerSnapshot, verifyLiveAccount } from "./provider.ts";
-import { productionAllowed, permittedCheckout, approvedBoundaryRelease, SKU, idOf, validatePrice, verifySession, ownedDownload } from "./commerce-core.mjs";
+import { productionAllowed, permittedCheckout, approvedBoundaryRelease, approvedForgeRelease, SKU, idOf, validatePrice, verifySession, ownedDownload } from "./commerce-core.mjs";
 const env=(k:string)=>Deno.env.get(k)||"";
 const url=env("SUPABASE_URL"), key=env("NBJB_COMMERCE_STRIPE_LIVE_KEY"), ref=env("NBJB_COMMERCE_PRODUCTION_REF");
 const origin=env("NBJB_COMMERCE_LIVE_ORIGIN").replace(/\/$/,"");
@@ -135,7 +135,7 @@ Deno.serve(async(req:Request)=>{
  if(typeof price.product==="string"||"deleted" in price.product||!price.product.active||idOf(price.product.tax_code)!==p.tax_code)return json({error:"tax_or_product_mismatch"},503);
  // Release-lineage safeguard: older v1.3 edition and Stripe metadata cannot
  // become a sale merely because a later admin enables a SKU or canary flag.
- if(!approvedBoundaryRelease(p,price.product))return json({error:"edition_release_mismatch"},503);
+ if(!approvedBoundaryRelease(p,price.product)||!approvedForgeRelease(p,price.product))return json({error:"edition_release_mismatch"},503);
  const reserve=await admin.rpc("commerce_reserve",{p_user:user.id,p_slug:slug,p_terms:p.terms_version});
  if(reserve.error){const m=reserve.error.message;return json({error:["already_owned","order_review","not_available","account_review","payment_exception_review"].includes(m)?m:"checkout_unavailable"},409);}
  const o=Array.isArray(reserve.data)?reserve.data[0]:reserve.data;

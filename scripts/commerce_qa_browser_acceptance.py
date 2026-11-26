@@ -407,6 +407,28 @@ def check_other_account(browser, primary_id, slugs):
         return "verified_denied"
     finally:context.close()
 
+def responsive_customer_journey(page):
+    # No checkout submission, account creation, order mutation or payment.
+    # The prior genuine payment-to-download evidence remains authoritative.
+    page.goto(QA_ORIGIN+"/store.html",wait_until="domcontentloaded")
+    card=page.locator("#boundary-builder-workbook")
+    card.locator("summary").click()
+    check(card.locator("details").evaluate("el=>el.open"),"PRODUCT_DETAILS_NOT_EXPANDABLE")
+    check(card.locator("details").inner_text().find("Both PDF editions are non-fillable")>=0,"PRODUCT_DELIVERY_DISCLOSURE_MISSING")
+    box=card.bounding_box()
+    check(bool(box) and box["x"]>=-1 and box["x"]+box["width"]<=page.viewport_size["width"]+1,"PRODUCT_CARD_EXCEEDS_VIEWPORT")
+    page.locator('a[href="member-auth.html?next=store.html"]').click()
+    page.wait_for_url("**/member-auth.html?next=store.html")
+    check(page.locator("#sign-up-email").is_visible() and page.locator("#sign-up-password").is_visible(),"REGISTRATION_FIELDS_MISSING")
+    check(page.locator("#sign-in-email").is_visible() and page.locator("#sign-in-password").is_visible(),"SIGN_IN_FIELDS_MISSING")
+    check(page.locator('a[href^="mailto:support@notbrokenjustburning.com"]').count()>0,"ACCOUNT_SUPPORT_MISSING")
+    page.goto(QA_ORIGIN+"/commerce-result.html",wait_until="domcontentloaded")
+    check(page.locator("#commerce-result-status").is_visible(),"RESULT_STATUS_MISSING")
+    page.goto(QA_ORIGIN+"/contact.html",wait_until="domcontentloaded")
+    for alias in ("support","billing","privacy"):
+        check(page.locator('a[href^="mailto:'+alias+'@notbrokenjustburning.com"]').count()>0,"SUPPORT_ROUTE_MISSING_"+alias)
+    return {"width":page.viewport_size["width"],"product_details":True,"account_entry":True,"result_status":True,"support_routes":True,"payment_attempted":False}
+
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("--mode",choices=["smoke","provider","existing-paid"],required=True)
@@ -419,6 +441,13 @@ def main():
         page=context.new_page()
         evidence["preview"]=smoke(page)
         print("PASS: Local HTTPS Chromium preview uses isolated QA ref; unreleased SKUs remain disabled",flush=True)
+        if args.mode=="smoke":
+            evidence["responsive_journey"]=[]
+            for width,height in ((1440,900),(390,844)):
+                with browser.new_context(ignore_https_errors=True,viewport={"width":width,"height":height},is_mobile=(width==390),has_touch=(width==390)) as responsive:
+                    responsive_page=responsive.new_page()
+                    evidence["responsive_journey"].append(responsive_customer_journey(responsive_page))
+                    print("PASS: customer product, account entry, result and support surfaces at "+str(width)+"px; no payment",flush=True)
         if args.mode=="existing-paid":
             evidence["kind"]="EXISTING_PAID_ORDER_DELIVERY_QA"
             primary_id=login(page,os.getenv("NBJB_QA_EXISTING_EMAIL",""),os.getenv("NBJB_QA_EXISTING_PASSWORD",""))

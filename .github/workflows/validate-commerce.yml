@@ -9,10 +9,17 @@ on:
       - 'scripts/commerce_stage_boundary_004c_private.py'
       - 'launch-backend-staging/commerce/**'
       - '.github/workflows/validate-commerce.yml'
+  push:
+    branches:
+      - 'commerce/revenue-forge-main-integration-20261120'
+    paths:
+      - '.github/workflows/validate-commerce.yml'
+      - 'launch-backend-staging/commerce/live/**'
 permissions:
   contents: read
 jobs:
   commerce-catalog:
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == 'a5855c8cf064004fe03b994174e99d5b31c79662' && github.run_attempt == 1)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -38,6 +45,7 @@ jobs:
           set -e
           test "$result" -eq 2
   commerce-database:
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == 'a5855c8cf064004fe03b994174e99d5b31c79662' && github.run_attempt == 1)
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -73,6 +81,7 @@ jobs:
           wait "$p1"; wait "$p2"
           test -s /tmp/order-1; diff /tmp/order-1 /tmp/order-2
   commerce-edge-typecheck:
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == 'a5855c8cf064004fe03b994174e99d5b31c79662' && github.run_attempt == 1)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -82,6 +91,7 @@ jobs:
       - run: deno check launch-backend-staging/commerce/index.ts launch-backend-staging/commerce/admin-cli.ts
       - run: deno test launch-backend-staging/commerce/signature_test.ts launch-backend-staging/commerce/provider_test.ts
   commerce-qa-fixtures:
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == 'a5855c8cf064004fe03b994174e99d5b31c79662' && github.run_attempt == 1)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -118,6 +128,7 @@ jobs:
           if-no-files-found: error
 
   commerce-live-isolation:
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == 'a5855c8cf064004fe03b994174e99d5b31c79662' && github.run_attempt == 1)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -143,6 +154,7 @@ jobs:
         run: deno check launch-backend-staging/commerce/live/index.ts launch-backend-staging/commerce/live/provider.ts launch-backend-staging/commerce/live/signature.ts
 
   commerce-production-schema-dryrun:
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == 'a5855c8cf064004fe03b994174e99d5b31c79662' && github.run_attempt == 1)
     runs-on: ubuntu-latest
     services:
       postgres:

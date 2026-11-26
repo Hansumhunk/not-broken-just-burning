@@ -246,3 +246,22 @@ jobs:
       - name: Verify narrow 007-D diff against immutable baseline
         if: github.event_name == 'pull_request' && github.head_ref == 'growth/007-d-social-share-correction'
         run: python scripts/test_social_share.py --compare-base 21f2ec9b3ef802a819523befb75dd165b86ce0c7
+
+
+  advanced-supabase-local:
+    if: github.event_name == 'pull_request' && github.head_ref == 'integration/mythic-resilience-rc2'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 3.4.0
+      - name: Isolated Supabase Auth, private Storage, Postgres and Edge Function test
+        shell: bash
+        run: bash scripts/test_advanced_collection_supabase.sh

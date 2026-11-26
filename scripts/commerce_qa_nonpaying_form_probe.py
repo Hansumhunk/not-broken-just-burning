@@ -85,6 +85,45 @@ def address_controls_snapshot(page):
         except Exception:continue
     print("STRIPE_SYNTHETIC_ADDRESS_CONTROL_DESCRIPTORS "+json.dumps(controls[:36],sort_keys=True),flush=True)
 
+def visible_required_form_controls(page):
+    # Native/custom field validity and missingness only. Do not read, print,
+    # screenshot or export any user/card values or raw Stripe error text.
+    fields=[]
+    names=set()
+    for frame in stripe_frames(page):
+        try:
+            nodes=frame.locator("input:visible,select:visible,textarea:visible").all()[:65]
+            for node in nodes:
+                try:
+                    data=node.evaluate("""el => ({
+                      tag:el.tagName.toLowerCase(),
+                      name:(el.getAttribute('name')||'').slice(0,50),
+                      autocomplete:(el.getAttribute('autocomplete')||'').slice(0,50),
+                      placeholder:(el.getAttribute('placeholder')||'').slice(0,50),
+                      type:(el.getAttribute('type')||'').slice(0,20),
+                      required:el.required===true,
+                      ariaRequired:el.getAttribute('aria-required')==='true',
+                      ariaInvalid:el.getAttribute('aria-invalid')==='true',
+                      valuePresent:Boolean(el.value),
+                      nativeValid:el.validity?.valid!==false,
+                      nativeMissing:el.validity?.valueMissing===true,
+                      nativePatternMismatch:el.validity?.patternMismatch===true,
+                      nativeTypeMismatch:el.validity?.typeMismatch===true
+                    })""")
+                    fingerprint=json.dumps(data,sort_keys=True)
+                    if fingerprint not in names:
+                        names.add(fingerprint);fields.append(data)
+                except Exception:continue
+        except Exception:continue
+    # Static presence of captcha host only, never network details or frame URLs.
+    captcha=any(("captcha" in (urlparse(f.url).hostname or "").lower()) for f in page.frames)
+    failures=[v for v in fields if v["required"] or v["ariaRequired"] or v["ariaInvalid"] or not v["nativeValid"]]
+    print("STRIPE_READONLY_REQUIRED_CONTROL_STATUS "+json.dumps({
+      "required_or_invalid_fields":failures[:35],
+      "visible_control_count":len(fields),
+      "captcha_host_present":captcha
+    },sort_keys=True),flush=True)
+
 def main():
     email=os.getenv("NBJB_QA_EXISTING_EMAIL","")
     password=os.getenv("NBJB_QA_EXISTING_PASSWORD","")
@@ -143,6 +182,7 @@ def main():
             test_host(page)
             fields=fill_synthetic_billing_address(page)
             address_controls_snapshot(page)
+            visible_required_form_controls(page)
             snap=frames_snapshot(page)
             print("NONPAYING_ADDRESS_FILL_STATUS "+json.dumps(fields,sort_keys=True),flush=True)
             print("SANDBOX_NONPAYING_FORM_DIAGNOSTIC "+json.dumps({"input_fill_status":results,**snap},sort_keys=True),flush=True)

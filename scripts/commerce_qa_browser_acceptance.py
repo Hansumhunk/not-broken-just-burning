@@ -400,6 +400,7 @@ def check_other_account(browser, primary_id, slugs):
         secondary=login(page,email,password)
         check(secondary!=primary_id,"SECONDARY_ACCOUNT_SAME_AS_BUYER")
         page.goto(QA_ORIGIN+"/member-library.html")
+        page.wait_for_function("window.NBJBAuth?.user?.id && window.NBJBCommerce?.enabled",timeout=25000)
         for slug in slugs:
             attempt=qa_request(page,"download",slug=slug)
             check(not attempt["ok"] and attempt["error"]=="not_owned","CROSS_ACCOUNT_ACCESS_NOT_DENIED")
@@ -408,7 +409,7 @@ def check_other_account(browser, primary_id, slugs):
 
 def main():
     parser=argparse.ArgumentParser()
-    parser.add_argument("--mode",choices=["smoke","provider"],required=True)
+    parser.add_argument("--mode",choices=["smoke","provider","existing-paid"],required=True)
     args=parser.parse_args()
     evidence={"kind":"REAL_PROVIDER_QA" if args.mode=="provider" else "LOCAL_QA_BROWSER_SMOKE",
               "project":QA_REF,"provider":"Stripe sandbox", "products":[]}
@@ -418,6 +419,17 @@ def main():
         page=context.new_page()
         evidence["preview"]=smoke(page)
         print("PASS: Local HTTPS Chromium preview uses isolated QA ref; unreleased SKUs remain disabled",flush=True)
+        if args.mode=="existing-paid":
+            evidence["kind"]="EXISTING_PAID_ORDER_DELIVERY_QA"
+            primary_id=login(page,os.getenv("NBJB_QA_EXISTING_EMAIL",""),os.getenv("NBJB_QA_EXISTING_PASSWORD",""))
+            page.goto(QA_ORIGIN+"/member-library.html",wait_until="domcontentloaded")
+            page.wait_for_function("window.NBJBAuth?.user?.id && window.NBJBCommerce?.enabled",timeout=25000)
+            for slug,cents,sha in SPECS:
+                result=exact_private_download(page,slug,sha)
+                evidence["products"].append({"sku":slug,**result})
+            evidence["cross_account"]=check_other_account(browser,primary_id,[x[0] for x in SPECS])
+            check(evidence["cross_account"]=="verified_denied","BLOCKED_CROSS_ACCOUNT_ACCEPTANCE")
+            print("PASS: existing paid entitlement download, exact bytes, expiration, recovery, and non-owner denial; no checkout",flush=True)
         if args.mode=="provider":
             email=os.getenv("NBJB_QA_EXISTING_EMAIL","")
             password=os.getenv("NBJB_QA_EXISTING_PASSWORD","")

@@ -258,7 +258,7 @@
       if (!block || typeof block.text !== 'string' || !block.text.trim()) continue;
       const text = block.text.trim();
       const kind = block.type === 'heading' ? 'heading' : 'paragraph';
-      if (kind === 'heading' && (major.test(text) || (slug === fortressSlug && /^RESEARCH NOTES AND REFERENCES$/i.test(text)))) {
+      if (kind === 'heading' && (major.test(text) || (slug === 'when-protection-becomes-a-prison' && /^RESEARCH NOTES AND REFERENCES$/i.test(text)))) {
         flush();
         name = prettyHeading(text);
         parentName = name;

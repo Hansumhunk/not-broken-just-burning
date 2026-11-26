@@ -50,6 +50,23 @@ export function approvedBoundaryRelease(product,stripeProduct) {
    && stripeProduct?.metadata?.sku==="NBJB-BB-001"
    && stripeProduct?.metadata?.version===BOUNDARY_APPROVED_RELEASE.stripe_version;
 }
+// Separate, still-INACTIVE successor release candidate. This freezes edition
+// identity for future checkout review; it does not authorize Forge activation.
+export const FORGE_APPROVED_RELEASE = Object.freeze({
+ slug:"forge-workbook",
+ asset_version:"v1.3",
+ asset_key:"forge-workbook/v1.3/NBJB-FG-002_v1.3_customer.zip",
+ download_name:"NBJB-FG-002_v1.3_customer.zip",
+ stripe_version:"1.3"
+});
+export function approvedForgeRelease(product,stripeProduct) {
+ if(product?.slug!==FORGE_APPROVED_RELEASE.slug)return true;
+ return product.asset_version===FORGE_APPROVED_RELEASE.asset_version
+   && product.asset_key===FORGE_APPROVED_RELEASE.asset_key
+   && product.download_name===FORGE_APPROVED_RELEASE.download_name
+   && stripeProduct?.metadata?.sku==="NBJB-FG-002"
+   && stripeProduct?.metadata?.version===FORGE_APPROVED_RELEASE.stripe_version;
+}
 export function idOf(x){return typeof x==='string'?x:x?.id||null;}
 export function validatePrice(price,p) {
  if (!price || price.livemode!==true || !price.active || price.type!=='one_time' || price.currency!==p.currency || price.unit_amount!==p.amount || price.id!==p.stripe_price_id || idOf(price.product)!==p.stripe_product_id || price.tax_behavior!==p.tax_behavior || (!RELEASE_CANDIDATES.has(p.slug) || SKU.get(p.slug)!==p.amount)) throw Error('price_mismatch');

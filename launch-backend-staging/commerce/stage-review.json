@@ -1,0 +1,50 @@
+{
+  "environment": "production_staging_review_only",
+  "checkoutEnabled": false,
+  "realMoneyCanaryAuthorized": false,
+  "generalSaleAuthorized": false,
+  "skipAutomatedSandboxBrowser": true,
+  "reviewedCommit": "",
+  "waveOne": [
+    "boundary-builder-workbook",
+    "forge-workbook"
+  ],
+  "evidence": {
+    "founderStageApproval": {
+      "approved": false,
+      "reference": ""
+    },
+    "productionSchemaAndBackupReviewed": {
+      "approved": false,
+      "reference": ""
+    },
+    "membershipIsolationReviewed": {
+      "approved": false,
+      "reference": ""
+    },
+    "liveBackendAndWebhookReviewed": {
+      "approved": false,
+      "reference": ""
+    },
+    "privateAssetsVerified": {
+      "approved": false,
+      "reference": ""
+    },
+    "pricingTermsAndTaxReviewed": {
+      "approved": false,
+      "reference": ""
+    },
+    "retentionErasureReviewed": {
+      "approved": false,
+      "reference": ""
+    },
+    "refundAndRollbackRunbookReviewed": {
+      "approved": false,
+      "reference": ""
+    },
+    "requiredCodeChecksPassed": {
+      "approved": false,
+      "reference": ""
+    }
+  }
+}

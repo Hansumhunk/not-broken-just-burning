@@ -1,0 +1,140 @@
+{
+  "source": "PR #242 manufacturing handoffs 7017532437 (Wave One v1.3) and 7022404166 (MR/HK v1.1); private archive hashes independently reverified; original candidate snapshots remain unchanged",
+  "catalogVersion": "1.5-commercial-review",
+  "releaseStatus": "Four-product technical candidate; MR/HK founder editorial/price acceptance and H.A.W.K. professional-scope review pending; no live activation",
+  "productionActivation": false,
+  "products": [
+    {
+      "slug": "boundary-builder-workbook",
+      "sku": "NBJB-BB-001",
+      "version": "1.3",
+      "priceCents": 1499,
+      "wave": 1,
+      "approved": false,
+      "archive": {
+        "filename": "NBJB-BB-001_v1.3_customer.zip",
+        "bytes": 405023,
+        "sha256": "8de5f26a6abd19b69d86b7d44d9125c07702b3f5a2fbfcf4adcee204ec2c68b9"
+      },
+      "allowedContents": [
+        {
+          "filename": "boundary_customer_v1.3.pdf",
+          "bytes": 512802,
+          "sha256": "8612a86c3bb4585356fb982790c8aede37972421f09eb3209cf27619523d3fb3"
+        },
+        {
+          "filename": "boundary_print_v1.3.pdf",
+          "bytes": 378256,
+          "sha256": "938ff26cfbe2cb1d659e6ea3864befdc1e06a510dc10026febf972e2d671b2e1"
+        }
+      ]
+    },
+    {
+      "slug": "forge-workbook",
+      "sku": "NBJB-FG-002",
+      "version": "1.3",
+      "priceCents": 1999,
+      "wave": 1,
+      "approved": false,
+      "archive": {
+        "filename": "NBJB-FG-002_v1.3_customer.zip",
+        "bytes": 450968,
+        "sha256": "7cf406c893fa1029c7cb7c84178696cbc902ce205e4edf461eae90057acaa7fd"
+      },
+      "allowedContents": [
+        {
+          "filename": "forge_customer_v1.3.pdf",
+          "bytes": 604086,
+          "sha256": "bd12e874ec45a0fa1937caa9f366ff813376d3d4008a4ddea81f3d9e092cfd6c"
+        },
+        {
+          "filename": "forge_print_v1.3.pdf",
+          "bytes": 485307,
+          "sha256": "a9e6342b02e3788cd28f2feaf720d0ff6e0f94be51c8c3a99ab085eff974a7bb"
+        }
+      ]
+    },
+    {
+      "slug": "30-days-through-the-fire",
+      "sku": "NBJB-FT-003",
+      "version": "1.0",
+      "priceCents": 2499,
+      "wave": 2,
+      "approved": false,
+      "archive": {
+        "filename": "NBJB-FT-003_v1.0_customer.zip",
+        "bytes": 565116,
+        "sha256": "008f50de6643417aaf61c0477784f64847567967d218a3ea88a4df4ffa86d438"
+      },
+      "allowedContents": [
+        {
+          "filename": "fire30_customer_v1.0.pdf",
+          "bytes": 783949,
+          "sha256": "02c1eef1f2edfbc3d2654a6b6679b6d84bbf8149712e57aa61e477217bfba8b3"
+        },
+        {
+          "filename": "fire30_print_v1.0.pdf",
+          "bytes": 295293,
+          "sha256": "59f7318cecb0c5ce7607b47537f6fd090a0a7528be614ecad994af402a571748"
+        }
+      ],
+      "releaseHold": "Retain historical v1.0 snapshot; FT v1.1 already accepted in separate private manufacturing manifest and not in this added-scope release"
+    },
+    {
+      "slug": "masculine-restoration-guide",
+      "sku": "NBJB-MR-004",
+      "version": "1.1",
+      "priceCents": 2999,
+      "wave": 2,
+      "approved": false,
+      "archive": {
+        "filename": "NBJB-MR-004_v1.1_customer.zip",
+        "bytes": 596685,
+        "sha256": "831b1ea4f5922f4775287bc21eed5fdade27c9671e51b13119c17921e771da4b"
+      },
+      "allowedContents": [
+        {
+          "filename": "masculine_customer_v1.1.pdf",
+          "bytes": 900636,
+          "sha256": "e20e0c31e8a8b1b25309dea18e0bf5c0a321b275bc1359c492bd235b29f44b84"
+        },
+        {
+          "filename": "masculine_print_v1.1.pdf",
+          "bytes": 801275,
+          "sha256": "7786066d079e3741256e29f17158766fefec5d494612d99386bef59d0faaa89c"
+        }
+      ],
+      "editorialApproval": false,
+      "priceApproval": false,
+      "additionalReview": "Founder editorial/usability and exact price approval required"
+    },
+    {
+      "slug": "hawk-complete-toolkit",
+      "sku": "NBJB-HK-005",
+      "version": "1.1",
+      "priceCents": 4999,
+      "wave": 3,
+      "approved": false,
+      "archive": {
+        "filename": "NBJB-HK-005_v1.1_customer.zip",
+        "bytes": 705480,
+        "sha256": "e47071901f5b59ac26409e3fe21391c2eea47aa128b2bbd2c0d67c2af8f26ec7"
+      },
+      "allowedContents": [
+        {
+          "filename": "hawk_customer_v1.1.pdf",
+          "bytes": 1081566,
+          "sha256": "9296df847764f803b523736b05c5d7b789a624e5d452ccdc004178675590d28a"
+        },
+        {
+          "filename": "hawk_print_v1.1.pdf",
+          "bytes": 989968,
+          "sha256": "17aea7c19e0cea7b1ac2cd59bd744d2e87d77332baa352f237c465b55f335bef"
+        }
+      ],
+      "editorialApproval": false,
+      "priceApproval": false,
+      "additionalReview": "Founder editorial/price, privacy and printable binder review plus qualified professional legal scope disposition required"
+    }
+  ]
+}

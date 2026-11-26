@@ -44,13 +44,15 @@ export default {
         .order("lesson_number", { ascending: true });
       if (listError) return reply({ error: "catalog_unavailable" }, 503);
       // Preserve existing catalog behavior for other lessons; the new candidate is invisible to ordinary accounts until published.
-      return reply({ lessons: (rows || []).filter(row => row.slug !== fortressSlug || row.status === "published" || isEditorialReviewer) });
+      return reply({ lessons: (rows || []).filter(row => row.track_slug !== "mythic-resilience" && (row.slug !== fortressSlug || row.status === "published" || isEditorialReviewer)) });
     }
 
     const slug = body?.slug;
     if (typeof slug !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 100) {
       return reply({ error: "invalid_lesson" }, 400);
     }
+
+    if (slug.startsWith("mythic-resilience-")) return reply({ error: "lesson_not_available" }, 404);
 
     // Entitlement comes only from the privileged database record, never caller-controlled metadata.
     const { data: member, error: memberError } = await ctx.supabaseAdmin

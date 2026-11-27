@@ -38,7 +38,8 @@ test("MR and HAWK candidate asset sizes and sha256 are exact, without embedding 
 });
 test("public storefront prepares verified product listings but cannot activate via browser flag",()=>{
  const page=read("store.html"),client=read("js/commerce-client.js"),switchCode=read("js/commerce-release.js");
- assert.match(page,/96-page PDF guide/);
+ assert.match(page,/Version 2\.0 RC1 · 73-page reading PDF/);
+ assert.match(page,/\$24\.99 USD/);
  assert.match(page,/121-page PDF toolkit/);
  assert.ok(page.includes("ten existing H.A.W.K. guides and offline tools remain free"));
  assert.match(page,/data-commerce-buy="masculine-restoration-guide" disabled/);

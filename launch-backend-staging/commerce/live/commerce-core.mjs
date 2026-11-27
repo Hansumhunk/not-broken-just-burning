@@ -1,7 +1,7 @@
 // Pure validation used by runtime and fixture tests. No secrets, network or DB.
-// Hardened standalone live adapter: independent production review required before enabling.
-// Changing an environment variable cannot override this compile-time release lock.
-export const LIVE_RUNTIME_REVIEWED = false;
+// Stage B activation source candidate ONLY; separate deployment/configuration approval required.
+// An absent or incorrect runtime approval value fails closed; public checkout stays hard-denied.
+export const LIVE_RUNTIME_REVIEWED = true;
 export const VERIFIED_LIVE_ACCOUNT = "acct_1UIHnYGyOSBYVfGl";
 export const LIVE_ORIGIN = "https://notbrokenjustburning.com";
 // Candidate release scope, NOT blanket commercial approval. Each SKU must be individually
@@ -11,21 +11,23 @@ export const RELEASE_CANDIDATES = new Set([
   "masculine-restoration-guide","hawk-complete-toolkit"
 ]);
 export const PRODUCTION_REF = 'plhbvtbvtxfzulsaxuim';
-export const SKU = new Map([['boundary-builder-workbook',1499],['forge-workbook',1999],['30-days-through-the-fire',2499],['masculine-restoration-guide',2999],['hawk-complete-toolkit',4999]]);
+export const SKU = new Map([['boundary-builder-workbook',1499],['forge-workbook',1999],['30-days-through-the-fire',2499],['masculine-restoration-guide',2499],['hawk-complete-toolkit',4999]]);
 export function liveConfigurationMatches({mode,key,url,expectedRef,origin,account}) {
  return mode==="production" && /^(sk_live_|rk_live_)/.test(key||"")
    && expectedRef===PRODUCTION_REF && url==="https://"+PRODUCTION_REF+".supabase.co"
    && origin===LIVE_ORIGIN && account===VERIFIED_LIVE_ACCOUNT;
 }
 export function productionAllowed(context) {
- return LIVE_RUNTIME_REVIEWED && liveConfigurationMatches(context);
+ return LIVE_RUNTIME_REVIEWED && context?.runtimeApproval==='stage-b-restricted-v1' && liveConfigurationMatches(context);
 }
 // Sandbox waiver path: allow only an explicitly named existing production member
 // and one preapproved SKU while the public checkout is still closed.
 // Neither a browser-side flag nor a missing canary UUID can make checkout public.
 export function permittedCheckout({gate,userId,slug,canaryUserId,canarySlug}) {
- if(!RELEASE_CANDIDATES.has(slug))return false;
- if(gate==='enabled')return true;
+ // Directive 004 first-sale scope: only Boundary can initiate checkout. Other editions remain held.
+ if(slug!=='boundary-builder-workbook'||!RELEASE_CANDIDATES.has(slug))return false;
+ // Stage B cannot open public checkout even if the environment is misconfigured.
+ if(gate==='enabled')return false;
  if(gate!=='canary')return false;
  const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
  return typeof userId==='string' && uuid.test(userId)

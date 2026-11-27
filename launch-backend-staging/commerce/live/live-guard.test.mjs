@@ -17,8 +17,12 @@ test("live context requires exact project, origin, account and live key",()=>{
   {origin:"https://www.notbrokenjustburning.com"},
   {account:"acct_1UIHnhGxoOD2zUCj"}
  ])assert.equal(liveConfigurationMatches({...good,...changes}),false,JSON.stringify(changes));
- assert.equal(LIVE_RUNTIME_REVIEWED,false);
- assert.equal(productionAllowed(good),false,"staged code never activates checkout");
+ assert.equal(LIVE_RUNTIME_REVIEWED,true);
+ assert.equal(productionAllowed(good),false,"absent runtime approval fails closed");
+ assert.equal(productionAllowed({...good,runtimeApproval:"enabled"}),false);
+ assert.equal(productionAllowed({...good,runtimeApproval:"stage-b-restricted-v1"}),true);
+ assert.equal(productionAllowed({...good,runtimeApproval:"stage-b-restricted-v1",mode:"sandbox"}),false);
+ assert.equal(productionAllowed({...good,runtimeApproval:"stage-b-restricted-v1",account:"acct_other"}),false);
 });
 
 test("Wave One Stripe Price requires a live one-time exact price",()=>{
@@ -28,7 +32,7 @@ test("Wave One Stripe Price requires a live one-time exact price",()=>{
  for(const bad of [{livemode:false},{type:"recurring"},{unit_amount:1599},{tax_behavior:"inclusive"},{product:"prod_OTHER"},{id:"price_SANDBOX"}]){
   assert.throws(()=>validatePrice({...price,...bad},p),/price_mismatch/);
  }
- for(const [slug,amount] of [["masculine-restoration-guide",2999],["hawk-complete-toolkit",4999]]) {
+ for(const [slug,amount] of [["masculine-restoration-guide",2499],["hawk-complete-toolkit",4999]]) {
   const candidate={...p,slug,amount,stripe_price_id:"price_"+slug,stripe_product_id:"prod_"+slug};
   const provider={...price,id:candidate.stripe_price_id,product:candidate.stripe_product_id,unit_amount:amount};
   assert.doesNotThrow(()=>validatePrice(provider,candidate),slug);
@@ -70,7 +74,9 @@ test("live canary never opens purchases to any other user or SKU",()=>{
   {gate:"disabled"},{gate:"test"},{gate:"sandbox"}]){
   assert.equal(permittedCheckout({...a,...changes}),false,JSON.stringify(changes));
  }
- assert.equal(permittedCheckout({...a,gate:"enabled"}),true);
+ assert.equal(permittedCheckout({...a,gate:"enabled"}),false);
+ assert.equal(permittedCheckout({...a,gate:"enabled",slug:"forge-workbook"}),false);
+ assert.equal(permittedCheckout({...a,slug:"forge-workbook",canarySlug:"forge-workbook"}),false);
  assert.equal(permittedCheckout({...a,gate:"enabled",slug:"30-days-through-the-fire"}),false);
  assert.equal(permittedCheckout({...a,gate:"canary",canaryUserId:"not-a-uuid"}),false);
 });

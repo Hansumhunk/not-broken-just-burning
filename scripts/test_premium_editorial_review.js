@@ -378,18 +378,18 @@ test('the private reader lists premium lessons in six distinct tracks', () => {
   assert.match(js, /Track 2 · The Placeholder Wound/);
 });
 
-test('membership and library accurately present all 44 released written lessons', () => {
+test('membership and library accurately present all 55 released premium lessons', () => {
   const store = read('member-store.html');
   const library = read('member-library.html');
   const doc = read('FOUNDING_LAUNCH_RELEASE.md');
-  assert.match(store, /All forty-four guided lessons are now published/);
-  assert.match(store, /All forty-four guided lessons are published in the protected member library/);
-  assert.match(store, /Available: 44 published lessons/);
+  assert.match(store, /All 55 premium guided lessons are published/);
+  assert.match(store, /All 55 premium guided lessons are published in the protected member library/);
+  assert.match(store, /Available: 55 premium lessons/);
   assert.match(library, /View Flamewalker\+ Membership/);
-  assert.match(library, /All 44 guided lessons are published and available/);
+  assert.match(library, /All 55 premium guided lessons are published and available/);
   assert.match(read('flamewalker-plus.html'), /7 published · Available with Flamewalker\+/);
   assert.match(read('flamewalker-plus.html'), /Paid checkout is available inside the authenticated member area/);
-  assert.match(library, /All 44 guided lessons are published and available/);
+  assert.match(library, /All 55 premium guided lessons are published and available/);
   assert.match(library, /Open Published Track/);
   assert.match(library, /Open Published Track/);
   assert.match(doc, /All seven are present in Supabase/);
@@ -601,7 +601,7 @@ test('new practical tracks appear in private reader and editorial queue without 
   assert.match(js, /Track 4 · Steadiness & Emotional Command/);
   assert.match(js, /Track 5 · Rebuilding a Life That Holds/);
   assert.match(html, /Premium lesson editorial review queue/);
-  assert.match(read('member-store.html'), /All forty-four guided lessons are published in the protected member library/);
+  assert.match(read('member-store.html'), /All 55 premium guided lessons are published in the protected member library/);
 });
 
 test('the recovered Sacred Laws remain private, correctly ordered, and awaiting founder approval', () => {
@@ -612,7 +612,7 @@ test('the recovered Sacred Laws remain private, correctly ordered, and awaiting 
   for (const slug of slugs) assert.match(html, new RegExp('data-premium-lesson-link="'+slug+'"'));
   assert.match(js, /Track 6 · The Five Sacred Laws of Survival/);
   assert.match(html, /Premium lesson editorial review queue/);
-  assert.match(read('member-store.html'), /All forty-four guided lessons are published in the protected member library/);
+  assert.match(read('member-store.html'), /All 55 premium guided lessons are published in the protected member library/);
   assert.match(doc, /35 drafts · 6 tracks · 0 published/);
   assert.match(doc, /Founding content scope is frozen/);
 });

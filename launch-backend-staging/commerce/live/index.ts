@@ -7,7 +7,7 @@ const env=(k:string)=>Deno.env.get(k)||"";
 const url=env("SUPABASE_URL"), key=env("NBJB_COMMERCE_STRIPE_LIVE_KEY"), ref=env("NBJB_COMMERCE_PRODUCTION_REF");
 const origin=env("NBJB_COMMERCE_LIVE_ORIGIN").replace(/\/$/,"");
 const bucket="nbjb-private-products";
-const live=productionAllowed({mode:env("NBJB_COMMERCE_MODE"),key,url,expectedRef:ref,origin,account:env("NBJB_COMMERCE_LIVE_STRIPE_ACCOUNT")});
+const live=productionAllowed({runtimeApproval:env("NBJB_COMMERCE_LIVE_RUNTIME_APPROVAL"),mode:env("NBJB_COMMERCE_MODE"),key,url,expectedRef:ref,origin,account:env("NBJB_COMMERCE_LIVE_STRIPE_ACCOUNT")});
 const admin=live?createClient(url,env("SUPABASE_SERVICE_ROLE_KEY"),{auth:{persistSession:false,autoRefreshToken:false}}):null;
 const stripe=live?new Stripe(key):null;
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -128,7 +128,7 @@ Deno.serve(async(req:Request)=>{
       canarySlug:env("NBJB_COMMERCE_LIVE_CANARY_SKU")}))return json({error:"checkout_disabled"},503);
  await verifyLiveAccount(stripe,env("NBJB_COMMERCE_LIVE_STRIPE_ACCOUNT"));
  const p=must(await admin.from("commerce_products").select("*").eq("slug",slug).eq("active",true).maybeSingle());
- if(!p||body.termsVersion!==p.terms_version||body.acceptTerms!==true)return json({error:"not_available_or_terms_required"},409);
+ if(!p||p.terms_version!=="boundary-004c-v1.0"||body.termsVersion!==p.terms_version||body.acceptTerms!==true)return json({error:"not_available_or_terms_required"},409);
  await productAsset(p);
  const price=await stripe.prices.retrieve(p.stripe_price_id,{expand:["product"]});
  validatePrice(price,p);
@@ -136,8 +136,8 @@ Deno.serve(async(req:Request)=>{
  // Release-lineage safeguard: older v1.3 edition and Stripe metadata cannot
  // become a sale merely because a later admin enables a SKU or canary flag.
  if(!approvedBoundaryRelease(p,price.product)||!approvedForgeRelease(p,price.product))return json({error:"edition_release_mismatch"},503);
- const reserve=await admin.rpc("commerce_reserve",{p_user:user.id,p_slug:slug,p_terms:p.terms_version});
- if(reserve.error){const m=reserve.error.message;return json({error:["already_owned","order_review","not_available","account_review","payment_exception_review"].includes(m)?m:"checkout_unavailable"},409);}
+ const reserve=await admin.rpc(env("NBJB_COMMERCE_LIVE_CHECKOUT")==="canary"?"commerce_reserve_canary":"commerce_reserve",{p_user:user.id,p_slug:slug,p_terms:p.terms_version});
+ if(reserve.error){const m=reserve.error.message;return json({error:["already_owned","order_review","not_available","account_review","payment_exception_review","canary_consumed"].includes(m)?m:"checkout_unavailable"},409);}
  const o=Array.isArray(reserve.data)?reserve.data[0]:reserve.data;
  if(!o)throw Error('order_not_reserved');
  if(o.stripe_price_id!==p.stripe_price_id||o.amount!==p.amount||o.tax_behavior!==p.tax_behavior)return json({error:"order_review"},409);
@@ -147,7 +147,7 @@ Deno.serve(async(req:Request)=>{
  const expires=Math.floor(Date.parse(o.created_at)/1000)+7200;
  // Stripe idempotency retention is at least 24h. Never recreate an old unknown session.
  if(!Number.isFinite(expires)||expires<Math.floor(Date.now()/1000)+1900)return json({error:"order_review"},409);
- const metadata={nbjb_commerce:"v1-live",order_id:o.id,slug};
+ const metadata={nbjb_commerce:"v1-live",order_id:o.id,slug,terms_version:o.terms_version};
  // Redirect an individually approved canary to its restricted result/verification page;
  // normal publicly enabled purchases continue to use the standard result page.
  const resultPage=env("NBJB_COMMERCE_LIVE_CHECKOUT")==="canary"?"commerce-live-canary.html":"commerce-result.html";

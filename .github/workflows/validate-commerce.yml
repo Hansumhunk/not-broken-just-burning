@@ -142,7 +142,10 @@ jobs:
           node --check js/commerce-client.js
           node --check js/commerce-store.js
           node --check js/commerce-release.js
-          grep -Fq 'LIVE_RUNTIME_REVIEWED = false' launch-backend-staging/commerce/live/commerce-core.mjs
+          grep -Fq 'LIVE_RUNTIME_REVIEWED = true' launch-backend-staging/commerce/live/commerce-core.mjs
+          grep -Fq "context?.runtimeApproval==='stage-b-restricted-v1'" launch-backend-staging/commerce/live/commerce-core.mjs
+          grep -Fq 'NBJB_COMMERCE_LIVE_RUNTIME_APPROVAL' launch-backend-staging/commerce/live/index.ts
+          grep -Fq "if(gate==='enabled')return false;" launch-backend-staging/commerce/live/commerce-core.mjs
           grep -Fq 'enabled:false' js/commerce-release.js
           if grep -Eq '(NBJB_COMMERCE_STRIPE_TEST_KEY|NBJB_COMMERCE_SANDBOX_REF|verifySandboxAccount|nbjb_commerce:"v1")' launch-backend-staging/commerce/live/index.ts; then
             echo 'Sandbox wiring leaked into the live handler' >&2; exit 1
@@ -184,6 +187,9 @@ jobs:
           psql $db -f launch-backend-staging/commerce/test-migration.sql
           psql $db -f launch-backend-staging/commerce/test-operations.sql
           psql $db -f launch-backend-staging/commerce/test-phase-four.sql
+          psql $db -f launch-backend-staging/commerce/live/directive-004-single-canary.sql
+          psql $db -f launch-backend-staging/commerce/live/test-directive-004-single-canary.sql
+          bash launch-backend-staging/commerce/live/test-directive-004-concurrent.sh
           if psql $db -f launch-backend-staging/commerce/live/production-schema-staged.sql >/tmp/duplicate-apply.log 2>&1; then
             echo 'FAIL: migration unexpectedly applied twice' >&2; exit 1
           fi

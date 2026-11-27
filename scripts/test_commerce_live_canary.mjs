@@ -28,14 +28,17 @@ test("canary source is wired to exact server-side user+SKU gate and private refu
  assert.match(worker,/resultPage=env\("NBJB_COMMERCE_LIVE_CHECKOUT"\)==="canary"/);
  assert.match(worker,/await verifyLiveAccount\(stripe/);
  assert.match(worker,/if\(req\.method==="POST" && new URL\(req\.url\)\.pathname\.endsWith\("\/webhook"\)\)return webhook/);
- assert.match(core,/export const LIVE_RUNTIME_REVIEWED = false/);
+ assert.match(core,/export const LIVE_RUNTIME_REVIEWED = true/);
+ assert.match(core,/context\?\.runtimeApproval==='stage-b-restricted-v1'/);
+ assert.match(worker,/NBJB_COMMERCE_LIVE_RUNTIME_APPROVAL/);
+ assert.match(core,/if\(gate==='enabled'\)return false/);
  assert.match(core,/return typeof userId==='string' && uuid\.test\(userId\)/);
  assert.match(release,/enabled:false/);
 });
 test("sandbox terms remain separate from specifically versioned LIVE terms",()=>{
  const store=read("store.html"), client=read("js/commerce-store.js");
  assert.match(store,/data-version="draft-v1"/);
- assert.match(client,/consent\.dataset\.version='live-v1'/);
+ assert.match(client,/consent\.dataset\.version='boundary-004c-v1\.0'/);
  assert.match(client,/commerce-policy-live-review\.html/);
  assert.match(client,/Review and accept the digital product terms first/);
 });

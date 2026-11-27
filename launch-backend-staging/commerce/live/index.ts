@@ -7,7 +7,7 @@ const env=(k:string)=>Deno.env.get(k)||"";
 const url=env("SUPABASE_URL"), key=env("NBJB_COMMERCE_STRIPE_LIVE_KEY"), ref=env("NBJB_COMMERCE_PRODUCTION_REF");
 const origin=env("NBJB_COMMERCE_LIVE_ORIGIN").replace(/\/$/,"");
 const bucket="nbjb-private-products";
-const live=productionAllowed({mode:env("NBJB_COMMERCE_MODE"),key,url,expectedRef:ref,origin,account:env("NBJB_COMMERCE_LIVE_STRIPE_ACCOUNT")});
+const live=productionAllowed({runtimeApproval:env("NBJB_COMMERCE_LIVE_RUNTIME_APPROVAL"),mode:env("NBJB_COMMERCE_MODE"),key,url,expectedRef:ref,origin,account:env("NBJB_COMMERCE_LIVE_STRIPE_ACCOUNT")});
 const admin=live?createClient(url,env("SUPABASE_SERVICE_ROLE_KEY"),{auth:{persistSession:false,autoRefreshToken:false}}):null;
 const stripe=live?new Stripe(key):null;
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

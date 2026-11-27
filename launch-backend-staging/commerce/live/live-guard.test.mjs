@@ -17,8 +17,12 @@ test("live context requires exact project, origin, account and live key",()=>{
   {origin:"https://www.notbrokenjustburning.com"},
   {account:"acct_1UIHnhGxoOD2zUCj"}
  ])assert.equal(liveConfigurationMatches({...good,...changes}),false,JSON.stringify(changes));
- assert.equal(LIVE_RUNTIME_REVIEWED,false);
- assert.equal(productionAllowed(good),false,"staged code never activates checkout");
+ assert.equal(LIVE_RUNTIME_REVIEWED,true);
+ assert.equal(productionAllowed(good),false,"absent runtime approval fails closed");
+ assert.equal(productionAllowed({...good,runtimeApproval:"enabled"}),false);
+ assert.equal(productionAllowed({...good,runtimeApproval:"stage-b-restricted-v1"}),true);
+ assert.equal(productionAllowed({...good,runtimeApproval:"stage-b-restricted-v1",mode:"sandbox"}),false);
+ assert.equal(productionAllowed({...good,runtimeApproval:"stage-b-restricted-v1",account:"acct_other"}),false);
 });
 
 test("Wave One Stripe Price requires a live one-time exact price",()=>{

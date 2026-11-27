@@ -1,7 +1,7 @@
 // Pure validation used by runtime and fixture tests. No secrets, network or DB.
-// Hardened standalone live adapter: independent production review required before enabling.
-// Changing an environment variable cannot override this compile-time release lock.
-export const LIVE_RUNTIME_REVIEWED = false;
+// Stage B activation source candidate ONLY; separate deployment/configuration approval required.
+// An absent or incorrect runtime approval value fails closed; public checkout stays hard-denied.
+export const LIVE_RUNTIME_REVIEWED = true;
 export const VERIFIED_LIVE_ACCOUNT = "acct_1UIHnYGyOSBYVfGl";
 export const LIVE_ORIGIN = "https://notbrokenjustburning.com";
 // Candidate release scope, NOT blanket commercial approval. Each SKU must be individually
@@ -18,7 +18,7 @@ export function liveConfigurationMatches({mode,key,url,expectedRef,origin,accoun
    && origin===LIVE_ORIGIN && account===VERIFIED_LIVE_ACCOUNT;
 }
 export function productionAllowed(context) {
- return LIVE_RUNTIME_REVIEWED && liveConfigurationMatches(context);
+ return LIVE_RUNTIME_REVIEWED && context?.runtimeApproval==='stage-b-restricted-v1' && liveConfigurationMatches(context);
 }
 // Sandbox waiver path: allow only an explicitly named existing production member
 // and one preapproved SKU while the public checkout is still closed.

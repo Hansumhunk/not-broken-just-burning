@@ -28,7 +28,10 @@ test("canary source is wired to exact server-side user+SKU gate and private refu
  assert.match(worker,/resultPage=env\("NBJB_COMMERCE_LIVE_CHECKOUT"\)==="canary"/);
  assert.match(worker,/await verifyLiveAccount\(stripe/);
  assert.match(worker,/if\(req\.method==="POST" && new URL\(req\.url\)\.pathname\.endsWith\("\/webhook"\)\)return webhook/);
- assert.match(core,/export const LIVE_RUNTIME_REVIEWED = false/);
+ assert.match(core,/export const LIVE_RUNTIME_REVIEWED = true/);
+ assert.match(core,/context\?\.runtimeApproval==='stage-b-restricted-v1'/);
+ assert.match(worker,/NBJB_COMMERCE_LIVE_RUNTIME_APPROVAL/);
+ assert.match(core,/if\(gate==='enabled'\)return false/);
  assert.match(core,/return typeof userId==='string' && uuid\.test\(userId\)/);
  assert.match(release,/enabled:false/);
 });

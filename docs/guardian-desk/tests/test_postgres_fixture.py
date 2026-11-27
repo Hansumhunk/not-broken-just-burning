@@ -193,6 +193,26 @@ DELETE FROM auth.users WHERE id='{A}'::uuid;
     check("GD003 P0-P4 valid under existing privileged DB constraint", one(f"""BEGIN; UPDATE public.guardian_support_tickets SET priority='P0' WHERE owner_user_id='{c}'::uuid; UPDATE public.guardian_support_tickets SET priority='P1' WHERE owner_user_id='{c}'::uuid; SELECT count(*) FROM public.guardian_support_tickets WHERE owner_user_id='{c}'::uuid AND priority='P1'; ROLLBACK;""") == "3")
     _, bad = query(f"UPDATE public.guardian_support_tickets SET priority='P5' WHERE owner_user_id='{c}'::uuid;", success=False)
     check("GD003 invalid P5 rejected", 'check constraint' in bad.lower())
+    # Synthetic recovery drill: no hosted database or credential is involved.
+    restore_db = "guardian_restore_fixture"
+    def local_cmd(args, data=None):
+        p = subprocess.run(["docker","exec","-i",CONTAINER,*args], input=data,
+                           capture_output=True, timeout=60, check=False)
+        if p.returncode:
+            raise AssertionError("Local recovery command failed: " + p.stderr.decode(errors="replace")[:450])
+        return p.stdout
+    snapshot = local_cmd(["pg_dump","-U","postgres","-Fc","-d",DATABASE])
+    check("GD003 synthetic logical dump is nonempty", len(snapshot) > 0)
+    local_cmd(["createdb","-U","postgres",restore_db])
+    try:
+        local_cmd(["pg_restore","-U","postgres","--exit-on-error","--single-transaction","-d",restore_db], snapshot)
+        def restored(sql):
+            return local_cmd(["psql","-X","-q","-A","-t","-v","ON_ERROR_STOP=1","-U","postgres","-d",restore_db],sql.encode()).decode().strip()
+        check("GD003 synthetic dump restores ticket count", restored("SELECT count(*) FROM public.guardian_support_tickets;") == one("SELECT count(*) FROM public.guardian_support_tickets;"))
+        check("GD003 restored RLS and service-only RPC privileges", restored("""SELECT (SELECT count(*) FROM pg_tables WHERE schemaname='public' AND tablename LIKE 'guardian_support_%' AND rowsecurity)=3 AND NOT has_function_privilege('authenticated','public.guardian_support_accept(uuid,text,text,text,text)','EXECUTE') AND has_function_privilege('service_role','public.guardian_support_accept(uuid,text,text,text,text)','EXECUTE');""") == "t")
+        check("GD003 restored P4 and P3 rows", restored(f"SELECT string_agg(priority,',' ORDER BY priority) FROM public.guardian_support_tickets WHERE owner_user_id='{c}'::uuid;") == "P2,P3,P4")
+    finally:
+        local_cmd(["dropdb","-U","postgres",restore_db])
     print(f"POSTGRES_Fixture: {CASES} passed; no hosted project modified", flush=True)
 
 

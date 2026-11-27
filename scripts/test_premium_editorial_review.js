@@ -361,7 +361,7 @@ test('the private reader lists premium lessons in six distinct tracks', () => {
     'body-as-ally', 'name-the-emotion-choose-action', 'the-space-between-trigger-and-response',
     'boundaries-without-cruelty', 'discipline-without-self-punishment',
     'provision-without-proving-worth', 'fatherhood-what-children-watch',
-    'brotherhood-without-dependency', 'lead-yourself-first', 'the-integrated-man-thirty-day-map',
+    'brotherhood-without-dependency', 'lead-yourself-first', 'the-integrated-man-thirty-day-map', 'when-protection-becomes-a-prison',
     'sacred-law-emotional-boundaries', 'sacred-law-pattern-recognition',
     'sacred-law-self-worth', 'sacred-law-strategic-retreat', 'sacred-law-authentic-voice'
   ];

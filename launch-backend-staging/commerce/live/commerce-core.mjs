@@ -26,7 +26,8 @@ export function productionAllowed(context) {
 export function permittedCheckout({gate,userId,slug,canaryUserId,canarySlug}) {
  // Directive 004 first-sale scope: only Boundary can initiate checkout. Other editions remain held.
  if(slug!=='boundary-builder-workbook'||!RELEASE_CANDIDATES.has(slug))return false;
- if(gate==='enabled')return true;
+ // Stage B cannot open public checkout even if the environment is misconfigured.
+ if(gate==='enabled')return false;
  if(gate!=='canary')return false;
  const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
  return typeof userId==='string' && uuid.test(userId)

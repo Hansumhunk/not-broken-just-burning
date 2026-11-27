@@ -70,7 +70,7 @@ test("live canary never opens purchases to any other user or SKU",()=>{
   {gate:"disabled"},{gate:"test"},{gate:"sandbox"}]){
   assert.equal(permittedCheckout({...a,...changes}),false,JSON.stringify(changes));
  }
- assert.equal(permittedCheckout({...a,gate:"enabled"}),true);
+ assert.equal(permittedCheckout({...a,gate:"enabled"}),false);
  assert.equal(permittedCheckout({...a,gate:"enabled",slug:"forge-workbook"}),false);
  assert.equal(permittedCheckout({...a,slug:"forge-workbook",canarySlug:"forge-workbook"}),false);
  assert.equal(permittedCheckout({...a,gate:"enabled",slug:"30-days-through-the-fire"}),false);

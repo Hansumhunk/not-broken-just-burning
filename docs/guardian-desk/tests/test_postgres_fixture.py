@@ -183,6 +183,16 @@ DELETE FROM auth.users WHERE id='{A}'::uuid;
     check("audit rows require safe event codes rather than customer text",
           one("""SELECT bool_and(safe_note ~ '^[a-z][a-z0-9_]{0,79}$')
           FROM public.guardian_support_events;""") == "t")
+    # Additional independent owner fixture after legacy count checks.
+    c = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc'
+    query(f"INSERT INTO auth.users(id) VALUES ('{c}'::uuid);")
+    for topic, priority, fingerprint in [('general_feedback','P4','d'*64),('education_navigation','P3','e'*64),('technical_problem','P2','f'*64)]:
+        result = json.loads(one(f"SELECT public.guardian_support_accept('{c}'::uuid,'{topic}',NULL,'Synthetic GD003 classification check','{fingerprint}');"))
+        check(f"GD003 RPC assigns {priority} to {topic}", one(f"SELECT priority FROM public.guardian_support_tickets WHERE id='{result['ticket_id']}'::uuid;") == priority)
+    check("GD003 owner sees own three tickets", user_count(c) == 3)
+    check("GD003 P0-P4 valid under existing privileged DB constraint", one(f"""BEGIN; UPDATE public.guardian_support_tickets SET priority='P0' WHERE owner_user_id='{c}'::uuid; UPDATE public.guardian_support_tickets SET priority='P1' WHERE owner_user_id='{c}'::uuid; SELECT count(*) FROM public.guardian_support_tickets WHERE owner_user_id='{c}'::uuid AND priority='P1'; ROLLBACK;""") == "3")
+    _, bad = query(f"UPDATE public.guardian_support_tickets SET priority='P5' WHERE owner_user_id='{c}'::uuid;", success=False)
+    check("GD003 invalid P5 rejected", 'check constraint' in bad.lower())
     print(f"POSTGRES_Fixture: {CASES} passed; no hosted project modified", flush=True)
 
 

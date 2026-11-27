@@ -54,7 +54,7 @@ export function canonicalDedupe(userId, validated) {
 }
 export function classifyTicket(validated) {
   // Verification, not customer emotion, authorizes P0/P1 escalation.
-  return { priority: validated.topic === 'general_feedback' ? 'P3' : 'P2',
+  return { priority: validated.topic === 'general_feedback' ? 'P4' : validated.topic === 'education_navigation' ? 'P3' : 'P2',
     suggested_team: validated.suggested_team, status: 'NEW' };
 }
 export function safePublicTicketResult(result) {

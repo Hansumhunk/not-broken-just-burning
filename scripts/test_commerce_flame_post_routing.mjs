@@ -30,7 +30,7 @@ test('final restricted terms retain professional routing, explicit release bound
  assert.match(s,/fourteen calendar days/);
  assert.match(s,/billing location is outside Florida or the total exceeds \$14\.99 USD/);
  assert.match(source('commerce-live-canary.html'),/I confirm that I am the authorized Florida purchaser/);
- assert.match(source('commerce-release.js'),/enabled:false/);
+ assert.match(source('js/commerce-release.js'),/enabled:false/);
  assert.match(store,/data-commerce-buy="boundary-builder-workbook" disabled/);
  assert.match(store,/data-commerce-buy="forge-workbook" disabled/);
 });

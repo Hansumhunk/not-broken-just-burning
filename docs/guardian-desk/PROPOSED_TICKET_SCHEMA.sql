@@ -18,7 +18,7 @@ CREATE TABLE public.guardian_support_tickets (
   feature_slug text CHECK (feature_slug IS NULL OR
     (char_length(feature_slug) BETWEEN 1 AND 120 AND feature_slug ~ '^[a-z0-9][a-z0-9_/-]*$')),
   summary text NOT NULL CHECK (char_length(summary) BETWEEN 10 AND 1200),
-  priority text NOT NULL DEFAULT 'P2' CHECK (priority IN ('P0','P1','P2','P3')),
+  priority text NOT NULL DEFAULT 'P2' CHECK (priority IN ('P0','P1','P2','P3','P4')),
   status text NOT NULL DEFAULT 'NEW' CHECK (status IN (
     'NEW','TRIAGED','AWAITING_CUSTOMER','ASSIGNED','IN_PROGRESS',
     'AWAITING_FOUNDER','RESOLVED','CLOSED','REOPENED'
@@ -150,7 +150,8 @@ BEGIN
  IF v_team IS NULL THEN
    RAISE EXCEPTION 'invalid support topic' USING ERRCODE = '22023';
  END IF;
- IF p_topic = 'general_feedback' THEN v_priority := 'P3'; END IF;
+ IF p_topic = 'general_feedback' THEN v_priority := 'P4';
+  ELSIF p_topic = 'education_navigation' THEN v_priority := 'P3'; END IF;
 
  -- Serialize intake by owner for the duration of this transaction. This
  -- protects first-submit vs identical retry races and avoids charging rate

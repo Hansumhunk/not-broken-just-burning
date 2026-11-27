@@ -52,7 +52,7 @@ test('dedupe owner isolation',()=>{
  const a=validateSubmission(valid);assert.notEqual(canonicalDedupe('ownerA',a),canonicalDedupe('ownerB',a));
 });
 test('routine severity not escalated to critical unverified',()=>{
- for(const topic of TOPICS)assert.ok(['P2','P3'].includes(classifyTicket(validateSubmission({...valid,topic})).priority));
+ for(const topic of TOPICS)assert.ok(['P2','P3','P4'].includes(classifyTicket(validateSubmission({...valid,topic})).priority));
 });
 test('billing queue is revenue forge',()=>assert.equal(classifyTicket(validateSubmission({...valid,topic:'billing_subscriptions'})).suggested_team,'revenue_forge'));
 test('safety language routed',()=>assert.equal(isImmediateDanger('I am going to kill myself'),true));
@@ -188,4 +188,24 @@ test('orphaned tickets cannot retain free-text metadata or legal hold references
 test('audit notes accept only identifiers, not free-text personal disclosures',()=>{
  assert.match(ddl,/safe_note ~ '\^\[a-z\]\[a-z0-9_\]\{0,79\}\$'/);
  assert.match(ddl,/authenticated_ticket_created/);
+});
+
+// GD-003-A: manual P0/P1 escalation stays human-controlled; intake only P2-P4.
+test('GD003 precise routine classification across all nine topics',()=>{
+ for(const topic of TOPICS){const expected=topic==='general_feedback'?'P4':topic==='education_navigation'?'P3':'P2';assert.equal(classifyTicket(validateSubmission({...valid,topic})).priority,expected);}
+});
+test('GD003 client cannot choose P0 or P4 or other priority',()=>{
+ for(const priority of ['P0','P1','P2','P3','P4','P5'])assert.equal(validateSubmission({...valid,priority}).code,'UNEXPECTED_FIELD');
+});
+test('GD003 source schema supports all five priority codes and classifier parity',()=>{
+ assert.ok(ddl.includes("('P0','P1','P2','P3','P4')"));
+ assert.ok(ddl.includes("p_topic = 'general_feedback' THEN v_priority := 'P4'"));
+ assert.ok(ddl.includes("p_topic = 'education_navigation' THEN v_priority := 'P3'"));
+});
+test('GD003 five-group KPI retains complementary suppression',()=>{
+ const x=suppressedExecutiveAggregate({total:26,groups:{P0:0,P1:0,P2:15,P3:10,P4:1}});
+ assert.equal(x.groups.P4,null);assert.equal(x.groups.P2,null);assert.equal(x.groups.P3,10);assert.equal(x.total,26);
+});
+test('GD003 feedback with emergency language takes safety path not P4 persistence',async()=>{
+ await withMock(async seen=>{const r=await handle(req({...valid,topic:'general_feedback',summary:'I am going to kill myself'}),get);assert.equal(r.status,200);assert.equal(seen.length,1);});
 });

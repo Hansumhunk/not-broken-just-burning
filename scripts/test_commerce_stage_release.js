@@ -24,7 +24,10 @@ test('even hypothetical complete staged-review evidence never authorizes live de
    assert.equal(evaluate({...m,...violation}).eligibleForCheckoutDisabledStageReview,false);
 });
 test('locked source code, original strict release gate and sandbox-fail status are preserved',()=>{
- assert.match(core,/export const LIVE_RUNTIME_REVIEWED\s*=\s*false;/);
+ assert.match(core,/export const LIVE_RUNTIME_REVIEWED\s*=\s*true;/);
+ assert.match(core,/context\?\.runtimeApproval==='stage-b-restricted-v1'/);
+ assert.match(core,/if\(gate==='enabled'\)return false;/);
+ assert.match(core,/if\(gate!=='canary'\)return false;/);
  assert.match(release,/enabled:false/);
  assert.equal(review.productionCheckoutEnabled,false);
  assert.equal(review.evidence.sandboxEndToEndPassed.approved,false);

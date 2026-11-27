@@ -2,6 +2,18 @@ import { withSupabase } from "npm:@supabase/server@1.7.0";
 
 // Never place premium lesson bodies, billing secrets, or user journal data in static GitHub Pages.
 const noStore = { "Cache-Control": "private, no-store, max-age=0", "Pragma": "no-cache" };
+// A fixed release-bound mapping, never a caller-supplied bucket, path, or URL.
+// No private manuscript, review link, or PDF bytes are stored in this repository.
+// The object is NOT provisioned by this code; separate release authorization is required.
+const fortressSlug = "when-protection-becomes-a-prison";
+const fortressEdition = "Fortress Project v1.1 (Directive 002)";
+const fortressWorkbook = {
+  bucket: "nbjb-private-products",
+  key: "curriculum/fortress/fortress-audit-v1.1.pdf",
+  filename: "The-Fortress-Audit.pdf",
+  bytes: 182857,
+  sha256: "f4561ff8594405d372f33309bdea111bc2fecdd45e5e56eb4ffdcb1413b60604",
+};
 function reply(data: unknown, status = 200) {
   return Response.json(data, { status, headers: noStore });
 }
@@ -11,6 +23,7 @@ export default {
     if (req.method !== "POST") return reply({ error: "method_not_allowed" }, 405);
     const userId = ctx.userClaims?.id;
     if (!userId) return reply({ error: "unauthorized" }, 401);
+    const isEditorialReviewer = userId === Deno.env.get("NBJB_SANDBOX_TEST_USER_ID");
 
     let body: { slug?: unknown; action?: unknown; section?: unknown };
     try { body = await req.json(); }
@@ -30,7 +43,8 @@ export default {
         .in("status", ["published", "editorial_review"])
         .order("lesson_number", { ascending: true });
       if (listError) return reply({ error: "catalog_unavailable" }, 503);
-      return reply({ lessons: rows || [] });
+      // Preserve existing catalog behavior for other lessons; the new candidate is invisible to ordinary accounts until published.
+      return reply({ lessons: (rows || []).filter(row => row.slug !== fortressSlug || row.status === "published" || isEditorialReviewer) });
     }
 
     const slug = body?.slug;
@@ -61,7 +75,6 @@ export default {
 
     // Only the nominated internal test account may review unpublished drafts.
     // The reviewer UUID is read from Supabase Secrets, never from the browser.
-    const isEditorialReviewer = userId === Deno.env.get("NBJB_SANDBOX_TEST_USER_ID");
     if (!entitled && !isEditorialReviewer) return reply({ error: "paid_membership_required" }, 403);
 
     let lessonQuery = ctx.supabaseAdmin
@@ -78,7 +91,64 @@ export default {
       return reply({ error: "content_unavailable" }, 503);
     }
     if (!lesson) return reply({ error: "lesson_not_available" }, 404);
+    // The reviewer exception is for unpublished Fortress review, never a free published download.
+    if (slug === fortressSlug && lesson.status === "published" && !entitled) {
+      return reply({ error: "paid_membership_required" }, 403);
+    }
 
-    return reply({ lesson });
+    // Keep the nominated reviewer exception for existing manuscripts. A new
+    // workbook requires current paid access to a published lesson, OR the
+    // nominated reviewer reading this exact editorial-review edition.
+    const workbookEligible = slug === fortressSlug
+      && lesson.content?.sourceEdition === fortressEdition
+      && lesson.content?.workbook?.slug === "fortress-audit"
+      && ((lesson.status === "published" && entitled)
+        || (lesson.status === "editorial_review" && isEditorialReviewer));
+    if (body?.action === "workbook") {
+      if (!workbookEligible) return reply({ error: "workbook_not_available" }, 404);
+      try {
+        const { data: file, error: fileError } = await ctx.supabaseAdmin.storage
+          .from(fortressWorkbook.bucket).download(fortressWorkbook.key);
+        if (fileError || !file || file.size !== fortressWorkbook.bytes) {
+          return reply({ error: "workbook_unavailable" }, 503);
+        }
+        const bytes = await file.arrayBuffer();
+        const digest = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes)))
+          .map(n => n.toString(16).padStart(2, "0")).join("");
+        if (digest !== fortressWorkbook.sha256) return reply({ error: "workbook_unavailable" }, 503);
+        // Recheck authorization after the private asset read, immediately before
+        // emitting bytes. No signed bearer URL remains usable after revocation.
+        const { data: latestMember, error: latestError } = await ctx.supabaseAdmin
+          .from("membership_entitlements").select("tier,status,valid_from,valid_until,provider")
+          .eq("user_id", userId).maybeSingle();
+        if (latestError) return reply({ error: "access_unavailable" }, 503);
+        const latestNow = Date.now();
+        const latestDate = (v: string | null, future: boolean) =>
+          v == null ? future : Number.isFinite(Date.parse(v)) &&
+            (future ? Date.parse(v) > latestNow : Date.parse(v) <= latestNow);
+        const latestEntitled = latestMember?.tier === "paid_member"
+          && ["active", "trialing", "past_due"].includes(latestMember.status)
+          && latestDate(latestMember.valid_from, false)
+          && (latestMember.provider !== "stripe" || latestMember.valid_until != null)
+          && latestDate(latestMember.valid_until, true);
+        const { data: latestLesson, error: latestLessonError } = await ctx.supabaseAdmin
+          .from("flamewalker_premium_lessons").select("status,content").eq("slug", slug).maybeSingle();
+        if (latestLessonError) return reply({ error: "content_unavailable" }, 503);
+        if (!latestLesson || latestLesson.content?.sourceEdition !== fortressEdition
+          || latestLesson.content?.workbook?.slug !== "fortress-audit"
+          || !((latestLesson.status === "published" && latestEntitled)
+            || (latestLesson.status === "editorial_review" && isEditorialReviewer))) {
+          return reply({ error: "workbook_not_available" }, 403);
+        }
+        // supabase-js functions.invoke recognizes octet-stream as a Blob.
+        return new Response(bytes, { status: 200, headers: {
+          ...noStore, "Content-Type": "application/octet-stream",
+          "Content-Disposition": 'attachment; filename="' + fortressWorkbook.filename + '"',
+          "X-Content-Type-Options": "nosniff", "X-Robots-Tag": "noindex, nofollow, noarchive",
+        } });
+      } catch (_) { return reply({ error: "workbook_unavailable" }, 503); }
+    }
+    // Never expose the private object key, Drive links or signed URLs.
+    return reply(workbookEligible ? { lesson, workbookAvailable: true } : { lesson });
   }),
 };

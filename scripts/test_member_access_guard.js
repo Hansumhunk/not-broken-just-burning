@@ -584,7 +584,8 @@ test('live Terms and Refund pages describe currently available paid membership w
     assert.ok(page.includes('44 currently published written lessons'),name);
     assert.ok(!page.includes('paid subscriptions are not yet available for purchase'),name);
     assert.ok(!page.includes('Applies to paid memberships when offered'),name);
-    assert.ok(page.includes('notbrokenjustburning@gmail.com'),name);
+    assert.ok(page.includes('mailto:billing@notbrokenjustburning.com'),name);
+    assert.ok(!page.includes('notbrokenjustburning@gmail.com'),name+' legacy public inbox');
     assert.ok(page.includes('14'),name);
     assert.ok(page.includes('30'),name);
   }
@@ -888,7 +889,7 @@ test('feedback prepares a private-by-default email without transmitting until me
   assert.equal(wrap.hidden,false);
   assert.equal(mailto,'','copy must not launch email');
   listeners['form:submit']({preventDefault(){}});
-  assert.ok(mailto.startsWith('mailto:notbrokenjustburning@gmail.com?subject='));
+  assert.ok(mailto.startsWith('mailto:support@notbrokenjustburning.com?subject='));
   assert.ok(mailto.includes('body='));
   assert.match(status.textContent,/NBJB has not received it yet/);
 });
@@ -1222,4 +1223,59 @@ test('account export refuses missing authentication, wrong owner, read failures 
  assert.match(html,/Request Account Deletion/);
  assert.match(html,/does not immediately delete data or stop renewal/);
  assert.match(read('js/member-bootstrap.js'),/settings: \["js\/member-account-export.js"\]/);
+});
+
+test('dashboard Path focus shortcut stays in the authenticated Path practice', () => {
+  const dashboard = read('js/member-dashboard.js');
+  const stagePage = read('member-path-stage.html');
+  const stageScript = read('js/member-path-stage.js');
+  const mapping = dashboard.match(/const pathRoutes = Object\.freeze\(\{([\s\S]*?)\}\);/)?.[1];
+  assert.ok(mapping, 'Dashboard must define Path focus routes');
+  const expected = [
+    ['Fire Reclamation', 'fire-reclamation'],
+    ["The Guardian's Path", 'guardian'],
+    ['Sacred Mirror Work', 'sacred-mirror'],
+    ['Masculine Restoration', 'masculine-restoration'],
+    ['Voice of Fire', 'voice-of-fire'],
+    ['Circle of the Flame', 'circle-of-flame']
+  ];
+  for (const [name, slug] of expected) {
+    const line = mapping.split('\n').find((value) => value.includes(name));
+    assert.ok(line?.includes('member-path-stage.html?stage=' + slug), name + ' must open authenticated practice');
+    assert.ok(stageScript.includes("slug:'" + slug + "'"), name + ' requires a recognized stage slug');
+  }
+  assert.doesNotMatch(mapping, /:\s*['"]path-[^'"]+\.html/, 'Member shortcut must not silently exit to public overview');
+  assert.match(stagePage, /id="nbjb-member-access-gate"/);
+});
+
+
+test('Directive 007: member continuity links to published free Seven Days without implying account sync', () => {
+  const dashboard = read('members.html');
+  const publicCourse = read('first-seven-days.html');
+  const publicMarks = read('js/first-seven-days.js');
+  const guestFrontDoor = read('index.html');
+  const memberPlatform = read('js/member-service.js');
+  assert.match(dashboard, /href="first-seven-days[.]html">Explore the free First Seven Days/);
+  assert.match(dashboard, /href="first-seven-days[.]html">Open the free First Seven Days/);
+  assert.match(dashboard, /Its optional day marks last only for that page visit/);
+  assert.match(dashboard, /not saved to your Hub or synchronized between devices/);
+  assert.match(dashboard, /Next Honest Action and explicitly saved My Work remain device-local/);
+  assert.match(publicCourse, /<link rel="canonical" href="https:\/\/notbrokenjustburning[.]com\/first-seven-days[.]html">/);
+  assert.match(guestFrontDoor, /href="first-seven-days[.]html"/);
+  assert.doesNotMatch(publicMarks, /localStorage|sessionStorage|fetch\(|sendBeacon\(|\.capture\(/);
+  assert.match(memberPlatform, /nbjb[.]member[.]v2/);
+});
+
+test('Directive 008: Join offers the published public Seven Days directly without requiring signup', () => {
+  const join = read('join.html');
+  const course = read('first-seven-days.html');
+  const marks = read('js/first-seven-days.js');
+  assert.match(join, /href="first-seven-days[.]html">Read the free First Seven Days/);
+  assert.match(join, /no account needed/);
+  assert.match(join, /href="member-auth[.]html" data-growth-cta="join_signup"/);
+  assert.match(join, /href="index[.]html#start-here">Try Free Guidance Without Signing Up/);
+  assert.match(join, /href="member-auth[.]html">Sign in/);
+  assert.match(course, /No account or payment required/);
+  assert.doesNotMatch(course, /src="js\/main[.]js"/);
+  assert.doesNotMatch(marks, /localStorage|sessionStorage|fetch\(|sendBeacon\(|\.capture\(/);
 });

@@ -1,10 +1,13 @@
 import { withSupabase } from "npm:@supabase/server@1.7.0";
 import Stripe from "npm:stripe@22.6.2";
-import { lookupOffer, validPrice, checkoutConflict, sessionIdempotencyKey } from "./checkout-policy.mjs";
+import { lookupOffer, validPrice } from "./checkout-policy.mjs";
+import { reservedCheckout } from "./reserved-checkout.mjs";
+import { bindMembershipCustomer } from "./customer-binding.mjs";
 
-const SITE_URL = (Deno.env.get("NBJB_SITE_URL") ?? "https://notbrokenjustburning.com").replace(/\/+$/, "");
-const stripeSecret = Deno.env.get("STRIPE_LIVE_SECRET_KEY");
-const stripe = stripeSecret ? new Stripe(stripeSecret) : null;
+import { billingEnvironment } from "../membership-atomic/billing-environment.mjs";
+const environment = billingEnvironment(k=>Deno.env.get(k));
+const SITE_URL = environment?.site;
+const stripe = environment ? new Stripe(environment.key) : null;
 
 function json(body: unknown, status = 200) {
   return Response.json(body, { status });
@@ -13,7 +16,7 @@ function json(body: unknown, status = 200) {
 export default {
   fetch: withSupabase({ auth: "user" }, async (req, ctx) => {
     if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
-    if (!stripe || !(stripeSecret?.startsWith("sk_live_") || stripeSecret?.startsWith("rk_live_"))) return json({ error: "live_billing_not_configured" }, 503);
+    if (!stripe || !environment) return json({ error: "live_billing_not_configured" }, 503);
 
     const userId = ctx.userClaims?.id;
     const email = ctx.userClaims?.email;
@@ -27,11 +30,15 @@ export default {
     // flags are enabled in the reviewed release code, not by a browser request.
     // Canary mode remains available whenever public release is disabled again.
     const PUBLIC_LIVE_CHECKOUT_ENABLED = true;
-    if (!PUBLIC_LIVE_CHECKOUT_ENABLED && !isCanary) {
+    if (environment.live && Deno.env.get("NBJB_LIVE_CHECKOUT_PAUSED") === "true") {
+      return json({ error: "live_checkout_not_enabled" }, 503);
+    }
+    if (environment.live && !PUBLIC_LIVE_CHECKOUT_ENABLED && !isCanary) {
       return json({ error: "live_checkout_not_enabled" }, 503);
     }
     // The sandbox QA identity must not contaminate real customer billing.
-    if (userId === Deno.env.get("NBJB_SANDBOX_TEST_USER_ID")) {
+    if (!environment.live && !environment.users.includes(userId)) return json({ error: "qa_identity_not_allowed" }, 403);
+    if (environment.live && userId === Deno.env.get("NBJB_SANDBOX_TEST_USER_ID")) {
       return json({ error: "sandbox_test_account_not_eligible" }, 403);
     }
 
@@ -60,7 +67,7 @@ export default {
 
     const { data: entitlement, error: entitlementError } = await ctx.supabaseAdmin
       .from("membership_entitlements")
-      .select("tier,status,provider,provider_customer_ref,provider_subscription_ref,cancel_at_period_end")
+      .select("tier,status,provider,provider_customer_ref,provider_subscription_ref,cancel_at_period_end,valid_until")
       .eq("user_id", userId)
       .single();
 
@@ -71,57 +78,15 @@ export default {
 
     if (
       entitlement.tier === "paid_member" &&
-      ["active", "trialing", "past_due"].includes(entitlement.status)
+      ["active", "trialing", "past_due"].includes(entitlement.status) &&
+      Number.isFinite(Date.parse(entitlement.valid_until ?? "")) && Date.parse(entitlement.valid_until ?? "") > Date.now()
     ) {
       return json({ error: "already_subscribed", manage_in_portal: true }, 409);
     }
 
     try {
-      let customerId =
-        entitlement.provider === "stripe" && entitlement.provider_customer_ref
-          ? entitlement.provider_customer_ref
-          : null;
-
-      if (customerId) {
-        // A historic Stripe customer reference must not trigger a new charge
-        // while a live Stripe subscription is still active. The local
-        // entitlement can be free when its paid access has ended or drifted;
-        // Stripe remains authoritative on existing billing agreements.
-        const customerSubscriptions = await stripe.subscriptions.list({
-          customer: customerId,
-          status: "all",
-          limit: 100,
-        });
-        const sessions = await stripe.checkout.sessions.list({ customer: customerId, status: "open", limit: 100 });
-        const conflict = checkoutConflict(customerSubscriptions, sessions);
-        if (conflict) return json({ error: conflict, manage_in_portal: conflict === "already_subscribed" }, conflict === "subscription_check_incomplete" ? 503 : 409);
-      }
-
-      if (!customerId) {
-        const customer = await stripe.customers.create(
-          {
-            email: typeof email === "string" ? email : undefined,
-            metadata: {
-              nbjb_user_id: userId,
-              nbjb_source: "flamewalker_account",
-              nbjb_environment: "live",
-            },
-          },
-          { idempotencyKey: `nbjb-live-customer-${userId}` },
-        );
-
-        customerId = customer.id;
-
-        const { error: customerSaveError } = await ctx.supabaseAdmin
-          .from("membership_entitlements")
-          .update({
-            provider: "stripe",
-            provider_customer_ref: customerId,
-          })
-          .eq("user_id", userId);
-
-        if (customerSaveError) throw customerSaveError;
-      }
+      if (!environment.live && (await stripe.accounts.retrieveCurrent()).id !== environment.account) return json({ error: "qa_stripe_account_mismatch" }, 503);
+      const customerId = await bindMembershipCustomer(ctx.supabaseAdmin, stripe, {userId,email,entitlement,environment});
 
       const prices = await stripe.prices.list({
         active: true,
@@ -130,12 +95,12 @@ export default {
       });
 
       const price = prices.data[0];
-      if (!validPrice(price, offer)) {
+      if (!validPrice(price, offer, environment.live)) {
         console.error("checkout_offer_misconfigured", offer.lookupKey);
         return json({ error: "offer_not_configured" }, 503);
       }
 
-      const session = await stripe.checkout.sessions.create({
+      const request = {
         mode: "subscription",
         customer: customerId,
         client_reference_id: userId,
@@ -145,20 +110,23 @@ export default {
         metadata: {
           nbjb_user_id: userId,
           nbjb_offer: offer.lookupKey,
-          nbjb_environment: "live",
+          nbjb_environment: environment.tag,
         },
         subscription_data: {
           metadata: {
             nbjb_user_id: userId,
             nbjb_offer: offer.lookupKey,
+            nbjb_environment: environment.tag,
           },
         },
-      }, { idempotencyKey: sessionIdempotencyKey(customerId) });
-
-      if (!session.url) return json({ error: "checkout_unavailable" }, 502);
-      return json({ url: session.url });
+      };
+      const result = await reservedCheckout(ctx.supabaseAdmin, stripe, { userId, customerId, offerSlug, request });
+      if (result.error) return json({ error: result.error, manage_in_portal: result.error === "already_subscribed" }, result.status);
+      return json({ url: result.url });
     } catch (error) {
       console.error("checkout_failed");
+      const code = error instanceof Error ? error.message : "";
+      if (["customer_mapping_review","customer_mapping_unavailable"].includes(code)) return json({ error: code }, 503);
       return json({ error: "checkout_failed" }, 500);
     }
   }),

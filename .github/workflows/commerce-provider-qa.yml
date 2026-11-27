@@ -1,0 +1,321 @@
+name: Commerce genuine Stripe sandbox acceptance
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/commerce-provider-qa.yml'
+      - 'scripts/commerce_qa_browser_acceptance.py'
+      - 'scripts/commerce_qa_nonpaying_form_probe.py'
+      - 'scripts/commerce_qa_hosted_probe.py'
+      - 'launch-backend-staging/commerce/build-qa-preview.py'
+      - 'launch-backend-staging/commerce/serve-qa-preview.py'
+      - 'store.html'
+      - 'js/commerce-*.js'
+  # One-shot direct branch QA test when pull_request checks are blocked by merge
+  # conflict. This job never submits a card payment and never touches live.
+  push:
+    branches:
+      - 'commerce/revenue-forge-main-integration-20261120'
+    paths:
+      - '.github/workflows/commerce-provider-qa.yml'
+      - 'scripts/commerce_qa_nonpaying_form_probe.py'
+permissions:
+  contents: read
+concurrency:
+  group: commerce-provider-qa-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+jobs:
+  qa-hosted-security-probe:
+    if: (github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == '4b0779a0f13024815c8f85aa0a506e53eb72a947' && github.run_attempt == 1)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Probe actual isolated QA webhook signature/JWT/origin enforcement
+        run: python scripts/commerce_qa_hosted_probe.py
+      - name: Mark as security-only, not successful payment
+        run: echo 'Real QA HTTPS security probes passed. These do NOT establish signed provider payment acceptance.' >> "$GITHUB_STEP_SUMMARY"
+  qa-local-preview-chromium:
+    # Run only on the existing controlled integration PR; never on forks or production.
+    if: (github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == '4b0779a0f13024815c8f85aa0a506e53eb72a947' && github.run_attempt == 1)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check automation script syntax
+        run: python -m py_compile scripts/commerce_qa_browser_acceptance.py
+      - name: Install previously approved pinned Chromium browser framework
+        run: |
+          python -m pip install playwright==1.51.0
+          python -m playwright install --with-deps chromium
+      - name: Launch existing isolated QA preview on runner localhost
+        env:
+          NBJB_QA_PUBLISHABLE_KEY: sb_publishable_Ayqf6-ZoFGIDscFq6RWfcw_eQ5p_etR
+        run: |
+          set -euo pipefail
+          python launch-backend-staging/commerce/build-qa-preview.py --out "$RUNNER_TEMP/nbjb-commerce-preview" --project-ref fgpkejlmpfkxgpktgdzm
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1" -keyout "$RUNNER_TEMP/qa-key.pem" -out "$RUNNER_TEMP/qa-cert.pem" >/dev/null 2>&1
+          nohup python launch-backend-staging/commerce/serve-qa-preview.py --dir "$RUNNER_TEMP/nbjb-commerce-preview" --cert "$RUNNER_TEMP/qa-cert.pem" --key "$RUNNER_TEMP/qa-key.pem" --port 8443 > "$RUNNER_TEMP/commerce-qa-server.log" 2>&1 &
+          for i in {1..25}; do
+            if curl -fsS --cacert "$RUNNER_TEMP/qa-cert.pem" https://localhost:8443/store.html > /dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS --cacert "$RUNNER_TEMP/qa-cert.pem" https://localhost:8443/store.html >/dev/null
+      - name: Real Chromium validates HTTPS preview and isolated QA browser routing
+        run: python scripts/commerce_qa_browser_acceptance.py --mode smoke
+      - name: Record genuine-provider status separately from browser smoke
+        run: echo 'Browser preview acceptance is NOT Stripe provider payment acceptance.' >> "$GITHUB_STEP_SUMMARY"
+  qa-credential-presence-only:
+    # Single synchronization only; no checkout, no payment and no secret values in runner.
+    if: github.event.action == 'synchronize' && github.event.pull_request.number == 265 && github.event.before == 'aa997e49c1e4a326098a390ba79cbbe8ca41f8a1' && github.run_attempt == 1 && github.event.pull_request.head.ref == 'commerce/revenue-forge-main-integration-20261120' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    permissions: {}
+    steps:
+      - name: Report approved QA credential presence only
+        env:
+          NBJB_QA_EXISTING_EMAIL_PRESENT: ${{ secrets.NBJB_QA_EXISTING_EMAIL != '' }}
+          NBJB_QA_EXISTING_PASSWORD_PRESENT: ${{ secrets.NBJB_QA_EXISTING_PASSWORD != '' }}
+          NBJB_QA_SECONDARY_EMAIL_PRESENT: ${{ secrets.NBJB_QA_SECONDARY_EMAIL != '' }}
+          NBJB_QA_SECONDARY_PASSWORD_PRESENT: ${{ secrets.NBJB_QA_SECONDARY_PASSWORD != '' }}
+        shell: bash
+        run: |
+          set +x
+          missing=0
+          for name in NBJB_QA_EXISTING_EMAIL NBJB_QA_EXISTING_PASSWORD NBJB_QA_SECONDARY_EMAIL NBJB_QA_SECONDARY_PASSWORD; do
+            flag="${name}_PRESENT"
+            if [[ "${!flag}" == "true" ]]; then
+              echo "$name: PRESENT"
+            else
+              echo "$name: MISSING"
+              missing=1
+            fi
+          done
+          if [[ "$missing" == 1 ]]; then
+            echo 'Credential availability incomplete; no authentication or payment attempted.'
+            exit 78
+          fi
+          echo 'All four inputs present; identity validity and isolation not yet tested.'
+  qa-existing-paid-delivery:
+    # One exact branch push: reuse founder-paid order, no checkout or payment.
+    if: github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == '4a60d334490388cb85e0a7594b77e0c0cf298c5a' && github.run_attempt == 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      NBJB_QA_EXISTING_EMAIL: ${{ secrets.NBJB_QA_EXISTING_EMAIL }}
+      NBJB_QA_EXISTING_PASSWORD: ${{ secrets.NBJB_QA_EXISTING_PASSWORD }}
+      NBJB_QA_SECONDARY_EMAIL: ${{ secrets.NBJB_QA_SECONDARY_EMAIL }}
+      NBJB_QA_SECONDARY_PASSWORD: ${{ secrets.NBJB_QA_SECONDARY_PASSWORD }}
+      NBJB_QA_PUBLISHABLE_KEY: sb_publishable_Ayqf6-ZoFGIDscFq6RWfcw_eQ5p_etR
+    steps:
+      - name: Securely verify existing QA identity secret availability
+        shell: bash
+        run: |
+          if [ -z "$NBJB_QA_EXISTING_EMAIL" ] || [ -z "$NBJB_QA_EXISTING_PASSWORD" ] || [ -z "$NBJB_QA_SECONDARY_EMAIL" ] || [ -z "$NBJB_QA_SECONDARY_PASSWORD" ]; then
+            echo 'BLOCKED: Existing approved QA identity credentials are not available to this GitHub Actions runner. No checkout or payment was attempted.' | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 78
+          fi
+          echo 'Approved existing QA identity credential inputs are present (contents withheld).' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify browser test implementation
+        run: python -m py_compile scripts/commerce_qa_browser_acceptance.py
+      - name: Install pinned Playwright and Chromium
+        run: |
+          python -m pip install playwright==1.51.0
+          python -m playwright install --with-deps chromium
+      - name: Start existing exact-origin SSL preview in runner
+        run: |
+          set -euo pipefail
+          python launch-backend-staging/commerce/build-qa-preview.py --out "$RUNNER_TEMP/nbjb-commerce-preview" --project-ref fgpkejlmpfkxgpktgdzm
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1" -keyout "$RUNNER_TEMP/qa-key.pem" -out "$RUNNER_TEMP/qa-cert.pem" >/dev/null 2>&1
+          nohup python launch-backend-staging/commerce/serve-qa-preview.py --dir "$RUNNER_TEMP/nbjb-commerce-preview" --cert "$RUNNER_TEMP/qa-cert.pem" --key "$RUNNER_TEMP/qa-key.pem" --port 8443 > "$RUNNER_TEMP/commerce-qa-server.log" 2>&1 &
+          for i in {1..25}; do
+            if curl -fsS --cacert "$RUNNER_TEMP/qa-cert.pem" https://localhost:8443/store.html >/dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS --cacert "$RUNNER_TEMP/qa-cert.pem" https://localhost:8443/store.html >/dev/null
+      - name: Existing paid Boundary owner delivery, exact hash, expiry, recovery and non-owner denial
+        run: python scripts/commerce_qa_browser_acceptance.py --mode existing-paid
+      - name: Upload sanitized evidence ONLY after delivery success
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: commerce-existing-paid-delivery-qa
+          path: /tmp/nbjb-provider-evidence.json
+          retention-days: 7
+          if-no-files-found: error
+      - name: Indicate existing paid delivery result
+        if: success()
+        run: echo 'Existing paid delivery browser completed; no new checkout or payment.' >> "$GITHUB_STEP_SUMMARY"
+
+  qa-one-shot-nonpaying-checkout-form-diagnosis:
+    # One exact SHA transition only. Inspect Stripe's synthetic state picker; no Pay. The previous paid attempt failed in the
+    # browser; this DIFFERENT probe never submits payment or creates a PaymentIntent.
+    # Never rearm or run on arbitrary branch pushes.
+    if: github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == '181fa26d240607cd5a476fabe038697c05c755b8' && github.run_attempt == 1
+    needs: [qa-local-preview-chromium, qa-hosted-security-probe]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      NBJB_QA_EXISTING_EMAIL: ${{ secrets.NBJB_QA_EXISTING_EMAIL }}
+      NBJB_QA_EXISTING_PASSWORD: ${{ secrets.NBJB_QA_EXISTING_PASSWORD }}
+      NBJB_QA_PUBLISHABLE_KEY: sb_publishable_Ayqf6-ZoFGIDscFq6RWfcw_eQ5p_etR
+    steps:
+      - name: Existing approved QA identity only, no new account
+        shell: bash
+        run: |
+          if [ -z "$NBJB_QA_EXISTING_EMAIL" ] || [ -z "$NBJB_QA_EXISTING_PASSWORD" ]; then
+            echo "BLOCKED_EXISTING_QA_IDENTITY; no checkout or card inputs" >> "$GITHUB_STEP_SUMMARY"
+            exit 78
+          fi
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check no-payment diagnostic syntax
+        run: python -m py_compile scripts/commerce_qa_nonpaying_form_probe.py scripts/commerce_qa_browser_acceptance.py
+      - name: Install pinned Chromium only
+        run: |
+          python -m pip install playwright==1.51.0
+          python -m playwright install --with-deps chromium
+      - name: Start existing isolated QA HTTPS storefront
+        run: |
+          set -euo pipefail
+          python launch-backend-staging/commerce/build-qa-preview.py --out "$RUNNER_TEMP/nbjb-commerce-preview" --project-ref fgpkejlmpfkxgpktgdzm
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1" -keyout "$RUNNER_TEMP/qa-key.pem" -out "$RUNNER_TEMP/qa-cert.pem" >/dev/null 2>&1
+          nohup python launch-backend-staging/commerce/serve-qa-preview.py --dir "$RUNNER_TEMP/nbjb-commerce-preview" --cert "$RUNNER_TEMP/qa-cert.pem" --key "$RUNNER_TEMP/qa-key.pem" --port 8443 > "$RUNNER_TEMP/commerce-qa-server.log" 2>&1 &
+          for i in {1..25}; do
+            if curl -fsS --cacert "$RUNNER_TEMP/qa-cert.pem" https://localhost:8443/store.html > /dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS --cacert "$RUNNER_TEMP/qa-cert.pem" https://localhost:8443/store.html >/dev/null
+      - name: Inspect only real sandbox form field readiness; NEVER press Pay
+        run: python scripts/commerce_qa_nonpaying_form_probe.py
+      - name: Distinguish diagnostic from genuine provider acceptance
+        if: always()
+        run: echo "Form probe MAY have created a pending sandbox Checkout session; NO successful payment, signed event, ownership or fulfillment acceptance is claimed." >> "$GITHUB_STEP_SUMMARY"
+
+  qa-postpaid-owner-private-download:
+    # EXACT one-shot QA delivery test against an ALREADY settled genuine test
+    # charge. No new Checkout, card form, payment, refund or production mutation.
+    if: github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == '09d9487cfef572d1b58e5897f72f6ae143f57afd' && github.run_attempt == 1
+    needs: [qa-local-preview-chromium, qa-hosted-security-probe]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      NBJB_QA_EXISTING_EMAIL: ${{ secrets.NBJB_QA_EXISTING_EMAIL }}
+      NBJB_QA_EXISTING_PASSWORD: ${{ secrets.NBJB_QA_EXISTING_PASSWORD }}
+      NBJB_QA_SECONDARY_EMAIL: ${{ secrets.NBJB_QA_SECONDARY_EMAIL }}
+      NBJB_QA_SECONDARY_PASSWORD: ${{ secrets.NBJB_QA_SECONDARY_PASSWORD }}
+      NBJB_QA_PUBLISHABLE_KEY: sb_publishable_Ayqf6-ZoFGIDscFq6RWfcw_eQ5p_etR
+    steps:
+      - name: Only two existing approved synthetic QA users; no secret disclosure
+        shell: bash
+        run: |
+          if [ -z "$NBJB_QA_EXISTING_EMAIL" ] || [ -z "$NBJB_QA_EXISTING_PASSWORD" ] || [ -z "$NBJB_QA_SECONDARY_EMAIL" ] || [ -z "$NBJB_QA_SECONDARY_PASSWORD" ]; then
+            echo 'BLOCKED_APPROVED_SYNTHETIC_QA_CREDENTIALS; no buyer login or downloads' >> "$GITHUB_STEP_SUMMARY"
+            exit 78
+          fi
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate approved read-only postpaid delivery script
+        run: python -m py_compile scripts/commerce_qa_postpaid_delivery.py scripts/commerce_qa_browser_acceptance.py
+      - name: Install pinned Chromium (existing QA test dependency)
+        run: |
+          python -m pip install playwright==1.51.0
+          python -m playwright install --with-deps chromium
+      - name: Build and launch existing isolated QA HTTPS website
+        run: |
+          set -euo pipefail
+          python launch-backend-staging/commerce/build-qa-preview.py --out "$RUNNER_TEMP/nbjb-commerce-preview" --project-ref fgpkejlmpfkxgpktgdzm
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1" -keyout "$RUNNER_TEMP/qa-key.pem" -out "$RUNNER_TEMP/qa-cert.pem" >/dev/null 2>&1
+          nohup python launch-backend-staging/commerce/serve-qa-preview.py --dir "$RUNNER_TEMP/nbjb-commerce-preview" --cert "$RUNNER_TEMP/qa-cert.pem" --key "$RUNNER_TEMP/qa-key.pem" --port 8443 > "$RUNNER_TEMP/commerce-qa-server.log" 2>&1 &
+          for i in {1..25}; do
+            if curl -fsS --cacert "$RUNNER_TEMP/qa-cert.pem" https://localhost:8443/store.html > /dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS --cacert "$RUNNER_TEMP/qa-cert.pem" https://localhost:8443/store.html >/dev/null
+      - name: Prove real paid-owner and no-owner secure ZIP delivery without payment
+        run: python scripts/commerce_qa_postpaid_delivery.py
+      - name: Preserve no-PII real owner delivery proof
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: commerce-real-qa-postpaid-owner-download
+          path: /tmp/nbjb-postpaid-delivery.json
+          retention-days: 7
+          if-no-files-found: error
+      - name: Distinguish delivery acceptance from full refund/replay
+        if: always()
+        run: echo 'This acceptance tests an existing genuine sandbox paid order only. No new purchase, refund, or signed replay event was created by this workflow.' >> "$GITHUB_STEP_SUMMARY"
+
+  qa-postrefund-owner-access-denial:
+    # One previous successful real paid sandbox order was FULLY refunded by
+    # genuine Stripe test API. Verify both original buyer and other account
+    # can no longer mint paid private file URLs. Never charge or refund here.
+    if: github.event_name == 'push' && github.repository == 'Hansumhunk/not-broken-just-burning' && github.ref == 'refs/heads/commerce/revenue-forge-main-integration-20261120' && github.event.before == '4b0779a0f13024815c8f85aa0a506e53eb72a947' && github.run_attempt == 1
+    needs: [qa-local-preview-chromium, qa-hosted-security-probe]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    env:
+      NBJB_QA_EXISTING_EMAIL: ${{ secrets.NBJB_QA_EXISTING_EMAIL }}
+      NBJB_QA_EXISTING_PASSWORD: ${{ secrets.NBJB_QA_EXISTING_PASSWORD }}
+      NBJB_QA_SECONDARY_EMAIL: ${{ secrets.NBJB_QA_SECONDARY_EMAIL }}
+      NBJB_QA_SECONDARY_PASSWORD: ${{ secrets.NBJB_QA_SECONDARY_PASSWORD }}
+      NBJB_QA_PUBLISHABLE_KEY: sb_publishable_Ayqf6-ZoFGIDscFq6RWfcw_eQ5p_etR
+    steps:
+      - name: Existing two approved QA identities only
+        run: |
+          if [ -z "$NBJB_QA_EXISTING_EMAIL" ] || [ -z "$NBJB_QA_EXISTING_PASSWORD" ] || [ -z "$NBJB_QA_SECONDARY_EMAIL" ] || [ -z "$NBJB_QA_SECONDARY_PASSWORD" ]; then
+            echo 'BLOCKED_EXISTING_QA_CREDENTIALS' >> "$GITHUB_STEP_SUMMARY"
+            exit 78
+          fi
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Read-only post-refund test syntax
+        run: python -m py_compile scripts/commerce_qa_postrefund_denial.py scripts/commerce_qa_browser_acceptance.py
+      - name: Existing pinned Chromium runner
+        run: |
+          python -m pip install playwright==1.51.0
+          python -m playwright install --with-deps chromium
+      - name: Launch existing QA HTTPS preview, not production
+        run: |
+          set -euo pipefail
+          python launch-backend-staging/commerce/build-qa-preview.py --out "$RUNNER_TEMP/nbjb-commerce-preview" --project-ref fgpkejlmpfkxgpktgdzm
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1" -keyout "$RUNNER_TEMP/qa-key.pem" -out "$RUNNER_TEMP/qa-cert.pem" >/dev/null 2>&1
+          nohup python launch-backend-staging/commerce/serve-qa-preview.py --dir "$RUNNER_TEMP/nbjb-commerce-preview" --cert "$RUNNER_TEMP/qa-cert.pem" --key "$RUNNER_TEMP/qa-key.pem" --port 8443 > "$RUNNER_TEMP/commerce-qa-server.log" 2>&1 &
+          for i in {1..25}; do
+            if curl -fsS --cacert "$RUNNER_TEMP/qa-cert.pem" https://localhost:8443/store.html > /dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS --cacert "$RUNNER_TEMP/qa-cert.pem" https://localhost:8443/store.html >/dev/null
+      - name: Confirm genuinely refunded test buyer and other identity cannot download
+        run: python scripts/commerce_qa_postrefund_denial.py
+      - name: Keep provider acceptance partition explicit
+        if: always()
+        run: echo 'Postrefund negative owner/nonowner QA only. No charges/refunds/replays and no production changes.' >> "$GITHUB_STEP_SUMMARY"

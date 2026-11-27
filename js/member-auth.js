@@ -20,6 +20,8 @@
   }
   function nextDestination(fallback='members.html'){
     const next = new URLSearchParams(location.search).get('next') || '';
+    if (next === 'commerce-live-canary.html') return next; // Restricted server-side canary, not an open redirect.
+    if (next === 'store.html') return next; // Exact public store return after free-account sign-in, no external redirect.
     if (/^(?:members|member-[a-z0-9-]+)\.html(?:[?#].*)?$/i.test(next)) return next;
     // Only explicit public-tool anchors may resume after sign-in.
     const toolReturns = new Set([
@@ -53,7 +55,7 @@
     if (button) button.disabled = busy;
   }
   q('#sign-in-form')?.addEventListener('submit', async (e)=>{ e.preventDefault(); setStatus('Signing in…'); const {error}=await auth.signIn(value('sign-in-email'),value('sign-in-password')); if(error)return setStatus(error.message,true); setStatus('Signed in. Opening the Flamewalker Hub…'); location.href=nextDestination('members.html'); });
-  q('#sign-up-form')?.addEventListener('submit', async (e)=>{ e.preventDefault(); setStatus('Creating account…'); const {data,error}=await auth.signUp(value('sign-up-email'),value('sign-up-password')); if(error)return setStatus(error.message,true); if(data.session){ setStatus('Account created. Opening onboarding…'); location.href=nextDestination('member-onboarding.html'); } else setStatus('Account created. Check your email to verify it, then return here.'); });
+  q('#sign-up-form')?.addEventListener('submit', async (e)=>{ e.preventDefault(); setStatus('Creating account…'); const {data,error}=await auth.signUp(value('sign-up-email'),value('sign-up-password')); if(error)return setStatus(error.message,true); if(data.session){ setStatus('Account created. Opening onboarding…'); location.href=nextDestination('member-onboarding.html'); } else setStatus('Check your email for a verification link, if one was sent. Already have an account? Use Sign In or Recovery.'); });
   q('#magic-link-form')?.addEventListener('submit', async (e)=>{ e.preventDefault(); setStatus('Sending sign-in link…'); const {error}=await auth.sendMagicLink(value('magic-email')); setStatus(error?error.message:'If that account exists, a sign-in link has been sent.',Boolean(error)); });
   q('#recovery-form')?.addEventListener('submit', async (e)=>{
     e.preventDefault();

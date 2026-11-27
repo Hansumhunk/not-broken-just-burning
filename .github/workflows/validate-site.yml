@@ -22,12 +22,26 @@ on:
       - 'FLAMEWALKER_ACCESS.md'
       - 'SUPABASE_PRODUCTION_AUTH.md'
       - 'scripts/validate_site.py'
+      - 'scripts/social_share_image.py'
+      - 'scripts/test_social_share.py'
       - 'scripts/test_member_save_flow.js'
+      - 'scripts/test_first_flame_onboarding.mjs'
+      - 'tests/first_flame_member_browser_test.py'
+      - 'FIRST_FLAME_ACTIVATION_AUDIT_20261122.md'
+      - 'FIRST_FLAME_PROVIDER_ACCEPTANCE_004D.md'
       - 'scripts/test_member_workshop.js'
       - 'scripts/test_member_access_guard.js'
       - 'scripts/test_member_search.js'
       - 'scripts/test_premium_editorial_review.js'
       - 'scripts/test_live_webhook_hardening.js'
+      - 'CROSS_OPERATION_ACCEPTANCE_STANDARD.md'
+      - 'PG_NET_MAINTENANCE_PLAN.md'
+      - 'PRODUCTION_ASSURANCE_2026-11-18.md'
+      - 'RELEASE_ASSURANCE_PHASE_TWO.md'
+      - 'scripts/test_account_export_browser.py'
+      - 'scripts/test_assurance_postgres.py'
+      - 'scripts/test_auth_security_reference.cjs'
+      - 'scripts/test_production_assurance.cjs'
       - 'scripts/test_membership_lifecycle.js'
       - 'MEMBERSHIP_LAUNCH_ACCEPTANCE_2026-11-16.md'
       - 'launch-backend-staging/stripe-live-webhook/**'
@@ -67,12 +81,26 @@ on:
       - 'README.md'
       - 'FLAMEWALKER_FREE_BETA_LAUNCH.md'
       - 'scripts/validate_site.py'
+      - 'scripts/social_share_image.py'
+      - 'scripts/test_social_share.py'
       - 'scripts/test_member_save_flow.js'
+      - 'scripts/test_first_flame_onboarding.mjs'
+      - 'tests/first_flame_member_browser_test.py'
+      - 'FIRST_FLAME_ACTIVATION_AUDIT_20261122.md'
+      - 'FIRST_FLAME_PROVIDER_ACCEPTANCE_004D.md'
       - 'scripts/test_member_workshop.js'
       - 'scripts/test_member_access_guard.js'
       - 'scripts/test_member_search.js'
       - 'scripts/test_premium_editorial_review.js'
       - 'scripts/test_live_webhook_hardening.js'
+      - 'CROSS_OPERATION_ACCEPTANCE_STANDARD.md'
+      - 'PG_NET_MAINTENANCE_PLAN.md'
+      - 'PRODUCTION_ASSURANCE_2026-11-18.md'
+      - 'RELEASE_ASSURANCE_PHASE_TWO.md'
+      - 'scripts/test_account_export_browser.py'
+      - 'scripts/test_assurance_postgres.py'
+      - 'scripts/test_auth_security_reference.cjs'
+      - 'scripts/test_production_assurance.cjs'
       - 'scripts/test_membership_lifecycle.js'
       - 'MEMBERSHIP_LAUNCH_ACCEPTANCE_2026-11-16.md'
       - 'launch-backend-staging/stripe-live-webhook/**'
@@ -98,6 +126,7 @@ on:
       - '.github/workflows/flame-spirit-welcome.yml'
       - 'scripts/flame_spirit_welcome.mjs'
       - 'scripts/test_flame_spirit_welcome.mjs'
+      - 'docs/guardian-desk/**'
       - 'FLAME_SPIRITS.md'
 
 permissions:
@@ -106,6 +135,13 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    services:
+      assurance-postgres:
+        image: postgres:17.6
+        env:
+          POSTGRES_PASSWORD: disposable-ci-fixture-only
+          POSTGRES_DB: nbjb_assurance_fixture
+        options: --health-cmd "pg_isready -U postgres -d nbjb_assurance_fixture" --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -117,16 +153,39 @@ jobs:
         run: python scripts/validate_site.py
       - name: Test save-to-My-Work sign-in and storage flow
         run: node --test scripts/test_member_save_flow.js
+      - name: Test First Flame onboarding save/failure continuity
+        run: node scripts/test_first_flame_onboarding.mjs
       - name: Verify signed-in Toolbox routing and visibility
         run: node --test scripts/test_member_workshop.js
       - name: Test signed-out member access and browser Back prevention
         run: node --test scripts/test_member_access_guard.js
+      - name: Test public Before You Hit Send acquisition tool and privacy boundaries
+        run: node --test scripts/test_before_you_send.mjs
       - name: Test member Find & Resume alongside More
         run: node --test scripts/test_member_search.js
       - name: Test protected Flamewalker Plus editorial review
         run: node --test scripts/test_premium_editorial_review.js
+      - name: Fortress isolated protected curriculum and workbook contract
+        run: node --test scripts/test_fortress_integration.mjs
+      - name: Advanced collection isolated HTTP authorization and integrity acceptance
+        run: node --test scripts/test_advanced_collection.mjs
       - name: Verify staged live webhook signature and payment resilience
         run: node --test scripts/test_live_webhook_hardening.js
+      - name: Verify offline cryptographic signatures and production assurance reference cases
+        run: |
+          npm install --prefix "$RUNNER_TEMP/nbjb-stripe-qa" --no-audit --no-fund --ignore-scripts --no-package-lock --no-save stripe@22.6.2
+          NODE_PATH="$RUNNER_TEMP/nbjb-stripe-qa/node_modules" node --test scripts/test_production_assurance.cjs
+      - name: Verify account export in Chromium with synthetic sessions
+        run: |
+          python -m pip install playwright==1.51.0
+          export CHROME_PATH="$(command -v google-chrome || command -v chromium)"
+          python scripts/test_account_export_browser.py
+      - name: Verify true PostgreSQL reservation concurrency in disposable fixture
+        env:
+          NBJB_QA_POSTGRES_CONTAINER: ${{ job.services.assurance-postgres.id }}
+        run: python scripts/test_assurance_postgres.py
+      - name: Verify proposed no-cost password, MFA and recovery reference policy
+        run: node --test scripts/test_auth_security_reference.cjs
       - name: Verify signup routing, expiring paid access and sandbox isolation
         run: node --test scripts/test_membership_lifecycle.js
       - name: Verify honest public Flamewalker Plus curriculum preview
@@ -144,3 +203,65 @@ jobs:
       - name: Smoke-test live Flamewalker Supabase Auth
         if: ${{ github.base_ref == 'main' || github.ref_name == 'main' || startsWith(github.ref_name, 'release/') }}
         run: python scripts/validate_supabase_runtime.py
+
+  social-sharing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned image and browser test dependencies
+        run: python -m pip install Pillow==11.3.0 playwright==1.51.0
+      - name: Verify image integrity, static metadata and browser decode
+        run: python scripts/test_social_share.py --browser
+      - name: First Flame Chromium synthetic member-journey acceptance
+        run: python tests/first_flame_member_browser_test.py
+      - name: Frontier Engine isolated privacy failure-path Chromium acceptance
+        run: python tests/frontier_privacy_browser_test.py
+      - name: Fortress isolated companion Chromium acceptance
+        run: python tests/fortress_companion_browser_test.py
+      - name: Advanced collection synthetic Chromium acceptance
+        run: python tests/advanced_collection_browser_test.py
+      - name: Flame Post dedicated no-send routing acceptance
+        if: github.event_name == 'pull_request' && github.head_ref == 'ops/flame-post-email-routing'
+        run: python tests/flame_post_routing_browser_test.py
+      - name: Retain synthetic First Flame browser QA screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: first-flame-synthetic-browser
+          path: test-results/first-flame/
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Verify SEO and production-probe fixtures on the exact candidate
+        run: |
+          python scripts/validate_site.py
+          python scripts/test_seo_phase_two.py
+          python scripts/seo_production_probe.py --self-test
+      - name: Verify narrow 007-D diff against immutable baseline
+        if: github.event_name == 'pull_request' && github.head_ref == 'growth/007-d-social-share-correction'
+        run: python scripts/test_social_share.py --compare-base 21f2ec9b3ef802a819523befb75dd165b86ce0c7
+
+
+  advanced-supabase-local:
+    if: github.event_name == 'pull_request' && github.head_ref == 'integration/mythic-resilience-rc2'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 3.4.0
+      - name: Isolated Supabase Auth, private Storage, Postgres and Edge Function test
+        shell: bash
+        run: bash scripts/test_advanced_collection_supabase.sh

@@ -1,0 +1,37 @@
+.bys-shell{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(260px,.85fr);gap:clamp(1rem,3vw,2.5rem);align-items:start;padding-top:1rem;padding-bottom:3rem}
+.bys-card,.bys-side{border:1px solid rgba(210,171,100,.28);border-radius:14px;padding:clamp(1.2rem,3vw,2rem);background:rgba(13,12,15,.75)}
+.bys-card h2,.bys-side h2{margin-top:.25rem}
+.bys-options{border:0;margin:1.2rem 0;padding:0;display:grid;gap:.65rem}
+.bys-visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.bys-choice{display:flex;align-items:flex-start;gap:.75rem;padding:1rem;border:1px solid rgba(210,171,100,.24);border-radius:12px;cursor:pointer;background:rgba(255,255,255,.025)}
+.bys-choice:has(input:checked){border-color:#d6b178;background:rgba(214,177,120,.1)}
+.bys-choice:focus-within{outline:2px solid #d6b178;outline-offset:3px}
+.bys-choice input{flex:none;margin:.35rem 0 0;accent-color:#d6b178;min-width:1rem;min-height:1rem}
+.bys-choice span{display:flex;flex-direction:column;gap:.35rem}
+.bys-choice small{line-height:1.55;opacity:.88;font-size:.94rem}
+.bys-card .button,.bys-share .button{min-height:44px}
+.bys-result{margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid rgba(210,171,100,.28)}
+.bys-result[hidden]{display:none}
+.bys-result h3:focus{outline:2px solid #d6b178;outline-offset:4px}
+.bys-subhead{font-weight:700;margin-bottom:.6rem}
+#bys-template{width:100%;box-sizing:border-box;min-height:9rem;padding:1rem;border:1px solid rgba(210,171,100,.48);border-radius:8px;background:#141317;color:#f4ede1;font:inherit;line-height:1.6;resize:vertical}
+.bys-next{margin-top:1rem;font-weight:600}
+.bys-note{font-size:.94rem;line-height:1.65}
+.bys-actions{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1rem}
+.bys-side ol{padding-left:1.25rem;display:grid;gap:.8rem}
+.bys-side p,.bys-disclaimer p{font-size:.95rem;line-height:1.75}
+.bys-share{margin-top:2.5rem;margin-bottom:2.5rem}
+.bys-share p{max-width:66ch}
+.bys-status,#bys-share-status{min-height:1.5rem;line-height:1.5}
+.bys-disclaimer{margin-bottom:2rem;opacity:.86}
+@media(max-width:830px){.bys-shell{grid-template-columns:1fr}.bys-choice{padding:.9rem}.bys-actions .button{width:100%}}
+@media(prefers-reduced-motion:reduce){.bys-choice{transition:none}}
+
+/* Tool-scoped accessible color pairs and target sizes; no shared-site redesign. */
+.bys-card,.bys-side,.bys-share{background:#111116;color:#f5efe7}
+.bys-choice{min-height:44px;box-sizing:border-box}
+.bys-card .button,.bys-share .button,.bys-followup .button{min-width:44px;min-height:44px}
+.bys-card .button-primary,.bys-followup .button-primary{background:#ffad72;color:#160802}
+.bys-card .button-ghost,.bys-share .button-ghost{background:#242127;color:#f5efe7}
+.bys-card a:not(.button),.bys-side a:not(.button),.bys-share a:not(.button){color:#ffad72;text-decoration:underline}
+.bys-card button:focus-visible,.bys-share button:focus-visible,.bys-followup .button:focus-visible,.bys-card a:focus-visible{outline:2px solid #ffad72;outline-offset:3px}

@@ -23,7 +23,7 @@ MAIN_JS = ROOT / "js" / "main.js"
 CNAME = ROOT / "CNAME"
 ROBOTS = ROOT / "robots.txt"
 SITEMAP = ROOT / "sitemap.xml"
-SOCIAL_IMAGE = ROOT / "assets" / "social-share.png"
+SOCIAL_IMAGE = ROOT / "assets" / "social-share-v2.jpg"
 SITE_ORIGIN = "https://notbrokenjustburning.com"
 OLD_PAGES_ORIGIN = "https://hansumhunk.github.io/not-broken-just-burning"
 CORE_NAV = {
@@ -235,7 +235,7 @@ def check_launch_files(errors: list[str], warnings: list[str]) -> set[str]:
                 errors.append(f"sitemap.xml: missing {page.name}.")
 
     if not SOCIAL_IMAGE.exists():
-        warnings.append("assets/social-share.png: missing raster social-sharing image.")
+        errors.append("assets/social-share-v2.jpg: missing required raster social-sharing image.")
 
     return url_set
 
@@ -311,6 +311,7 @@ def main() -> int:
             "css/member-workshop.css",
             "css/member-expansion.css",
             "css/member-premium-lesson.css",
+            "css/member-advanced-collections.css",
             "css/members.css",
             "css/member-path-stage.css",
             "js/member-auth.js",
@@ -328,6 +329,7 @@ def main() -> int:
             "js/member-path-stage.js",
             "js/member-path-foundations.js",
             "js/member-premium-lesson.js",
+            "js/member-advanced-collections.js",
             "js/member-final-reflection-journal.js",
             "js/member-lesson-workspaces.js",
             "js/member-chosen-code.js",
@@ -340,6 +342,8 @@ def main() -> int:
             "js/tool-member-bootstrap.js",
             "FLAMEWALKER_ACCESS.md",
             "supabase/functions/read-flamewalker-lesson/index.ts",
+            "supabase/functions/read-advanced-collection/core.mjs",
+            "supabase/functions/read-advanced-collection/index.ts",
             "supabase/functions/premium-audio-admin/index.ts",
             "supabase/functions/check-live-stripe-prices/index.ts",
             "supabase/migrations/20260918010500_phase_two_member_foundation.sql",
@@ -706,7 +710,7 @@ def main() -> int:
                 elif og_urls[0] != expected_url:
                     errors.append(f"{rel}: og:url must be {expected_url}, found {og_urls[0]}.")
 
-                expected_social = f"{SITE_ORIGIN}/assets/social-share.png"
+                expected_social = f"{SITE_ORIGIN}/assets/social-share-v2.jpg"
                 og_images = parser.og.get("og:image", [])
                 if not og_images:
                     errors.append(f"{rel}: missing static og:image on public page.")

@@ -166,7 +166,7 @@ Avoid:
 Current official public channels include:
 
 - Website repository/platform
-- Email: `notbrokenjustburning@gmail.com`
+- Email: `contact@notbrokenjustburning.com`
 - Facebook: `https://www.facebook.com/profile.php?id=61575787773619`
 
 Ordinary email contact must remain separate from future newsletter/subscriber consent.

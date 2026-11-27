@@ -45,6 +45,7 @@
 
   const pageScripts = {
     dashboard: ["js/member-dashboard.js"],
+    library: ["js/member-advanced-collections.js"],
     "path-stage": ["js/member-path-foundations.js", "js/member-path-stage.js"],
     progress: ["js/member-history-insights.js", "js/member-learning-progress.js"],
     work: ["js/member-history-insights.js"],

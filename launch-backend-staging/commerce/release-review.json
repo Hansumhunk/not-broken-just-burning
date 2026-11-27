@@ -1,0 +1,63 @@
+{
+  "environment": "production_review_only",
+  "productionCheckoutEnabled": false,
+  "reviewedCommit": "",
+  "firstWave": [
+    "boundary-builder-workbook",
+    "forge-workbook"
+  ],
+  "evidence": {
+    "founderLaunchApproval": {
+      "approved": false,
+      "reference": ""
+    },
+    "finishedAssetsApproved": {
+      "approved": false,
+      "reference": ""
+    },
+    "finalPricingApproved": {
+      "approved": false,
+      "reference": ""
+    },
+    "taxApproved": {
+      "approved": false,
+      "reference": ""
+    },
+    "termsApproved": {
+      "approved": false,
+      "reference": ""
+    },
+    "retentionApproved": {
+      "approved": false,
+      "reference": ""
+    },
+    "securityReviewPassed": {
+      "approved": false,
+      "reference": ""
+    },
+    "sandboxEndToEndPassed": {
+      "approved": false,
+      "reference": ""
+    },
+    "browserAcceptancePassed": {
+      "approved": false,
+      "reference": ""
+    },
+    "reconciliationRunbookApproved": {
+      "approved": false,
+      "reference": ""
+    },
+    "productionMigrationReviewed": {
+      "approved": false,
+      "reference": ""
+    },
+    "canaryConfigurationReviewed": {
+      "approved": false,
+      "reference": ""
+    },
+    "rollbackRehearsed": {
+      "approved": false,
+      "reference": ""
+    }
+  }
+}

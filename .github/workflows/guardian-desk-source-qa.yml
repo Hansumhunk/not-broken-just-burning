@@ -1,0 +1,52 @@
+name: Guardian Desk source-only synthetic security QA
+# Draft-PR-only; no secrets, no hosted Supabase access, no website release.
+on:
+  pull_request:
+    paths:
+      - 'docs/guardian-desk/**'
+      - '.github/workflows/guardian-desk-source-qa.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-code:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact pull request candidate
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Use Node 22 for synthetic, dependency-free tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run Guardian Desk authored Node tests
+        run: node --experimental-strip-types --test docs/guardian-desk/tests/security.test.mjs
+
+  disposable-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact pull request candidate
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Start disposable local-only PostgreSQL 17.12 fixture
+        run: |
+          docker run -d --name nbjb-guardian-postgres-fixture \
+            -e POSTGRES_PASSWORD=synthetic-only-local -e POSTGRES_DB=guardian_fixture \
+            postgres:17.12
+          for attempt in $(seq 1 35); do
+            if docker exec nbjb-guardian-postgres-fixture psql -X -q -U postgres -d guardian_fixture -c 'SELECT 1' >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 1
+          done
+          exit 1
+      - name: Test real Postgres DDL, role ACLs, RLS, atomic rate, duplicate concurrency, rollback and deletion
+        run: python3 docs/guardian-desk/tests/test_postgres_fixture.py
+      - name: Destroy temporary fixture
+        if: always()
+        run: docker rm -f nbjb-guardian-postgres-fixture || true

@@ -6,10 +6,10 @@ export const OFFERS = Object.freeze({
 export function lookupOffer(slug) {
   return typeof slug === 'string' && Object.hasOwn(OFFERS, slug) ? OFFERS[slug] : null;
 }
-export function validPrice(price, offer) {
+export function validPrice(price, offer, live = true) {
   return Boolean(offer && price && price.lookup_key === offer.lookupKey &&
     price.currency === 'usd' && price.type === 'recurring' && price.unit_amount === offer.amount &&
-    price.recurring?.interval === offer.interval && price.recurring?.interval_count === 1 && price.livemode === true);
+    price.recurring?.interval === offer.interval && price.recurring?.interval_count === 1 && price.livemode === live);
 }
 export function checkoutConflict(subscriptions, sessions) {
   if (subscriptions?.has_more || sessions?.has_more || !Array.isArray(subscriptions?.data) || !Array.isArray(sessions?.data)) return 'subscription_check_incomplete';

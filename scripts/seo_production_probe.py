@@ -5,6 +5,7 @@ import urllib.request
 from urllib.parse import urlsplit
 from xml.etree import ElementTree as ET
 import unittest
+from social_share_image import SOCIAL_PATH, SOCIAL_URL, validate_social_image
 
 ORIGIN = "https://notbrokenjustburning.com"
 LIMIT = 1024 * 1024
@@ -15,7 +16,7 @@ TARGETS = [("http://notbrokenjustburning.com/", ORIGIN + "/", "html"),
 TARGETS += [(ORIGIN + "/" + path, ORIGIN + "/" + path, kind) for path, kind in
             [("", "html"), ("robots.txt", "robots"), ("sitemap.xml", "xml"),
              ("css/style.css", "css"), ("js/main.js", "js"),
-             ("assets/social-share.png", "png")] + [(p, "html") for p in HUBS]]
+             (SOCIAL_PATH, "jpeg")] + [(p, "html") for p in HUBS]]
 
 
 class Metadata(HTMLParser):
@@ -23,6 +24,7 @@ class Metadata(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.canonicals, self.robots, self.descriptions = [], [], []
         self.titles, self.h1 = [], 0
+        self.og_images, self.twitter_images = [], []
         self.in_title = False
 
     def handle_starttag(self, tag, attrs):
@@ -36,6 +38,10 @@ class Metadata(HTMLParser):
                 self.robots.append(content)
             if name == "description":
                 self.descriptions.append(content)
+            if (a.get("property") or "").lower() == "og:image":
+                self.og_images.append(content)
+            if name == "twitter:image":
+                self.twitter_images.append(content)
         if tag == "title":
             self.titles.append("")
             self.in_title = True
@@ -71,7 +77,7 @@ def validate(data, kind, expected, status, final, content_type, xrobots=""):
     types = {"html": {"text/html"}, "robots": {"text/plain"},
              "xml": {"application/xml", "text/xml"}, "css": {"text/css"},
              "js": {"application/javascript", "text/javascript", "application/x-javascript"},
-             "png": {"image/png"}}
+             "jpeg": {"image/jpeg"}}
     if mime not in types[kind]:
         errors.append("unexpected content-type: " + mime)
     if kind == "html":
@@ -86,6 +92,8 @@ def validate(data, kind, expected, status, final, content_type, xrobots=""):
             errors.append("expected exactly one nonempty description")
         if p.h1 != 1:
             errors.append("expected exactly one H1")
+        if p.og_images != [SOCIAL_URL] or p.twitter_images != [SOCIAL_URL]:
+            errors.append("expected exact current Open Graph and Twitter shared image URLs")
         directives = ",".join(p.robots + [xrobots]).lower()
         import re
         if re.search(r"\b(noindex|none)\b", directives):
@@ -111,8 +119,11 @@ def validate(data, kind, expected, status, final, content_type, xrobots=""):
             if ORIGIN + "/" + p not in urls:
                 errors.append("missing expected public route: /" + p)
         print(f"Sitemap: {len(urls)} URLs; {len(set(urls))} unique")
-    elif kind == "png" and not data.startswith(b"\x89PNG\r\n\x1a\n"):
-        errors.append("invalid PNG signature")
+    elif kind == "jpeg":
+        try:
+            validate_social_image(data)
+        except Exception as exc:
+            errors.append(f"invalid social JPEG: {type(exc).__name__}: {exc}")
     return errors
 
 
@@ -142,7 +153,7 @@ def probe():
 
 class ProbeTests(unittest.TestCase):
     url = ORIGIN + "/"
-    good = f'<title>Test</title><meta name="description" content="Test"><link href="{url}" rel="canonical"><h1>Test</h1>'
+    good = f'<title>Test</title><meta name="description" content="Test"><link href="{url}" rel="canonical"><h1>Test</h1><meta property="og:image" content="{SOCIAL_URL}"><meta name="twitter:image" content="{SOCIAL_URL}">'
 
     def check(self, html, final=None, mime="text/html", robots=""):
         return validate(html.encode(), "html", self.url, 200, final or self.url, mime, robots)
@@ -181,6 +192,16 @@ class ProbeTests(unittest.TestCase):
 
     def test_robots_missing_sitemap(self):
         self.assertTrue(validate(b"User-agent: *\nDisallow: /", "robots", ORIGIN + "/robots.txt", 200, ORIGIN + "/robots.txt", "text/plain"))
+
+    def test_wrong_social_meta(self):
+        self.assertTrue(self.check(self.good.replace(SOCIAL_URL, ORIGIN + "/wrong.jpg")))
+    def test_social_asset_full_decode(self):
+        from pathlib import Path
+        data = (Path(__file__).resolve().parents[1] / SOCIAL_PATH).read_bytes()
+        self.assertEqual([], validate(data, "jpeg", SOCIAL_URL, 200, SOCIAL_URL, "image/jpeg"))
+        for malformed, mime in ((data[:len(data)//2], "image/jpeg"),
+                                (data, "image/png"), (b"not an image", "image/jpeg")):
+            self.assertTrue(validate(malformed, "jpeg", SOCIAL_URL, 200, SOCIAL_URL, mime))
 
     def test_network_failure_exits_nonzero(self):
         from unittest.mock import patch

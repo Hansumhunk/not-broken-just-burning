@@ -42,20 +42,23 @@ A Flamewalker is a movement identity for someone doing the work of reclamation. 
 - site-wide Join navigation
 - site-wide Contact, Support & Safety, and Privacy & Data Use routes
 - clear return paths from stories to tools and from tools to the Path
-- official public contact inbox: `notbrokenjustburning@gmail.com`
+- official public contact inbox: `contact@notbrokenjustburning.com`
 - explicit disclosure that newsletter signup is not active yet
 
 ## Public contact architecture
 
 The official inbox is:
 
-**notbrokenjustburning@gmail.com**
+**contact@notbrokenjustburning.com**
 
 The public Contact page routes:
 
-- general questions
-- speaking, media, and collaboration inquiries
-- technical/site feedback
+- general questions: `contact@notbrokenjustburning.com`
+- speaking, media, and collaboration inquiries: `partnerships@notbrokenjustburning.com`
+- technical/site feedback and account assistance: `support@notbrokenjustburning.com`
+- billing, cancellation, and refund inquiries: `billing@notbrokenjustburning.com`
+- privacy and data requests: `privacy@notbrokenjustburning.com`
+- newsletter correspondence: `newsletter@notbrokenjustburning.com`
 
 The Contact page clearly states that the inbox is not continuously monitored and is not an emergency, crisis, medical, legal, or domestic-violence response channel.
 

@@ -35,7 +35,7 @@ test("canary source is wired to exact server-side user+SKU gate and private refu
 test("sandbox terms remain separate from specifically versioned LIVE terms",()=>{
  const store=read("store.html"), client=read("js/commerce-store.js");
  assert.match(store,/data-version="draft-v1"/);
- assert.match(client,/consent\.dataset\.version='live-v1'/);
+ assert.match(client,/consent\.dataset\.version='boundary-004c-v1\.0'/);
  assert.match(client,/commerce-policy-live-review\.html/);
  assert.match(client,/Review and accept the digital product terms first/);
 });

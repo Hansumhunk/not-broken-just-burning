@@ -11,7 +11,7 @@
    && window.NBJBConfig?.supabaseUrl===prod
    && !window.NBJBCommercePreview
    && window.NBJBCommerceLive?.enabled!==true;
- const slug='boundary-builder-workbook',termsVersion='live-v1';
+ const slug='boundary-builder-workbook',termsVersion='boundary-004c-v1.0';
  const order=(new URLSearchParams(location.search)).get('order');
  const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
  const setStatus=s=>{status.textContent=s;};

@@ -28,7 +28,7 @@ test("Wave One Stripe Price requires a live one-time exact price",()=>{
  for(const bad of [{livemode:false},{type:"recurring"},{unit_amount:1599},{tax_behavior:"inclusive"},{product:"prod_OTHER"},{id:"price_SANDBOX"}]){
   assert.throws(()=>validatePrice({...price,...bad},p),/price_mismatch/);
  }
- for(const [slug,amount] of [["masculine-restoration-guide",2999],["hawk-complete-toolkit",4999]]) {
+ for(const [slug,amount] of [["masculine-restoration-guide",2499],["hawk-complete-toolkit",4999]]) {
   const candidate={...p,slug,amount,stripe_price_id:"price_"+slug,stripe_product_id:"prod_"+slug};
   const provider={...price,id:candidate.stripe_price_id,product:candidate.stripe_product_id,unit_amount:amount};
   assert.doesNotThrow(()=>validatePrice(provider,candidate),slug);
@@ -71,6 +71,8 @@ test("live canary never opens purchases to any other user or SKU",()=>{
   assert.equal(permittedCheckout({...a,...changes}),false,JSON.stringify(changes));
  }
  assert.equal(permittedCheckout({...a,gate:"enabled"}),true);
+ assert.equal(permittedCheckout({...a,gate:"enabled",slug:"forge-workbook"}),false);
+ assert.equal(permittedCheckout({...a,slug:"forge-workbook",canarySlug:"forge-workbook"}),false);
  assert.equal(permittedCheckout({...a,gate:"enabled",slug:"30-days-through-the-fire"}),false);
  assert.equal(permittedCheckout({...a,gate:"canary",canaryUserId:"not-a-uuid"}),false);
 });

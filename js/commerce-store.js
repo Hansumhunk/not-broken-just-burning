@@ -5,7 +5,7 @@
  // Preserve the original draft-v1 sandbox terms, but use a distinct LIVE version.
  // The live terms document and version must be founder-approved before release.
  if(api.mode==='live' && consent){
-   consent.dataset.version='live-v1';
+   consent.dataset.version='boundary-004c-v1.0';
    const termsLink=consent.querySelector('a');
    if(termsLink){termsLink.href='commerce-policy-live-review.html';termsLink.textContent='digital product purchase, delivery and refund terms';}
  }

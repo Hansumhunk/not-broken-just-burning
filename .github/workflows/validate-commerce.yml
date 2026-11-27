@@ -184,6 +184,8 @@ jobs:
           psql $db -f launch-backend-staging/commerce/test-migration.sql
           psql $db -f launch-backend-staging/commerce/test-operations.sql
           psql $db -f launch-backend-staging/commerce/test-phase-four.sql
+          psql $db -f launch-backend-staging/commerce/live/directive-004-single-canary.sql
+          psql $db -f launch-backend-staging/commerce/live/test-directive-004-single-canary.sql
           if psql $db -f launch-backend-staging/commerce/live/production-schema-staged.sql >/tmp/duplicate-apply.log 2>&1; then
             echo 'FAIL: migration unexpectedly applied twice' >&2; exit 1
           fi

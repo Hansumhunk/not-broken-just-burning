@@ -11,7 +11,7 @@ export const RELEASE_CANDIDATES = new Set([
   "masculine-restoration-guide","hawk-complete-toolkit"
 ]);
 export const PRODUCTION_REF = 'plhbvtbvtxfzulsaxuim';
-export const SKU = new Map([['boundary-builder-workbook',1499],['forge-workbook',1999],['30-days-through-the-fire',2499],['masculine-restoration-guide',2999],['hawk-complete-toolkit',4999]]);
+export const SKU = new Map([['boundary-builder-workbook',1499],['forge-workbook',1999],['30-days-through-the-fire',2499],['masculine-restoration-guide',2499],['hawk-complete-toolkit',4999]]);
 export function liveConfigurationMatches({mode,key,url,expectedRef,origin,account}) {
  return mode==="production" && /^(sk_live_|rk_live_)/.test(key||"")
    && expectedRef===PRODUCTION_REF && url==="https://"+PRODUCTION_REF+".supabase.co"
@@ -24,7 +24,8 @@ export function productionAllowed(context) {
 // and one preapproved SKU while the public checkout is still closed.
 // Neither a browser-side flag nor a missing canary UUID can make checkout public.
 export function permittedCheckout({gate,userId,slug,canaryUserId,canarySlug}) {
- if(!RELEASE_CANDIDATES.has(slug))return false;
+ // Directive 004 first-sale scope: only Boundary can initiate checkout. Other editions remain held.
+ if(slug!=='boundary-builder-workbook'||!RELEASE_CANDIDATES.has(slug))return false;
  if(gate==='enabled')return true;
  if(gate!=='canary')return false;
  const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;

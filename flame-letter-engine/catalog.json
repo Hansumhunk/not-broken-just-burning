@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "policy": "Public NBJB educational pages only. Editorial candidates, not sendable campaigns.",
+  "topics": [
+    {
+      "id": "boundaries-hurt",
+      "title": "A Boundary Can Hurt and Still Be Necessary",
+      "theme": "boundaries",
+      "source": "story-boundaries.html",
+      "idea": "A limit can be appropriate even when it leaves you sad. Grieving a relationship or a hoped-for repair does not automatically mean you made the wrong decision. A boundary is about what you will do to protect your time, participation, and dignity; it is not a tool for punishing or forcing another adult.",
+      "question": "Am I reconsidering this limit because it is unfair, or because honoring it is uncomfortable?",
+      "tool": "Write the behavior that concerns you, what you can control, and the specific action you will take if it happens again. Make the action realistic, proportionate, and yours to carry out.",
+      "action": "Choose one boundary sentence and check that it describes your behavior, not a demand for somebody else's obedience."
+    },
+    {
+      "id": "one-stone",
+      "title": "When the Mountain Is Too Large, Move One Stone",
+      "theme": "overwhelm",
+      "source": "story-one-stone.html",
+      "idea": "Overwhelm tends to compress a dozen separate responsibilities into one impossible-looking problem. You do not need a perfect life plan before you can act. Breaking the pile into urgent, later, and not-yours-to-solve categories turns an emotional mountain back into individual decisions.",
+      "question": "Which part of this problem truly needs a decision today, and which part simply feels loud?",
+      "tool": "Write three columns: must happen today, can wait, and not within my control. Under the first column, define a step that can be completed in twenty minutes or less.",
+      "action": "Complete the smallest legitimate first step, then reevaluate without promising to solve everything tonight."
+    },
+    {
+      "id": "shame-action",
+      "title": "Accountability Is Not a Verdict on Your Worth",
+      "theme": "shame",
+      "source": "story-shame.html",
+      "idea": "After a difficult experience, people may mistake hindsight for evidence that they were foolish or defective. You can examine choices, repair mistakes, and learn new boundaries without turning one painful chapter into a permanent identity. Shame asks who is bad; accountability asks what can be understood or done differently.",
+      "question": "What specific action deserves review, and what global judgment about myself can I set aside?",
+      "tool": "Write one self-critical sentence. Separate the observable behavior from the identity label. Replace the label with a responsible, concrete repair or prevention step.",
+      "action": "Choose a single repair or learning action that does not require condemning who you are."
+    },
+    {
+      "id": "survival-off-switch",
+      "title": "The Useful Survival Skill That Needs an Off Switch",
+      "theme": "regulation",
+      "source": "story-survival-skill-off-switch.html",
+      "idea": "Being alert, analyzing patterns, documenting events, and preparing for problems can be useful under pressure. If those habits never switch off, they can also consume the time and attention needed for ordinary life. Strength includes recognizing when an emergency skill is no longer needed at full power.",
+      "question": "Which protective habit helped me earlier but is now running past its useful hours?",
+      "tool": "Name one survival habit, the situations in which it helps, and the signs that it is costing too much. Design a clear start and stop condition rather than demanding that you stop noticing everything.",
+      "action": "Give yourself one short period today when you deliberately stop scanning and do something ordinary."
+    },
+    {
+      "id": "timeline-first",
+      "title": "Build the Timeline Before the Theory",
+      "theme": "discernment",
+      "source": "story-timeline-before-theory.html",
+      "idea": "When multiple difficult events cluster together, our minds rapidly create explanations. A reliable timeline makes room for genuine patterns without treating sequence as proof of causation or motive. Observation, pattern, hypothesis, and conclusion are different categories of claim.",
+      "question": "Which sentence in my account describes something observable, and which sentence interprets why it happened?",
+      "tool": "Draw four labeled rows: Observed, Repeated, Possible explanation, Supported conclusion. Place each claim in exactly one row and mark where you need more information.",
+      "action": "Correct one overstated conclusion into a question you can investigate or leave open."
+    },
+    {
+      "id": "strength-restraint",
+      "title": "Strength Can Look Like Restraint",
+      "theme": "masculine-restoration",
+      "source": "story-strength-restraint.html",
+      "idea": "Power and volume are not the same as leadership. When anger rises, strength often means holding enough choice to avoid harm, intimidation, or an irreversible message. Restraint does not require tolerating danger or accepting mistreatment; it means choosing an effective response when more than one safe option exists.",
+      "question": "What reaction would feel powerful for ten seconds but create a bigger problem tomorrow?",
+      "tool": "Before a difficult reply, draft two versions: the immediate reaction and a response focused on the outcome you actually want. Remove threats, mind-reading, and unnecessary escalation from the second version.",
+      "action": "Use the calmer version or postpone the conversation until you can make a deliberate choice."
+    },
+    {
+      "id": "fatherhood-steadiness",
+      "title": "Fatherhood Under Pressure: The Value of Being Steady",
+      "theme": "fatherhood",
+      "source": "path-masculine-restoration.html",
+      "idea": "When family schedules change or responsibilities compete, fatherhood can feel like a test that never ends. Steadiness, protection, and responsibility offer a more useful standard than perfect performance: show up reliably, repair mistakes, and protect children from being made messengers or referees in adult conflict. A father can take his role seriously without trying to control another household.",
+      "question": "Which dependable parenting behavior is within my control this week, even when the surrounding circumstances are stressful?",
+      "tool": "Choose one repeatable connection or caregiving routine. Write when you will do it, what could interfere, and how you can follow through or repair a missed moment without bringing the child into adult conflict.",
+      "action": "Keep one small promise connected to your fatherhood values, and allow that action to matter more than a grand declaration."
+    },
+    {
+      "id": "clarity-not-certainty",
+      "title": "Clarity Before Certainty",
+      "theme": "clarity",
+      "source": "lesson-clarity-before-certainty.html",
+      "idea": "A powerful feeling deserves attention, but the explanation attached to it may still contain guesses. Separating what is felt, what is observed, what is inferred, and what needs evidence creates a more reliable basis for decisions. This does not require dismissing intuition or minimizing possible danger.",
+      "question": "What part of my conclusion do I know, and what part am I predicting?",
+      "tool": "Divide one troubling thought into four lines: Emotion, Known fact, Interpretation, Unknown. Keep each line brief and add one action you can take without pretending the unknown is settled.",
+      "action": "Make the next decision from the known facts, while keeping your interpretation open to revision."
+    },
+    {
+      "id": "healthy-validation",
+      "title": "Ask for Perspective Without Handing Over Your Judgment",
+      "theme": "connection",
+      "source": "story-healthy-validation.html",
+      "idea": "When life becomes uncertain, asking for another perspective can help you check your assumptions. Trouble begins when one person's agreement becomes the only proof that your feelings or decisions are valid. Useful support expands the questions you can consider; it does not replace your judgment with somebody else's permission.",
+      "question": "When I ask for feedback, am I seeking information I can evaluate or approval that another person must grant?",
+      "tool": "Ask two trusted people the same narrow question without sharing an accusation as a conclusion. Write where their observations agree, where they differ, and what independently observable facts you can check.",
+      "action": "Use one useful outside perspective to improve your decision, then make the decision yourself."
+    },
+    {
+      "id": "reciprocity-early",
+      "title": "Notice the Imbalance Before You Are Exhausted",
+      "theme": "reciprocity",
+      "source": "story-reciprocity-before-exhaustion.html",
+      "idea": "Relationships do not need perfectly equal effort every day. Illness, grief, and work can shift the load for a season. But if your needs only become visible after you reach exhaustion, the relationship may lack a reliable way to discuss mutual care. Healthy reciprocity means asking clear questions earlier, without turning kindness into a scoreboard.",
+      "question": "What have I needed but delayed asking for because I was waiting until I could no longer carry the load?",
+      "tool": "Write down one recurring responsibility, what support would actually help, and a specific respectful request. Notice the response across time rather than judging the whole connection from one conversation.",
+      "action": "Make one reasonable request before resentment becomes the only way your need gets expressed."
+    },
+    {
+      "id": "carrying-everyone",
+      "title": "Helping Is an Action, Not Your Entire Identity",
+      "theme": "over-responsibility",
+      "source": "story-carrying-everyone.html",
+      "idea": "Being dependable can become costly when every relationship quietly expects you to fix, absorb, or organize other people's problems. The aim is not to become uncaring. It is to separate help you freely choose from rescue work driven by fear that saying no will make you unworthy or disposable.",
+      "question": "Which responsibility am I carrying because I freely agreed to it, and which one am I carrying because stopping feels unsafe?",
+      "tool": "Make two columns: commitments I own and problems I can support without owning. Move one task to the second column, then decide what kind of limited support is realistic.",
+      "action": "Offer one specific form of help with a clear limit instead of automatically taking ownership of the whole problem."
+    },
+    {
+      "id": "documentation-window",
+      "title": "Give the Evidence Binder an Office Hour",
+      "theme": "documentation",
+      "source": "story-documentation-memory.html",
+      "idea": "Keeping records can protect clarity when memories, deadlines, and difficult conversations pile up. But continually reopening every document can turn useful organization into round-the-clock attention to the same conflict. A defined documentation routine can preserve what matters without letting the folder occupy every quiet moment.",
+      "question": "Is this review helping me make a current decision, or am I reopening the same material because uncertainty feels uncomfortable?",
+      "tool": "Create a twenty-minute documentation window: record date, source, what happened, what remains unknown, and a next required action. Close the record when the window ends unless a genuine deadline requires more.",
+      "action": "Put one necessary record in the right folder, then return to a part of the day unrelated to the dispute."
+    }
+  ]
+}

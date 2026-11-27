@@ -1,0 +1,54 @@
+# Editorial candidate generation ONLY: no list access, sends, credentials, or deployment.
+# Scheduled jobs run only after a separately approved merge onto the default branch.
+name: Flame Letter editorial replenishment (draft only)
+on:
+  pull_request:
+    paths:
+      - 'flame-letter-engine/**'
+      - 'scripts/flame_letter_editorial.mjs'
+      - 'scripts/test_flame_letter_editorial.mjs'
+      - 'scripts/flame_letter_send_guard.mjs'
+      - 'scripts/test_flame_letter_send_guard.mjs'
+      - '.github/workflows/flame-letter-editorial.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '17 13 * * 1' # weekly draft-only; UTC; NOT a marketing send time
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eternal-flame-editorial-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  editorial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test offline generator and hard release gates
+        run: node --test scripts/test_flame_letter_editorial.mjs scripts/test_flame_letter_send_guard.mjs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test isolated durable ledger and provider read-only adapter
+        run: python -m unittest discover -s flame-letter-engine -p 'test_*.py' -v
+      - name: Stage four review-only candidate editions
+        run: node scripts/flame_letter_editorial.mjs --weeks=4 --out=flame-letter-staging
+      - name: Confirm structural/editorial draft parity and write approval report
+        run: python flame-letter-engine/review_staged.py . flame-letter-staging
+      - name: Write sanitized Phase IV provider acceptance holds
+        run: python flame-letter-engine/phase4_report.py flame-letter-staging/phase4-readiness.json
+      - name: Archive editorial REVIEW artifacts, never send
+        uses: actions/upload-artifact@v4
+        with:
+          name: flame-letter-editorial-review-${{ github.run_id }}
+          path: flame-letter-staging/
+          retention-days: 14
+          if-no-files-found: error

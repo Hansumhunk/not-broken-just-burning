@@ -143,8 +143,13 @@ test('invalid slug and method denied; release catalog exposes only approved Fort
     assert.ok(!html.includes('Synthetic workbook'),file);
     assert.ok(!html.includes('curriculum/fortress/'),file);
     assert.ok(!html.includes(sha),file);
-    if(file!=='member-lessons.html') assert.ok(!html.includes(slug),file);
+    if(!['member-lessons.html','member-premium-lesson.html'].includes(file)) assert.ok(!html.includes(slug),file);
   }
+  const readerPage=read('member-premium-lesson.html');
+  assert.equal([...readerPage.matchAll(/data-premium-lesson-link="when-protection-becomes-a-prison"/g)].length,1);
+  assert.match(readerPage,/href="member-premium-lesson\.html\?lesson=when-protection-becomes-a-prison" data-premium-lesson-link="when-protection-becomes-a-prison"/);
+  assert.match(readerPage,/data-member-page="premium-lesson"/);
+  assert.match(readerPage,/nbjb-member-access-gate/);
   const catalog=read('member-lessons.html');
   const cards=[...catalog.matchAll(/<article[^>]*data-editorial-preview="([^"]+)"[^>]*>[\s\S]*?<\/article>/g)].filter(m=>m[1]===slug);
   assert.equal(cards.length,1);

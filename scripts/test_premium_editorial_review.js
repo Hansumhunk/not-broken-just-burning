@@ -584,8 +584,8 @@ test('new Safe Room lessons have preview entries but are never embedded in publi
 test('every protected premium lesson link is unique across six tracks', () => {
   const html = read('member-premium-lesson.html');
   const links = [...html.matchAll(/data-premium-lesson-link="([^"]+)"/g)].map(m => m[1]);
-  assert.equal(links.length, 44);
-  assert.equal(new Set(links).size, 44);
+  assert.equal(links.length, 45);
+  assert.equal(new Set(links).size, 45);
   assert.match(html, /Review the guided lesson catalog/);
   const script = read('js/member-premium-lesson.js');
   assert.match(script, /'safe-room-courtroom'/);
@@ -843,7 +843,7 @@ test('exercise usability audit covers the 35-lesson library and preserves privat
   const doc = read('FLAMEWALKER_EXERCISE_USABILITY_AUDIT.md');
   const html = read('member-premium-lesson.html');
   const slugs = [...html.matchAll(/data-premium-lesson-link="([^"]+)"/g)].map(match => match[1]);
-  assert.equal(slugs.length, 44);
+  assert.equal(slugs.length, 45);
   const founding = slugs.filter(slug => doc.includes('`' + slug + '`'));
   assert.equal(founding.length, 35, 'historical founding audit must still cover all 35 original lessons');
   const nineNew = ['psychological-abuse-therapy-feedback-loop','what-comes-after-survival-adaptations','men-vulnerability-never-again-rule','document-fire-not-live-evidence-locker','when-therapy-enters-court-records','when-distress-looks-like-deception','the-credibility-cascade','challenge-bias-and-repair','rebuilding-ability-to-seek-help'];

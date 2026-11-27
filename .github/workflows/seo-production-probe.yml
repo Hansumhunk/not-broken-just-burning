@@ -28,3 +28,5 @@ jobs:
         run: |
           git show "$BASE_SHA:scripts/seo_production_probe.py" > "$RUNNER_TEMP/seo-live-baseline.py"
           PYTHONPATH="$GITHUB_WORKSPACE/scripts" python "$RUNNER_TEMP/seo-live-baseline.py"
+      - name: Read-only candidate checks for already published public guides
+        run: python scripts/seo_production_probe.py

@@ -11,12 +11,16 @@ ORIGIN = "https://notbrokenjustburning.com"
 LIMIT = 1024 * 1024
 HUBS = ("divorce-recovery.html", "masculine-restoration-placeholder-wound.html",
         "mens-mental-health.html", "mens-personal-development.html", "lessons.html")
+GUIDES = ("guide-dad-days-without-kids.html", "guide-working-through-divorce.html",
+          "guide-rebuilding-friendships-after-divorce.html")
+FREE_ENTRY_ROUTES = ("first-seven-days.html", "before-you-send.html")
+PUBLIC_ROUTES = HUBS + GUIDES + FREE_ENTRY_ROUTES
 TARGETS = [("http://notbrokenjustburning.com/", ORIGIN + "/", "html"),
            ("https://www.notbrokenjustburning.com/", ORIGIN + "/", "html")]
 TARGETS += [(ORIGIN + "/" + path, ORIGIN + "/" + path, kind) for path, kind in
             [("", "html"), ("robots.txt", "robots"), ("sitemap.xml", "xml"),
              ("css/style.css", "css"), ("js/main.js", "js"),
-             (SOCIAL_PATH, "jpeg")] + [(p, "html") for p in HUBS]]
+             (SOCIAL_PATH, "jpeg")] + [(p, "html") for p in PUBLIC_ROUTES]]
 
 
 class Metadata(HTMLParser):
@@ -115,7 +119,7 @@ def validate(data, kind, expected, status, final, content_type, xrobots=""):
             path = parts.path.lower()
             if path.startswith("/member-") or path in ("/join.html", "/account.html", "/members.html"):
                 errors.append("private/account route in public sitemap: " + path)
-        for p in ("", *HUBS):
+        for p in ("", *PUBLIC_ROUTES):
             if ORIGIN + "/" + p not in urls:
                 errors.append("missing expected public route: /" + p)
         print(f"Sitemap: {len(urls)} URLs; {len(set(urls))} unique")
@@ -178,9 +182,16 @@ class ProbeTests(unittest.TestCase):
     def test_missing_heading(self):
         self.assertTrue(self.check(self.good.replace("<h1>Test</h1>", "")))
 
+    def test_published_free_entry_routes_are_checked(self):
+        """Keep new public free entrances in delivery checks, not member-only routes."""
+        checked = {url for url, _, kind in TARGETS if kind == "html"}
+        for page in FREE_ENTRY_ROUTES:
+            with self.subTest(route=page):
+                self.assertIn(ORIGIN + "/" + page, checked)
+
     def test_sitemap_private_duplicate(self):
         base = '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
-        urls = [ORIGIN + "/" + p for p in ("", *HUBS)]
+        urls = [ORIGIN + "/" + p for p in ("", *PUBLIC_ROUTES)]
         xml = lambda us: (base + "".join(f"<url><loc>{u}</loc></url>" for u in us) + "</urlset>").encode()
         validate_xml = lambda us: validate(xml(us), "xml", ORIGIN + "/sitemap.xml", 200, ORIGIN + "/sitemap.xml", "application/xml")
         self.assertEqual([], validate_xml(urls))
@@ -189,6 +200,12 @@ class ProbeTests(unittest.TestCase):
             with self.subTest(private=private):
                 errors = validate_xml(urls + [ORIGIN + private])
                 self.assertIn("private/account route in public sitemap: " + private, errors)
+
+    def test_new_public_guides_are_probed(self):
+        probed = {url for url, expected, kind in TARGETS if kind == "html" and url == expected}
+        for guide in GUIDES:
+            with self.subTest(guide=guide):
+                self.assertIn(ORIGIN + "/" + guide, probed)
 
     def test_robots_missing_sitemap(self):
         self.assertTrue(validate(b"User-agent: *\nDisallow: /", "robots", ORIGIN + "/robots.txt", 200, ORIGIN + "/robots.txt", "text/plain"))

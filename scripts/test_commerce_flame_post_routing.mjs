@@ -20,11 +20,17 @@ for(const [path,addresses] of Object.entries(checks)){
    }
  });
 }
-test('consumer terms and publication gates remain unaffected by correspondence-only edits',()=>{
+test('final restricted terms retain professional routing, explicit release boundary and disabled public purchases',()=>{
  const s=source('commerce-policy-live-review.html');
  const store=source('store.html');
- assert.match(s,/Draft for founder review only/);
- assert.match(s,/not an effective offer/);
+ assert.match(s,/Final purchase terms — boundary-004c-v1\.0/);
+ assert.match(s,/Effective only upon separately authorized restricted Florida release/);
+ assert.match(s,/not a public offer and does not itself enable checkout/);
+ assert.match(s,/does not record consent or authorize payment/);
+ assert.match(s,/fourteen calendar days/);
+ assert.match(s,/billing location is outside Florida or the total exceeds \$14\.99 USD/);
+ assert.match(source('commerce-live-canary.html'),/I confirm that I am the authorized Florida purchaser/);
+ assert.match(source('commerce-release.js'),/enabled:false/);
  assert.match(store,/data-commerce-buy="boundary-builder-workbook" disabled/);
  assert.match(store,/data-commerce-buy="forge-workbook" disabled/);
 });

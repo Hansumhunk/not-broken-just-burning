@@ -192,7 +192,8 @@ test('Reader links and catalog cards describe the same unique premium lesson slu
  const catalogSlugs=new Set([...slugs(catalog,/data-editorial-preview="([a-z0-9-]+)"/g),...slugs(catalog,/member-premium-lesson\.html\?lesson=([a-z0-9-]+)"/g)]);
  const readerSlugs=slugs(reader,/data-premium-lesson-link="([a-z0-9-]+)"/g);
  assert.equal(readerSlugs.length,new Set(readerSlugs).size);
- assert.ok(catalogSlugs.size>=44);
+ assert.equal(catalogSlugs.size,45);
+ assert.ok(catalogSlugs.has('when-protection-becomes-a-prison'));
  assert.deepEqual([...catalogSlugs].sort(),[...new Set(readerSlugs)].sort());
 });
 

@@ -134,13 +134,33 @@ test('missing/wrong/changed assets and changed entitlement or edition fail close
   assert.equal(old.lesson.slug,'old-lesson');assert.equal(old.workbookAvailable,undefined);
   const audio=await h.call({slug,action:'audio'});assert.equal(audio.status,410);
 });
-test('invalid slug and method denied; old public content is not expanded',async()=>{
+test('invalid slug and method denied; release catalog exposes only approved Fortress metadata',async()=>{
   await denied(harness(),400,{slug:'../secret',action:'workbook'});
   assert.equal((await harness().call({},'GET')).status,405);
-  for(const file of ['flamewalker-plus.html','member-premium-lesson.html','member-lessons.html','sitemap.xml','join.html']){
-    assert.ok(!read(file).includes(slug),file);
-    assert.ok(!read(file).includes('Synthetic protected body'),file);
+  for(const file of ['flamewalker-plus.html','member-premium-lesson.html','member-lessons.html','sitemap.xml','join.html','member-library.html','member-store.html']){
+    const html=read(file);
+    assert.ok(!html.includes('Synthetic protected body'),file);
+    assert.ok(!html.includes('Synthetic workbook'),file);
+    assert.ok(!html.includes('curriculum/fortress/'),file);
+    assert.ok(!html.includes(sha),file);
+    if(!['member-lessons.html','member-premium-lesson.html'].includes(file)) assert.ok(!html.includes(slug),file);
   }
+  const readerPage=read('member-premium-lesson.html');
+  assert.equal([...readerPage.matchAll(/data-premium-lesson-link="when-protection-becomes-a-prison"/g)].length,1);
+  assert.match(readerPage,/href="member-premium-lesson\.html\?lesson=when-protection-becomes-a-prison" data-premium-lesson-link="when-protection-becomes-a-prison"/);
+  assert.match(readerPage,/data-member-page="premium-lesson"/);
+  assert.match(readerPage,/nbjb-member-access-gate/);
+  const catalog=read('member-lessons.html');
+  const cards=[...catalog.matchAll(/<article[^>]*data-editorial-preview="([^"]+)"[^>]*>[\s\S]*?<\/article>/g)].filter(m=>m[1]===slug);
+  assert.equal(cards.length,1);
+  assert.match(cards[0][0],/Lesson 6 of 6 · Access requires Flamewalker\+/);
+  assert.match(cards[0][0],/When Protection Becomes a Prison/);
+  assert.match(cards[0][0],/Checking lesson availability/);
+  assert.doesNotMatch(cards[0][0],/<a\b|data-paid-lesson-open|data-publication-status/);
+  assert.ok(catalog.includes("if (!item || item.status !== 'published') continue;"));
+  assert.ok(catalog.includes("link.hidden = !paid || (card && card.dataset.publicationStatus !== 'published')"));
+  assert.ok(catalog.includes("memberState?.tier === 'paid' && memberState?.source !== 'server_error'"));
+  assert.ok(catalog.includes("functions.invoke('read-flamewalker-lesson', { body: { action: 'catalog' } })"));
 });
 test('reader chapters and references remain separate; protected version checked before rendering',()=>{
   const reader=read('js/member-premium-lesson.js');

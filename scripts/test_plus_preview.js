@@ -5,7 +5,7 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const read = name => fs.readFileSync(path.join(root, name), 'utf8');
 
-test('Flamewalker Plus has a public, indexable, accessible forty-four-lesson curriculum preview', () => {
+test('Flamewalker Plus has a public, indexable, accessible 45-core-lesson and Mythic Resilience curriculum preview', () => {
   const html = read('flamewalker-plus.html');
   const foundation = [...html.matchAll(/data-plus-lesson data-plus-track="wounded-boy"/g)];
   const relationship = [...html.matchAll(/data-plus-lesson data-plus-track="placeholder-wound"/g)];
@@ -14,7 +14,7 @@ test('Flamewalker Plus has a public, indexable, accessible forty-four-lesson cur
   const trust = [...html.matchAll(/data-plus-lesson data-plus-track="safe-room-courtroom"/g)];
   assert.equal(trust.length, 14);
   assert.equal([...html.matchAll(/data-plus-lesson data-plus-track="steadiness-command"/g)].length, 5);
-  assert.equal([...html.matchAll(/data-plus-lesson data-plus-track="life-rebuilt"/g)].length, 5);
+  assert.equal([...html.matchAll(/data-plus-lesson data-plus-track="life-rebuilt"/g)].length, 6);
   assert.equal([...html.matchAll(/data-plus-lesson data-plus-track="sacred-laws"/g)].length, 5);
   assert.match(html, /id="wounded-boy"/);
   assert.match(html, /id="placeholder-wound"/);
@@ -22,6 +22,9 @@ test('Flamewalker Plus has a public, indexable, accessible forty-four-lesson cur
   assert.match(html, /id="steadiness-command"/);
   assert.match(html, /id="life-rebuilt"/);
   assert.match(html, /id="sacred-laws"/);
+  assert.match(html, /id="mythic-resilience"/);
+  assert.match(html, /4 Free · 10 Plus/);
+  assert.match(html, /When Protection Becomes a Prison/);
   assert.match(html, /href="#main-content"/);
   assert.match(html, /<main id="main-content">/);
   assert.match(html, /rel="canonical" href="https:\/\/notbrokenjustburning\.com\/flamewalker-plus\.html"/);
@@ -30,8 +33,8 @@ test('Flamewalker Plus has a public, indexable, accessible forty-four-lesson cur
 });
 test('the founding-preview identifies the available paid membership', () => {
   const html = read('flamewalker-plus.html');
-  assert.match(html, /All six learning tracks published · Membership available/);
-  assert.match(html, /All 44 guided lessons are published in the protected member library/);
+  assert.match(html, /Six core tracks and Mythic Resilience published · Membership available/);
+  assert.match(html, /55 premium lessons and four additional free Mythic Resilience lessons are published in the protected member library/);
   assert.match(html, /Paid checkout is available inside the authenticated member area/);
   assert.match(html, /\$14\.99/);
   assert.match(html, /\$149/);
@@ -45,24 +48,24 @@ test('site visitors and signed-in members can discover the preview without a bro
     assert.match(read(file), /href="flamewalker-plus\.html"/, file);
   }
   assert.match(read('join.html'), /Create Free Flamewalker Account/);
-  assert.match(read('member-store.html'), /Available: 44 published lessons/);
+  assert.match(read('member-store.html'), /Available: 55 premium lessons/);
 });
 
-test('forty-four planned lessons are honestly presented in six distinct tracks', () => {
+test('45 core lessons and the 14-lesson mixed-access collection are honestly presented', () => {
   const html = read('flamewalker-plus.html');
   const cards = [...html.matchAll(/data-plus-lesson data-plus-track="([^"]+)"/g)].map(m=>m[1]);
   assert.deepEqual(cards.filter(v=>v==="wounded-boy").length,7);
   assert.deepEqual(cards.filter(v=>v==="placeholder-wound").length,8);
   assert.deepEqual(cards.filter(v=>v==="safe-room-courtroom").length,14);
   assert.equal(cards.filter(v=>v==="steadiness-command").length,5);
-  assert.equal(cards.filter(v=>v==="life-rebuilt").length,5);
+  assert.equal(cards.filter(v=>v==="life-rebuilt").length,6);
   assert.equal(cards.filter(v=>v==="sacred-laws").length,5);
-  assert.equal(cards.length,44);
-  assert.match(html, /All 44 guided lessons are published in the protected member library/);
-  assert.match(html, /All 44 guided lessons are published/);
+  assert.equal(cards.length,45);
+  assert.match(html, /55 premium lessons and four additional free Mythic Resilience lessons are published in the protected member library/);
+  assert.match(html, /The six core tracks contain 45 premium lessons\. Mythic Resilience adds ten premium and four free member lessons/);
   assert.match(html, /qualified references and clear clinical\/legal boundaries/);
-  assert.match(html, /Yes\. All 44 guided written lessons are available with Flamewalker\+/);
-  assert.match(read('join.html'), /Explore the forty-four-lesson curriculum preview/);
+  assert.match(html, /Yes\. All 55 premium guided written lessons are available with Flamewalker\+/);
+  assert.match(read('join.html'), /href="flamewalker-plus\.html">Explore the curriculum preview/);
   assert.match(html, /The Five Sacred Laws of Survival/);
   assert.match(html, /the separate Sacred Laws book is not presented as finished or for sale/);
 });

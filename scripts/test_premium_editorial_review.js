@@ -401,7 +401,7 @@ test('expanded relationship modules deliver additional guided value without gati
   const store = read('member-store.html');
   const library = read('member-library.html');
   const release = read('FOUNDING_LAUNCH_RELEASE.md');
-  assert.match(store, /seven on inherited manhood, eight on relationships, fourteen on professional trust and credibility, five on emotional command, five on rebuilding life, and five on the Sacred Laws of Survival/);
+  assert.match(store, /seven on inherited manhood, eight on relationships, fourteen on professional trust and credibility, five on emotional command, six on rebuilding life, and five on the Sacred Laws of Survival/);
   assert.match(store, /original shorter public educational articles remain available for future free use/i);
   assert.match(library, /Original shorter educational articles can remain free/);
   assert.match(release, /7 original full-length \+ 3 newly expanded = 10 substantial guided lessons/);
